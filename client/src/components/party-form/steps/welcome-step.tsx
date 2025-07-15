@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import allieImage from "@assets/image_1752579343744.png";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -9,13 +10,16 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
     <div className="text-center">
       <div className="mb-8">
         <img
-          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
-          alt="Sarah - Your party planning assistant"
+          src={allieImage}
+          alt="Allie - Your party planning assistant"
           className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border-4 border-white shadow-lg"
         />
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">Hey! I'm Sarah.</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+          Hey! I'm Allie.
+        </h2>
         <p className="text-gray-600 text-lg leading-relaxed">
-          I'm here to help you plan the perfect birthday party at Host Hampton! Let's create something magical together.
+          I'm here to help you plan the perfect birthday party at Host Hampton!
+          Let's create something magical together.
         </p>
       </div>
 
