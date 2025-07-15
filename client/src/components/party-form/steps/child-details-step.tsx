@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import birthdayStarImage from "@assets/image_1752580458121.png";
 
 interface ChildDetailsStepProps {
   formData: any;
@@ -37,8 +38,8 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
     <div className="text-center">
       <div className="mb-8">
         <img
-          src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
-          alt="Birthday child celebration"
+          src={birthdayStarImage}
+          alt="Cute birthday star with party hat"
           className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border-4 border-white shadow-lg"
         />
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Tell us about the birthday star!</h2>
