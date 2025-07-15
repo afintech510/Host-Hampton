@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import CnP_15072025_075558 from "@assets/CnP_15072025_075558.png";
+
 interface FoodStepProps {
   formData: any;
   updateFormData: (data: any) => void;
@@ -25,7 +27,7 @@ export function FoodStep({ formData, updateFormData, onNext, onBack }: FoodStepP
     <div className="text-center">
       <div className="mb-8">
         <img
-          src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+          src={CnP_15072025_075558}
           alt="Party food and treats"
           className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border-4 border-white shadow-lg"
         />
@@ -34,7 +36,6 @@ export function FoodStep({ formData, updateFormData, onNext, onBack }: FoodStepP
           Let's pick some delicious food and treats for the party!
         </p>
       </div>
-
       <div className="space-y-6 text-left">
         <div>
           <Label className="text-sm font-medium text-gray-700 mb-3 block">Food Selection</Label>
