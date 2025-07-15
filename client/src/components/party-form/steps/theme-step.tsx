@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import partyTimeImage from "@assets/image_1752579930605.png";
 
 interface ThemeStepProps {
   formData: any;
@@ -36,8 +37,8 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
     <div className="text-center">
       <div className="mb-8">
         <img
-          src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
-          alt="Party theme decorations"
+          src={partyTimeImage}
+          alt="Party time neon decorations"
           className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border-4 border-white shadow-lg"
         />
         <h2 className="text-2xl font-bold text-gray-900 mb-3">What's your party vibe?</h2>
