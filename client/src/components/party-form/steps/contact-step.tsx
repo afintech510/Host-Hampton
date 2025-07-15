@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import CnP_15072025_075736 from "@assets/CnP_15072025_075736.png";
+
 interface ContactStepProps {
   formData: any;
   updateFormData: (data: any) => void;
@@ -38,7 +40,7 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
     <div className="text-center">
       <div className="mb-8">
         <img
-          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+          src={CnP_15072025_075736}
           alt="Customer service representative"
           className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border-4 border-white shadow-lg"
         />
@@ -47,7 +49,6 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
           We'll need your contact details to confirm the party and send you updates!
         </p>
       </div>
-
       <div className="space-y-6 text-left">
         <div className="grid grid-cols-2 gap-4">
           <div>
