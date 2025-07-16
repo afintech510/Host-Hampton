@@ -318,6 +318,133 @@ export default function ThemedParties() {
         </div>
       </section>
 
+      {/* Location & Drive Time Section */}
+      <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Find Us in <span className="text-purple-600">Speonk</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Conveniently located on Long Island, serving families across Suffolk County
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            {/* Location Info */}
+            <div className="space-y-8">
+              <Card className="border-0 shadow-lg bg-white">
+                <CardContent className="p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Host Hampton Studio</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-purple-600">📍</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Address</p>
+                        <p className="text-gray-600">123 Main Street<br />Speonk, NY 11972</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-purple-600">📞</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Phone</p>
+                        <p className="text-gray-600">(555) 123-PARTY</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-purple-600">🕒</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Hours</p>
+                        <p className="text-gray-600">
+                          Mon-Fri: 10am-6pm<br />
+                          Sat-Sun: 9am-8pm<br />
+                          Parties by appointment
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t">
+                    <h4 className="text-lg font-bold text-gray-900 mb-4">Calculate Your Drive Time</h4>
+                    <div className="flex gap-3">
+                      <input
+                        type="text"
+                        placeholder="Enter your address or zip code"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6">
+                        Get Directions
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      We'll show you the quickest route and estimated drive time
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50">
+                <CardContent className="p-6">
+                  <h4 className="text-lg font-bold text-gray-900 mb-4">Serving These Areas</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="space-y-1">
+                      <p className="text-gray-700">• Westhampton</p>
+                      <p className="text-gray-700">• Hampton Bays</p>
+                      <p className="text-gray-700">• Eastport</p>
+                      <p className="text-gray-700">• Remsenburg</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-gray-700">• Moriches</p>
+                      <p className="text-gray-700">• Center Moriches</p>
+                      <p className="text-gray-700">• East Moriches</p>
+                      <p className="text-gray-700">• Manorville</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Map Placeholder */}
+            <div className="lg:h-full">
+              <Card className="border-0 shadow-lg h-full min-h-[500px]">
+                <CardContent className="p-0 h-full">
+                  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    {/* Map placeholder with visual elements */}
+                    <div className="absolute inset-0 opacity-10">
+                      {/* Road lines */}
+                      <div className="absolute top-1/4 left-0 right-0 h-0.5 bg-gray-400 transform rotate-12"></div>
+                      <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-400 transform -rotate-6"></div>
+                      <div className="absolute top-3/4 left-0 right-0 h-0.5 bg-gray-400 transform rotate-3"></div>
+                      <div className="absolute left-1/4 top-0 bottom-0 w-0.5 bg-gray-400 transform rotate-12"></div>
+                      <div className="absolute left-3/4 top-0 bottom-0 w-0.5 bg-gray-400 transform -rotate-12"></div>
+                    </div>
+                    
+                    {/* Location marker */}
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <span className="text-white text-2xl">📍</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-700 mb-2">Host Hampton</h3>
+                      <p className="text-gray-600">Speonk, NY</p>
+                      <p className="text-sm text-gray-500 mt-4">Interactive map coming soon</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Social Proof */}
       <ReviewsSection showFeatured={true} limit={3} />
       {/* Final CTA */}
