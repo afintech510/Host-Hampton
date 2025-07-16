@@ -242,6 +242,82 @@ export default function ThemedParties() {
           </div>
         </div>
       </section>
+      {/* Age Groups Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="lg:w-1/2">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Party Magic for <span className="text-purple-600">Every Age</span>
+              </h2>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-pink-500 text-2xl">✨</span>
+                <span className="text-purple-500 text-2xl">✨</span>
+                <span className="text-pink-500 text-2xl">✨</span>
+              </div>
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                From tiny toddlers to trendy teens, we create age-perfect celebrations that capture 
+                every milestone moment. Our expert team crafts activities, themes, and experiences 
+                that match your child's interests and developmental stage perfectly.
+              </p>
+              <Link href="/party-booking">
+                <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg">
+                  Plan Your Perfect Party
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="lg:w-1/2">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300 hover:shadow-lg transition-all transform hover:scale-105">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🧸</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Toddlers</h3>
+                    <p className="text-sm text-gray-600">Ages 1-3</p>
+                    <p className="text-xs text-gray-500 mt-2">Soft play, sensory fun, safe adventures</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-pink-100 to-purple-100 border-2 border-pink-300 hover:shadow-lg transition-all transform hover:scale-105">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🎨</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Preschool</h3>
+                    <p className="text-sm text-gray-600">Ages 4-5</p>
+                    <p className="text-xs text-gray-500 mt-2">Creative crafts, themed play, imagination</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-blue-100 to-teal-100 border-2 border-blue-300 hover:shadow-lg transition-all transform hover:scale-105">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🎪</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Elementary</h3>
+                    <p className="text-sm text-gray-600">Ages 6-10</p>
+                    <p className="text-xs text-gray-500 mt-2">Interactive games, themed adventures</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300 hover:shadow-lg transition-all transform hover:scale-105">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🌟</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Tweens & Teens</h3>
+                    <p className="text-sm text-gray-600">Ages 11+</p>
+                    <p className="text-xs text-gray-500 mt-2">Trendy themes, social experiences</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Social Proof */}
       <ReviewsSection showFeatured={true} limit={3} />
       {/* Final CTA */}
