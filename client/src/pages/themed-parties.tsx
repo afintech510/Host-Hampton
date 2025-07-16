@@ -233,7 +233,7 @@ export default function ThemedParties() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white text-white hover:bg-white/10 font-bold text-lg px-8 py-4 rounded-full"
+                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-bold text-lg px-8 py-4 rounded-full transition-all"
               >
                 See Our Themes
               </Button>
