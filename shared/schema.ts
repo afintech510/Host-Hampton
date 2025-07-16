@@ -44,6 +44,24 @@ export const reviews = pgTable("reviews", {
   featured: boolean("featured").default(false).notNull(), // For highlighting special reviews
 });
 
+export const partyThemes = pgTable("party_themes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  color: text("color").notNull(),
+  active: boolean("active").default(true).notNull(),
+});
+
+export const partyExtras = pgTable("party_extras", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(), // Price in cents
+  icon: text("icon").notNull(),
+  active: boolean("active").default(true).notNull(),
+});
+
 export const insertPartyBookingSchema = createInsertSchema(partyBookings).omit({
   id: true,
   createdAt: true,
@@ -57,6 +75,14 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   reviewDate: true,
+});
+
+export const insertPartyThemeSchema = createInsertSchema(partyThemes).omit({
+  id: true,
+});
+
+export const insertPartyExtraSchema = createInsertSchema(partyExtras).omit({
+  id: true,
 });
 
 // Relations (currently no foreign key relationships, but following blueprint pattern)
@@ -78,3 +104,7 @@ export type InsertPartyBooking = z.infer<typeof insertPartyBookingSchema>;
 export type PartyBooking = typeof partyBookings.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
+export type InsertPartyTheme = z.infer<typeof insertPartyThemeSchema>;
+export type PartyTheme = typeof partyThemes.$inferSelect;
+export type InsertPartyExtra = z.infer<typeof insertPartyExtraSchema>;
+export type PartyExtra = typeof partyExtras.$inferSelect;

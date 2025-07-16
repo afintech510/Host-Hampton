@@ -269,14 +269,21 @@ export default function ThemedParties() {
             
             <div className="lg:w-1/2">
               <div className="grid grid-cols-2 gap-4">
-                <Card className="bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300 hover:shadow-lg transition-all transform hover:scale-105">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Card className="border-2 border-yellow-300 hover:shadow-lg transition-all transform hover:scale-105 overflow-hidden relative">
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                      backgroundImage: "url('/attached_assets/image_1752647828958.png')"
+                    }}
+                  ></div>
+                  <div className="absolute inset-0 bg-black/40"></div>
+                  <CardContent className="p-6 text-center relative z-10">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
                       <span className="text-2xl">🧸</span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Toddlers</h3>
-                    <p className="text-sm text-gray-600">Ages 1-3</p>
-                    <p className="text-xs text-gray-500 mt-2">Soft play, sensory fun, safe adventures</p>
+                    <h3 className="text-lg font-bold text-white mb-2">Toddlers</h3>
+                    <p className="text-sm text-white/90">Ages 1-3</p>
+                    <p className="text-xs text-white/80 mt-2">Soft play, sensory fun, safe adventures</p>
                   </CardContent>
                 </Card>
                 
