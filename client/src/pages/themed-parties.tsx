@@ -59,7 +59,7 @@ export default function ThemedParties() {
       name: "Glow Party",
       description: "Neon blacklight experience with live DJ, glow face painting, and dance party",
       color: "bg-indigo-100 border-indigo-300",
-      icon: "✨"
+      icon: "🌟"
     }
   ];
 
