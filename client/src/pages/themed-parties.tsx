@@ -8,40 +8,58 @@ import { ReviewsSection } from "@/components/reviews-section";
 export default function ThemedParties() {
   const themes = [
     {
-      name: "Princess Dreams",
-      description: "Royal treatment with crowns, gowns, and fairy tale magic",
+      name: "The Spa Party",
+      description: "Pink robes, manicures, hair styling, makeup, and DIY nail polish activity",
       color: "bg-pink-100 border-pink-300",
-      icon: "👑"
+      icon: "💅"
     },
     {
-      name: "Superhero Squad",
-      description: "Action-packed adventure with capes, masks, and heroic fun",
-      color: "bg-blue-100 border-blue-300", 
-      icon: "🦸‍♂️"
+      name: "Swiftie Party",
+      description: "Taylor Swift theme with karaoke, friendship bracelets, and glitter makeup",
+      color: "bg-purple-100 border-purple-300", 
+      icon: "🎤"
     },
     {
-      name: "Dinosaur Discovery",
-      description: "Prehistoric adventure with dino decorations and fossil hunts",
-      color: "bg-green-100 border-green-300",
-      icon: "🦕"
+      name: "Barbie Party",
+      description: "Life-size Barbie box photos, dress-up fashion show, and glam styling",
+      color: "bg-pink-100 border-pink-300",
+      icon: "💖"
     },
     {
-      name: "Unicorn Magic",
-      description: "Sparkly celebration with rainbows, glitter, and magical moments",
+      name: "Unicorn Party",
+      description: "Unicorn headbands, glitter makeup, unicorn crafts, and rainbow celebration",
       color: "bg-purple-100 border-purple-300",
       icon: "🦄"
     },
     {
-      name: "Space Explorer",
-      description: "Blast off to fun with rockets, planets, and cosmic adventures",
-      color: "bg-indigo-100 border-indigo-300",
-      icon: "🚀"
+      name: "Slime Party",
+      description: "Full slime station with take-home containers, glitter, beads, and karaoke",
+      color: "bg-green-100 border-green-300",
+      icon: "🧪"
     },
     {
-      name: "Mermaid Lagoon",
-      description: "Under-the-sea celebration with ocean themes and treasure hunts",
-      color: "bg-teal-100 border-teal-300",
-      icon: "🧜‍♀️"
+      name: "Trucker Hat Party",
+      description: "Customize hats with iron-on patches and photo booth with instant texting",
+      color: "bg-blue-100 border-blue-300",
+      icon: "🎨"
+    },
+    {
+      name: "Sweets-n-Treats Party",
+      description: "Apron decorating and dessert decorating - perfect for little bakers",
+      color: "bg-yellow-100 border-yellow-300",
+      icon: "🍭"
+    },
+    {
+      name: "Toddler Party",
+      description: "Soft play area with ball pit, rockers, and safe toddler-friendly activities",
+      color: "bg-orange-100 border-orange-300",
+      icon: "👶"
+    },
+    {
+      name: "Glow Party",
+      description: "Neon blacklight experience with live DJ, glow face painting, and dance party",
+      color: "bg-indigo-100 border-indigo-300",
+      icon: "✨"
     }
   ];
 
@@ -142,7 +160,7 @@ export default function ThemedParties() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {themes.map((theme, index) => (
               <Card key={index} className={`${theme.color} border-2 hover:shadow-lg transition-all transform hover:scale-105 cursor-pointer`}>
                 <CardContent className="p-6 text-center">
