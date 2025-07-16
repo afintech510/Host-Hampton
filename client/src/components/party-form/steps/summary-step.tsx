@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, ThumbsUp } from "lucide-react";
 
 interface SummaryStepProps {
   formData: any;
@@ -79,11 +79,9 @@ export function SummaryStep({ formData, onBack, onSubmit, isSubmitting }: Summar
   return (
     <div className="text-center">
       <div className="mb-8">
-        <img
-          src="https://images.unsplash.com/photo-1464207687429-7505649dae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
-          alt="Party celebration setup"
-          className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border-4 border-white shadow-lg"
-        />
+        <div className="w-20 h-20 rounded-full mx-auto mb-6 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center border-4 border-white shadow-lg">
+          <ThumbsUp className="w-10 h-10 text-white" />
+        </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Perfect! Let's review everything</h2>
         <p className="text-gray-600">
           Here's your amazing party plan. Ready to make it official?

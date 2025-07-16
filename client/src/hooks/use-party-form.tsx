@@ -27,13 +27,13 @@ interface FormData {
 const ADDON_PRICES: Record<string, number> = {
   "photo-booth": 50,
   "candy-wall": 75,
-  "balloons": 25,
-  "karaoke": 40,
+  balloons: 25,
+  karaoke: 40,
   "glitter-makeup": 30,
   "hair-tinsel": 25,
   "beaded-hair-braid": 35,
   "glitter-tattoo": 20,
-  "manicure": 40,
+  manicure: 40,
   "bracelet-making": 30,
 };
 
@@ -43,9 +43,12 @@ export function usePartyForm() {
 
   const calculateTotal = (data: Partial<FormData>) => {
     const basePrice = 400; // Base party package price
-    const addonTotal = (data.partyAddons || []).reduce((total: number, addon: string) => {
-      return total + (ADDON_PRICES[addon] || 0);
-    }, 0);
+    const addonTotal = (data.partyAddons || []).reduce(
+      (total: number, addon: string) => {
+        return total + (ADDON_PRICES[addon] || 0);
+      },
+      0,
+    );
     return basePrice + addonTotal;
   };
 
@@ -59,20 +62,22 @@ export function usePartyForm() {
         title: "🎉 Party Booked Successfully!",
         description: "Redirecting to secure payment...",
       });
-      
+
       // Open GoDaddy payment link in popup
-      const paymentUrl = "https://pay.godaddy.com/checkout/"; // Replace with actual GoDaddy payment link
+      const paymentUrl =
+        "https://0b55c8c3-d136-4109-9537-5db058a282c7.paylinks.godaddy.com/party-deposit"; // Replace with actual GoDaddy payment link
       const popup = window.open(
         paymentUrl,
         "payment",
-        "width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no"
+        "width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no",
       );
-      
+
       // Check if popup was blocked
       if (!popup || popup.closed || typeof popup.closed === "undefined") {
         toast({
           title: "Popup Blocked",
-          description: "Please allow popups for payment processing. Redirecting now...",
+          description:
+            "Please allow popups for payment processing. Redirecting now...",
           variant: "destructive",
         });
         // Fallback: redirect in same window after a short delay
@@ -86,7 +91,8 @@ export function usePartyForm() {
             clearInterval(checkClosed);
             toast({
               title: "Payment Window Closed",
-              description: "Thank you! We'll contact you within 24 hours to confirm your party details.",
+              description:
+                "Thank you! We'll contact you within 24 hours to confirm your party details.",
             });
           }
         }, 1000);
@@ -95,7 +101,8 @@ export function usePartyForm() {
     onError: (error) => {
       toast({
         title: "Booking Failed",
-        description: "There was an error submitting your party booking. Please try again or contact us directly.",
+        description:
+          "There was an error submitting your party booking. Please try again or contact us directly.",
         variant: "destructive",
       });
       console.error("Booking error:", error);
@@ -103,12 +110,12 @@ export function usePartyForm() {
   });
 
   const updateFormData = (newData: Partial<FormData>) => {
-    setFormData(prev => ({ ...prev, ...newData }));
+    setFormData((prev) => ({ ...prev, ...newData }));
   };
 
   const submitBooking = async () => {
     const totalEstimate = calculateTotal(formData);
-    
+
     const bookingData: InsertPartyBooking = {
       partyDate: formData.partyDate!,
       partyTime: formData.partyTime!,
