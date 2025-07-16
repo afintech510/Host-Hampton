@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,20 @@ export default function ThemedParties() {
     phone: "",
     message: ""
   });
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = Math.min(scrollTop / (documentHeight * 0.7), 1);
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -758,35 +771,98 @@ export default function ThemedParties() {
         </div>
       </section>
       
-      {/* Final CTA */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Create Magic?
-          </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Your child's dream party is just one click away. Let's make their
-            special day extraordinary!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/party-booking">
-              <Button
-                size="lg"
-                className="bg-white text-purple-600 hover:bg-gray-100 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
-              >
-                Book Your Magic Party Now 🎉
-              </Button>
-            </Link>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white/10 font-bold text-lg px-8 py-4 rounded-full"
+      {/* Expanding CTA Section */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ease-out"
+        style={{
+          height: `${20 + (scrollProgress * 80)}vh`,
+          transform: `translateY(${(1 - scrollProgress) * 100}%)`,
+        }}
+      >
+        <div 
+          className="relative w-full h-full bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 overflow-hidden"
+          style={{
+            borderRadius: scrollProgress > 0.5 ? '0px' : '20px 20px 0 0',
+          }}
+        >
+          {/* Background Image with Overlay */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{
+              backgroundImage: `url(${preschoolImage})`,
+            }}
+          ></div>
+          <div className="absolute inset-0 bg-purple-900/60"></div>
+          
+          {/* Content */}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4">
+            <div 
+              className="transition-all duration-500"
+              style={{
+                transform: `scale(${0.8 + (scrollProgress * 0.4)})`,
+                opacity: 0.7 + (scrollProgress * 0.3),
+              }}
             >
-              Call Us: (555) 123-PARTY
-            </Button>
+              <div className="text-6xl mb-6">🎂</div>
+              <h2 
+                className="font-bold mb-4 transition-all duration-500"
+                style={{
+                  fontSize: `${1.8 + (scrollProgress * 1.2)}rem`,
+                }}
+              >
+                Don't Miss Out!
+              </h2>
+              <h3 
+                className="font-bold mb-8 transition-all duration-500"
+                style={{
+                  fontSize: `${1.5 + (scrollProgress * 0.8)}rem`,
+                }}
+              >
+                Lock In Your Party Today!
+              </h3>
+              
+              <div 
+                className="transition-all duration-500"
+                style={{
+                  transform: `scale(${0.9 + (scrollProgress * 0.2)})`,
+                }}
+              >
+                <Link href="/party-booking">
+                  <Button
+                    size="lg"
+                    className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-lg px-12 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all"
+                  >
+                    Book Your Party Now
+                  </Button>
+                </Link>
+              </div>
+              
+              {scrollProgress > 0.7 && (
+                <div 
+                  className="mt-8 animate-fade-in"
+                  style={{
+                    animation: 'fadeInUp 0.6s ease-out',
+                  }}
+                >
+                  <p className="text-lg mb-4 max-w-2xl">
+                    Your child's dream party is just one click away. Let's make their special day extraordinary!
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-bold px-8 py-3 rounded-full"
+                  >
+                    Call Us: (555) 123-PARTY
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+      
+      {/* Spacer to prevent content overlap */}
+      <div className="h-32"></div>
     </div>
   );
 }

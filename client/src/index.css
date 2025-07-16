@@ -60,6 +60,17 @@
     @apply font-sans antialiased text-foreground;
     background-color: hsl(210, 20%, 98%);
   }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 .coral {
