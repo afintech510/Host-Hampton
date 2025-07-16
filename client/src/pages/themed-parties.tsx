@@ -38,6 +38,13 @@ export default function ThemedParties() {
       icon: "🧪"
     },
     {
+      name: "cta-tile",
+      description: "Call to action tile",
+      color: "bg-gradient-to-br from-purple-500 to-pink-500",
+      icon: "🎉",
+      isCTA: true
+    },
+    {
       name: "Trucker Hat Party",
       description: "Customize hats with iron-on patches and photo booth with instant texting",
       color: "bg-blue-100 border-blue-300",
@@ -161,29 +168,34 @@ export default function ThemedParties() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            {themes.map((theme, index) => (
-              <Card key={index} className={`${theme.color} border-2 hover:shadow-lg transition-all transform hover:scale-105 cursor-pointer`}>
-                <CardContent className="p-6 text-center">
-                  <div className="text-6xl mb-4">{theme.icon}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{theme.name}</h3>
-                  <p className="text-gray-700 text-sm">{theme.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-            
-            {/* Call-to-action tile */}
-            <Link href="/party-booking">
-              <Card className="bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-300 hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer text-white">
-                <CardContent className="p-6 text-center h-full flex flex-col justify-center">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <h3 className="text-xl font-bold mb-2">Ready to Book?</h3>
-                  <p className="text-purple-100 text-sm mb-4">Click here to start planning your perfect celebration!</p>
-                  <div className="bg-white text-purple-600 px-4 py-2 rounded-full text-sm font-semibold inline-block">
-                    Start Planning →
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            {themes.map((theme, index) => {
+              if (theme.isCTA) {
+                return (
+                  <Link key={index} href="/party-booking">
+                    <Card className="bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-300 hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer text-white">
+                      <CardContent className="p-6 text-center h-full flex flex-col justify-center">
+                        <div className="text-6xl mb-4">{theme.icon}</div>
+                        <h3 className="text-xl font-bold mb-2">Ready to Book?</h3>
+                        <p className="text-purple-100 text-sm mb-4">Click here to start planning your perfect celebration!</p>
+                        <div className="bg-white text-purple-600 px-4 py-2 rounded-full text-sm font-semibold inline-block">
+                          Start Planning →
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              }
+              
+              return (
+                <Card key={index} className={`${theme.color} border-2 hover:shadow-lg transition-all transform hover:scale-105 cursor-pointer`}>
+                  <CardContent className="p-6 text-center">
+                    <div className="text-6xl mb-4">{theme.icon}</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{theme.name}</h3>
+                    <p className="text-gray-700 text-sm">{theme.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
           
           <div className="text-center mt-12">
