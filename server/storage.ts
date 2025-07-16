@@ -1,4 +1,4 @@
-import { users, partyBookings, reviews, type User, type InsertUser, type PartyBooking, type InsertPartyBooking, type Review, type InsertReview } from "@shared/schema";
+import { users, partyBookings, reviews, partyThemes, partyExtras, type User, type InsertUser, type PartyBooking, type InsertPartyBooking, type Review, type InsertReview, type PartyTheme, type PartyExtra } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -12,6 +12,8 @@ export interface IStorage {
   createReview(review: InsertReview): Promise<Review>;
   getReviews(limit?: number): Promise<Review[]>;
   getFeaturedReviews(): Promise<Review[]>;
+  getPartyThemes(): Promise<PartyTheme[]>;
+  getPartyExtras(): Promise<PartyExtra[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -142,6 +144,14 @@ export class DatabaseStorage implements IStorage {
 
   async getFeaturedReviews(): Promise<Review[]> {
     return await db.select().from(reviews).where(eq(reviews.featured, true)).orderBy(reviews.reviewDate);
+  }
+
+  async getPartyThemes(): Promise<PartyTheme[]> {
+    return await db.select().from(partyThemes).where(eq(partyThemes.active, true));
+  }
+
+  async getPartyExtras(): Promise<PartyExtra[]> {
+    return await db.select().from(partyExtras).where(eq(partyExtras.active, true));
   }
 }
 

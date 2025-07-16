@@ -128,6 +128,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get party themes
+  app.get("/api/party-themes", async (req, res) => {
+    try {
+      const themes = await storage.getPartyThemes();
+      res.json({ success: true, themes });
+    } catch (error) {
+      console.error("Error fetching party themes:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch party themes" 
+      });
+    }
+  });
+
+  // Get party extras
+  app.get("/api/party-extras", async (req, res) => {
+    try {
+      const extras = await storage.getPartyExtras();
+      res.json({ success: true, extras });
+    } catch (error) {
+      console.error("Error fetching party extras:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch party extras" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
