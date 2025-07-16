@@ -1,0 +1,70 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="themesBack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FAF5FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FEF7FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#themesBack)"/>
+  
+  <!-- Section Title -->
+  <text x="400" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1F2937">Choose Your</text>
+  <text x="400" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#9333EA">Adventure</text>
+  
+  <!-- Theme Cards Grid (2x3) -->
+  <!-- Row 1 -->
+  <!-- Princess Dreams -->
+  <rect x="80" y="120" width="180" height="140" rx="10" fill="#FCE7F3" stroke="#F9A8D4" stroke-width="2"/>
+  <text x="170" y="160" text-anchor="middle" font-size="40">👑</text>
+  <text x="170" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F2937">Princess Dreams</text>
+  <text x="170" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">Royal treatment with</text>
+  <text x="170" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">crowns and magic</text>
+  
+  <!-- Superhero Squad -->
+  <rect x="310" y="120" width="180" height="140" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="2"/>
+  <text x="400" y="160" text-anchor="middle" font-size="40">🦸‍♂️</text>
+  <text x="400" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F2937">Superhero Squad</text>
+  <text x="400" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">Action-packed adventure</text>
+  <text x="400" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">with capes and heroics</text>
+  
+  <!-- Dinosaur Discovery -->
+  <rect x="540" y="120" width="180" height="140" rx="10" fill="#D1FAE5" stroke="#86EFAC" stroke-width="2"/>
+  <text x="630" y="160" text-anchor="middle" font-size="40">🦕</text>
+  <text x="630" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F2937">Dinosaur Discovery</text>
+  <text x="630" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">Prehistoric adventure</text>
+  <text x="630" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">with fossil hunts</text>
+  
+  <!-- Row 2 -->
+  <!-- Unicorn Magic -->
+  <rect x="80" y="300" width="180" height="140" rx="10" fill="#EDE9FE" stroke="#C4B5FD" stroke-width="2"/>
+  <text x="170" y="340" text-anchor="middle" font-size="40">🦄</text>
+  <text x="170" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F2937">Unicorn Magic</text>
+  <text x="170" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">Sparkly celebration</text>
+  <text x="170" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">with rainbows</text>
+  
+  <!-- Space Explorer -->
+  <rect x="310" y="300" width="180" height="140" rx="10" fill="#E0E7FF" stroke="#A5B4FC" stroke-width="2"/>
+  <text x="400" y="340" text-anchor="middle" font-size="40">🚀</text>
+  <text x="400" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F2937">Space Explorer</text>
+  <text x="400" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">Blast off to fun</text>
+  <text x="400" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">with cosmic adventures</text>
+  
+  <!-- Mermaid Lagoon -->
+  <rect x="540" y="300" width="180" height="140" rx="10" fill="#CCFBF1" stroke="#5EEAD4" stroke-width="2"/>
+  <text x="630" y="340" text-anchor="middle" font-size="40">🧜‍♀️</text>
+  <text x="630" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1F2937">Mermaid Lagoon</text>
+  <text x="630" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">Under-the-sea</text>
+  <text x="630" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">celebration</text>
+  
+  <!-- CTA Button -->
+  <rect x="275" y="460" width="250" height="35" rx="17" fill="url(#themesCTA)"/>
+  <text x="400" y="482" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Start Planning Your Theme Party</text>
+  
+  <defs>
+    <linearGradient id="themesCTA" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -5,12 +5,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import PartyBooking from "@/pages/party-booking";
+import ThemedParties from "@/pages/themed-parties";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={PartyBooking} />
+      <Route path="/" component={ThemedParties} />
       <Route path="/party-booking" component={PartyBooking} />
+      <Route path="/themed-parties" component={ThemedParties} />
       <Route component={NotFound} />
     </Switch>
   );

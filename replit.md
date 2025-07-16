@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack party booking application built for "Host Hampton" - a children's party planning service. The application features a modern React frontend with a step-by-step booking form and an Express.js backend with database integration. It's designed to capture party bookings with detailed information about party themes, add-ons, child details, and contact information.
+This is a full-stack party booking application built for "Host Hampton" - a children's party planning service. The application features a modern React frontend with both a marketing landing page and a step-by-step booking form, plus an Express.js backend with database integration. The marketing page showcases themed party options and funnels users to the detailed booking form to capture party information including themes, add-ons, child details, and contact information.
 
 ## User Preferences
 
@@ -51,10 +51,12 @@ Preferred communication style: Simple, everyday language.
 - `GET /api/party-bookings`: Retrieves all bookings (admin function)
 
 ### Frontend Components
+- **Landing Page**: Urban Air-inspired themed parties marketing page with hero section, benefits, theme showcase, social proof, and multiple CTAs
 - **Multi-step Form**: 8-step party booking process with progress tracking
 - **Step Components**: Modular form steps for different booking aspects
 - **UI Components**: Comprehensive shadcn/ui component library
 - **Custom Hooks**: Form management and API integration hooks
+- **Custom Images**: User-provided themed images for form steps (Allie welcome, party neon, horn, birthday star)
 
 ### Storage Layer (`server/storage.ts`)
 - **Interface-based Design**: IStorage interface for storage abstraction
