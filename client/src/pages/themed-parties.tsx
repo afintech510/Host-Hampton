@@ -582,6 +582,40 @@ export default function ThemedParties() {
 
       {/* Social Proof */}
       <ReviewsSection showFeatured={true} limit={3} />
+      
+      {/* Got More Questions Section */}
+      <section className="relative overflow-hidden">
+        <div 
+          className="bg-gradient-to-r from-pink-500 to-teal-400 py-16 px-4"
+          style={{
+            clipPath: "polygon(0 15%, 100% 0%, 100% 85%, 0% 100%)"
+          }}
+        >
+          <div className="container mx-auto">
+            <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8">
+              <div className="text-white lg:text-left text-center">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Got More Questions?
+                </h2>
+                <p className="text-lg md:text-xl leading-relaxed max-w-2xl">
+                  We are your party planner and your party venue. If you've got 
+                  questions, chances are, we've already answered them in our FAQs, 
+                  but you can always contact us too!
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Button 
+                  size="lg"
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                >
+                  View FAQs
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white">
         <div className="container mx-auto px-4 text-center">
