@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, Shield, Clock, Users, Sparkles, Gift, Camera, Cake, Music } from "lucide-react";
 import { Link } from "wouter";
+import { ReviewsSection } from "@/components/reviews-section";
 
 export default function ThemedParties() {
   const themes = [
@@ -62,23 +63,7 @@ export default function ThemedParties() {
     }
   ];
 
-  const testimonials = [
-    {
-      text: "Host Hampton made my daughter's princess party absolutely magical! Every detail was perfect.",
-      author: "Sarah M.",
-      rating: 5
-    },
-    {
-      text: "The superhero party was incredible. My son felt like a real hero for the day!",
-      author: "Mike R.", 
-      rating: 5
-    },
-    {
-      text: "Professional, creative, and so much fun. Will definitely book again!",
-      author: "Jennifer L.",
-      rating: 5
-    }
-  ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
@@ -220,34 +205,7 @@ export default function ThemedParties() {
       </section>
 
       {/* Social Proof */}
-      <section className="py-20 bg-gradient-to-br from-yellow-50 to-orange-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Happy Parents, <span className="text-orange-600">Magical Memories</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Don't just take our word for it – see what Hampton families are saying
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-white shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-4 italic">"{testimonial.text}"</p>
-                  <p className="font-semibold text-gray-900">- {testimonial.author}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ReviewsSection showFeatured={true} limit={3} />
 
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white">

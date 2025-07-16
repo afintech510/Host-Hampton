@@ -60,8 +60,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Storage Layer (`server/storage.ts`)
 - **Interface-based Design**: IStorage interface for storage abstraction
-- **Memory Storage**: In-memory implementation for development
-- **Database Ready**: Designed to easily swap to database implementation
+- **Database Storage**: PostgreSQL implementation with Drizzle ORM for production
+- **Memory Storage**: In-memory fallback implementation for testing
+- **Reviews System**: Full CRUD operations for customer reviews with featured/verified flags
 
 ## External Dependencies
 

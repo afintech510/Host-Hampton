@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPartyBookingSchema } from "@shared/schema";
+import { insertPartyBookingSchema, insertReviewSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -73,6 +73,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Failed to fetch booking" 
+      });
+    }
+  });
+
+  // Create a new review
+  app.post("/api/reviews", async (req, res) => {
+    try {
+      const reviewData = insertReviewSchema.parse(req.body);
+      const review = await storage.createReview(reviewData);
+      res.status(201).json({ success: true, review });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid review data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating review:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create review" 
+      });
+    }
+  });
+
+  // Get reviews (with optional limit)
+  app.get("/api/reviews", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const reviews = await storage.getReviews(limit);
+      res.json({ success: true, reviews });
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch reviews" 
+      });
+    }
+  });
+
+  // Get featured reviews
+  app.get("/api/reviews/featured", async (req, res) => {
+    try {
+      const reviews = await storage.getFeaturedReviews();
+      res.json({ success: true, reviews });
+    } catch (error) {
+      console.error("Error fetching featured reviews:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch featured reviews" 
       });
     }
   });

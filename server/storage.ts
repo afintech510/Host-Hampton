@@ -1,4 +1,6 @@
-import { users, partyBookings, type User, type InsertUser, type PartyBooking, type InsertPartyBooking } from "@shared/schema";
+import { users, partyBookings, reviews, type User, type InsertUser, type PartyBooking, type InsertPartyBooking, type Review, type InsertReview } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -7,19 +9,26 @@ export interface IStorage {
   createPartyBooking(booking: InsertPartyBooking): Promise<PartyBooking>;
   getPartyBooking(id: number): Promise<PartyBooking | undefined>;
   getAllPartyBookings(): Promise<PartyBooking[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  getReviews(limit?: number): Promise<Review[]>;
+  getFeaturedReviews(): Promise<Review[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private partyBookings: Map<number, PartyBooking>;
+  private reviews: Map<number, Review>;
   private currentUserId: number;
   private currentBookingId: number;
+  private currentReviewId: number;
 
   constructor() {
     this.users = new Map();
     this.partyBookings = new Map();
+    this.reviews = new Map();
     this.currentUserId = 1;
     this.currentBookingId = 1;
+    this.currentReviewId = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -59,6 +68,81 @@ export class MemStorage implements IStorage {
   async getAllPartyBookings(): Promise<PartyBooking[]> {
     return Array.from(this.partyBookings.values());
   }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const id = this.currentReviewId++;
+    const review: Review = { 
+      ...insertReview, 
+      id, 
+      reviewDate: new Date()
+    };
+    this.reviews.set(id, review);
+    return review;
+  }
+
+  async getReviews(limit: number = 10): Promise<Review[]> {
+    const allReviews = Array.from(this.reviews.values());
+    return allReviews.sort((a, b) => b.reviewDate.getTime() - a.reviewDate.getTime()).slice(0, limit);
+  }
+
+  async getFeaturedReviews(): Promise<Review[]> {
+    const featuredReviews = Array.from(this.reviews.values()).filter(review => review.featured);
+    return featuredReviews.sort((a, b) => b.reviewDate.getTime() - a.reviewDate.getTime());
+  }
 }
 
-export const storage = new MemStorage();
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async createPartyBooking(insertBooking: InsertPartyBooking): Promise<PartyBooking> {
+    const [booking] = await db
+      .insert(partyBookings)
+      .values(insertBooking)
+      .returning();
+    return booking;
+  }
+
+  async getPartyBooking(id: number): Promise<PartyBooking | undefined> {
+    const [booking] = await db.select().from(partyBookings).where(eq(partyBookings.id, id));
+    return booking || undefined;
+  }
+
+  async getAllPartyBookings(): Promise<PartyBooking[]> {
+    return await db.select().from(partyBookings);
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db
+      .insert(reviews)
+      .values(insertReview)
+      .returning();
+    return review;
+  }
+
+  async getReviews(limit: number = 10): Promise<Review[]> {
+    return await db.select().from(reviews).orderBy(reviews.reviewDate).limit(limit);
+  }
+
+  async getFeaturedReviews(): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.featured, true)).orderBy(reviews.reviewDate);
+  }
+}
+
+export const storage = new DatabaseStorage();
