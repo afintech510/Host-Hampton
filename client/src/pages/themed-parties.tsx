@@ -97,9 +97,7 @@ export default function ThemedParties() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-white/20 text-white border-white/30 text-lg px-6 py-2">
-              ✨ Hampton's Premier Party Planners ✨
-            </Badge>
+            <Badge className="mb-6 bg-white/20 text-white border-white/30 text-lg px-6 py-2">✨ Let Us Plan Your Party 🎉</Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               The Most <span className="text-yellow-300">Magical</span> Kids Parties
               <br />In Hampton!
@@ -126,7 +124,6 @@ export default function ThemedParties() {
         <div className="absolute bottom-20 left-20 text-5xl animate-bounce delay-300">🎂</div>
         <div className="absolute bottom-32 right-10 text-3xl animate-pulse delay-500">🎊</div>
       </section>
-
       {/* Benefits Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -154,7 +151,6 @@ export default function ThemedParties() {
           </div>
         </div>
       </section>
-
       {/* Party Themes Showcase */}
       <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
         <div className="container mx-auto px-4">
@@ -207,7 +203,6 @@ export default function ThemedParties() {
           </div>
         </div>
       </section>
-
       {/* How It Works */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -247,10 +242,8 @@ export default function ThemedParties() {
           </div>
         </div>
       </section>
-
       {/* Social Proof */}
       <ReviewsSection showFeatured={true} limit={3} />
-
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white">
         <div className="container mx-auto px-4 text-center">
