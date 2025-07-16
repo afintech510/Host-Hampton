@@ -53,7 +53,7 @@ export default function ThemedParties() {
       name: "Toddler Party",
       description: "Soft play area with ball pit, rockers, and safe toddler-friendly activities",
       color: "bg-orange-100 border-orange-300",
-      icon: "👶"
+      icon: "🧸"
     },
     {
       name: "Glow Party",
