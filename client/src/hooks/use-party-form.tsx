@@ -57,8 +57,40 @@ export function usePartyForm() {
     onSuccess: (data) => {
       toast({
         title: "🎉 Party Booked Successfully!",
-        description: `Your party for ${data.booking.childName} on ${data.booking.partyDate} has been scheduled. We'll contact you within 24 hours to confirm all details.`,
+        description: "Redirecting to secure payment...",
       });
+      
+      // Open GoDaddy payment link in popup
+      const paymentUrl = "https://pay.godaddy.com/checkout/"; // Replace with actual GoDaddy payment link
+      const popup = window.open(
+        paymentUrl,
+        "payment",
+        "width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no"
+      );
+      
+      // Check if popup was blocked
+      if (!popup || popup.closed || typeof popup.closed === "undefined") {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups for payment processing. Redirecting now...",
+          variant: "destructive",
+        });
+        // Fallback: redirect in same window after a short delay
+        setTimeout(() => {
+          window.location.href = paymentUrl;
+        }, 2000);
+      } else {
+        // Monitor popup to detect when it's closed
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            toast({
+              title: "Payment Window Closed",
+              description: "Thank you! We'll contact you within 24 hours to confirm your party details.",
+            });
+          }
+        }, 1000);
+      }
     },
     onError: (error) => {
       toast({
