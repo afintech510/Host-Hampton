@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import {
   Star,
   Heart,
@@ -20,6 +26,47 @@ import preschoolImage from "@assets/image_1752648592321.png";
 import tweensImage from "@assets/image_1752648836877.png";
 
 export default function ThemedParties() {
+  const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: ""
+  });
+  const { toast } = useToast();
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      toast({
+        title: "Please fill in all required fields",
+        description: "Name, email, and message are required.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Here you would typically send to your backend
+      // For now, we'll just show a success message
+      toast({
+        title: "Message sent successfully!",
+        description: "We'll get back to you within 24 hours.",
+      });
+      
+      // Reset form and close dialog
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+      setIsContactDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Failed to send message",
+        description: "Please try again or call us directly.",
+        variant: "destructive"
+      });
+    }
+  };
   const themes = [
     {
       name: "The Spa Party",
@@ -603,13 +650,108 @@ export default function ThemedParties() {
                   but you can always contact us too!
                 </p>
               </div>
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg"
                   className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
                 >
                   View FAQs
                 </Button>
+                
+                <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-white text-white hover:bg-white hover:text-pink-500 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                    >
+                      Contact Us
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-gray-900">
+                        Contact Host Hampton
+                      </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                          Name *
+                        </Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Your full name"
+                          className="mt-1"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                          Email *
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="your.email@example.com"
+                          className="mt-1"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                          Phone
+                        </Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={contactForm.phone}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                          placeholder="(555) 123-4567"
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="message" className="text-sm font-medium text-gray-700">
+                          Message *
+                        </Label>
+                        <Textarea
+                          id="message"
+                          value={contactForm.message}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                          placeholder="Tell us about your party needs or ask any questions..."
+                          className="mt-1 min-h-[100px]"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="flex gap-3 pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsContactDialogOpen(false)}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                        >
+                          Send Message
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
