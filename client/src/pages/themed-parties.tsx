@@ -579,6 +579,30 @@ export default function ThemedParties() {
             </div>
           </div>
 
+          {/* Small Contact Us Module */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 mb-16 max-w-4xl mx-auto text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Plan Your Party?</h3>
+            <p className="text-gray-600 mb-6">Contact us today to book your magical celebration or learn more about our services!</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/party-booking">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                >
+                  Book Your Party Now
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-2 border-purple-500 text-purple-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full"
+                onClick={() => window.open('tel:(631) 998-9325')}
+              >
+                Call (631) 998-9325
+              </Button>
+            </div>
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
             {/* Location Info */}
             <div className="space-y-8">
