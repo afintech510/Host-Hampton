@@ -17,6 +17,7 @@ import { Link } from "wouter";
 import { ReviewsSection } from "@/components/reviews-section";
 import toddlerImage from "@assets/image_1752647828958.png";
 import preschoolImage from "@assets/image_1752648592321.png";
+import tweensImage from "@assets/image_1752648836877.png";
 
 export default function ThemedParties() {
   const themes = [
@@ -408,16 +409,23 @@ export default function ThemedParties() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300 hover:shadow-lg transition-all transform hover:scale-105">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Card className="border-2 border-indigo-300 hover:shadow-lg transition-all transform hover:scale-105 overflow-hidden relative">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${tweensImage})`,
+                    }}
+                  ></div>
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <CardContent className="p-6 text-center relative z-10">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
                       <span className="text-2xl">🌟</span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    <h3 className="text-lg font-bold text-white mb-2">
                       Tweens & Teens
                     </h3>
-                    <p className="text-sm text-gray-600">Ages 11+</p>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-sm text-white/90">Ages 11+</p>
+                    <p className="text-xs text-white/80 mt-2">
                       Trendy themes, social experiences
                     </p>
                   </CardContent>
