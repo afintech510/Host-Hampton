@@ -38,13 +38,31 @@ export default function ThemedParties() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = Math.min(scrollTop / (documentHeight * 0.7), 1);
-      setScrollProgress(progress);
+      const expandingElement = document.getElementById('expanding-cta');
+      if (!expandingElement) return;
+
+      const rect = expandingElement.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // Calculate when the element is in view and how much
+      const elementTop = rect.top;
+      const elementHeight = rect.height;
+      
+      // Start expanding when element reaches 80% from top
+      const triggerPoint = windowHeight * 0.8;
+      
+      if (elementTop <= triggerPoint && elementTop > -elementHeight) {
+        // Element is in the expansion zone
+        const progress = Math.max(0, Math.min(1, (triggerPoint - elementTop) / (windowHeight * 0.6)));
+        setScrollProgress(progress);
+      } else {
+        // Element is out of expansion zone
+        setScrollProgress(0);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial call
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -772,61 +790,53 @@ export default function ThemedParties() {
       </section>
       
       {/* Expanding CTA Section */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ease-out"
-        style={{
-          height: `${20 + (scrollProgress * 80)}vh`,
-          transform: `translateY(${(1 - scrollProgress) * 100}%)`,
-        }}
+      <section 
+        id="expanding-cta"
+        className="relative py-20"
       >
+        {/* Fixed overlay that expands */}
         <div 
-          className="relative w-full h-full bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 overflow-hidden"
+          className="fixed inset-0 z-40 pointer-events-none transition-all duration-700 ease-out"
           style={{
-            borderRadius: scrollProgress > 0.5 ? '0px' : '20px 20px 0 0',
+            opacity: scrollProgress,
+            visibility: scrollProgress > 0 ? 'visible' : 'hidden',
           }}
         >
-          {/* Background Image with Overlay */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30"
-            style={{
-              backgroundImage: `url(${preschoolImage})`,
-            }}
-          ></div>
-          <div className="absolute inset-0 bg-purple-900/60"></div>
-          
-          {/* Content */}
-          <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800">
             <div 
-              className="transition-all duration-500"
+              className="absolute inset-0 bg-cover bg-center opacity-30"
               style={{
-                transform: `scale(${0.8 + (scrollProgress * 0.4)})`,
-                opacity: 0.7 + (scrollProgress * 0.3),
+                backgroundImage: `url(${preschoolImage})`,
               }}
-            >
-              <div className="text-6xl mb-6">🎂</div>
-              <h2 
-                className="font-bold mb-4 transition-all duration-500"
-                style={{
-                  fontSize: `${1.8 + (scrollProgress * 1.2)}rem`,
-                }}
-              >
-                Don't Miss Out!
-              </h2>
-              <h3 
-                className="font-bold mb-8 transition-all duration-500"
-                style={{
-                  fontSize: `${1.5 + (scrollProgress * 0.8)}rem`,
-                }}
-              >
-                Lock In Your Party Today!
-              </h3>
-              
+            ></div>
+            <div className="absolute inset-0 bg-purple-900/60"></div>
+          </div>
+        </div>
+
+        {/* Regular content when not expanded */}
+        <div 
+          className="relative z-50"
+          style={{
+            opacity: scrollProgress > 0.3 ? 0 : 1,
+            transition: 'opacity 0.5s ease-out',
+          }}
+        >
+          <div className="container mx-auto px-4 text-center">
+            <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 rounded-xl overflow-hidden relative">
               <div 
-                className="transition-all duration-500"
+                className="absolute inset-0 bg-cover bg-center opacity-20"
                 style={{
-                  transform: `scale(${0.9 + (scrollProgress * 0.2)})`,
+                  backgroundImage: `url(${preschoolImage})`,
                 }}
-              >
+              ></div>
+              <div className="relative z-10 py-16 px-8 text-white">
+                <div className="text-6xl mb-6">🎂</div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Don't Miss Out!
+                </h2>
+                <h3 className="text-xl md:text-2xl font-bold mb-8">
+                  Lock In Your Party Today!
+                </h3>
                 <Link href="/party-booking">
                   <Button
                     size="lg"
@@ -836,21 +846,53 @@ export default function ThemedParties() {
                   </Button>
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Expanded overlay content */}
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center text-white text-center px-4"
+          style={{
+            opacity: scrollProgress,
+            visibility: scrollProgress > 0 ? 'visible' : 'hidden',
+            transform: `scale(${0.8 + (scrollProgress * 0.2)})`,
+            transition: 'all 0.7s ease-out',
+            pointerEvents: scrollProgress > 0 ? 'auto' : 'none',
+          }}
+        >
+          <div>
+            <div className="text-8xl mb-8">🎂</div>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+              Don't Miss Out!
+            </h2>
+            <h3 className="text-2xl md:text-4xl font-bold mb-12">
+              Lock In Your Party Today!
+            </h3>
+            
+            <div className="space-y-6">
+              <Link href="/party-booking">
+                <Button
+                  size="lg"
+                  className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-xl px-16 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all"
+                >
+                  Book Your Party Now
+                </Button>
+              </Link>
               
               {scrollProgress > 0.7 && (
                 <div 
-                  className="mt-8 animate-fade-in"
                   style={{
                     animation: 'fadeInUp 0.6s ease-out',
                   }}
                 >
-                  <p className="text-lg mb-4 max-w-2xl">
+                  <p className="text-xl mb-6 max-w-2xl mx-auto">
                     Your child's dream party is just one click away. Let's make their special day extraordinary!
                   </p>
                   <Button
                     variant="outline"
                     size="lg"
-                    className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-bold px-8 py-3 rounded-full"
+                    className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-bold text-lg px-8 py-4 rounded-full"
                   >
                     Call Us: (555) 123-PARTY
                   </Button>
@@ -859,10 +901,7 @@ export default function ThemedParties() {
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Spacer to prevent content overlap */}
-      <div className="h-32"></div>
+      </section>
     </div>
   );
 }
