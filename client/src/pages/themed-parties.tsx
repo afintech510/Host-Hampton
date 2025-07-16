@@ -537,10 +537,7 @@ export default function ThemedParties() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Find Us in <span className="text-purple-600">Speonk, NY</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Conveniently located on Long Island, serving families across
-              Suffolk County
-            </p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Conveniently located on Long Island, serving families across Eastern Suffolk County</p>
           </div>
 
           {/* Service Tiles */}
