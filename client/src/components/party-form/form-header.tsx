@@ -16,7 +16,7 @@ export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
             variant="ghost"
             size="icon"
             onClick={onBack}
-            className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0 h-auto"
+            className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black hover:bg-gray-100 p-0 h-auto"
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
@@ -36,14 +36,14 @@ export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-gray-600 p-0 h-auto"
+            className="text-gray-400 hover:text-black hover:bg-gray-100 p-0 h-auto"
           >
             <HelpCircle className="w-5 h-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-gray-600 p-0 h-auto"
+            className="text-gray-400 hover:text-black hover:bg-gray-100 p-0 h-auto"
           >
             <X className="w-5 h-5" />
           </Button>
