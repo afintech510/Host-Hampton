@@ -9,25 +9,30 @@ interface FormHeaderProps {
 export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
   return (
     <header className="bg-white shadow-sm">
-      <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {currentStep > 1 && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onBack}
-              className="text-gray-400 hover:text-gray-600 p-0 h-auto"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-          )}
+      <div className="max-w-md mx-auto px-6 py-4 relative">
+        {/* Back button - positioned absolutely on the left */}
+        {currentStep > 1 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBack}
+            className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0 h-auto"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+        )}
+        
+        {/* Centered logo */}
+        <div className="flex justify-center">
           <img 
             src="/images/host-hampton-logo.png" 
             alt="Host Hampton" 
-            className="h-6 object-contain"
+            className="h-10 object-contain"
           />
         </div>
-        <div className="flex items-center space-x-2">
+        
+        {/* Action buttons - positioned absolutely on the right */}
+        <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
           <Button
             variant="ghost"
             size="icon"
