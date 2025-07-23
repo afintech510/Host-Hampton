@@ -4,6 +4,7 @@ import { FormHeader } from "@/components/party-form/form-header";
 import { ProgressBar } from "@/components/party-form/progress-bar";
 import { StepContainer } from "@/components/party-form/step-container";
 import { WelcomeStep } from "@/components/party-form/steps/welcome-step";
+import { EventTypeStep } from "@/components/party-form/steps/event-type-step";
 import { DateTimeStep } from "@/components/party-form/steps/date-time-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
 import { AddonsStep } from "@/components/party-form/steps/addons-step";
@@ -15,7 +16,7 @@ import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
 import { HelpCircle, MessageCircle } from "lucide-react";
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 export default function BookEvent() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -40,7 +41,7 @@ export default function BookEvent() {
         return <WelcomeStep onNext={handleNextStep} />;
       case 2:
         return (
-          <DateTimeStep
+          <EventTypeStep
             formData={formData}
             updateFormData={updateFormData}
             onNext={handleNextStep}
@@ -49,7 +50,7 @@ export default function BookEvent() {
         );
       case 3:
         return (
-          <ThemeStep
+          <DateTimeStep
             formData={formData}
             updateFormData={updateFormData}
             onNext={handleNextStep}
@@ -58,7 +59,7 @@ export default function BookEvent() {
         );
       case 4:
         return (
-          <AddonsStep
+          <ThemeStep
             formData={formData}
             updateFormData={updateFormData}
             onNext={handleNextStep}
@@ -67,7 +68,7 @@ export default function BookEvent() {
         );
       case 5:
         return (
-          <ChildDetailsStep
+          <AddonsStep
             formData={formData}
             updateFormData={updateFormData}
             onNext={handleNextStep}
@@ -76,7 +77,7 @@ export default function BookEvent() {
         );
       case 6:
         return (
-          <FoodStep
+          <ChildDetailsStep
             formData={formData}
             updateFormData={updateFormData}
             onNext={handleNextStep}
@@ -85,7 +86,7 @@ export default function BookEvent() {
         );
       case 7:
         return (
-          <ContactStep
+          <FoodStep
             formData={formData}
             updateFormData={updateFormData}
             onNext={handleNextStep}
@@ -93,6 +94,15 @@ export default function BookEvent() {
           />
         );
       case 8:
+        return (
+          <ContactStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+          />
+        );
+      case 9:
         return (
           <SummaryStep
             formData={formData}
