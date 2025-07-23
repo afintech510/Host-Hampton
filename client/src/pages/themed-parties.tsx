@@ -201,39 +201,38 @@ export default function ThemedParties() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(15,50%,92%)] via-[hsl(15,40%,95%)] to-[hsl(45,40%,90%)] text-[hsl(155,40%,25%)]">
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-white/20 text-white border-white/30 text-lg px-6 py-2">
-              ✨ Let Us Plan Your Party 🎉
-            </Badge>
+            <div className="mb-8">
+              <div className="text-[hsl(155,40%,35%)] text-3xl md:text-4xl font-light italic mb-2">Host</div>
+              <div className="text-[hsl(155,40%,25%)] text-4xl md:text-5xl font-bold tracking-wide">HAMPTON</div>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              The Most <span className="text-yellow-300">Magical</span> Kids
-              Parties
+              Design Your
               <br />
-              In Hampton!
+              <span className="text-[hsl(155,40%,35%)]">Party Experience</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl mb-8 text-[hsl(155,20%,45%)] max-w-3xl mx-auto leading-relaxed">
               Transform your child's special day into an unforgettable adventure
               with our themed party experiences. Professional planning, magical
               decorations, and memories that last a lifetime.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/party-booking">
+              <Link href="/party-designer">
                 <Button
                   size="lg"
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                  className="bg-[hsl(155,40%,25%)] text-white hover:bg-[hsl(155,40%,20%)] font-semibold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
                 >
-                  Book Your Magic Party 🎉
+                  Try Designer Tool
                 </Button>
               </Link>
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-bold text-lg px-8 py-4 rounded-full transition-all"
+                className="border-2 border-[hsl(155,40%,25%)] text-[hsl(155,40%,25%)] hover:bg-[hsl(155,40%,25%)] hover:text-white font-semibold text-lg px-8 py-4 rounded-full transition-all"
               >
                 See Our Themes
               </Button>
@@ -241,19 +240,11 @@ export default function ThemedParties() {
           </div>
         </div>
 
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 text-6xl animate-bounce">
-          🎈
-        </div>
-        <div className="absolute top-32 right-20 text-4xl animate-pulse">
-          ⭐
-        </div>
-        <div className="absolute bottom-20 left-20 text-5xl animate-bounce delay-300">
-          🎂
-        </div>
-        <div className="absolute bottom-32 right-10 text-3xl animate-pulse delay-500">
-          🎊
-        </div>
+        {/* Subtle Decorative Stars */}
+        <div className="absolute top-20 right-20 text-4xl text-[hsl(45,60%,70%)] animate-pulse">✦</div>
+        <div className="absolute top-40 left-20 text-2xl text-[hsl(45,60%,70%)] animate-pulse [animation-delay:-1s]">✦</div>
+        <div className="absolute bottom-32 right-32 text-3xl text-[hsl(45,60%,70%)] animate-pulse [animation-delay:-2s]">✦</div>
+        <div className="absolute bottom-40 left-32 text-2xl text-[hsl(45,60%,70%)] animate-pulse [animation-delay:-0.5s]">✦</div>
       </section>
       {/* Benefits Section */}
       <section className="py-20 bg-white">
@@ -583,7 +574,7 @@ export default function ThemedParties() {
               <Link href="/party-designer">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                  className="bg-[hsl(155,40%,25%)] hover:bg-[hsl(155,40%,20%)] text-white font-semibold px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all"
                 >
                   Try New Designer Tool
                 </Button>
@@ -592,7 +583,7 @@ export default function ThemedParties() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-2 border-purple-500 text-purple-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full"
+                  className="border-2 border-[hsl(155,40%,25%)] text-[hsl(155,40%,25%)] hover:bg-[hsl(155,40%,25%)] hover:text-white font-semibold px-8 py-3 rounded-full"
                 >
                   Use Current Form
                 </Button>
@@ -600,7 +591,7 @@ export default function ThemedParties() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-gray-300 text-gray-600 hover:bg-gray-50 font-bold px-8 py-3 rounded-full"
+                className="border-2 border-[hsl(155,20%,50%)] text-[hsl(155,20%,50%)] hover:bg-[hsl(155,20%,50%)] hover:text-white font-semibold px-8 py-3 rounded-full"
                 onClick={() => window.open('tel:(631) 998-9325')}
               >
                 Call (631) 998-9325
