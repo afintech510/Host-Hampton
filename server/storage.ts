@@ -1,8 +1,18 @@
-import { users, partyBookings, reviews, partyThemes, partyExtras, type User, type InsertUser, type PartyBooking, type InsertPartyBooking, type Review, type InsertReview, type PartyTheme, type PartyExtra } from "@shared/schema";
+import { 
+  users, partyBookings, reviews, partyThemes, partyExtras,
+  eventTypes, customers, packages, addons, events, invoices, invoiceItems,
+  type User, type InsertUser, type PartyBooking, type InsertPartyBooking, 
+  type Review, type InsertReview, type PartyTheme, type PartyExtra,
+  type EventType, type InsertEventType, type Customer, type InsertCustomer,
+  type Package, type InsertPackage, type Addon, type InsertAddon,
+  type Event, type InsertEvent, type Invoice, type InsertInvoice,
+  type InvoiceItem, type InsertInvoiceItem
+} from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
+  // Existing methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -14,6 +24,27 @@ export interface IStorage {
   getFeaturedReviews(): Promise<Review[]>;
   getPartyThemes(): Promise<PartyTheme[]>;
   getPartyExtras(): Promise<PartyExtra[]>;
+  
+  // New Designer Tool methods
+  getEventTypes(): Promise<EventType[]>;
+  createEventType(eventType: InsertEventType): Promise<EventType>;
+  getCustomers(): Promise<Customer[]>;
+  createCustomer(customer: InsertCustomer): Promise<Customer>;
+  getCustomer(id: number): Promise<Customer | undefined>;
+  getPackages(): Promise<Package[]>;
+  getPackagesByEventType(eventTypeId: number): Promise<Package[]>;
+  createPackage(pkg: InsertPackage): Promise<Package>;
+  getAddons(): Promise<Addon[]>;
+  createAddon(addon: InsertAddon): Promise<Addon>;
+  getEvents(): Promise<Event[]>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  getEvent(id: number): Promise<Event | undefined>;
+  updateEventStatus(id: number, status: string): Promise<Event | undefined>;
+  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  getInvoice(id: number): Promise<Invoice | undefined>;
+  getInvoiceByEventId(eventId: number): Promise<Invoice | undefined>;
+  createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem>;
+  getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -75,6 +106,10 @@ export class MemStorage implements IStorage {
     const id = this.currentReviewId++;
     const review: Review = { 
       ...insertReview, 
+      partyTheme: insertReview.partyTheme || null,
+      platform: insertReview.platform || "Google",
+      verified: insertReview.verified !== undefined ? insertReview.verified : true,
+      featured: insertReview.featured !== undefined ? insertReview.featured : false,
       id, 
       reviewDate: new Date()
     };
@@ -90,6 +125,92 @@ export class MemStorage implements IStorage {
   async getFeaturedReviews(): Promise<Review[]> {
     const featuredReviews = Array.from(this.reviews.values()).filter(review => review.featured);
     return featuredReviews.sort((a, b) => b.reviewDate.getTime() - a.reviewDate.getTime());
+  }
+
+  // Placeholder implementations for legacy system methods
+  async getPartyThemes(): Promise<PartyTheme[]> {
+    return [];
+  }
+
+  async getPartyExtras(): Promise<PartyExtra[]> {
+    return [];
+  }
+
+  // New Designer Tool methods - placeholder implementations
+  async getEventTypes(): Promise<EventType[]> {
+    return [];
+  }
+
+  async createEventType(eventType: InsertEventType): Promise<EventType> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getCustomers(): Promise<Customer[]> {
+    return [];
+  }
+
+  async createCustomer(customer: InsertCustomer): Promise<Customer> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getCustomer(id: number): Promise<Customer | undefined> {
+    return undefined;
+  }
+
+  async getPackages(): Promise<Package[]> {
+    return [];
+  }
+
+  async getPackagesByEventType(eventTypeId: number): Promise<Package[]> {
+    return [];
+  }
+
+  async createPackage(pkg: InsertPackage): Promise<Package> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getAddons(): Promise<Addon[]> {
+    return [];
+  }
+
+  async createAddon(addon: InsertAddon): Promise<Addon> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getEvents(): Promise<Event[]> {
+    return [];
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    return undefined;
+  }
+
+  async updateEventStatus(id: number, status: string): Promise<Event | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    return undefined;
+  }
+
+  async getInvoiceByEventId(eventId: number): Promise<Invoice | undefined> {
+    return undefined;
+  }
+
+  async createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
+    return [];
   }
 }
 
@@ -152,6 +273,95 @@ export class DatabaseStorage implements IStorage {
 
   async getPartyExtras(): Promise<PartyExtra[]> {
     return await db.select().from(partyExtras).where(eq(partyExtras.active, true));
+  }
+
+  // New Designer Tool methods - Database implementations
+  async getEventTypes(): Promise<EventType[]> {
+    return await db.select().from(eventTypes).where(eq(eventTypes.active, true));
+  }
+
+  async createEventType(eventType: InsertEventType): Promise<EventType> {
+    const [created] = await db.insert(eventTypes).values(eventType).returning();
+    return created;
+  }
+
+  async getCustomers(): Promise<Customer[]> {
+    return await db.select().from(customers);
+  }
+
+  async createCustomer(customer: InsertCustomer): Promise<Customer> {
+    const [created] = await db.insert(customers).values(customer).returning();
+    return created;
+  }
+
+  async getCustomer(id: number): Promise<Customer | undefined> {
+    const [customer] = await db.select().from(customers).where(eq(customers.id, id));
+    return customer || undefined;
+  }
+
+  async getPackages(): Promise<Package[]> {
+    return await db.select().from(packages).where(eq(packages.active, true));
+  }
+
+  async getPackagesByEventType(eventTypeId: number): Promise<Package[]> {
+    return await db.select().from(packages).where(eq(packages.eventTypeId, eventTypeId));
+  }
+
+  async createPackage(pkg: InsertPackage): Promise<Package> {
+    const [created] = await db.insert(packages).values(pkg).returning();
+    return created;
+  }
+
+  async getAddons(): Promise<Addon[]> {
+    return await db.select().from(addons).where(eq(addons.active, true));
+  }
+
+  async createAddon(addon: InsertAddon): Promise<Addon> {
+    const [created] = await db.insert(addons).values(addon).returning();
+    return created;
+  }
+
+  async getEvents(): Promise<Event[]> {
+    return await db.select().from(events);
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const [created] = await db.insert(events).values(event).returning();
+    return created;
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event || undefined;
+  }
+
+  async updateEventStatus(id: number, status: string): Promise<Event | undefined> {
+    const [updated] = await db.update(events).set({ status }).where(eq(events.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    const [created] = await db.insert(invoices).values(invoice).returning();
+    return created;
+  }
+
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice || undefined;
+  }
+
+  async getInvoiceByEventId(eventId: number): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.eventId, eventId));
+    return invoice || undefined;
+  }
+
+  async createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem> {
+    const [created] = await db.insert(invoiceItems).values(item).returning();
+    return created;
+  }
+
+  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
+    return await db.select().from(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
   }
 }
 

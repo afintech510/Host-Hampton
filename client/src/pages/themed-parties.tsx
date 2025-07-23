@@ -580,18 +580,27 @@ export default function ThemedParties() {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Plan Your Party?</h3>
             <p className="text-gray-600 mb-6">Contact us today to book your magical celebration or learn more about our services!</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/party-booking">
+              <Link href="/party-designer">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all"
                 >
-                  Book Your Party Now
+                  Try New Designer Tool
+                </Button>
+              </Link>
+              <Link href="/party-booking">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-purple-500 text-purple-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full"
+                >
+                  Use Current Form
                 </Button>
               </Link>
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-purple-500 text-purple-500 hover:bg-purple-50 font-bold px-8 py-3 rounded-full"
+                className="border-2 border-gray-300 text-gray-600 hover:bg-gray-50 font-bold px-8 py-3 rounded-full"
                 onClick={() => window.open('tel:(631) 998-9325')}
               >
                 Call (631) 998-9325

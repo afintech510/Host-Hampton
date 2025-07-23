@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import PartyBooking from "@/pages/party-booking";
 import ThemedParties from "@/pages/themed-parties";
+import PartyDesigner from "@/pages/party-designer";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   return (
@@ -13,6 +15,8 @@ function Router() {
       <Route path="/" component={ThemedParties} />
       <Route path="/party-booking" component={PartyBooking} />
       <Route path="/themed-parties" component={ThemedParties} />
+      <Route path="/party-designer" component={PartyDesigner} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

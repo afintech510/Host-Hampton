@@ -1,7 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPartyBookingSchema, insertReviewSchema } from "@shared/schema";
+import { 
+  insertPartyBookingSchema, insertReviewSchema, 
+  insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
+  insertAddonSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema 
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -153,6 +157,232 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: "Failed to fetch party extras" 
       });
+    }
+  });
+
+  // ==== NEW DESIGNER TOOL API ROUTES ====
+
+  // Event Types
+  app.get("/api/event-types", async (req, res) => {
+    try {
+      const eventTypes = await storage.getEventTypes();
+      res.json({ success: true, eventTypes });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch event types" });
+    }
+  });
+
+  app.post("/api/event-types", async (req, res) => {
+    try {
+      const eventType = insertEventTypeSchema.parse(req.body);
+      const created = await storage.createEventType(eventType);
+      res.status(201).json({ success: true, eventType: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create event type" });
+    }
+  });
+
+  // Customers
+  app.get("/api/customers", async (req, res) => {
+    try {
+      const customers = await storage.getCustomers();
+      res.json({ success: true, customers });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch customers" });
+    }
+  });
+
+  app.post("/api/customers", async (req, res) => {
+    try {
+      const customer = insertCustomerSchema.parse(req.body);
+      const created = await storage.createCustomer(customer);
+      res.status(201).json({ success: true, customer: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create customer" });
+    }
+  });
+
+  app.get("/api/customers/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const customer = await storage.getCustomer(id);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "Customer not found" });
+      }
+      res.json({ success: true, customer });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch customer" });
+    }
+  });
+
+  // Packages
+  app.get("/api/packages", async (req, res) => {
+    try {
+      const { eventTypeId } = req.query;
+      const packages = eventTypeId 
+        ? await storage.getPackagesByEventType(parseInt(eventTypeId as string))
+        : await storage.getPackages();
+      res.json({ success: true, packages });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch packages" });
+    }
+  });
+
+  app.post("/api/packages", async (req, res) => {
+    try {
+      const pkg = insertPackageSchema.parse(req.body);
+      const created = await storage.createPackage(pkg);
+      res.status(201).json({ success: true, package: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create package" });
+    }
+  });
+
+  // Add-ons
+  app.get("/api/addons", async (req, res) => {
+    try {
+      const addons = await storage.getAddons();
+      res.json({ success: true, addons });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch add-ons" });
+    }
+  });
+
+  app.post("/api/addons", async (req, res) => {
+    try {
+      const addon = insertAddonSchema.parse(req.body);
+      const created = await storage.createAddon(addon);
+      res.status(201).json({ success: true, addon: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create add-on" });
+    }
+  });
+
+  // Events (Designer Tool Events)
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      res.json({ success: true, events });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch events" });
+    }
+  });
+
+  app.post("/api/events", async (req, res) => {
+    try {
+      const event = insertEventSchema.parse(req.body);
+      const created = await storage.createEvent(event);
+      res.status(201).json({ success: true, event: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create event" });
+    }
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const event = await storage.getEvent(id);
+      if (!event) {
+        return res.status(404).json({ success: false, message: "Event not found" });
+      }
+      res.json({ success: true, event });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch event" });
+    }
+  });
+
+  app.patch("/api/events/:id/status", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      const updated = await storage.updateEventStatus(id, status);
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Event not found" });
+      }
+      res.json({ success: true, event: updated });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to update event status" });
+    }
+  });
+
+  // Invoices
+  app.post("/api/invoices", async (req, res) => {
+    try {
+      const invoice = insertInvoiceSchema.parse(req.body);
+      const created = await storage.createInvoice(invoice);
+      res.status(201).json({ success: true, invoice: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create invoice" });
+    }
+  });
+
+  app.get("/api/invoices/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      const items = await storage.getInvoiceItems(id);
+      res.json({ success: true, invoice: { ...invoice, items } });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.get("/api/events/:eventId/invoice", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const invoice = await storage.getInvoiceByEventId(eventId);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      const items = await storage.getInvoiceItems(invoice.id);
+      res.json({ success: true, invoice: { ...invoice, items } });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch invoice" });
+    }
+  });
+
+  // Invoice Items
+  app.post("/api/invoice-items", async (req, res) => {
+    try {
+      const item = insertInvoiceItemSchema.parse(req.body);
+      const created = await storage.createInvoiceItem(item);
+      res.status(201).json({ success: true, item: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create invoice item" });
+    }
+  });
+
+  app.get("/api/invoices/:invoiceId/items", async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.invoiceId);
+      const items = await storage.getInvoiceItems(invoiceId);
+      res.json({ success: true, items });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch invoice items" });
     }
   });
 

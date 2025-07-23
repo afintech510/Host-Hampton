@@ -1,0 +1,149 @@
+🎉 Kids Party Designer Tool – Functional Overview
+🔮 Purpose
+An interactive booking and quoting tool for kids' parties, rentals, and other services
+
+Parents can design their party, see real-time pricing, and book with a deposit
+
+Admin can adjust quotes, track bookings, add services, and collect payments
+
+💻 FRONTEND: Customer-Facing Party Designer
+1. Welcome Screen
+Dropdown or tile layout for selecting event type:
+
+Kids Birthday Party
+
+Trucker Hat Bar [Mobile]
+
+Permanent Jewelry Appointment
+
+Full Studio Rental
+
+Partial Studio Rental (Cosmetic Services)
+
+Workshop/Class
+
+2. Party Design Wizard (Multi-Step Form)
+Each step stores input to a central form state tied to a booking quote.
+
+🪩 Step 1: Event Info
+Name
+
+Child’s name + age
+
+Desired date + time
+
+Number of guests
+
+Preferred party theme (list from database)
+
+Custom theme input
+
+🎈 Step 2: Package & Add-Ons
+Pull from database:
+
+Base party packages (e.g. Spa, Swiftie, Barbie, Slime, etc.)
+
+Add-ons (candy wall, tinsel, glitter tattoo, photo booth, etc.)
+
+Dynamic pricing updates live as options are selected
+
+💳 Step 3: Billing Info
+Parent name, email, phone
+
+Billing address (for Stripe receipts)
+
+Promo code / gift card (if applicable)
+
+📋 Step 4: Party Summary & Payment
+Line-item breakdown
+
+Auto-calculate:
+
+Subtotal
+
+Sales tax (8.75%)
+
+Total
+
+Deposit (flat $200 or 25%)
+
+Remaining balance
+
+Customer can:
+
+Pay deposit via Stripe
+
+Opt into auto-pay balance day-of or pay manually later
+
+🧠 BACKEND: Admin Dashboard
+🔍 Party & Quote Manager
+Search/filter bookings by name, date, event type
+
+Status filters: Quote | Booked | Deposit Paid | Final Paid | Cancelled
+
+📝 Editable Invoice View
+View invoice generated from front end
+
+Add/remove line items manually
+
+Update guest count, add discounts, waive fees
+
+Update tax or add tip line
+
+Generate & email revised invoice
+
+💰 Payment + Status Tracking
+Track Stripe deposit + balance payments
+
+Add manual payments (Venmo, cash, etc.)
+
+Auto-calculate credit card fee (3%)
+
+🧾 PDF Generator / Print Mode
+Export party details into printable Host Hampton invoice format (see PDF you provided)
+
+Auto-populate from database + inputs
+
+🗄️ DATABASE STRUCTURE (CMS or SQL)
+Tables/Collections
+events
+id	type	date	customer_id	status	created_at
+
+customers
+| id | name | email | phone | billing_address |
+
+packages
+| id | name | price | description | max_guests | image_url |
+
+addons
+| id | name | price | per_guest (bool) | description | image_url |
+
+invoices
+| id | event_id | subtotal | tax | total | deposit | balance_due | cc_fee | notes |
+
+invoice_items
+| id | invoice_id | type (package/addon/custom) | name | qty | unit_price | total |
+
+🧰 Tech Stack Recommendation
+Frontend UI: React + Tailwind or Webflow with custom JS widgets
+
+Form Backend: Firebase / Supabase / Xano for logic + storage
+
+Payments: Stripe Checkout (deposit and balance logic)
+
+Admin Dashboard: Retool, Supabase Studio, or custom React panel
+
+PDF/Invoice: Dynamic generation using jsPDF or serverless Node
+
+Auth: Simple email+password for admin access
+
+✅ Phase 1 Launch Plan (MVP)
+Build database with packages, add-ons, and pricing
+
+Launch 4-step frontend party builder with live price calc
+
+Integrate Stripe for deposit collection
+
+Admin view with edit & resend invoice capability
+
+Export/print invoice in branded format

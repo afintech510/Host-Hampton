@@ -2,7 +2,15 @@
 
 ## Overview
 
-This is a full-stack party booking application built for "Host Hampton" - a children's party planning service. The application features a modern React frontend with both a marketing landing page and a step-by-step booking form, plus an Express.js backend with database integration. The marketing page showcases themed party options and funnels users to the detailed booking form to capture party information including themes, add-ons, child details, and contact information.
+This is a comprehensive party booking and management platform built for "Host Hampton" - a children's party planning service. The application features:
+
+1. **Marketing Landing Page**: Showcases themed party options with service tiles and contact modules
+2. **Legacy Booking Form**: Original multi-step form for party bookings  
+3. **Kids Party Designer Tool**: New interactive booking system with event type selection and real-time pricing
+4. **Admin Dashboard**: Complete management system for tracking bookings, quotes, payments, and inventory
+5. **Database Integration**: Full PostgreSQL schema supporting both legacy and new management systems
+
+The platform serves as both a customer-facing booking tool and a comprehensive business management solution.
 
 ## User Preferences
 
@@ -38,25 +46,50 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Database Schema (`shared/schema.ts`)
+**Legacy Tables:**
 - **Users Table**: Basic user authentication (currently unused in main flow)
-- **Party Bookings Table**: Comprehensive party booking information including:
-  - Party details (date, time, theme, add-ons)
-  - Child information (name, age, guest count)
-  - Food preferences (meal choice, cupcake flavor)
-  - Parent contact details and address
-  - Total cost estimate
+- **Party Bookings Table**: Original booking system data
+- **Reviews, Party Themes, Party Extras**: Supporting data for legacy system
+
+**New Management System Tables:**
+- **Event Types**: Categorizes different service types (Birthday Party, Trucker Hat Bar, etc.)
+- **Customers**: Customer information with billing details
+- **Packages**: Service packages with pricing and event type associations
+- **Addons**: Additional services with per-guest or flat pricing options
+- **Events**: Core event/booking records with status tracking
+- **Invoices**: Financial tracking with tax, deposits, and balance calculations
+- **Invoice Items**: Line-item breakdown for detailed billing
 
 ### API Endpoints (`server/routes.ts`)
+**Legacy Endpoints:**
 - `POST /api/party-bookings`: Creates new party booking
 - `GET /api/party-bookings`: Retrieves all bookings (admin function)
+- `GET /api/reviews/featured`: Fetches featured customer reviews
+
+**New Management System Endpoints:**
+- `GET/POST /api/event-types`: Event type management
+- `GET/POST /api/customers`: Customer management with individual lookups
+- `GET/POST /api/packages`: Package management with event type filtering
+- `GET/POST /api/addons`: Add-on service management
+- `GET/POST /api/events`: Event/booking management with status updates
+- `GET/POST /api/invoices`: Invoice management with item details
+- `GET/POST /api/invoice-items`: Line-item management for invoices
 
 ### Frontend Components
-- **Landing Page**: Urban Air-inspired themed parties marketing page with hero section, benefits, theme showcase, social proof, and multiple CTAs
-- **Multi-step Form**: 8-step party booking process with progress tracking
-- **Step Components**: Modular form steps for different booking aspects
-- **UI Components**: Comprehensive shadcn/ui component library
-- **Custom Hooks**: Form management and API integration hooks
-- **Custom Images**: User-provided themed images for form steps (Allie welcome, party neon, horn, birthday star)
+**Landing Page (`/themed-parties`)**: Marketing page with hero section, service tiles, contact modules, and navigation to both booking systems
+
+**Legacy Booking System (`/party-booking`)**: Original 8-step multi-step form with progress tracking and payment integration
+
+**New Management System:**
+- **Party Designer Tool (`/party-designer`)**: Interactive event type selection with detailed service options
+- **Admin Dashboard (`/admin`)**: Comprehensive management interface with:
+  - Booking and quote tracking with status management
+  - Package and add-on inventory management
+  - Payment tracking and invoice generation
+  - Customer management and communication tools
+  - Real-time stats and financial reporting
+
+**Shared Components**: shadcn/ui component library, custom hooks, form management, and API integration utilities
 
 ### Storage Layer (`server/storage.ts`)
 - **Interface-based Design**: IStorage interface for storage abstraction
