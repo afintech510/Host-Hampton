@@ -11,6 +11,10 @@ import { CustomDateTimeStep } from "@/components/party-form/steps/custom-date-ti
 import { CustomAddonsStep } from "@/components/party-form/steps/custom-addons-step";
 import { CustomContactStep } from "@/components/party-form/steps/custom-contact-step";
 import { CustomInvoiceStep } from "@/components/party-form/steps/custom-invoice-step";
+import { JewelryPiecesStep } from "@/components/party-form/steps/jewelry-pieces-step";
+import { JewelryPeopleCountStep } from "@/components/party-form/steps/jewelry-people-count-step";
+import { JewelryDateTimeStep } from "@/components/party-form/steps/jewelry-date-time-step";
+import { JewelryContactStep } from "@/components/party-form/steps/jewelry-contact-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
 import { AddonsStep } from "@/components/party-form/steps/addons-step";
 import { ChildDetailsStep } from "@/components/party-form/steps/child-details-step";
@@ -26,6 +30,11 @@ const TOTAL_STEPS = 9;
 // Custom flow for DIY Party and Private Event (6 steps)
 const isCustomFlow = (eventType: string) => {
   return eventType === "diy-party" || eventType === "private-event";
+};
+
+// Permanent Jewelry flow (5 steps)
+const isJewelryFlow = (eventType: string) => {
+  return eventType === "permanent-jewelry";
 };
 
 export default function BookEvent() {
@@ -46,7 +55,9 @@ export default function BookEvent() {
   };
 
   const renderStep = () => {
-    const customFlow = formData.eventType ? isCustomFlow(formData.eventType) : false;
+    const eventType = formData.eventType || "";
+    const customFlow = eventType ? isCustomFlow(eventType) : false;
+    const jewelryFlow = eventType ? isJewelryFlow(eventType) : false;
     
     switch (currentStep) {
       case 1:
@@ -65,6 +76,17 @@ export default function BookEvent() {
         if (customFlow) {
           return (
             <EventDetailsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry flow
+        if (jewelryFlow) {
+          return (
+            <JewelryPiecesStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -92,6 +114,17 @@ export default function BookEvent() {
             />
           );
         }
+        // Permanent Jewelry flow: People count
+        if (jewelryFlow) {
+          return (
+            <JewelryPeopleCountStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         return (
           <ThemeStep
             formData={formData}
@@ -105,6 +138,17 @@ export default function BookEvent() {
         if (customFlow) {
           return (
             <CustomAddonsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry flow: Date/Time preference
+        if (jewelryFlow) {
+          return (
+            <JewelryDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -128,6 +172,17 @@ export default function BookEvent() {
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry flow: Contact & Submit
+        if (jewelryFlow) {
+          return (
+            <JewelryContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={submitBooking}
               onBack={handlePreviousStep}
             />
           );
@@ -188,7 +243,11 @@ export default function BookEvent() {
       <FormHeader currentStep={currentStep} onBack={handlePreviousStep} />
       <ProgressBar 
         currentStep={currentStep} 
-        totalSteps={formData.eventType && isCustomFlow(formData.eventType) ? 6 : TOTAL_STEPS} 
+        totalSteps={
+          formData.eventType && isCustomFlow(formData.eventType) ? 6 : 
+          formData.eventType && isJewelryFlow(formData.eventType) ? 5 : 
+          TOTAL_STEPS
+        } 
       />
       
       <main className="flex-1 flex items-center justify-center px-6 py-8">
