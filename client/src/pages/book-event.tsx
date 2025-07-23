@@ -6,7 +6,9 @@ import { StepContainer } from "@/components/party-form/step-container";
 import { WelcomeStep } from "@/components/party-form/steps/welcome-step";
 import { EventTypeStep } from "@/components/party-form/steps/event-type-step";
 import { DateTimeStep } from "@/components/party-form/steps/date-time-step";
+import { EventDetailsStep } from "@/components/party-form/steps/event-details-step";
 import { CustomDateTimeStep } from "@/components/party-form/steps/custom-date-time-step";
+import { CustomAddonsStep } from "@/components/party-form/steps/custom-addons-step";
 import { CustomContactStep } from "@/components/party-form/steps/custom-contact-step";
 import { CustomInvoiceStep } from "@/components/party-form/steps/custom-invoice-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
@@ -21,7 +23,7 @@ import { HelpCircle, MessageCircle } from "lucide-react";
 
 const TOTAL_STEPS = 9;
 
-// Custom flow for DIY Party and Private Event
+// Custom flow for DIY Party and Private Event (6 steps)
 const isCustomFlow = (eventType: string) => {
   return eventType === "diy-party" || eventType === "private-event";
 };
@@ -62,7 +64,7 @@ export default function BookEvent() {
         // Custom flow for DIY Party and Private Event
         if (customFlow) {
           return (
-            <CustomDateTimeStep
+            <EventDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -79,10 +81,10 @@ export default function BookEvent() {
           />
         );
       case 4:
-        // Custom flow: Contact step
+        // Custom flow: Date/Time step
         if (customFlow) {
           return (
-            <CustomContactStep
+            <CustomDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -99,14 +101,14 @@ export default function BookEvent() {
           />
         );
       case 5:
-        // Custom flow: Invoice step
+        // Custom flow: Add-ons step
         if (customFlow) {
           return (
-            <CustomInvoiceStep
+            <CustomAddonsStep
               formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
-              onSubmit={submitBooking}
-              isSubmitting={isSubmitting}
             />
           );
         }
@@ -119,6 +121,17 @@ export default function BookEvent() {
           />
         );
       case 6:
+        // Custom flow: Contact step
+        if (customFlow) {
+          return (
+            <CustomContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         return (
           <ChildDetailsStep
             formData={formData}
@@ -128,6 +141,17 @@ export default function BookEvent() {
           />
         );
       case 7:
+        // Custom flow: Invoice step
+        if (customFlow) {
+          return (
+            <CustomInvoiceStep
+              formData={formData}
+              onBack={handlePreviousStep}
+              onSubmit={submitBooking}
+              isSubmitting={isSubmitting}
+            />
+          );
+        }
         return (
           <FoodStep
             formData={formData}
@@ -164,7 +188,7 @@ export default function BookEvent() {
       <FormHeader currentStep={currentStep} onBack={handlePreviousStep} />
       <ProgressBar 
         currentStep={currentStep} 
-        totalSteps={formData.eventType && isCustomFlow(formData.eventType) ? 5 : TOTAL_STEPS} 
+        totalSteps={formData.eventType && isCustomFlow(formData.eventType) ? 6 : TOTAL_STEPS} 
       />
       
       <main className="flex-1 flex items-center justify-center px-6 py-8">

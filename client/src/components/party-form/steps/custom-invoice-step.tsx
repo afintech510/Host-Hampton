@@ -11,6 +11,15 @@ interface CustomInvoiceStepProps {
 }
 
 export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: CustomInvoiceStepProps) {
+  // Add-ons pricing
+  const addons = [
+    { id: "photobooth", name: "Photobooth", price: 150 },
+    { id: "candy-wall", name: "Candy Wall", price: 100 },
+    { id: "trucker-hat-bar", name: "Trucker Hat Bar", price: 200 },
+    { id: "permanent-jewelry", name: "Permanent Jewelry", price: 250 },
+    { id: "toddler-play-area", name: "Toddler Soft Play Area", price: 125 }
+  ];
+
   // Calculate pricing based on event type
   const getEventPricing = () => {
     switch (formData.eventType) {
@@ -36,8 +45,17 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
   };
 
   const pricing = getEventPricing();
-  const tax = Math.round(pricing.basePrice * 0.08); // 8% tax
-  const total = pricing.basePrice + tax;
+  
+  // Calculate add-ons total
+  const selectedAddons = formData.selectedAddons || [];
+  const addonsTotal = selectedAddons.reduce((total: number, addonId: string) => {
+    const addon = addons.find(a => a.id === addonId);
+    return total + (addon?.price || 0);
+  }, 0);
+
+  const subtotal = pricing.basePrice + addonsTotal;
+  const tax = Math.round(subtotal * 0.08); // 8% tax
+  const total = subtotal + tax;
   const deposit = Math.round(total * 0.5); // 50% deposit
 
   const formatEventType = (type: string) => {
@@ -123,6 +141,25 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
               </div>
               <p className="font-medium">${pricing.basePrice}.00</p>
             </div>
+            
+            {selectedAddons.length > 0 && (
+              <>
+                {selectedAddons.map((addonId: string) => {
+                  const addon = addons.find(a => a.id === addonId);
+                  if (!addon) return null;
+                  return (
+                    <div key={addonId} className="flex justify-between text-sm">
+                      <p className="text-gray-600">{addon.name}</p>
+                      <p className="text-gray-600">${addon.price}.00</p>
+                    </div>
+                  );
+                })}
+                <div className="flex justify-between font-medium pt-2 border-t border-gray-200">
+                  <p>Subtotal</p>
+                  <p>${subtotal}.00</p>
+                </div>
+              </>
+            )}
             
             <div className="flex justify-between text-sm">
               <p className="text-gray-600">Tax (8%)</p>
