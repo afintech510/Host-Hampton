@@ -48,6 +48,7 @@ export const partyThemes = pgTable("party_themes", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
+  price: integer("price").default(0).notNull(), // Price in cents
   icon: text("icon").notNull(),
   color: text("color").notNull(),
   active: boolean("active").default(true).notNull(),

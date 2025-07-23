@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 - **Users Table**: Basic user authentication (currently unused in main flow)
 - **Party Bookings Table**: Original booking system data
 - **Reviews, Party Themes, Party Extras**: Supporting data for legacy system
+  - **Party Themes**: Now includes price field (in cents) for theme-based pricing
 
 **New Management System Tables:**
 - **Event Types**: Categorizes different service types (Birthday Party, Trucker Hat Bar, etc.)

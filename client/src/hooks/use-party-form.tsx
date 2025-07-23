@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { InsertPartyBooking } from "@shared/schema";
@@ -84,15 +84,32 @@ export function usePartyForm() {
   const [formData, setFormData] = useState<Partial<FormData>>({});
   const { toast } = useToast();
 
+  // Fetch themes for pricing calculation
+  const { data: themes = [] } = useQuery({
+    queryKey: ["/api/party-themes"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/party-themes");
+      const data = await response.json();
+      return data.success ? data.themes : [];
+    },
+  });
+
   const calculateTotal = (data: Partial<FormData>) => {
     const basePrice = 400; // Base party package price
+    
+    // Add theme price
+    const selectedTheme = themes.find((theme: any) => theme.name === data.partyTheme);
+    const themePrice = selectedTheme ? selectedTheme.price / 100 : 0; // Convert cents to dollars
+    
+    // Add addon prices
     const addonTotal = (data.partyAddons || []).reduce(
       (total: number, addon: string) => {
         return total + (ADDON_PRICES[addon] || 0);
       },
       0,
     );
-    return basePrice + addonTotal;
+    
+    return basePrice + themePrice + addonTotal;
   };
 
   const submitBookingMutation = useMutation({

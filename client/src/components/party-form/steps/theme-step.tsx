@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import partyTimeImage from "@assets/image_1752579930605.png";
 
 interface ThemeStepProps {
@@ -11,20 +13,28 @@ interface ThemeStepProps {
   onBack: () => void;
 }
 
-const themes = [
-  { value: "slime", label: "Slime Party", emoji: "🧪" },
-  { value: "taylor-swift", label: "Taylor Swift", emoji: "🎤" },
-  { value: "barbie", label: "Barbie", emoji: "💗" },
-  { value: "spa", label: "Spa Party", emoji: "🧘‍♀️" },
-  { value: "unicorn", label: "Unicorn Magic", emoji: "🦄" },
-  { value: "trucker-hat", label: "Trucker Hat / Pouch", emoji: "🧢" },
-  { value: "sweets-treats", label: "Sweets & Treats", emoji: "🍭" },
-  { value: "toddler", label: "Toddler", emoji: "👶" },
-  { value: "custom", label: "Custom Theme", emoji: "🎨" },
-];
+interface PartyTheme {
+  id: number;
+  name: string;
+  description: string;
+  price: number; // price in cents
+  icon: string;
+  color: string;
+  active: boolean;
+}
 
 export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeStepProps) {
   const [partyTheme, setPartyTheme] = useState(formData.partyTheme || "");
+
+  // Fetch themes from database
+  const { data: themes = [], isLoading } = useQuery({
+    queryKey: ["/api/party-themes"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/party-themes");
+      const data = await response.json();
+      return data.success ? data.themes : [];
+    },
+  });
 
   const handleNext = () => {
     updateFormData({ partyTheme });
@@ -32,6 +42,15 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
   };
 
   const isValid = partyTheme;
+
+  if (isLoading) {
+    return (
+      <div className="text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-pink-300 border-t-transparent rounded-full mx-auto mb-4" />
+        <p className="text-gray-600">Loading themes...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="text-center">
@@ -49,15 +68,25 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
 
       <div className="space-y-4 mb-6 text-left">
         <RadioGroup value={partyTheme} onValueChange={setPartyTheme} className="space-y-4">
-          {themes.map((theme) => (
+          {themes.map((theme: PartyTheme) => (
             <div
-              key={theme.value}
+              key={theme.id}
               className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors"
             >
-              <RadioGroupItem value={theme.value} id={theme.value} className="mr-4" />
-              <Label htmlFor={theme.value} className="flex items-center cursor-pointer flex-1">
-                <span className="text-2xl mr-3">{theme.emoji}</span>
-                <span className="text-lg font-medium">{theme.label}</span>
+              <RadioGroupItem value={theme.name} id={theme.name} className="mr-4" />
+              <Label htmlFor={theme.name} className="flex items-center cursor-pointer flex-1">
+                <span className="text-2xl mr-3">{theme.icon}</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-medium">{theme.name}</span>
+                    {theme.price > 0 && (
+                      <span className="text-coral font-semibold">
+                        +${(theme.price / 100).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{theme.description}</p>
+                </div>
               </Label>
             </div>
           ))}
