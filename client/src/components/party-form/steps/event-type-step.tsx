@@ -10,7 +10,7 @@ interface EventTypeStepProps {
 
 const eventTypes = [
   {
-    id: "kids-birthday",
+    id: "birthday-party",
     title: "Kids Birthday Party"
   },
   {
