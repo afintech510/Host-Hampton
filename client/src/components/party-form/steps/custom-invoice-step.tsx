@@ -1,0 +1,176 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Calendar, Clock, User, Mail, Phone, MapPin } from "lucide-react";
+
+interface CustomInvoiceStepProps {
+  formData: any;
+  onBack: () => void;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+}
+
+export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: CustomInvoiceStepProps) {
+  // Calculate pricing based on event type
+  const getEventPricing = () => {
+    switch (formData.eventType) {
+      case "diy-party":
+        return {
+          basePrice: 250,
+          description: "DIY Party Package",
+          details: "Includes studio space, basic supplies, and 2-hour rental"
+        };
+      case "private-event":
+        return {
+          basePrice: 400,
+          description: "Private Event Package", 
+          details: "Exclusive venue access with full amenities"
+        };
+      default:
+        return {
+          basePrice: 300,
+          description: "Custom Event Package",
+          details: "Tailored experience for your special event"
+        };
+    }
+  };
+
+  const pricing = getEventPricing();
+  const tax = Math.round(pricing.basePrice * 0.08); // 8% tax
+  const total = pricing.basePrice + tax;
+  const deposit = Math.round(total * 0.5); // 50% deposit
+
+  const formatEventType = (type: string) => {
+    return type.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const formatDateTime = () => {
+    if (formData.dateChoice === "unsure") {
+      return "Date & Time: To be determined";
+    }
+    
+    if (formData.partyDate && formData.startTime && formData.endTime) {
+      const date = new Date(formData.partyDate).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      return `${date} from ${formData.startTime} to ${formData.endTime}`;
+    }
+    
+    return "Date & Time: Not specified";
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center space-y-3">
+        <div className="w-20 h-20 bg-gradient-to-br from-pink-100 to-orange-100 rounded-full mx-auto flex items-center justify-center">
+          <div className="text-2xl">💰</div>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900">
+          Event Quote
+        </h2>
+        <p className="text-gray-600">
+          Review your event details and pricing
+        </p>
+      </div>
+
+      <Card className="border-2 border-gray-200">
+        <CardHeader className="bg-pink-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MapPin className="h-5 w-5 text-pink-400" />
+            Host Hampton - 295 Montauk Hwy, Speonk, NY 11972
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-gray-400 mt-1" />
+              <div>
+                <p className="font-medium">{formData.customerName}</p>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    {formData.customerEmail}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    {formData.customerPhone}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-gray-400 mt-1" />
+              <div>
+                <p className="font-medium">{formatEventType(formData.eventType)}</p>
+                <p className="text-sm text-gray-600">{formatDateTime()}</p>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <div>
+                <p className="font-medium">{pricing.description}</p>
+                <p className="text-sm text-gray-600">{pricing.details}</p>
+              </div>
+              <p className="font-medium">${pricing.basePrice}.00</p>
+            </div>
+            
+            <div className="flex justify-between text-sm">
+              <p className="text-gray-600">Tax (8%)</p>
+              <p className="text-gray-600">${tax}.00</p>
+            </div>
+            
+            <Separator />
+            
+            <div className="flex justify-between text-lg font-bold">
+              <p>Total</p>
+              <p>${total}.00</p>
+            </div>
+            
+            <div className="bg-pink-50 p-4 rounded-xl">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium text-pink-800">Reservation Deposit (50%)</p>
+                  <p className="text-sm text-pink-600">Remaining balance due before event</p>
+                </div>
+                <p className="text-xl font-bold text-pink-800">${deposit}.00</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="bg-blue-50 p-4 rounded-xl">
+        <p className="text-sm text-blue-800">
+          <strong>Next Steps:</strong> After payment, we'll contact you within 24 hours to finalize event details and discuss any special requirements.
+        </p>
+      </div>
+
+      <div className="flex space-x-3 pt-4">
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+        >
+          Back
+        </Button>
+        <Button 
+          onClick={onSubmit}
+          disabled={isSubmitting}
+          className="flex-1 bg-pink-400 hover:bg-pink-500 text-white disabled:bg-gray-200 disabled:text-gray-400"
+        >
+          {isSubmitting ? "Processing..." : "Pay Reservation Deposit"}
+        </Button>
+      </div>
+    </div>
+  );
+}
