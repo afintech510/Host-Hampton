@@ -19,6 +19,10 @@ import { WorkshopDetailsStep } from "@/components/party-form/steps/workshop-deta
 import { WorkshopScheduleStep } from "@/components/party-form/steps/workshop-schedule-step";
 import { WorkshopAddonsStep } from "@/components/party-form/steps/workshop-addons-step";
 import { WorkshopInvoiceStep } from "@/components/party-form/steps/workshop-invoice-step";
+import { StudioPurposeStep } from "@/components/party-form/steps/studio-purpose-step";
+import { StudioClientsStep } from "@/components/party-form/steps/studio-clients-step";
+import { StudioDateTimeStep } from "@/components/party-form/steps/studio-datetime-step";
+import { StudioContactStep } from "@/components/party-form/steps/studio-contact-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
 import { AddonsStep } from "@/components/party-form/steps/addons-step";
 import { ChildDetailsStep } from "@/components/party-form/steps/child-details-step";
@@ -46,6 +50,11 @@ const isWorkshopFlow = (eventType: string) => {
   return eventType === "workshop";
 };
 
+// Studio Rental flow (4 steps)
+const isStudioFlow = (eventType: string) => {
+  return eventType === "studio-rental";
+};
+
 export default function BookEvent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
@@ -68,6 +77,7 @@ export default function BookEvent() {
     const customFlow = eventType ? isCustomFlow(eventType) : false;
     const jewelryFlow = eventType ? isJewelryFlow(eventType) : false;
     const workshopFlow = eventType ? isWorkshopFlow(eventType) : false;
+    const studioFlow = eventType ? isStudioFlow(eventType) : false;
     
     switch (currentStep) {
       case 1:
@@ -108,6 +118,17 @@ export default function BookEvent() {
         if (workshopFlow) {
           return (
             <WorkshopDetailsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental flow
+        if (studioFlow) {
+          return (
+            <StudioPurposeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -157,6 +178,17 @@ export default function BookEvent() {
             />
           );
         }
+        // Studio Rental flow: Client count
+        if (studioFlow) {
+          return (
+            <StudioClientsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         return (
           <ThemeStep
             formData={formData}
@@ -192,6 +224,17 @@ export default function BookEvent() {
         if (workshopFlow) {
           return (
             <WorkshopAddonsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental flow: Date/Time
+        if (studioFlow) {
+          return (
+            <StudioDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -237,6 +280,17 @@ export default function BookEvent() {
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental flow: Contact & Submit
+        if (studioFlow) {
+          return (
+            <StudioContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={submitBooking}
               onBack={handlePreviousStep}
             />
           );
@@ -312,6 +366,7 @@ export default function BookEvent() {
           formData.eventType && isCustomFlow(formData.eventType) ? 6 : 
           formData.eventType && isJewelryFlow(formData.eventType) ? 5 : 
           formData.eventType && isWorkshopFlow(formData.eventType) ? 6 : 
+          formData.eventType && isStudioFlow(formData.eventType) ? 4 : 
           TOTAL_STEPS
         } 
       />
