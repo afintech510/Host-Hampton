@@ -22,7 +22,7 @@ export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
             </Button>
           )}
           <img 
-            src="/attached_assets/host-hampton-logo_1920_1753312301680.png" 
+            src="/images/host-hampton-logo.png" 
             alt="Host Hampton" 
             className="h-6 object-contain"
           />

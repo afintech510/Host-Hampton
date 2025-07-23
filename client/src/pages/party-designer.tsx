@@ -120,7 +120,7 @@ const PartyDesigner = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img 
-                src="/attached_assets/host-hampton-logo_1920_1753312301680.png" 
+                src="/images/host-hampton-logo.png" 
                 alt="Host Hampton" 
                 className="h-8 object-contain"
               />

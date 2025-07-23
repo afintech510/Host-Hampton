@@ -208,7 +208,7 @@ export default function ThemedParties() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
               <img 
-                src="/attached_assets/host-hampton-logo_1920_1753312301680.png" 
+                src="/images/host-hampton-logo.png" 
                 alt="Host Hampton" 
                 className="h-20 md:h-24 mx-auto object-contain"
               />
