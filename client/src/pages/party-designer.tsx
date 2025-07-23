@@ -119,11 +119,11 @@ const PartyDesigner = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="text-2xl">✦</div>
-              <div>
-                <div className="text-[hsl(155,40%,35%)] text-sm font-light italic">Host</div>
-                <div className="text-[hsl(155,40%,25%)] text-lg font-bold tracking-wide">HAMPTON</div>
-              </div>
+              <img 
+                src="/attached_assets/host-hampton-logo_1920_1753312301680.png" 
+                alt="Host Hampton" 
+                className="h-8 object-contain"
+              />
             </div>
             <Link href="/">
               <Button variant="ghost" className="text-[hsl(155,40%,25%)] hover:bg-[hsl(15,25%,90%)]">← Back to Home</Button>

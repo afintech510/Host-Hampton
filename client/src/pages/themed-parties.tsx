@@ -207,8 +207,11 @@ export default function ThemedParties() {
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
-              <div className="text-[hsl(155,40%,35%)] text-3xl md:text-4xl font-light italic mb-2">Host</div>
-              <div className="text-[hsl(155,40%,25%)] text-4xl md:text-5xl font-bold tracking-wide">HAMPTON</div>
+              <img 
+                src="/attached_assets/host-hampton-logo_1920_1753312301680.png" 
+                alt="Host Hampton" 
+                className="h-20 md:h-24 mx-auto object-contain"
+              />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               Design Your

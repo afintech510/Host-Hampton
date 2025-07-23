@@ -21,7 +21,11 @@ export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
               <ChevronLeft className="w-5 h-5" />
             </Button>
           )}
-          <h1 className="text-lg font-semibold text-gray-800">Host Hampton</h1>
+          <img 
+            src="/attached_assets/host-hampton-logo_1920_1753312301680.png" 
+            alt="Host Hampton" 
+            className="h-6 object-contain"
+          />
         </div>
         <div className="flex items-center space-x-2">
           <Button
