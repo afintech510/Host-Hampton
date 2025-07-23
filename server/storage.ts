@@ -43,6 +43,7 @@ export interface IStorage {
   updateEventStatus(id: number, status: string): Promise<Event | undefined>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   getInvoice(id: number): Promise<Invoice | undefined>;
+  getInvoices(): Promise<Invoice[]>;
   getInvoiceByEventId(eventId: number): Promise<Invoice | undefined>;
   createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem>;
   getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]>;
@@ -52,7 +53,7 @@ export interface IStorage {
   getTimeSlots(date?: string): Promise<any[]>;
   createTimeSlot(slot: any): Promise<any>;
   getStaff(): Promise<any[]>;
-  createStaff(staff: any): Promise<any>;
+  createStaffMember(staff: any): Promise<any>;
   createLead(lead: any): Promise<any>;
   getLeads(): Promise<any[]>;
   createPayment(payment: any): Promise<any>;
@@ -196,7 +197,54 @@ export class MemStorage implements IStorage {
   }
 
   async getEvents(): Promise<Event[]> {
-    return [];
+    // Sample event data for demonstration
+    return [
+      {
+        id: 1,
+        eventTypeId: 1,
+        customerId: 1,
+        eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        guestCount: 12,
+        status: "confirmed",
+        notes: "Disney Princess theme, outdoor setup preferred",
+        createdAt: new Date(),
+        // Additional admin dashboard properties
+        eventTime: "2:00 PM",
+        totalAmount: 48600, // $486.00 in cents
+        customerName: "Sarah Smith",
+        eventTypeName: "Birthday Party"
+      } as any,
+      {
+        id: 2,
+        eventTypeId: 3,
+        customerId: 2,
+        eventDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+        guestCount: 8,
+        status: "pending",
+        notes: "First time booking, interested in jewelry options",
+        createdAt: new Date(Date.now() - 86400000), // 1 day ago
+        // Additional admin dashboard properties
+        eventTime: "6:00 PM",
+        totalAmount: 34560, // $345.60 in cents
+        customerName: "Jessica Miller",
+        eventTypeName: "Permanent Jewelry Party"
+      } as any,
+      {
+        id: 3,
+        eventTypeId: 5,
+        customerId: 3,
+        eventDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        guestCount: 20,
+        status: "quote",
+        notes: "Corporate team building event",
+        createdAt: new Date(Date.now() - 172800000), // 2 days ago
+        // Additional admin dashboard properties
+        eventTime: "1:00 PM",
+        totalAmount: 75000, // $750.00 in cents
+        customerName: "Amanda Rodriguez",
+        eventTypeName: "Studio Rental"
+      } as any
+    ];
   }
 
   async createEvent(event: InsertEvent): Promise<Event> {
@@ -231,6 +279,52 @@ export class MemStorage implements IStorage {
     return [];
   }
 
+  async getInvoices(): Promise<Invoice[]> {
+    // Sample invoice data for demonstration
+    return [
+      {
+        id: 1,
+        eventId: 1,
+        subtotal: 45000, // $450.00 in cents
+        tax: 3600, // $36.00 in cents
+        total: 48600, // $486.00 in cents
+        deposit: 15000, // $150.00 in cents
+        balanceDue: 33600, // $336.00 in cents
+        ccFee: 0,
+        notes: "Birthday party for Emma - Disney Princess theme",
+        createdAt: new Date(),
+        // Additional admin dashboard properties
+        invoiceNumber: "INV-001",
+        totalAmount: 48600,
+        taxAmount: 3600,
+        depositAmount: 15000,
+        status: "pending",
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        customerName: "Sarah Smith"
+      } as any,
+      {
+        id: 2,
+        eventId: 2,
+        subtotal: 32000, // $320.00 in cents
+        tax: 2560, // $25.60 in cents
+        total: 34560, // $345.60 in cents
+        deposit: 10000, // $100.00 in cents
+        balanceDue: 24560, // $245.60 in cents
+        ccFee: 0,
+        notes: "Permanent jewelry workshop",
+        createdAt: new Date(Date.now() - 86400000), // 1 day ago
+        // Additional admin dashboard properties
+        invoiceNumber: "INV-002",
+        totalAmount: 34560,
+        taxAmount: 2560,
+        depositAmount: 10000,
+        status: "paid",
+        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
+        customerName: "Jessica Miller"
+      } as any
+    ];
+  }
+
   // Enhanced methods for new functionality (placeholder implementations)
   async createCommunication(communication: any): Promise<any> {
     console.log('Communication logged:', communication);
@@ -246,19 +340,74 @@ export class MemStorage implements IStorage {
   }
 
   async getStaff(): Promise<any[]> {
-    return [];
+    // Sample staff data for demonstration
+    return [
+      {
+        id: 1,
+        name: "Sarah Johnson",
+        role: "Lead Host",
+        hourlyRate: 2500, // $25.00 in cents
+        active: true
+      },
+      {
+        id: 2,
+        name: "Mike Davis",
+        role: "Assistant Host",
+        hourlyRate: 2000, // $20.00 in cents
+        active: true
+      },
+      {
+        id: 3,
+        name: "Emma Wilson",
+        role: "Setup Coordinator",
+        hourlyRate: 1800, // $18.00 in cents
+        active: true
+      }
+    ];
   }
 
-  async createStaff(staff: any): Promise<any> {
-    return staff;
+  async createStaffMember(staff: any): Promise<any> {
+    return { ...staff, id: Date.now() };
   }
 
   async createLead(lead: any): Promise<any> {
-    return lead;
+    return { ...lead, id: Date.now() };
   }
 
   async getLeads(): Promise<any[]> {
-    return [];
+    // Sample lead data for demonstration
+    return [
+      {
+        id: 1,
+        name: "Jessica Miller",
+        email: "jessica@email.com",
+        phone: "(555) 123-4567",
+        source: "website",
+        status: "new",
+        eventType: "Birthday Party",
+        createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+      },
+      {
+        id: 2,
+        name: "Robert Chen",
+        email: "robert@email.com",
+        phone: "(555) 987-6543",
+        source: "referral",
+        status: "contacted",
+        eventType: "Permanent Jewelry Party",
+        createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+      },
+      {
+        id: 3,
+        name: "Amanda Rodriguez",
+        email: "amanda@email.com",
+        phone: "(555) 456-7890",
+        source: "social",
+        status: "quoted",
+        eventType: "Studio Rental",
+        createdAt: new Date(Date.now() - 259200000).toISOString() // 3 days ago
+      }
+    ];
   }
 
   async createPayment(payment: any): Promise<any> {

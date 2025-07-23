@@ -181,6 +181,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Dashboard API Endpoints
+
+  // Events management
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      res.json({ success: true, events });
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch events" 
+      });
+    }
+  });
+
+  app.post("/api/events", async (req, res) => {
+    try {
+      const eventData = req.body;
+      const event = await storage.createEvent(eventData);
+      res.json({ success: true, event });
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create event" 
+      });
+    }
+  });
+
+  // Invoices management
+  app.get("/api/invoices", async (req, res) => {
+    try {
+      const invoices = await storage.getInvoices();
+      res.json({ success: true, invoices });
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch invoices" 
+      });
+    }
+  });
+
+  app.post("/api/invoices", async (req, res) => {
+    try {
+      const invoiceData = req.body;
+      const invoice = await storage.createInvoice(invoiceData);
+      res.json({ success: true, invoice });
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create invoice" 
+      });
+    }
+  });
+
+  // Leads management
+  app.get("/api/leads", async (req, res) => {
+    try {
+      const leads = await storage.getLeads();
+      res.json({ success: true, leads });
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch leads" 
+      });
+    }
+  });
+
+  app.post("/api/leads", async (req, res) => {
+    try {
+      const leadData = req.body;
+      const lead = await storage.createLead(leadData);
+      res.json({ success: true, lead });
+    } catch (error) {
+      console.error("Error creating lead:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create lead" 
+      });
+    }
+  });
+
+  // Staff management
+  app.get("/api/staff", async (req, res) => {
+    try {
+      const staff = await storage.getStaff();
+      res.json({ success: true, staff });
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch staff" 
+      });
+    }
+  });
+
+  app.post("/api/staff", async (req, res) => {
+    try {
+      const staffData = req.body;
+      const staff = await storage.createStaffMember(staffData);
+      res.json({ success: true, staff });
+    } catch (error) {
+      console.error("Error creating staff member:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create staff member" 
+      });
+    }
+  });
+
+
+
   // Get party extras
   app.get("/api/party-extras", async (req, res) => {
     try {
