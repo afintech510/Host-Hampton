@@ -15,6 +15,10 @@ import { JewelryPiecesStep } from "@/components/party-form/steps/jewelry-pieces-
 import { JewelryPeopleCountStep } from "@/components/party-form/steps/jewelry-people-count-step";
 import { JewelryDateTimeStep } from "@/components/party-form/steps/jewelry-date-time-step";
 import { JewelryContactStep } from "@/components/party-form/steps/jewelry-contact-step";
+import { WorkshopDetailsStep } from "@/components/party-form/steps/workshop-details-step";
+import { WorkshopScheduleStep } from "@/components/party-form/steps/workshop-schedule-step";
+import { WorkshopAddonsStep } from "@/components/party-form/steps/workshop-addons-step";
+import { WorkshopInvoiceStep } from "@/components/party-form/steps/workshop-invoice-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
 import { AddonsStep } from "@/components/party-form/steps/addons-step";
 import { ChildDetailsStep } from "@/components/party-form/steps/child-details-step";
@@ -35,6 +39,11 @@ const isCustomFlow = (eventType: string) => {
 // Permanent Jewelry flow (5 steps)
 const isJewelryFlow = (eventType: string) => {
   return eventType === "permanent-jewelry";
+};
+
+// Workshop/Class flow (6 steps)
+const isWorkshopFlow = (eventType: string) => {
+  return eventType === "workshop";
 };
 
 export default function BookEvent() {
@@ -58,6 +67,7 @@ export default function BookEvent() {
     const eventType = formData.eventType || "";
     const customFlow = eventType ? isCustomFlow(eventType) : false;
     const jewelryFlow = eventType ? isJewelryFlow(eventType) : false;
+    const workshopFlow = eventType ? isWorkshopFlow(eventType) : false;
     
     switch (currentStep) {
       case 1:
@@ -87,6 +97,17 @@ export default function BookEvent() {
         if (jewelryFlow) {
           return (
             <JewelryPiecesStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Workshop flow
+        if (workshopFlow) {
+          return (
+            <WorkshopDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -125,6 +146,17 @@ export default function BookEvent() {
             />
           );
         }
+        // Workshop flow: Schedule
+        if (workshopFlow) {
+          return (
+            <WorkshopScheduleStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         return (
           <ThemeStep
             formData={formData}
@@ -149,6 +181,17 @@ export default function BookEvent() {
         if (jewelryFlow) {
           return (
             <JewelryDateTimeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Workshop flow: Add-ons
+        if (workshopFlow) {
+          return (
+            <WorkshopAddonsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -187,6 +230,17 @@ export default function BookEvent() {
             />
           );
         }
+        // Workshop flow: Contact
+        if (workshopFlow) {
+          return (
+            <CustomContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         return (
           <ChildDetailsStep
             formData={formData}
@@ -200,6 +254,17 @@ export default function BookEvent() {
         if (customFlow) {
           return (
             <CustomInvoiceStep
+              formData={formData}
+              onBack={handlePreviousStep}
+              onSubmit={submitBooking}
+              isSubmitting={isSubmitting}
+            />
+          );
+        }
+        // Workshop flow: Invoice step
+        if (workshopFlow) {
+          return (
+            <WorkshopInvoiceStep
               formData={formData}
               onBack={handlePreviousStep}
               onSubmit={submitBooking}
@@ -246,6 +311,7 @@ export default function BookEvent() {
         totalSteps={
           formData.eventType && isCustomFlow(formData.eventType) ? 6 : 
           formData.eventType && isJewelryFlow(formData.eventType) ? 5 : 
+          formData.eventType && isWorkshopFlow(formData.eventType) ? 6 : 
           TOTAL_STEPS
         } 
       />
