@@ -45,6 +45,17 @@ export interface IStorage {
   getInvoiceByEventId(eventId: number): Promise<Invoice | undefined>;
   createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem>;
   getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]>;
+  
+  // Enhanced methods for new functionality
+  createCommunication(communication: any): Promise<any>;
+  getTimeSlots(date?: string): Promise<any[]>;
+  createTimeSlot(slot: any): Promise<any>;
+  getStaff(): Promise<any[]>;
+  createStaff(staff: any): Promise<any>;
+  createLead(lead: any): Promise<any>;
+  getLeads(): Promise<any[]>;
+  createPayment(payment: any): Promise<any>;
+  getPayments(invoiceId?: number): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -210,6 +221,44 @@ export class MemStorage implements IStorage {
   }
 
   async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
+    return [];
+  }
+
+  // Enhanced methods for new functionality (placeholder implementations)
+  async createCommunication(communication: any): Promise<any> {
+    console.log('Communication logged:', communication);
+    return communication;
+  }
+
+  async getTimeSlots(date?: string): Promise<any[]> {
+    return [];
+  }
+
+  async createTimeSlot(slot: any): Promise<any> {
+    return slot;
+  }
+
+  async getStaff(): Promise<any[]> {
+    return [];
+  }
+
+  async createStaff(staff: any): Promise<any> {
+    return staff;
+  }
+
+  async createLead(lead: any): Promise<any> {
+    return lead;
+  }
+
+  async getLeads(): Promise<any[]> {
+    return [];
+  }
+
+  async createPayment(payment: any): Promise<any> {
+    return payment;
+  }
+
+  async getPayments(invoiceId?: number): Promise<any[]> {
     return [];
   }
 }

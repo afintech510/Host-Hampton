@@ -60,6 +60,19 @@ Preferred communication style: Simple, everyday language.
 - **Invoices**: Financial tracking with tax, deposits, and balance calculations
 - **Invoice Items**: Line-item breakdown for detailed billing
 
+**Enhanced Business Management Tables:**
+- **Time Slots**: Calendar and availability management with capacity tracking
+- **Staff**: Employee management with roles and hourly rates
+- **Event Staff Assignments**: Staff scheduling and hours tracking per event
+- **Communications**: Email/SMS tracking with delivery status and provider integration
+- **Campaigns**: Marketing campaign management with targeting and scheduling
+- **Leads**: Lead tracking from source to conversion with pipeline management
+- **Payments**: Payment transaction history with processor integration
+- **Inventory**: Supply and material management with stock levels
+- **Event Inventory Usage**: Cost tracking for supplies used per event
+- **Customer Preferences**: Contact preferences, marketing opt-ins, and special needs
+- **Business Metrics**: Analytics and reporting data for business intelligence
+
 ### API Endpoints (`server/routes.ts`)
 **Legacy Endpoints:**
 - `POST /api/party-bookings`: Creates new party booking
