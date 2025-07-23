@@ -5,23 +5,66 @@ import { useToast } from "@/hooks/use-toast";
 import type { InsertPartyBooking } from "@shared/schema";
 
 interface FormData {
-  partyDate: string;
-  partyTime: string;
-  partyTheme: string;
-  partyAddons: string[];
-  childName: string;
-  childAge: number;
-  guestCount: number;
-  foodChoice: string;
-  cupcakeFlavor: string;
-  parentFirstName: string;
-  parentLastName: string;
-  parentEmail: string;
-  parentPhone: string;
-  address: string;
-  city: string;
-  zipCode: string;
+  // Common fields
+  eventType: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerCompany?: string;
+  
+  // Legacy birthday party fields
+  partyDate?: string;
+  partyTime?: string;
+  partyTheme?: string;
+  partyAddons?: string[];
+  childName?: string;
+  childAge?: number;
+  guestCount?: number;
+  foodChoice?: string;
+  cupcakeFlavor?: string;
+  parentFirstName?: string;
+  parentLastName?: string;
+  parentEmail?: string;
+  parentPhone?: string;
+  address?: string;
+  city?: string;
+  zipCode?: string;
   partyNotes?: string;
+  totalEstimate?: number;
+  
+  // Custom event fields (DIY/Private)
+  eventDescription?: string;
+  adultCount?: number;
+  childrenCount?: number;
+  selectedCustomAddons?: string[];
+  customPreferredDate?: string;
+  customStartTime?: string;
+  customEndTime?: string;
+  
+  // Permanent Jewelry fields
+  selectedJewelryPieces?: string[];
+  jewelryPeopleCount?: number;
+  jewelryPreferredDate?: string;
+  jewelryPreferredTime?: string;
+  
+  // Workshop fields
+  workshopType?: string;
+  workshopDescription?: string;
+  classFormat?: string;
+  expectedAttendees?: number;
+  preferredDate?: string;
+  startTime?: string;
+  selectedWorkshopAddons?: string[];
+  
+  // Studio Rental fields
+  studioPurpose?: string;
+  customStudioPurpose?: string;
+  studioPurposeDescription?: string;
+  studioClientCount?: number;
+  studioGroupType?: string;
+  studioPreferredDate?: string;
+  studioStartTime?: string;
+  studioEndTime?: string;
 }
 
 const ADDON_PRICES: Record<string, number> = {
@@ -53,49 +96,68 @@ export function usePartyForm() {
   };
 
   const submitBookingMutation = useMutation({
-    mutationFn: async (data: InsertPartyBooking) => {
-      const response = await apiRequest("POST", "/api/party-bookings", data);
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/submit-booking", data);
       return response.json();
     },
     onSuccess: (data) => {
-      toast({
-        title: "🎉 Party Booked Successfully!",
-        description: "Redirecting to secure payment...",
-      });
-
-      // Open GoDaddy payment link in popup
-      const paymentUrl =
-        "https://0b55c8c3-d136-4109-9537-5db058a282c7.paylinks.godaddy.com/party-deposit"; // Replace with actual GoDaddy payment link
-      const popup = window.open(
-        paymentUrl,
-        "payment",
-        "width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no",
-      );
-
-      // Check if popup was blocked
-      if (!popup || popup.closed || typeof popup.closed === "undefined") {
+      const eventType = formData.eventType || "";
+      
+      // Check if this is a paid event that needs payment processing
+      const paidEvents = ["birthday-party", "diy-party", "private-event", "workshop"];
+      const isPaidEvent = paidEvents.includes(eventType);
+      
+      if (isPaidEvent && data.data?.invoiceId) {
         toast({
-          title: "Popup Blocked",
-          description:
-            "Please allow popups for payment processing. Redirecting now...",
-          variant: "destructive",
+          title: "🎉 Event Booked Successfully!",
+          description: "Redirecting to secure payment...",
         });
-        // Fallback: redirect in same window after a short delay
-        setTimeout(() => {
-          window.location.href = paymentUrl;
-        }, 2000);
+
+        // Open payment link in popup for paid events
+        const paymentUrl = "https://0b55c8c3-d136-4109-9537-5db058a282c7.paylinks.godaddy.com/party-deposit";
+        const popup = window.open(
+          paymentUrl,
+          "payment",
+          "width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no",
+        );
+
+        // Check if popup was blocked
+        if (!popup || popup.closed || typeof popup.closed === "undefined") {
+          toast({
+            title: "Popup Blocked",
+            description: "Please allow popups for payment processing. Redirecting now...",
+            variant: "destructive",
+          });
+          setTimeout(() => {
+            window.location.href = paymentUrl;
+          }, 2000);
+        } else {
+          // Monitor popup to detect when it's closed
+          const checkClosed = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(checkClosed);
+              toast({
+                title: "Payment Window Closed",
+                description: "Thank you! We'll contact you within 24 hours to confirm your event details.",
+              });
+              // Redirect to home after payment
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 2000);
+            }
+          }, 1000);
+        }
       } else {
-        // Monitor popup to detect when it's closed
-        const checkClosed = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(checkClosed);
-            toast({
-              title: "Payment Window Closed",
-              description:
-                "Thank you! We'll contact you within 24 hours to confirm your party details.",
-            });
-          }
-        }, 1000);
+        // For request-only events (jewelry, studio rental)
+        toast({
+          title: "🎉 Request Submitted Successfully!",
+          description: "We'll contact you within 24 hours to discuss your request.",
+        });
+        
+        // Redirect to confirmation page after a brief delay
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 2000);
       }
     },
     onError: (error) => {
@@ -114,27 +176,24 @@ export function usePartyForm() {
   };
 
   const submitBooking = async () => {
-    const totalEstimate = calculateTotal(formData);
-
-    const bookingData: InsertPartyBooking = {
-      partyDate: formData.partyDate!,
-      partyTime: formData.partyTime!,
-      partyTheme: formData.partyTheme!,
-      partyAddons: formData.partyAddons || [],
-      childName: formData.childName!,
-      childAge: formData.childAge!,
-      guestCount: formData.guestCount!,
-      foodChoice: formData.foodChoice!,
-      cupcakeFlavor: formData.cupcakeFlavor!,
-      parentFirstName: formData.parentFirstName!,
-      parentLastName: formData.parentLastName!,
-      parentEmail: formData.parentEmail!,
-      parentPhone: formData.parentPhone!,
-      address: formData.address!,
-      city: formData.city!,
-      zipCode: formData.zipCode!,
-      partyNotes: formData.partyNotes || "",
-      totalEstimate,
+    const eventType = formData.eventType || "";
+    
+    // Create comprehensive booking data that includes all form fields
+    const bookingData = {
+      // Common fields
+      eventType,
+      customerName: formData.customerName || 
+        (formData.parentFirstName && formData.parentLastName ? 
+          `${formData.parentFirstName} ${formData.parentLastName}` : ""),
+      customerEmail: formData.customerEmail || formData.parentEmail || "",
+      customerPhone: formData.customerPhone || formData.parentPhone || "",
+      customerCompany: formData.customerCompany,
+      
+      // Include all form data for specific flows
+      ...formData,
+      
+      // Calculate totals for legacy flow
+      totalEstimate: eventType === "birthday-party" ? calculateTotal(formData) : undefined,
     };
 
     await submitBookingMutation.mutateAsync(bookingData);

@@ -1,12 +1,12 @@
 import { 
   users, partyBookings, reviews, partyThemes, partyExtras,
-  eventTypes, customers, packages, addons, events, invoices, invoiceItems,
+  eventTypes, customers, packages, addons, events, invoices, invoiceItems, eventCalendar,
   type User, type InsertUser, type PartyBooking, type InsertPartyBooking, 
   type Review, type InsertReview, type PartyTheme, type PartyExtra,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
-  type InvoiceItem, type InsertInvoiceItem
+  type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -31,6 +31,7 @@ export interface IStorage {
   getCustomers(): Promise<Customer[]>;
   createCustomer(customer: InsertCustomer): Promise<Customer>;
   getCustomer(id: number): Promise<Customer | undefined>;
+  getCustomerByEmail(email: string): Promise<Customer | undefined>;
   getPackages(): Promise<Package[]>;
   getPackagesByEventType(eventTypeId: number): Promise<Package[]>;
   createPackage(pkg: InsertPackage): Promise<Package>;
@@ -56,6 +57,8 @@ export interface IStorage {
   getLeads(): Promise<any[]>;
   createPayment(payment: any): Promise<any>;
   getPayments(invoiceId?: number): Promise<any[]>;
+  createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar>;
+  getEventCalendar(): Promise<EventCalendar[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -168,6 +171,10 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async getCustomerByEmail(email: string): Promise<Customer | undefined> {
+    return undefined;
+  }
+
   async getPackages(): Promise<Package[]> {
     return [];
   }
@@ -261,6 +268,14 @@ export class MemStorage implements IStorage {
   async getPayments(invoiceId?: number): Promise<any[]> {
     return [];
   }
+
+  async createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getEventCalendar(): Promise<EventCalendar[]> {
+    return [];
+  }
 }
 
 // Database Storage Implementation
@@ -348,6 +363,11 @@ export class DatabaseStorage implements IStorage {
     return customer || undefined;
   }
 
+  async getCustomerByEmail(email: string): Promise<Customer | undefined> {
+    const [customer] = await db.select().from(customers).where(eq(customers.email, email));
+    return customer || undefined;
+  }
+
   async getPackages(): Promise<Package[]> {
     return await db.select().from(packages).where(eq(packages.active, true));
   }
@@ -411,6 +431,61 @@ export class DatabaseStorage implements IStorage {
 
   async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
     return await db.select().from(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
+  }
+
+  // Enhanced methods for comprehensive business management
+  async createCommunication(communication: any): Promise<any> {
+    // TODO: Implement with communications table
+    return communication;
+  }
+
+  async getTimeSlots(date?: string): Promise<any[]> {
+    // TODO: Implement with timeSlots table
+    return [];
+  }
+
+  async createTimeSlot(slot: any): Promise<any> {
+    // TODO: Implement with timeSlots table
+    return slot;
+  }
+
+  async getStaff(): Promise<any[]> {
+    // TODO: Implement with staff table
+    return [];
+  }
+
+  async createStaff(staff: any): Promise<any> {
+    // TODO: Implement with staff table
+    return staff;
+  }
+
+  async createLead(lead: any): Promise<any> {
+    // TODO: Implement with leads table
+    return lead;
+  }
+
+  async getLeads(): Promise<any[]> {
+    // TODO: Implement with leads table
+    return [];
+  }
+
+  async createPayment(payment: any): Promise<any> {
+    // TODO: Implement with payments table
+    return payment;
+  }
+
+  async getPayments(invoiceId?: number): Promise<any[]> {
+    // TODO: Implement with payments table
+    return [];
+  }
+
+  async createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar> {
+    const [created] = await db.insert(eventCalendar).values(calendarEntry).returning();
+    return created;
+  }
+
+  async getEventCalendar(): Promise<EventCalendar[]> {
+    return await db.select().from(eventCalendar).orderBy(eventCalendar.eventDate);
   }
 }
 

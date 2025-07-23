@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { bookingService } from "./booking-service";
 import { 
   insertPartyBookingSchema, insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
@@ -9,7 +10,41 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Create a new party booking
+  
+  // NEW COMPREHENSIVE BOOKING SUBMISSION ENDPOINT
+  app.post("/api/submit-booking", async (req, res) => {
+    try {
+      console.log("Received booking submission:", req.body);
+      
+      const result = await bookingService.processBooking(req.body);
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message,
+          data: {
+            customerId: result.customerId,
+            eventId: result.eventId,
+            invoiceId: result.invoiceId,
+            stripeInvoiceUrl: result.stripeInvoiceUrl
+          }
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.error || "Failed to process booking"
+        });
+      }
+    } catch (error) {
+      console.error("Booking submission error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error processing booking"
+      });
+    }
+  });
+
+  // Create a new party booking (LEGACY ENDPOINT)
   app.post("/api/party-bookings", async (req, res) => {
     try {
       const validatedData = insertPartyBookingSchema.parse(req.body);

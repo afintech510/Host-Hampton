@@ -270,6 +270,23 @@ export const customerPreferences = pgTable("customer_preferences", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Event calendar for tracking confirmed/booked events
+export const eventCalendar = pgTable("event_calendar", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull(),
+  title: text("title").notNull(),
+  eventDate: timestamp("event_date").notNull(),
+  startTime: text("start_time").notNull(), // "14:00"
+  endTime: text("end_time").notNull(), // "18:00"
+  eventType: text("event_type").notNull(), // "birthday", "private-event", "workshop", etc.
+  customerName: text("customer_name").notNull(),
+  guestCount: integer("guest_count"),
+  location: text("location").default("Host Hampton Studio").notNull(),
+  status: text("status").default("confirmed").notNull(), // "confirmed", "cancelled", "completed"
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Business analytics and reporting
 export const businessMetrics = pgTable("business_metrics", {
   id: serial("id").primaryKey(),
@@ -347,6 +364,7 @@ export const insertInventorySchema = createInsertSchema(inventory).omit({ id: tr
 export const insertEventInventoryUsageSchema = createInsertSchema(eventInventoryUsage).omit({ id: true });
 export const insertCustomerPreferencesSchema = createInsertSchema(customerPreferences).omit({ id: true, updatedAt: true });
 export const insertBusinessMetricSchema = createInsertSchema(businessMetrics).omit({ id: true });
+export const insertEventCalendarSchema = createInsertSchema(eventCalendar).omit({ id: true, createdAt: true });
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -429,6 +447,10 @@ export const customerPreferencesRelations = relations(customerPreferences, ({ on
   customer: one(customers, { fields: [customerPreferences.customerId], references: [customers.id] }),
 }));
 
+export const eventCalendarRelations = relations(eventCalendar, ({ one }) => ({
+  event: one(events, { fields: [eventCalendar.eventId], references: [events.id] }),
+}));
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertPartyBooking = z.infer<typeof insertPartyBookingSchema>;
@@ -479,3 +501,5 @@ export type InsertCustomerPreferences = z.infer<typeof insertCustomerPreferences
 export type CustomerPreferences = typeof customerPreferences.$inferSelect;
 export type InsertBusinessMetric = z.infer<typeof insertBusinessMetricSchema>;
 export type BusinessMetric = typeof businessMetrics.$inferSelect;
+export type InsertEventCalendar = z.infer<typeof insertEventCalendarSchema>;
+export type EventCalendar = typeof eventCalendar.$inferSelect;
