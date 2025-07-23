@@ -53,7 +53,8 @@ Preferred communication style: Simple, everyday language.
   - **Party Themes**: Now includes price field (in cents) for theme-based pricing
 
 **New Management System Tables:**
-- **Event Types**: Categorizes different service types (Birthday Party, Trucker Hat Bar, etc.)
+- **Event Types**: Categorizes different service types - now populated with 7 active event types:
+  - Birthday Party, Adult Workshop/Classes, Permanent Jewelry Party, Permanent Jewelry Pop-Up, Studio Rental, Host Your Client, Permanent Jewelry Appointment
 - **Customers**: Customer information with billing details
 - **Packages**: Service packages with pricing and event type associations
 - **Addons**: Additional services with per-guest or flat pricing options
