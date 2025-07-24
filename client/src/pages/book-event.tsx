@@ -432,12 +432,13 @@ export default function BookEvent() {
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
             <h2 className="text-xl font-bold mb-3" style={{ fontFamily: "'Libre Baskerville', serif" }}>Need Help?</h2>
             <p className="text-gray-600 mb-4">
-              We're here to help you plan the perfect event! Contact us:
+              We're here to help you plan the perfect event!<br />
+              Contact Allie!
             </p>
             <div className="space-y-2 text-sm">
               <p><strong>Phone:</strong> (631) 998-9325</p>
-              <p><strong>Email:</strong> events@hosthampton.com</p>
-              <p><strong>Hours:</strong> Mon-Fri 9am-6pm</p>
+              <p><strong>Email:</strong> hosthampton295@gmail.com</p>
+              <p><strong>Hours:</strong> By Appointment Only</p>
             </div>
             <Button
               onClick={() => setShowHelp(false)}
