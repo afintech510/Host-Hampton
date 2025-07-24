@@ -389,7 +389,7 @@ export default function BookEvent() {
         }
       />
       
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8 relative">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait">
             <motion.div
@@ -403,9 +403,11 @@ export default function BookEvent() {
             </motion.div>
           </AnimatePresence>
         </div>
-        
-        {/* Bottom corner buttons - positioned under the form content */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between items-end px-6 pb-4 max-w-md mx-auto w-full">
+      </main>
+
+      {/* Footer bar with help and contact buttons */}
+      <footer className="bg-white border-t border-gray-200 px-6 py-4">
+        <div className="w-full max-w-md mx-auto flex justify-between items-center">
           <Button
             variant="ghost"
             onClick={handleHelpClick}
@@ -422,7 +424,7 @@ export default function BookEvent() {
             <MessageCircle className="w-6 h-6" />
           </Button>
         </div>
-      </main>
+      </footer>
 
       {/* Help Dialog */}
       {showHelp && (
