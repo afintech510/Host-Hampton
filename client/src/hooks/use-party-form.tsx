@@ -128,11 +128,16 @@ export function usePartyForm() {
       const selectedTheme = themes.find((theme: any) => theme.name === data.partyTheme);
       const themePrice = selectedTheme ? (Number(selectedTheme.price) || 0) / 100 : 0; // Convert cents to dollars, ensure it's a number
       
-      // Add addon prices from database
+      // Add addon prices from database with per-guest pricing support
+      const guestCount = Number(data.guestCount) || 10; // Default to 10 guests if not specified
       const addonTotal = (data.partyAddons || []).reduce(
         (total: number, addonName: string) => {
           const selectedAddon = addons.find((addon: any) => addon.name === addonName);
-          const addonPrice = selectedAddon ? (Number(selectedAddon.price) || 0) / 100 : 0; // Convert cents to dollars
+          if (!selectedAddon) return total;
+          
+          const basePrice = (Number(selectedAddon.price) || 0) / 100; // Convert cents to dollars
+          const addonPrice = selectedAddon.per_guest ? basePrice * guestCount : basePrice;
+          
           return total + addonPrice;
         },
         0,
