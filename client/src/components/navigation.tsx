@@ -31,10 +31,10 @@ export default function Navigation() {
           <div className="flex items-center">
             <Link href="/">
               <div className="flex items-center cursor-pointer">
-                <img 
-                  src={hostHamptonLogo} 
-                  alt="Host Hampton" 
-                  className="h-10 w-auto object-contain"
+                <img
+                  src={hostHamptonLogo}
+                  alt="Host Hampton"
+                  className="h-12 md:h-16 w-auto object-contain"
                 />
               </div>
             </Link>
@@ -69,7 +69,11 @@ export default function Navigation() {
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
