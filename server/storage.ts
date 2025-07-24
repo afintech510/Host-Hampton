@@ -1,7 +1,7 @@
 import { 
   users, partyBookings, reviews, partyThemes, partyExtras,
   eventTypes, customers, packages, addons, events, invoices, invoiceItems, eventCalendar,
-  roomRentalPricing,
+  roomRentalPricing, verificationCodes,
   type User, type InsertUser, type PartyBooking, type InsertPartyBooking, 
   type Review, type InsertReview, type PartyTheme, type PartyExtra,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
@@ -63,6 +63,11 @@ export interface IStorage {
   createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar>;
   getEventCalendar(): Promise<EventCalendar[]>;
   getRoomRentalPricing(): Promise<RoomRentalPricing[]>;
+  
+  // Customer authentication methods
+  createVerificationCode(email: string, code: string): Promise<void>;
+  verifyCode(email: string, code: string): Promise<{ customerId: number } | null>;
+  getCustomerEvents(customerId: number): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -466,6 +471,23 @@ export class MemStorage implements IStorage {
       }
     ];
   }
+  
+  // Customer authentication methods (in-memory placeholder)
+  async createVerificationCode(email: string, code: string): Promise<void> {
+    // In memory implementation - code would expire after 10 minutes
+    console.log(`Verification code ${code} created for ${email}`);
+  }
+  
+  async verifyCode(email: string, code: string): Promise<{ customerId: number } | null> {
+    // In memory placeholder - always return null
+    console.log(`Verifying code ${code} for ${email}`);
+    return null;
+  }
+  
+  async getCustomerEvents(customerId: number): Promise<any[]> {
+    // In memory placeholder
+    return [];
+  }
 }
 
 // Database Storage Implementation
@@ -684,6 +706,89 @@ export class DatabaseStorage implements IStorage {
 
   async getRoomRentalPricing(): Promise<RoomRentalPricing[]> {
     return await db.select().from(roomRentalPricing).where(eq(roomRentalPricing.active, true)).orderBy(roomRentalPricing.duration);
+  }
+  
+  // Customer authentication methods
+  async createVerificationCode(email: string, code: string): Promise<void> {
+    // Set expiration to 10 minutes from now
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    
+    await db.insert(verificationCodes).values({
+      email,
+      code,
+      expiresAt,
+      used: false
+    });
+  }
+  
+  async verifyCode(email: string, code: string): Promise<{ customerId: number } | null> {
+    // Find valid, unused code that hasn't expired
+    const [verificationRecord] = await db
+      .select()
+      .from(verificationCodes)
+      .where(
+        eq(verificationCodes.email, email) &&
+        eq(verificationCodes.code, code) &&
+        eq(verificationCodes.used, false)
+      )
+      .orderBy(verificationCodes.createdAt);
+    
+    if (!verificationRecord || verificationRecord.expiresAt < new Date()) {
+      return null;
+    }
+    
+    // Mark code as used
+    await db
+      .update(verificationCodes)
+      .set({ used: true })
+      .where(eq(verificationCodes.id, verificationRecord.id));
+    
+    // Find or create customer
+    let customer = await this.getCustomerByEmail(email);
+    if (!customer) {
+      // Create new customer with minimal info
+      customer = await this.createCustomer({
+        name: "Customer", // Will be updated when they provide more info
+        email,
+        phone: "", // Will be updated when they provide more info
+        billingAddress: null
+      });
+    }
+    
+    return { customerId: customer.id };
+  }
+  
+  async getCustomerEvents(customerId: number): Promise<any[]> {
+    // Get customer's events with related data
+    const customerEvents = await db
+      .select({
+        id: events.id,
+        eventDate: events.eventDate,
+        status: events.status,
+        notes: events.notes,
+        eventType: eventTypes.name,
+        guestCount: events.guestCount,
+        totalAmount: invoices.total,
+        paidAmount: invoices.deposit,
+        description: eventTypes.description
+      })
+      .from(events)
+      .leftJoin(eventTypes, eq(events.eventTypeId, eventTypes.id))
+      .leftJoin(invoices, eq(events.id, invoices.eventId))
+      .where(eq(events.customerId, customerId))
+      .orderBy(events.eventDate);
+    
+    return customerEvents.map(event => ({
+      id: event.id,
+      eventType: event.eventType || "Unknown Event",
+      eventDate: event.eventDate,
+      status: event.status,
+      totalAmount: event.totalAmount || 0,
+      paidAmount: event.paidAmount || 0,
+      description: event.description || event.notes || "",
+      guestCount: event.guestCount,
+      location: "Host Hampton Studio" // Default location
+    }));
   }
 }
 

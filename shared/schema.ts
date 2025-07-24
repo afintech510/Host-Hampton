@@ -272,6 +272,16 @@ export const customerPreferences = pgTable("customer_preferences", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Customer authentication table
+export const verificationCodes = pgTable("verification_codes", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Event calendar for tracking confirmed/booked events
 export const eventCalendar = pgTable("event_calendar", {
   id: serial("id").primaryKey(),
@@ -378,6 +388,7 @@ export const insertCustomerPreferencesSchema = createInsertSchema(customerPrefer
 export const insertBusinessMetricSchema = createInsertSchema(businessMetrics).omit({ id: true });
 export const insertEventCalendarSchema = createInsertSchema(eventCalendar).omit({ id: true, createdAt: true });
 export const insertRoomRentalPricingSchema = createInsertSchema(roomRentalPricing).omit({ id: true, createdAt: true });
+export const insertVerificationCodeSchema = createInsertSchema(verificationCodes).omit({ id: true, createdAt: true });
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

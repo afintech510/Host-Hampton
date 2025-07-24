@@ -19,6 +19,100 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // CUSTOMER AUTHENTICATION ENDPOINTS
+  app.post("/api/auth/send-code", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email is required" 
+        });
+      }
+      
+      // Generate 6-digit verification code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Store verification code in database
+      await storage.createVerificationCode(email, code);
+      
+      // TODO: Send email with verification code using SendGrid
+      console.log(`Verification code for ${email}: ${code}`);
+      
+      res.json({
+        success: true,
+        message: "Verification code sent to your email"
+      });
+    } catch (error) {
+      console.error("Send code error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send verification code"
+      });
+    }
+  });
+  
+  app.post("/api/auth/verify-code", async (req, res) => {
+    try {
+      const { email, code } = req.body;
+      
+      if (!email || !code) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and code are required"
+        });
+      }
+      
+      const result = await storage.verifyCode(email, code);
+      
+      if (!result) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid or expired verification code"
+        });
+      }
+      
+      res.json({
+        success: true,
+        customerId: result.customerId,
+        message: "Authentication successful"
+      });
+    } catch (error) {
+      console.error("Verify code error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to verify code"
+      });
+    }
+  });
+  
+  app.get("/api/customer/events", async (req, res) => {
+    try {
+      const customerId = parseInt(req.query.customerId as string);
+      
+      if (!customerId) {
+        return res.status(400).json({
+          success: false,
+          message: "Customer ID is required"
+        });
+      }
+      
+      const events = await storage.getCustomerEvents(customerId);
+      
+      res.json({
+        success: true,
+        events
+      });
+    } catch (error) {
+      console.error("Get customer events error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve events"
+      });
+    }
+  });
+  
   // INQUIRY CREATION ENDPOINT - For "Show Price" and contact form submissions
   app.post("/api/create-inquiry", async (req, res) => {
     try {

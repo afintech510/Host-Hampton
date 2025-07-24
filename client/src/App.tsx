@@ -14,6 +14,7 @@ import ShopEvents from "@/pages/shop-events";
 import PartyRoomRental from "@/pages/party-room-rental";
 import TruckHatBar from "@/pages/truck-hat-bar";
 import PermanentJewelry from "@/pages/permanent-jewelry";
+import MyEvents from "@/pages/my-events";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/party-room-rental" component={PartyRoomRental} />
       <Route path="/trucker-hat-bar" component={TruckHatBar} />
       <Route path="/permanent-jewelry" component={PermanentJewelry} />
+      <Route path="/my-events" component={MyEvents} />
       <Route component={NotFound} />
     </Switch>
   );

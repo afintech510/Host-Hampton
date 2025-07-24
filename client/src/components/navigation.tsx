@@ -40,8 +40,13 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Right side - Book Now Button and Menu Button */}
+          {/* Right side - My Events, Book Now Button and Menu Button */}
           <div className="flex items-center space-x-4">
+            <Link href="/my-events">
+              <Button className="bg-pink-100 hover:bg-pink-200 text-black rounded-full">
+                My Events
+              </Button>
+            </Link>
             <Link href="/book-event">
               <Button className="bg-pink-600 hover:bg-pink-700 text-white rounded-full">
                 Book Now
