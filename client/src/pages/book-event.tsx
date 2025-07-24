@@ -31,7 +31,7 @@ import { ContactStep } from "@/components/party-form/steps/contact-step";
 import { SummaryStep } from "@/components/party-form/steps/summary-step";
 import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, HelpCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
 const TOTAL_STEPS = 9;
@@ -387,11 +387,9 @@ export default function BookEvent() {
           formData.eventType && isStudioFlow(formData.eventType) ? 4 : 
           TOTAL_STEPS
         }
-        onHelpClick={handleHelpClick}
-        onContactClick={handleContactClick}
       />
       
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-8 relative">
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait">
             <motion.div
@@ -404,6 +402,25 @@ export default function BookEvent() {
               <StepContainer>{renderStep()}</StepContainer>
             </motion.div>
           </AnimatePresence>
+        </div>
+        
+        {/* Bottom corner buttons - positioned under the form content */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between items-end px-6 pb-4 max-w-md mx-auto w-full">
+          <Button
+            variant="ghost"
+            onClick={handleHelpClick}
+            className="text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
+          >
+            <HelpCircle className="w-6 h-6" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            onClick={handleContactClick}
+            className="text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </Button>
         </div>
       </main>
 
