@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import { motion } from "framer-motion";
 
 interface EventTypeStepProps {
@@ -108,20 +108,21 @@ export function EventTypeStep({ formData, updateFormData, onNext, onBack }: Even
       </div>
 
       <div className="flex space-x-3 pt-4">
-        <Button 
+        <UnifiedButton 
           variant="outline" 
           onClick={onBack}
-          className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="flex-1"
         >
           Back
-        </Button>
-        <Button 
+        </UnifiedButton>
+        <UnifiedButton 
           onClick={handleNext}
           disabled={!selectedEventType}
-          className="flex-1 bg-pink-300 hover:bg-pink-400 text-white disabled:bg-gray-200 disabled:text-gray-400"
+          variant="primary"
+          className="flex-1"
         >
           Continue
-        </Button>
+        </UnifiedButton>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import partyHornImage from "@assets/image_1752580300891.png";
@@ -77,12 +77,14 @@ export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsS
         )}
       </div>
 
-      <Button
+      <UnifiedButton
         onClick={handleNext}
-        className="w-full bg-coral hover:bg-coral text-white py-4 px-6 rounded-2xl text-lg font-semibold shadow-lg transition-all duration-200"
+        variant="primary"
+        size="lg"
+        className="w-full"
       >
         Looks great!
-      </Button>
+      </UnifiedButton>
     </div>
   );
 }

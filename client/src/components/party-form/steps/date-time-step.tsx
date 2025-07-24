@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -71,13 +71,15 @@ export function DateTimeStep({ formData, updateFormData, onNext, onBack }: DateT
           </RadioGroup>
         </div>
 
-        <Button
+        <UnifiedButton
           onClick={handleNext}
           disabled={!isValid}
-          className="w-full bg-coral hover:bg-coral text-white py-4 px-6 rounded-2xl text-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          variant="primary"
+          size="lg"
+          className="w-full"
         >
           Continue
-        </Button>
+        </UnifiedButton>
       </div>
     </div>
   );

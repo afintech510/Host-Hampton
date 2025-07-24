@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -122,13 +122,15 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
           </div>
         </div>
 
-        <Button
+        <UnifiedButton
           onClick={handleNext}
           disabled={!isValid}
-          className="w-full bg-coral hover:bg-coral text-white py-4 px-6 rounded-2xl text-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          variant="primary"
+          size="lg"
+          className="w-full"
         >
           Almost done!
-        </Button>
+        </UnifiedButton>
       </div>
     </div>
   );

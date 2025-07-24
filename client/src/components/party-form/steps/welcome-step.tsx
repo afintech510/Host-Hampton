@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import allieImage from "@assets/image_1752579343744.png";
 
 interface WelcomeStepProps {
@@ -24,18 +24,21 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       </div>
 
       <div className="space-y-4">
-        <Button
+        <UnifiedButton
           onClick={onNext}
-          className="w-full bg-coral hover:bg-coral text-white py-4 px-6 rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+          variant="primary"
+          size="lg"
+          className="w-full"
         >
           Let's start planning! 🎉
-        </Button>
-        <Button
+        </UnifiedButton>
+        <UnifiedButton
           variant="outline"
-          className="w-full text-gray-700 py-4 px-6 rounded-2xl text-lg font-medium border-2 border-gray-200 hover:border-gray-300 transition-all duration-200"
+          size="lg"
+          className="w-full"
         >
           I have an existing booking
-        </Button>
+        </UnifiedButton>
       </div>
     </div>
   );

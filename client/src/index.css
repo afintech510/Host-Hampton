@@ -140,6 +140,39 @@
   color: hsl(15, 25%, 65%);
 }
 
+/* Unified button styling with mood board colors */
+.bg-dusty-blue {
+  background-color: hsl(210, 35%, 72%) !important;
+}
+
+.text-blush-pink {
+  color: hsl(350, 35%, 75%) !important;
+}
+
+.border-blush-pink {
+  border-color: hsl(350, 35%, 80%) !important;
+}
+
+.hover\:bg-blush-pink:hover {
+  background-color: hsl(350, 35%, 80%) !important;
+}
+
+.border-slate-300 {
+  border-color: hsl(210, 25%, 75%) !important;
+}
+
+.text-slate-600 {
+  color: hsl(210, 25%, 60%) !important;
+}
+
+.hover\:border-slate-400:hover {
+  border-color: hsl(210, 25%, 65%) !important;
+}
+
+.hover\:text-slate-700:hover {
+  color: hsl(210, 25%, 50%) !important;
+}
+
 .step-transition {
   transition: all 0.3s ease-out;
 }

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, ThumbsUp } from "lucide-react";
 
@@ -160,20 +160,23 @@ export function SummaryStep({ formData, onBack, onSubmit, isSubmitting }: Summar
       </Alert>
 
       <div className="space-y-4">
-        <Button
+        <UnifiedButton
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="w-full bg-coral hover:bg-coral text-white py-4 px-6 rounded-2xl text-lg font-semibold shadow-lg transition-all duration-200"
+          variant="primary"
+          size="lg"
+          className="w-full"
         >
           {isSubmitting ? "Booking Your Party... 🎉" : "Book Our Party! 🎉"}
-        </Button>
-        <Button
+        </UnifiedButton>
+        <UnifiedButton
           onClick={onBack}
           variant="outline"
-          className="w-full text-gray-600 py-3 px-6 rounded-2xl text-base font-medium border-2 border-gray-200 hover:border-gray-300 transition-all duration-200"
+          size="default"
+          className="w-full"
         >
           ← Go Back
-        </Button>
+        </UnifiedButton>
       </div>
     </div>
   );

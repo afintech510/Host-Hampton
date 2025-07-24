@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { UnifiedButton } from "@/components/ui/unified-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
@@ -146,19 +146,20 @@ export function CustomAddonsStep({ formData, updateFormData, onNext, onBack }: C
       )}
 
       <div className="flex space-x-3 pt-4">
-        <Button 
+        <UnifiedButton 
           variant="outline" 
           onClick={onBack}
-          className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="flex-1"
         >
           Back
-        </Button>
-        <Button 
+        </UnifiedButton>
+        <UnifiedButton 
           onClick={handleNext}
-          className="flex-1 bg-pink-300 hover:bg-pink-400 text-white"
+          variant="primary"
+          className="flex-1"
         >
           Continue
-        </Button>
+        </UnifiedButton>
       </div>
     </div>
   );
