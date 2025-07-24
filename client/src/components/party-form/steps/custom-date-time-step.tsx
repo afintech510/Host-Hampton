@@ -81,8 +81,17 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
     if (diffHrs <= 0) return null;
     
     // Get the day of the week (0 = Sunday, 6 = Saturday)
-    const dayOfWeek = new Date(partyDate).getDay();
+    const date = new Date(partyDate + 'T00:00:00'); // Ensure we parse in local timezone
+    const dayOfWeek = date.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    
+    console.log('Date parsing debug:', {
+      partyDate,
+      parsedDate: date.toString(),
+      dayOfWeek,
+      isWeekend,
+      dayName: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek]
+    });
     
     // Find the pricing tier based on duration
     let pricing = null;
