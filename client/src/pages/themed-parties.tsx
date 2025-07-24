@@ -213,10 +213,10 @@ export default function ThemedParties() {
                 className="h-20 md:h-24 mx-auto object-contain"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: 'hsl(210, 15%, 40%)' }}>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-black" style={{ fontFamily: "'Libre Baskerville', serif" }}>
               Design Your
               <br />
-              <span className="text-dusty-blue">Party Experience</span>
+              Party Experience
             </h1>
             <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(210, 15%, 55%)' }}>
               Transform your child's special day into an unforgettable adventure
