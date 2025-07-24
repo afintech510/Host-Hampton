@@ -122,23 +122,41 @@ export function usePartyForm() {
   });
 
   const calculateTotal = (data: Partial<FormData>) => {
-    const basePrice = 400; // Base party package price
-    
-    // Add theme price
-    const selectedTheme = themes.find((theme: any) => theme.name === data.partyTheme);
-    const themePrice = selectedTheme ? selectedTheme.price / 100 : 0; // Convert cents to dollars
-    
-    // Add addon prices
-    const addonTotal = (data.partyAddons || []).reduce(
-      (total: number, addon: string) => {
-        return total + (ADDON_PRICES[addon] || 0);
-      },
-      0,
-    );
-    
-    const total = basePrice + themePrice + addonTotal;
-    console.log("Calculated total:", { basePrice, themePrice, addonTotal, total });
-    return total;
+    try {
+      const basePrice = 400; // Base party package price
+      
+      // Add theme price
+      const selectedTheme = themes.find((theme: any) => theme.name === data.partyTheme);
+      const themePrice = selectedTheme ? (Number(selectedTheme.price) || 0) / 100 : 0; // Convert cents to dollars, ensure it's a number
+      
+      // Add addon prices
+      const addonTotal = (data.partyAddons || []).reduce(
+        (total: number, addon: string) => {
+          const addonPrice = Number(ADDON_PRICES[addon]) || 0;
+          return total + addonPrice;
+        },
+        0,
+      );
+      
+      const total = basePrice + themePrice + addonTotal;
+      console.log("Calculated total (debug):", { 
+        basePrice, 
+        themePrice: themePrice,
+        addonTotal, 
+        total, 
+        typeofTotal: typeof total,
+        selectedTheme: selectedTheme?.name,
+        addons: data.partyAddons 
+      });
+      
+      // Ensure we return a valid number that meets Stripe minimum
+      const finalTotal = Math.max(Number(total) || 400, 1); // At least $1 to meet Stripe minimum
+      console.log("Final calculated total:", finalTotal, typeof finalTotal);
+      return finalTotal;
+    } catch (error) {
+      console.error("Error calculating total:", error);
+      return 400; // Return base price as fallback
+    }
   };
 
   // Inquiry submission (for "Show Price" clicks)
@@ -229,12 +247,13 @@ export function usePartyForm() {
 
         // Calculate the total amount
         const calculatedTotal = calculateTotal(formData);
-        const paymentAmount = formData.totalEstimate || calculatedTotal || 550; // Use calculated total as fallback
+        const paymentAmount = Number(formData.totalEstimate || calculatedTotal || 550); // Ensure it's a number
         
-        console.log("Submitting payment:", { 
+        console.log("Submitting payment (fixed):", { 
           eventId: data.data.eventId, 
           invoiceId: data.data.invoiceId, 
           amount: paymentAmount,
+          amountType: typeof paymentAmount,
           eventType: formData.eventType,
           formDataTotal: formData.totalEstimate,
           calculatedTotal
@@ -277,7 +296,8 @@ export function usePartyForm() {
       
       // Auto-calculate total when relevant fields change
       if (newData.partyTheme || newData.partyAddons || newData.guestCount) {
-        updated.totalEstimate = calculateTotal(updated);
+        const calculatedTotal = calculateTotal(updated);
+        updated.totalEstimate = Number(calculatedTotal) || 400; // Ensure it's a number
       }
       
       // Immediately save to session storage
@@ -307,7 +327,7 @@ export function usePartyForm() {
       ...formData,
       
       // Calculate totals for legacy flow
-      totalEstimate: eventType === "birthday-party" ? calculateTotal(formData) : undefined,
+      totalEstimate: eventType === "birthday-party" ? Number(calculateTotal(formData)) || 400 : undefined,
       
       // Add deposit amount for payment flow
       depositAmount: formData.rentalPricing?.total || 
