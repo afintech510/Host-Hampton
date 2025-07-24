@@ -74,18 +74,7 @@ interface FormData {
   };
 }
 
-const ADDON_PRICES: Record<string, number> = {
-  "photo-booth": 50,
-  "candy-wall": 75,
-  balloons: 25,
-  karaoke: 40,
-  "glitter-makeup": 30,
-  "hair-tinsel": 25,
-  "beaded-hair-braid": 35,
-  "glitter-tattoo": 20,
-  manicure: 40,
-  "bracelet-making": 30,
-};
+// Addon prices will be loaded from database - no more mock data
 
 export function usePartyForm() {
   const [formData, setFormData] = useState<Partial<FormData>>(() => {
@@ -121,6 +110,16 @@ export function usePartyForm() {
     },
   });
 
+  // Fetch addons for pricing calculation
+  const { data: addons = [] } = useQuery({
+    queryKey: ["/api/addons"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/addons");
+      const data = await response.json();
+      return data.success ? data.addons : [];
+    },
+  });
+
   const calculateTotal = (data: Partial<FormData>) => {
     try {
       const basePrice = 400; // Base party package price
@@ -129,10 +128,11 @@ export function usePartyForm() {
       const selectedTheme = themes.find((theme: any) => theme.name === data.partyTheme);
       const themePrice = selectedTheme ? (Number(selectedTheme.price) || 0) / 100 : 0; // Convert cents to dollars, ensure it's a number
       
-      // Add addon prices
+      // Add addon prices from database
       const addonTotal = (data.partyAddons || []).reduce(
-        (total: number, addon: string) => {
-          const addonPrice = Number(ADDON_PRICES[addon]) || 0;
+        (total: number, addonName: string) => {
+          const selectedAddon = addons.find((addon: any) => addon.name === addonName);
+          const addonPrice = selectedAddon ? (Number(selectedAddon.price) || 0) / 100 : 0; // Convert cents to dollars
           return total + addonPrice;
         },
         0,

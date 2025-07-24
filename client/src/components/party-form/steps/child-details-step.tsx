@@ -45,17 +45,11 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
     label: `${i + 1} year${i + 1 > 1 ? 's' : ''} old`
   }));
 
-  // Guest count options for wheel selector
-  const guestOptions = [
-    { value: "5", label: "5 children" },
-    { value: "8", label: "8 children" },
-    { value: "10", label: "10 children" },
-    { value: "12", label: "12 children" },
-    { value: "15", label: "15 children" },
-    { value: "18", label: "18 children" },
-    { value: "20", label: "20 children" },
-    { value: "25", label: "25 children (max)" }
-  ];
+  // Guest count options for wheel selector - numerical from 5 to 35
+  const guestOptions = Array.from({ length: 31 }, (_, i) => ({
+    value: (i + 5).toString(),
+    label: (i + 5).toString()
+  }));
 
   return (
     <div className="text-center">
@@ -105,7 +99,7 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
             value={guestCount}
             onValueChange={setGuestCount}
             options={guestOptions}
-            placeholder="Select number"
+            placeholder="Select number (5-35)"
           />
         </div>
 
