@@ -722,6 +722,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { eventId, invoiceId, amount, eventType } = req.body;
       
+      console.log("Payment request received:", { eventId, invoiceId, amount, eventType });
+      
       if (!amount || amount <= 0) {
         return res.status(400).json({
           success: false,
@@ -729,9 +731,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Ensure minimum amount (Stripe requires at least $0.50 for USD)
+      const amountInCents = Math.round(amount * 100);
+      const minimumAmount = 50; // 50 cents minimum for USD
+      
+      if (amountInCents < minimumAmount) {
+        console.log("Amount too low:", { amount, amountInCents, minimumAmount });
+        return res.status(400).json({
+          success: false,
+          message: `Amount must be at least $0.50. Received: $${amount}`
+        });
+      }
+
+      console.log("Creating Stripe payment intent:", { amountInCents, currency: "usd" });
+
       // Create Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
+        amount: amountInCents,
         currency: "usd",
         metadata: {
           eventId: eventId?.toString() || '',
@@ -739,6 +755,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eventType: eventType || ''
         }
       });
+
+      console.log("Payment intent created successfully:", paymentIntent.id);
 
       res.json({
         success: true,

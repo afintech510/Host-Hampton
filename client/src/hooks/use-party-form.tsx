@@ -136,7 +136,9 @@ export function usePartyForm() {
       0,
     );
     
-    return basePrice + themePrice + addonTotal;
+    const total = basePrice + themePrice + addonTotal;
+    console.log("Calculated total:", { basePrice, themePrice, addonTotal, total });
+    return total;
   };
 
   // Inquiry submission (for "Show Price" clicks)
@@ -169,7 +171,13 @@ export function usePartyForm() {
   const submitPaymentMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/book-with-payment", data);
-      return response.json();
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || `Server error: ${response.status}`);
+      }
+      
+      return result;
     },
     onSuccess: (data) => {
       if (data.success && data.clientSecret) {
@@ -184,15 +192,16 @@ export function usePartyForm() {
         window.location.href = `/payment?client_secret=${data.clientSecret}`;
       } else {
         toast({
-          title: "Booking Failed",
+          title: "Payment Setup Failed",
           description: data.message || "Please try again or contact us directly.",
           variant: "destructive",
         });
       }
     },
     onError: (error: any) => {
+      console.error("Payment mutation error:", error);
       toast({
-        title: "Booking Failed",
+        title: "Payment Setup Failed",
         description: error.message || "Please try again or contact us directly.",
         variant: "destructive",
       });
@@ -218,11 +227,24 @@ export function usePartyForm() {
           description: "Redirecting to secure payment...",
         });
 
+        // Calculate the total amount
+        const calculatedTotal = calculateTotal(formData);
+        const paymentAmount = formData.totalEstimate || calculatedTotal || 550; // Use calculated total as fallback
+        
+        console.log("Submitting payment:", { 
+          eventId: data.data.eventId, 
+          invoiceId: data.data.invoiceId, 
+          amount: paymentAmount,
+          eventType: formData.eventType,
+          formDataTotal: formData.totalEstimate,
+          calculatedTotal
+        });
+
         // Create Stripe payment intent and redirect to checkout
         submitPaymentMutation.mutate({
           eventId: data.data.eventId,
           invoiceId: data.data.invoiceId,
-          amount: formData.totalEstimate || 550, // Default to $550 if no estimate
+          amount: paymentAmount,
           eventType: formData.eventType
         });
       } else {
@@ -252,6 +274,12 @@ export function usePartyForm() {
   const updateFormData = (newData: Partial<FormData>) => {
     setFormData((prev) => {
       const updated = { ...prev, ...newData };
+      
+      // Auto-calculate total when relevant fields change
+      if (newData.partyTheme || newData.partyAddons || newData.guestCount) {
+        updated.totalEstimate = calculateTotal(updated);
+      }
+      
       // Immediately save to session storage
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('partyFormData', JSON.stringify(updated));
