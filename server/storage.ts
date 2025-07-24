@@ -1,9 +1,10 @@
 import { 
-  users, reviews, eventTypes, customers, packages, addons, events, invoices, invoiceItems, eventCalendar,
+  users, reviews, eventTypes, customers, packages, addons, partyThemes, events, invoices, invoiceItems, eventCalendar,
   roomRentalPricing, verificationCodes,
   type User, type InsertUser, type Review, type InsertReview,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
+  type PartyTheme, type InsertPartyTheme,
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
   type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar,
   type RoomRentalPricing
@@ -34,6 +35,8 @@ export interface IStorage {
   createPackage(pkg: InsertPackage): Promise<Package>;
   getAddons(): Promise<Addon[]>;
   createAddon(addon: InsertAddon): Promise<Addon>;
+  getPartyThemes(): Promise<PartyTheme[]>;
+  createPartyTheme(theme: InsertPartyTheme): Promise<PartyTheme>;
   getEvents(): Promise<Event[]>;
   createEvent(event: InsertEvent): Promise<Event>;
   getEvent(id: number): Promise<Event | undefined>;
@@ -68,14 +71,44 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private reviews: Map<number, Review>;
+  private partyThemes: Map<number, PartyTheme>;
   private currentUserId: number;
   private currentReviewId: number;
+  private currentThemeId: number;
 
   constructor() {
     this.users = new Map();
     this.reviews = new Map();
+    this.partyThemes = new Map();
     this.currentUserId = 1;
     this.currentReviewId = 1;
+    this.currentThemeId = 1;
+    
+    // Initialize party themes
+    this.initializePartyThemes();
+  }
+  
+  private initializePartyThemes() {
+    const themes = [
+      { name: "Princess Party", description: "Magical princess adventure with tiaras and fairy tales", price: 15000, icon: "👑", color: "pink" },
+      { name: "Superhero Party", description: "Action-packed hero training with capes and masks", price: 15000, icon: "🦸", color: "blue" },
+      { name: "Dinosaur Party", description: "Prehistoric adventure with fossil hunts and dino games", price: 15000, icon: "🦕", color: "green" },
+      { name: "Unicorn Party", description: "Enchanted unicorn party with rainbow decorations", price: 15000, icon: "🦄", color: "purple" },
+      { name: "Space Party", description: "Cosmic adventure with planets and rocket ships", price: 15000, icon: "🚀", color: "navy" },
+      { name: "Mermaid Party", description: "Under the sea adventure with shells and treasures", price: 15000, icon: "🧜", color: "teal" },
+      { name: "Safari Party", description: "Wild animal adventure with jungle decorations", price: 15000, icon: "🦁", color: "orange" },
+      { name: "Art Party", description: "Creative art studio with painting and crafts", price: 12000, icon: "🎨", color: "yellow" }
+    ];
+    
+    themes.forEach(theme => {
+      const id = this.currentThemeId++;
+      this.partyThemes.set(id, { 
+        ...theme, 
+        id,
+        active: true,
+        description: theme.description
+      });
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -167,6 +200,17 @@ export class MemStorage implements IStorage {
 
   async createAddon(addon: InsertAddon): Promise<Addon> {
     throw new Error("Not implemented in MemStorage");
+  }
+
+  async getPartyThemes(): Promise<PartyTheme[]> {
+    return Array.from(this.partyThemes.values()).filter(theme => theme.active);
+  }
+
+  async createPartyTheme(insertTheme: InsertPartyTheme): Promise<PartyTheme> {
+    const id = this.currentThemeId++;
+    const theme: PartyTheme = { ...insertTheme, id };
+    this.partyThemes.set(id, theme);
+    return theme;
   }
 
   async getEvents(): Promise<Event[]> {
@@ -544,6 +588,16 @@ export class DatabaseStorage implements IStorage {
   async createAddon(addon: InsertAddon): Promise<Addon> {
     const [created] = await db.insert(addons).values(addon).returning();
     return created;
+  }
+
+  async getPartyThemes(): Promise<PartyTheme[]> {
+    const results = await db.select().from(partyThemes).where(eq(partyThemes.active, true));
+    return results;
+  }
+
+  async createPartyTheme(insertTheme: InsertPartyTheme): Promise<PartyTheme> {
+    const [theme] = await db.insert(partyThemes).values(insertTheme).returning();
+    return theme;
   }
 
   async getEvents(): Promise<Event[]> {

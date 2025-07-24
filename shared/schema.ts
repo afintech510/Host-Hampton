@@ -63,6 +63,16 @@ export const addons = pgTable("addons", {
   active: boolean("active").default(true).notNull(),
 });
 
+export const partyThemes = pgTable("party_themes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(), // Price in cents
+  icon: text("icon").notNull(),
+  color: text("color").notNull(),
+  active: boolean("active").default(true).notNull(),
+});
+
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   eventTypeId: integer("event_type_id").notNull(),
@@ -308,6 +318,10 @@ export const insertAddonSchema = createInsertSchema(addons).omit({
   id: true,
 });
 
+export const insertPartyThemeSchema = createInsertSchema(partyThemes).omit({
+  id: true,
+});
+
 export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
   createdAt: true,
@@ -435,6 +449,8 @@ export type InsertPackage = z.infer<typeof insertPackageSchema>;
 export type Package = typeof packages.$inferSelect;
 export type InsertAddon = z.infer<typeof insertAddonSchema>;
 export type Addon = typeof addons.$inferSelect;
+export type InsertPartyTheme = z.infer<typeof insertPartyThemeSchema>;
+export type PartyTheme = typeof partyThemes.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Event = typeof events.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;

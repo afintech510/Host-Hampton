@@ -6,7 +6,7 @@ import { bookingService } from "./booking-service";
 import { 
   insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
-  insertAddonSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema 
+  insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema 
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -574,6 +574,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ success: false, message: "Failed to create add-on" });
+    }
+  });
+
+  // PARTY THEMES ENDPOINTS
+  app.get("/api/party-themes", async (req, res) => {
+    try {
+      const themes = await storage.getPartyThemes();
+      res.json({ success: true, themes });
+    } catch (error) {
+      console.error("Error fetching party themes:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch party themes" });
+    }
+  });
+
+  app.post("/api/party-themes", async (req, res) => {
+    try {
+      const theme = insertPartyThemeSchema.parse(req.body);
+      const created = await storage.createPartyTheme(theme);
+      res.status(201).json({ success: true, theme: created });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create party theme" });
     }
   });
 
