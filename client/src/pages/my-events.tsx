@@ -157,7 +157,7 @@ export default function MyEvents() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#D4A5A5' }}>
       <Navigation />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -190,7 +190,8 @@ export default function MyEvents() {
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+                      className="w-full text-white"
+                      style={{ backgroundColor: '#A1B5C8' }}
                       disabled={sendCodeMutation.isPending}
                     >
                       {sendCodeMutation.isPending ? (
@@ -227,7 +228,8 @@ export default function MyEvents() {
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+                      className="w-full text-white"
+                      style={{ backgroundColor: '#A1B5C8' }}
                       disabled={verifyCodeMutation.isPending}
                     >
                       {verifyCodeMutation.isPending ? (
@@ -277,7 +279,7 @@ export default function MyEvents() {
             {/* Events List */}
             {eventsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-pink-600" />
+                <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A1B5C8' }} />
                 <span className="ml-2 text-gray-600">Loading your events...</span>
               </div>
             ) : (events as any)?.events?.length > 0 ? (
@@ -331,7 +333,10 @@ export default function MyEvents() {
                   <p className="text-gray-600 mb-4">
                     You don't have any events or bookings yet.
                   </p>
-                  <Button className="bg-pink-600 hover:bg-pink-700 text-white rounded-full">
+                  <Button 
+                    className="text-white rounded-full"
+                    style={{ backgroundColor: '#A1B5C8' }}
+                  >
                     Book Your First Event
                   </Button>
                 </CardContent>
