@@ -143,11 +143,8 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
         <h2 className="text-2xl font-bold text-gray-900">
           When would you like your event?
         </h2>
-        <p className="text-gray-600">
-          Let us know your preferred date and time, or select "Unsure" if you'd like to discuss options
-        </p>
+        <p className="text-gray-600">Let us know your preferred date and time.</p>
       </div>
-
       <div className="space-y-6">
         <div>
           <Label className="text-sm font-medium text-gray-700 mb-3 block">Date Preference</Label>
@@ -245,7 +242,6 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
           </div>
         )}
       </div>
-
       <div className="flex space-x-3 pt-4">
         <UnifiedButton 
           variant="outline" 
