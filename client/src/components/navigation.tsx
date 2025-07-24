@@ -40,30 +40,15 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              {menuItems.map((item) => (
-                <Link key={item.name} href={item.href}>
-                  <span className="text-gray-600 hover:text-pink-600 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Book Now Button */}
-          <div className="hidden md:block">
+          {/* Right side - Book Now Button and Menu Button */}
+          <div className="flex items-center space-x-4">
             <Link href="/book-event">
               <Button className="bg-pink-600 hover:bg-pink-700 text-white">
                 Book Now
               </Button>
             </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+            
+            {/* Menu button - now visible on all screen sizes */}
             <Button
               variant="ghost"
               size="sm"
@@ -78,9 +63,9 @@ export default function Navigation() {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Navigation Menu - now shows on all screen sizes when hamburger is clicked */}
         {isMenuOpen && (
-          <div className="md:hidden">
+          <div>
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
               {menuItems.map((item) => (
                 <Link key={item.name} href={item.href}>
@@ -92,13 +77,6 @@ export default function Navigation() {
                   </span>
                 </Link>
               ))}
-              <div className="pt-4 pb-2">
-                <Link href="/book-event">
-                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
-                    Book Now
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         )}
