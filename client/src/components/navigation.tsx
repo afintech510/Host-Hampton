@@ -34,7 +34,7 @@ export default function Navigation() {
                 <img
                   src={hostHamptonLogo}
                   alt="Host Hampton"
-                  className="h-12 md:h-16 w-auto object-contain"
+                  className="h-12 md:h-14 w-auto object-contain"
                 />
               </div>
             </Link>
@@ -47,7 +47,7 @@ export default function Navigation() {
                 Book Now
               </Button>
             </Link>
-            
+
             {/* Menu button - now visible on all screen sizes */}
             <Button
               variant="ghost"

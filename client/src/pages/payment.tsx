@@ -64,7 +64,7 @@ export default function Payment() {
 
   if (!clientSecret) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center text-red-600">Payment Error</CardTitle>
@@ -88,7 +88,7 @@ export default function Payment() {
 
   if (paymentStatus === 'succeeded') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center text-green-600 flex items-center justify-center">
@@ -129,7 +129,7 @@ export default function Payment() {
 
   if (paymentStatus === 'failed') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center text-red-600">Payment Failed</CardTitle>
@@ -163,7 +163,7 @@ export default function Payment() {
   const appearance = {
     theme: 'stripe' as const,
     variables: {
-      colorPrimary: '#ec4899', // Pink-400
+      colorPrimary: '#A1B5C8', // Dusty blue
       colorBackground: '#ffffff',
       colorText: '#374151',
       colorDanger: '#ef4444',
@@ -179,7 +179,7 @@ export default function Payment() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader>
