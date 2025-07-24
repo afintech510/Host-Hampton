@@ -77,16 +77,32 @@ export class MemStorage implements IStorage {
   private currentThemeId: number;
   private addons: Map<number, Addon>;
   private currentAddonId: number;
+  private customers: Map<number, Customer>;
+  private events: Map<number, Event>;
+  private invoices: Map<number, Invoice>;
+  private invoiceItems: Map<number, InvoiceItem>;
+  private currentCustomerId: number;
+  private currentEventId: number;
+  private currentInvoiceId: number;
+  private currentInvoiceItemId: number;
 
   constructor() {
     this.users = new Map();
     this.reviews = new Map();
     this.partyThemes = new Map();
     this.addons = new Map();
+    this.customers = new Map();
+    this.events = new Map();
+    this.invoices = new Map();
+    this.invoiceItems = new Map();
     this.currentUserId = 1;
     this.currentReviewId = 1;
     this.currentThemeId = 1;
     this.currentAddonId = 1;
+    this.currentCustomerId = 1;
+    this.currentEventId = 1;
+    this.currentInvoiceId = 1;
+    this.currentInvoiceItemId = 1;
     
     // Initialize party themes and addons
     this.initializePartyThemes();
@@ -198,8 +214,20 @@ export class MemStorage implements IStorage {
     return [];
   }
 
-  async createCustomer(customer: InsertCustomer): Promise<Customer> {
-    throw new Error("Not implemented in MemStorage");
+  async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
+    const id = this.currentCustomerId++;
+    const customer: Customer = { 
+      ...insertCustomer, 
+      id,
+      billingAddress: insertCustomer.billingAddress || null,
+      createdAt: new Date()
+    };
+    // Store in a customers map (add if missing)
+    if (!this.customers) {
+      this.customers = new Map();
+    }
+    this.customers.set(id, customer);
+    return customer;
   }
 
   async getCustomer(id: number): Promise<Customer | undefined> {
@@ -207,6 +235,11 @@ export class MemStorage implements IStorage {
   }
 
   async getCustomerByEmail(email: string): Promise<Customer | undefined> {
+    for (const [, customer] of this.customers) {
+      if (customer.email === email) {
+        return customer;
+      }
+    }
     return undefined;
   }
 
@@ -251,9 +284,22 @@ export class MemStorage implements IStorage {
     return theme;
   }
 
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const id = this.currentEventId++;
+    const event: Event = {
+      ...insertEvent,
+      id,
+      status: insertEvent.status || "pending",
+      guestCount: insertEvent.guestCount || 0,
+      notes: insertEvent.notes || null,
+      createdAt: new Date()
+    };
+    this.events.set(id, event);
+    return event;
+  }
+
   async getEvents(): Promise<Event[]> {
-    // Sample event data for demonstration
-    return [
+    return Array.from(this.events.values()).concat([
       {
         id: 1,
         eventTypeId: 1,
@@ -299,12 +345,34 @@ export class MemStorage implements IStorage {
         customerName: "Amanda Rodriguez",
         eventTypeName: "Studio Rental"
       } as any
-    ];
+    ]);
   }
 
-  async createEvent(event: InsertEvent): Promise<Event> {
-    throw new Error("Not implemented in MemStorage");
+  async createInvoice(insertInvoice: InsertInvoice): Promise<Invoice> {
+    const id = this.currentInvoiceId++;
+    const invoice: Invoice = {
+      ...insertInvoice,
+      id,
+      notes: insertInvoice.notes || null,
+      ccFee: insertInvoice.ccFee || 0,
+      createdAt: new Date()
+    };
+    this.invoices.set(id, invoice);
+    return invoice;
   }
+
+  async createInvoiceItem(insertInvoiceItem: InsertInvoiceItem): Promise<InvoiceItem> {
+    const id = this.currentInvoiceItemId++;
+    const invoiceItem: InvoiceItem = {
+      ...insertInvoiceItem,
+      id,
+      quantity: insertInvoiceItem.quantity || 1
+    };
+    this.invoiceItems.set(id, invoiceItem);
+    return invoiceItem;
+  }
+
+  // createEvent is already implemented above
 
   async getEvent(id: number): Promise<Event | undefined> {
     return undefined;
@@ -314,9 +382,7 @@ export class MemStorage implements IStorage {
     throw new Error("Not implemented in MemStorage");
   }
 
-  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
-    throw new Error("Not implemented in MemStorage");
-  }
+  // createInvoice is already implemented above
 
   async getInvoice(id: number): Promise<Invoice | undefined> {
     return undefined;
@@ -326,13 +392,11 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
-  async createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem> {
-    throw new Error("Not implemented in MemStorage");
+  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
+    return Array.from(this.invoiceItems.values()).filter(item => item.invoiceId === invoiceId);
   }
 
-  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
-    return [];
-  }
+  // getInvoiceItems is already implemented above
 
   async getInvoices(): Promise<Invoice[]> {
     // Sample invoice data for demonstration

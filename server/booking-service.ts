@@ -44,7 +44,7 @@ class BookingService {
       
       switch (bookingData.eventType) {
         case "birthday-party":
-          return await this.createEventBooking(bookingData, "Birthday Party");
+          return await this.processBirthdayParty(bookingData);
         
         case "diy-party":
         case "private-event":
@@ -69,6 +69,54 @@ class BookingService {
   }
 
 
+
+  /**
+   * Birthday party events - paid events with theme and addons
+   */
+  private async processBirthdayParty(data: BookingData): Promise<BookingResult> {
+    try {
+      console.log("Processing birthday party booking:", data);
+      
+      // Create or get customer
+      const customer = await this.createOrGetCustomer({
+        name: data.customerName,
+        email: data.customerEmail,
+        phone: data.customerPhone,
+        billingAddress: null,
+      });
+
+      // Create event with proper date handling
+      const eventDate = data.partyDate || data.eventDate;
+      const startTime = data.startTime || '14:00';
+      const eventDateTime = eventDate ? new Date(eventDate + 'T' + startTime) : new Date();
+      
+      const event = await storage.createEvent({
+        eventTypeId: await this.getEventTypeId("birthday-party"),
+        customerId: customer.id,
+        eventDate: eventDateTime,
+        guestCount: data.guestCount || 0,
+        status: "confirmed", // Birthday parties are confirmed immediately
+        notes: `Theme: ${data.partyTheme}${data.partyAddons?.length ? ', Add-ons: ' + data.partyAddons.join(', ') : ''}`,
+      });
+
+      // Create invoice with birthday party pricing
+      const invoiceResult = await this.createBirthdayPartyInvoice(event.id, data);
+      
+      // Send confirmation email
+      await this.sendConfirmationEmail(data, event.id, "birthday-party");
+      
+      return {
+        success: true,
+        customerId: customer.id,
+        eventId: event.id,
+        invoiceId: invoiceResult.invoiceId,
+        message: "Birthday party booked successfully!"
+      };
+    } catch (error) {
+      console.error("Birthday party booking error:", error);
+      return { success: false, error: "Failed to create birthday party booking" };
+    }
+  }
 
   /**
    * Custom events (DIY Party, Private Event) - paid events with invoicing
@@ -264,6 +312,93 @@ class BookingService {
     };
     
     return eventTypeMap[eventType] || 1;
+  }
+
+  /**
+   * Create invoice for birthday party events
+   */
+  private async createBirthdayPartyInvoice(eventId: number, data: BookingData) {
+    const basePrice = 80000; // $800 base price for birthday parties
+    
+    // Calculate addon costs
+    let addonTotal = 0;
+    if (data.partyAddons && Array.isArray(data.partyAddons)) {
+      const addonPrices: { [key: string]: number } = {
+        "Face Painting": 7500,
+        "Balloon Animals": 5000,
+        "Magic Show": 12000,
+        "Photo Booth": 8500,
+        "Character Visit": 15000,
+        "Craft Station": 6000,
+        "Goodie Bags": 800, // per child
+        "Extra Hour": 10000
+      };
+      
+      addonTotal = data.partyAddons.reduce((total: number, addonName: string) => {
+        const price = addonPrices[addonName] || 0;
+        // Special handling for per-child addons
+        if (addonName === "Goodie Bags") {
+          return total + (price * (data.guestCount || 1));
+        }
+        return total + price;
+      }, 0);
+    }
+    
+    const subtotal = basePrice + addonTotal;
+    const tax = Math.round(subtotal * 0.08); // 8% tax
+    const total = subtotal + tax;
+    const deposit = Math.round(total * 0.50); // 50% deposit
+    
+    const invoice = await storage.createInvoice({
+      eventId,
+      subtotal,
+      tax,
+      total,
+      deposit,
+      balanceDue: total - deposit,
+      notes: "",
+      ccFee: 0
+    });
+    
+    // Create invoice items
+    await storage.createInvoiceItem({
+      invoiceId: invoice.id,
+      name: "Birthday Party - Theme: " + (data.partyTheme || "Standard"),
+      type: "package",
+      quantity: 1,
+      unitPrice: basePrice,
+      total: basePrice
+    });
+    
+    // Add addon items
+    if (data.partyAddons && Array.isArray(data.partyAddons)) {
+      for (const addonName of data.partyAddons) {
+        const price = {
+          "Face Painting": 7500,
+          "Balloon Animals": 5000,
+          "Magic Show": 12000,
+          "Photo Booth": 8500,
+          "Character Visit": 15000,
+          "Craft Station": 6000,
+          "Goodie Bags": 800,
+          "Extra Hour": 10000
+        }[addonName as keyof typeof addonPrices] || 0;
+        
+        if (price > 0) {
+          const quantity = addonName === "Goodie Bags" ? (data.guestCount || 1) : 1;
+          await storage.createInvoiceItem({
+            invoiceId: invoice.id,
+            name: addonName,
+            type: "addon",
+            quantity,
+            unitPrice: price,
+            total: price * quantity
+          });
+        }
+      }
+    }
+    
+    return { invoiceId: invoice.id };
   }
 
   /**
