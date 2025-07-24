@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { ReviewsSection } from "@/components/reviews-section";
+import Navigation from "@/components/navigation";
 import toddlerImage from "@assets/image_1752647828958.png";
 import preschoolImage from "@assets/image_1752648592321.png";
 import elementaryImage from "@assets/image_1752649999301.png";
@@ -202,6 +203,7 @@ export default function ThemedParties() {
 
   return (
     <div className="min-h-screen">
+      <Navigation />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-warm-ivory via-soft-blush-pink to-warm-ivory">
         <div className="container mx-auto px-4 py-20 relative z-10">
