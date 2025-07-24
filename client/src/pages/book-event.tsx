@@ -33,6 +33,7 @@ import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, HelpCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import allieImage from "@assets/image_1752579343744.png";
 
 const TOTAL_STEPS = 9;
 
@@ -429,13 +430,18 @@ export default function BookEvent() {
       {/* Help Dialog */}
       {showHelp && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+            <img
+              src={allieImage}
+              alt="Allie - Your party planning assistant"
+              className="w-16 h-16 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg"
+            />
             <h2 className="text-xl font-bold mb-3" style={{ fontFamily: "'Libre Baskerville', serif" }}>Need Help?</h2>
             <p className="text-gray-600 mb-4">
               We're here to help you plan the perfect event!<br />
               Contact Allie!
             </p>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-sm text-left">
               <p><strong>Phone:</strong> (631) 998-9325</p>
               <p><strong>Email:</strong> hosthampton295@gmail.com</p>
               <p><strong>Hours:</strong> By Appointment Only</p>
