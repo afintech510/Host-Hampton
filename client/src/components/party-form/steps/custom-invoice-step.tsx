@@ -20,26 +20,42 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
     { id: "toddler-play-area", name: "Toddler Soft Play Area", price: 125 }
   ];
 
-  // Calculate pricing based on event type
+  // Calculate pricing based on rental pricing or event type fallback
   const getEventPricing = () => {
+    // Use rental pricing if available (from specific date/time selection)
+    if (formData.rentalPricing) {
+      const rentalPricing = formData.rentalPricing;
+      return {
+        basePrice: rentalPricing.basePrice / 100, // Convert from cents to dollars
+        securityDeposit: rentalPricing.securityDeposit / 100,
+        description: `Space Rental (${rentalPricing.hours} hour${rentalPricing.hours > 1 ? 's' : ''})`,
+        details: `${rentalPricing.isWeekend ? 'Weekend' : 'Weekday'} rate - Studio space rental`,
+        hasRentalPricing: true
+      };
+    }
+
+    // Fallback to event type pricing (for "unsure" dates or other scenarios)
     switch (formData.eventType) {
       case "diy-party":
         return {
           basePrice: 250,
           description: "DIY Party Package",
-          details: "Includes studio space, basic supplies, and 2-hour rental"
+          details: "Includes studio space, basic supplies, and 2-hour rental",
+          hasRentalPricing: false
         };
       case "private-event":
         return {
           basePrice: 400,
           description: "Private Event Package", 
-          details: "Exclusive venue access with full amenities"
+          details: "Exclusive venue access with full amenities",
+          hasRentalPricing: false
         };
       default:
         return {
           basePrice: 300,
           description: "Custom Event Package",
-          details: "Tailored experience for your special event"
+          details: "Tailored experience for your special event",
+          hasRentalPricing: false
         };
     }
   };
@@ -53,10 +69,12 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
     return total + (addon?.price || 0);
   }, 0);
 
+  // Calculate totals differently for rental pricing vs package pricing
   const subtotal = pricing.basePrice + addonsTotal;
+  const securityDeposit = pricing.hasRentalPricing ? pricing.securityDeposit : 0;
   const tax = Math.round(subtotal * 0.08); // 8% tax
-  const total = subtotal + tax;
-  const deposit = Math.round(total * 0.5); // 50% deposit
+  const total = subtotal + tax + securityDeposit;
+  const deposit = pricing.hasRentalPricing ? securityDeposit : Math.round(total * 0.5); // For rental: security deposit, otherwise 50% deposit
 
   const formatEventType = (type: string) => {
     return type.split('-').map(word => 
@@ -163,6 +181,13 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
               <p className="text-gray-600">${tax}.00</p>
             </div>
             
+            {pricing.hasRentalPricing && securityDeposit > 0 && (
+              <div className="flex justify-between text-sm">
+                <p className="text-gray-600">Security Deposit</p>
+                <p className="text-gray-600">${securityDeposit}.00</p>
+              </div>
+            )}
+            
             <Separator />
             
             <div className="flex justify-between text-lg font-bold">
@@ -173,8 +198,17 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
             <div className="bg-pink-50 p-4 rounded-xl">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="font-medium text-pink-800">Reservation Deposit (50%)</p>
-                  <p className="text-sm text-pink-600">Remaining balance due before event</p>
+                  {pricing.hasRentalPricing ? (
+                    <>
+                      <p className="font-medium text-pink-800">Security Deposit Due</p>
+                      <p className="text-sm text-pink-600">Refundable after event completion</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-pink-800">Reservation Deposit (50%)</p>
+                      <p className="text-sm text-pink-600">Remaining balance due before event</p>
+                    </>
+                  )}
                 </div>
                 <p className="text-xl font-bold text-pink-800">${deposit}.00</p>
               </div>
