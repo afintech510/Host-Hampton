@@ -121,7 +121,9 @@ export default function AdminDashboard() {
     lead.status === 'new' || lead.status === 'contacted'
   ).length;
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
+    
     switch (status.toLowerCase()) {
       case 'confirmed': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -233,7 +235,7 @@ export default function AdminDashboard() {
                           </p>
                         </div>
                         <Badge className={getStatusColor(event.status)}>
-                          {event.status}
+                          {event.status || 'pending'}
                         </Badge>
                       </div>
                     ))}
@@ -254,7 +256,7 @@ export default function AdminDashboard() {
                           <p className="text-sm text-gray-600">{lead.email}</p>
                         </div>
                         <Badge className={getStatusColor(lead.status)}>
-                          {lead.status}
+                          {lead.status || 'new'}
                         </Badge>
                       </div>
                     ))}
@@ -333,7 +335,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <Badge className={getStatusColor(event.status)}>
-                                {event.status}
+                                {event.status || 'pending'}
                               </Badge>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -422,7 +424,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <Badge className={getStatusColor(invoice.status)}>
-                                {invoice.status}
+                                {invoice.status || 'pending'}
                               </Badge>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -509,7 +511,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <Badge className={getStatusColor(lead.status)}>
-                                {lead.status}
+                                {lead.status || 'new'}
                               </Badge>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

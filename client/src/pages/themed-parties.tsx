@@ -209,18 +209,32 @@ export default function ThemedParties() {
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
-              <img 
-                src="/images/host-hampton-logo.png" 
-                alt="Host Hampton" 
+              <img
+                src="/images/host-hampton-logo.png"
+                alt="Host Hampton"
                 className="h-20 md:h-24 mx-auto object-contain"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-black" style={{ fontFamily: "'Libre Baskerville', serif" }}>
+            <h1
+              className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-black"
+              style={{ fontFamily: "'Libre Baskerville', serif" }}
+            >
               Design Your
-              <br />
+            </h1>
+
+            <h1
+              className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-black"
+              style={{ fontFamily: "'Libre Baskerville', serif" }}
+            >
+              {" "}
               Party Experience
             </h1>
-            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(210, 15%, 55%)' }}>One Space. Endless Celebrations.</p>
+            <p
+              className="text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed"
+              style={{ color: "hsl(210, 15%, 55%)" }}
+            >
+              One Space. Endless Celebrations.
+            </p>
             <div className="flex justify-center">
               <Link href="/book-event">
                 <Button
@@ -235,10 +249,18 @@ export default function ThemedParties() {
         </div>
 
         {/* Subtle Decorative Stars */}
-        <div className="absolute top-20 right-20 text-4xl text-mauve-rose animate-pulse">✦</div>
-        <div className="absolute top-40 left-20 text-2xl text-mauve-rose animate-pulse [animation-delay:-1s]">✦</div>
-        <div className="absolute bottom-32 right-32 text-3xl text-mauve-rose animate-pulse [animation-delay:-2s]">✦</div>
-        <div className="absolute bottom-40 left-32 text-2xl text-mauve-rose animate-pulse [animation-delay:-0.5s]">✦</div>
+        <div className="absolute top-20 right-20 text-4xl text-mauve-rose animate-pulse">
+          ✦
+        </div>
+        <div className="absolute top-40 left-20 text-2xl text-mauve-rose animate-pulse [animation-delay:-1s]">
+          ✦
+        </div>
+        <div className="absolute bottom-32 right-32 text-3xl text-mauve-rose animate-pulse [animation-delay:-2s]">
+          ✦
+        </div>
+        <div className="absolute bottom-40 left-32 text-2xl text-mauve-rose animate-pulse [animation-delay:-0.5s]">
+          ✦
+        </div>
       </section>
       {/* Benefits Section */}
       <section className="py-20 bg-white">
@@ -522,7 +544,10 @@ export default function ThemedParties() {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Find Us in <span className="text-purple-600">Speonk, NY</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Conveniently located on Long Island, serving families across Eastern Suffolk County</p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Conveniently located on Long Island, serving families across
+              Eastern Suffolk County
+            </p>
           </div>
 
           {/* Service Tiles */}
@@ -531,23 +556,33 @@ export default function ThemedParties() {
               <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-lg font-bold">💎</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-2">Permanent Jewelry</h3>
-              <p className="text-xs text-gray-600">Custom welded bracelets & anklets</p>
+              <h3 className="font-bold text-gray-900 text-sm mb-2">
+                Permanent Jewelry
+              </h3>
+              <p className="text-xs text-gray-600">
+                Custom welded bracelets & anklets
+              </p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-lg font-bold">🧢</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-2">Trucker Hat Bar</h3>
-              <p className="text-xs text-gray-600">Customize your own hat design</p>
+              <h3 className="font-bold text-gray-900 text-sm mb-2">
+                Trucker Hat Bar
+              </h3>
+              <p className="text-xs text-gray-600">
+                Customize your own hat design
+              </p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-lg font-bold">💄</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-2">Custom Make-Up Pouch</h3>
+              <h3 className="font-bold text-gray-900 text-sm mb-2">
+                Custom Make-Up Pouch
+              </h3>
               <p className="text-xs text-gray-600">Personalized beauty bags</p>
             </div>
 
@@ -555,15 +590,22 @@ export default function ThemedParties() {
               <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-lg font-bold">🛍️</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-2">Gift Shop</h3>
+              <h3 className="font-bold text-gray-900 text-sm mb-2">
+                Gift Shop
+              </h3>
               <p className="text-xs text-gray-600">Party favors & keepsakes</p>
             </div>
           </div>
 
           {/* Small Contact Us Module */}
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-16 max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Plan Your Party?</h3>
-            <p className="text-gray-600 mb-6">Contact us today to book your magical celebration or learn more about our services!</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              Ready to Plan Your Party?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Contact us today to book your magical celebration or learn more
+              about our services!
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/party-designer">
                 <Button
@@ -586,7 +628,7 @@ export default function ThemedParties() {
                 variant="outline"
                 size="lg"
                 className="border-2 border-[hsl(155,20%,50%)] text-[hsl(155,20%,50%)] hover:bg-[hsl(155,20%,50%)] hover:text-white font-semibold px-8 py-3 rounded-full"
-                onClick={() => window.open('tel:(631) 998-9325')}
+                onClick={() => window.open("tel:(631) 998-9325")}
               >
                 Call (631) 998-9325
               </Button>
