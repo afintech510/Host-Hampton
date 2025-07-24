@@ -232,13 +232,15 @@ export default function ThemedParties() {
                   Try Designer Tool
                 </Button>
               </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-[hsl(155,40%,25%)] text-[hsl(155,40%,25%)] hover:bg-[hsl(155,40%,25%)] hover:text-white font-semibold text-lg px-8 py-4 rounded-full transition-all"
-              >
-                See Our Themes
-              </Button>
+              <Link href="/book-event">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-[hsl(155,40%,25%)] text-[hsl(155,40%,25%)] hover:bg-[hsl(155,40%,25%)] hover:text-white font-semibold text-lg px-8 py-4 rounded-full transition-all"
+                >
+                  Book Your Event
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
