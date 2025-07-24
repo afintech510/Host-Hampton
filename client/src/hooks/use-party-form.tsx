@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -26,11 +26,9 @@ interface FormData {
   parentLastName?: string;
   parentEmail?: string;
   parentPhone?: string;
-  address?: string;
-  city?: string;
-  zipCode?: string;
   partyNotes?: string;
   totalEstimate?: number;
+  specialNeeds?: string[];
   
   // Custom event fields (DIY/Private)
   eventDescription?: string;
@@ -90,8 +88,28 @@ const ADDON_PRICES: Record<string, number> = {
 };
 
 export function usePartyForm() {
-  const [formData, setFormData] = useState<Partial<FormData>>({});
+  const [formData, setFormData] = useState<Partial<FormData>>(() => {
+    // Initialize from session storage
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('partyFormData');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.warn('Failed to parse saved form data:', e);
+        }
+      }
+    }
+    return {};
+  });
   const { toast } = useToast();
+
+  // Save to session storage whenever formData changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('partyFormData', JSON.stringify(formData));
+    }
+  }, [formData]);
 
   // Fetch themes for pricing calculation
   const { data: themes = [] } = useQuery({
@@ -200,40 +218,13 @@ export function usePartyForm() {
           description: "Redirecting to secure payment...",
         });
 
-        // Open payment link in popup for paid events
-        const paymentUrl = "https://0b55c8c3-d136-4109-9537-5db058a282c7.paylinks.godaddy.com/party-deposit";
-        const popup = window.open(
-          paymentUrl,
-          "payment",
-          "width=900,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no",
-        );
-
-        // Check if popup was blocked
-        if (!popup || popup.closed || typeof popup.closed === "undefined") {
-          toast({
-            title: "Popup Blocked",
-            description: "Please allow popups for payment processing. Redirecting now...",
-            variant: "destructive",
-          });
-          setTimeout(() => {
-            window.location.href = paymentUrl;
-          }, 2000);
-        } else {
-          // Monitor popup to detect when it's closed
-          const checkClosed = setInterval(() => {
-            if (popup.closed) {
-              clearInterval(checkClosed);
-              toast({
-                title: "Payment Window Closed",
-                description: "Thank you! We'll contact you within 24 hours to confirm your event details.",
-              });
-              // Redirect to home after payment
-              setTimeout(() => {
-                window.location.href = "/";
-              }, 2000);
-            }
-          }, 1000);
-        }
+        // Create Stripe payment intent and redirect to checkout
+        submitPaymentMutation.mutate({
+          eventId: data.data.eventId,
+          invoiceId: data.data.invoiceId,
+          amount: formData.totalEstimate || 550, // Default to $550 if no estimate
+          eventType: formData.eventType
+        });
       } else {
         // For request-only events (jewelry, studio rental)
         toast({
@@ -259,7 +250,14 @@ export function usePartyForm() {
   });
 
   const updateFormData = (newData: Partial<FormData>) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
+    setFormData((prev) => {
+      const updated = { ...prev, ...newData };
+      // Immediately save to session storage
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('partyFormData', JSON.stringify(updated));
+      }
+      return updated;
+    });
   };
 
   const submitBooking = async (options?: { action?: 'inquiry' | 'payment' }) => {

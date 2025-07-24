@@ -717,6 +717,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // STRIPE PAYMENT ENDPOINT
+  app.post("/api/book-with-payment", async (req, res) => {
+    try {
+      const { eventId, invoiceId, amount, eventType } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Valid amount is required"
+        });
+      }
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          eventId: eventId?.toString() || '',
+          invoiceId: invoiceId?.toString() || '',
+          eventType: eventType || ''
+        }
+      });
+
+      res.json({
+        success: true,
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        bookingData: {
+          eventId,
+          invoiceId,
+          eventType
+        }
+      });
+    } catch (error) {
+      console.error("Payment intent creation error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create payment intent"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

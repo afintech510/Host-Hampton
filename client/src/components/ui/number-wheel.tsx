@@ -1,135 +1,89 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface NumberWheelProps {
-  value: number;
-  onChange: (value: number) => void;
-  min?: number;
-  max?: number;
-  className?: string;
+  value: string;
+  onValueChange: (value: string) => void;
+  options: { value: string; label: string }[];
   placeholder?: string;
+  className?: string;
 }
 
-export function NumberWheel({ 
-  value, 
-  onChange, 
-  min = 0, 
-  max = 100, 
-  className,
-  placeholder = "0"
-}: NumberWheelProps) {
+export function NumberWheel({ value, onValueChange, options, placeholder, className }: NumberWheelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value);
   const wheelRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Generate numbers for the wheel (limit to reasonable range for mobile)
-  const numbers = Array.from({ length: Math.min(max - min + 1, 51) }, (_, i) => min + i);
+  const selectedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+    if (isOpen && selectedRef.current && wheelRef.current) {
+      // Center the selected item
+      const wheelHeight = wheelRef.current.clientHeight;
+      const itemHeight = 48; // Height of each item
+      const selectedIndex = options.findIndex(opt => opt.value === value);
+      if (selectedIndex >= 0) {
+        const scrollTop = selectedIndex * itemHeight - (wheelHeight / 2) + (itemHeight / 2);
+        wheelRef.current.scrollTop = scrollTop;
       }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
     }
+  }, [isOpen, value, options]);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    setSelectedValue(value);
-  }, [value]);
-
-  const handleSelect = useCallback((num: number) => {
-    setSelectedValue(num);
-    onChange(num);
-    setIsOpen(false);
-  }, [onChange]);
-
-  // Check if device is mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-
-  if (!isMobile) {
-    // Fallback to regular input on desktop
-    return (
-      <input
-        type="number"
-        value={value || ""}
-        onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-        placeholder={placeholder}
-        min={min}
-        max={max}
-        className={cn(
-          "w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300",
-          className
-        )}
-      />
-    );
-  }
+  const selectedOption = options.find(opt => opt.value === value);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div className="relative">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300 text-left bg-white flex items-center justify-between",
-          isOpen && "border-pink-300",
+          "w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral text-left flex items-center justify-between",
+          !selectedOption && "text-gray-400",
           className
         )}
       >
-        <span className={selectedValue === 0 ? "text-gray-400" : "text-gray-900"}>
-          {selectedValue || placeholder}
-        </span>
-        <div className="flex flex-col space-y-0.5">
-          <div className="w-0 h-0 border-l-2 border-r-2 border-l-transparent border-r-transparent border-b-2 border-b-gray-400"></div>
-          <div className="w-0 h-0 border-l-2 border-r-2 border-l-transparent border-r-transparent border-t-2 border-t-gray-400"></div>
-        </div>
+        <span>{selectedOption ? selectedOption.label : placeholder}</span>
+        <svg
+          className={cn("w-5 h-5 transition-transform", isOpen && "rotate-180")}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end md:relative md:inset-auto md:bg-transparent md:flex md:items-start">
-          <div className="w-full bg-white rounded-t-2xl md:absolute md:top-full md:left-0 md:right-0 md:mt-1 md:rounded-xl md:border md:border-gray-200 md:shadow-lg md:max-h-60">
-            {/* Mobile header */}
-            <div className="md:hidden p-4 border-b border-gray-200 flex justify-between items-center">
-              <span className="text-lg font-medium text-gray-900">Select Number</span>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ×
-              </button>
-            </div>
-            
+        <>
+          <div 
+            className="fixed inset-0 bg-black/20 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-hidden">
             <div 
               ref={wheelRef}
-              className="overflow-y-auto max-h-80 md:max-h-60 pb-safe"
-              style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+              className="overflow-y-auto scroll-smooth"
+              style={{ maxHeight: '240px' }}
             >
-              {numbers.map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => handleSelect(num)}
+              {options.map((option, index) => (
+                <div
+                  key={option.value}
+                  ref={option.value === value ? selectedRef : null}
+                  onClick={() => {
+                    onValueChange(option.value);
+                    setIsOpen(false);
+                  }}
                   className={cn(
-                    "w-full px-6 py-4 md:px-4 md:py-3 text-left hover:bg-pink-50 active:bg-pink-100 transition-colors text-lg border-b border-gray-100 last:border-b-0",
-                    selectedValue === num && "bg-pink-100 text-pink-800 font-medium"
+                    "p-3 text-center cursor-pointer transition-colors h-12 flex items-center justify-center border-b border-gray-100 last:border-b-0",
+                    option.value === value 
+                      ? "bg-coral text-white font-medium" 
+                      : "hover:bg-gray-50"
                   )}
                 >
-                  {num}
-                </button>
+                  {option.label}
+                </div>
               ))}
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -77,13 +77,8 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
               <Label htmlFor={theme.name} className="flex items-center cursor-pointer flex-1">
                 <span className="text-2xl mr-3">{theme.icon}</span>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center">
                     <span className="text-lg font-medium">{theme.name}</span>
-                    {theme.price > 0 && (
-                      <span className="text-coral font-semibold">
-                        +${(theme.price / 100).toFixed(2)}
-                      </span>
-                    )}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{theme.description}</p>
                 </div>

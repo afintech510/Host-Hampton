@@ -68,6 +68,12 @@ export function DateTimeStep({ formData, updateFormData, onNext, onBack }: DateT
                 4:00 PM - 6:00 PM
               </Label>
             </div>
+            <div className="flex items-center p-4 border-2 border-purple-200 rounded-xl hover:border-purple-400 transition-colors bg-purple-50">
+              <RadioGroupItem value="unsure" id="time4" className="mr-3" />
+              <Label htmlFor="time4" className="text-lg cursor-pointer flex-1 text-purple-700">
+                📅 I'm unsure, exploring options
+              </Label>
+            </div>
           </RadioGroup>
         </div>
 

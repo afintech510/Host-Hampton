@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import CnP_15072025_075558 from "@assets/CnP_15072025_075558.png";
 
@@ -15,10 +16,30 @@ interface FoodStepProps {
 export function FoodStep({ formData, updateFormData, onNext, onBack }: FoodStepProps) {
   const [foodChoice, setFoodChoice] = useState(formData.foodChoice || "");
   const [cupcakeFlavor, setCupcakeFlavor] = useState(formData.cupcakeFlavor || "");
+  const [specialNeeds, setSpecialNeeds] = useState<string[]>(formData.specialNeeds || []);
+
+  // Save to session storage whenever values change
+  useEffect(() => {
+    const sessionData = JSON.parse(sessionStorage.getItem('partyFormData') || '{}');
+    sessionStorage.setItem('partyFormData', JSON.stringify({
+      ...sessionData,
+      foodChoice,
+      cupcakeFlavor,
+      specialNeeds
+    }));
+  }, [foodChoice, cupcakeFlavor, specialNeeds]);
 
   const handleNext = () => {
-    updateFormData({ foodChoice, cupcakeFlavor });
+    updateFormData({ foodChoice, cupcakeFlavor, specialNeeds });
     onNext();
+  };
+
+  const handleSpecialNeedsChange = (need: string, checked: boolean) => {
+    if (checked) {
+      setSpecialNeeds([...specialNeeds, need]);
+    } else {
+      setSpecialNeeds(specialNeeds.filter(n => n !== need));
+    }
   };
 
   const isValid = foodChoice && cupcakeFlavor;
@@ -52,6 +73,12 @@ export function FoodStep({ formData, updateFormData, onNext, onBack }: FoodStepP
                 🥯 Bagels
               </Label>
             </div>
+            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+              <RadioGroupItem value="none" id="food-none" className="mr-3" />
+              <Label htmlFor="food-none" className="text-lg cursor-pointer flex-1">
+                ❌ None
+              </Label>
+            </div>
           </RadioGroup>
         </div>
 
@@ -70,7 +97,52 @@ export function FoodStep({ formData, updateFormData, onNext, onBack }: FoodStepP
                 🍫 Chocolate
               </Label>
             </div>
+            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+              <RadioGroupItem value="none" id="cupcake-none" className="mr-3" />
+              <Label htmlFor="cupcake-none" className="text-lg cursor-pointer flex-1">
+                ❌ None
+              </Label>
+            </div>
           </RadioGroup>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">Special Needs (Select all that apply)</Label>
+          <div className="space-y-3">
+            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors">
+              <Checkbox
+                id="gluten-free"
+                checked={specialNeeds.includes("gluten-free")}
+                onCheckedChange={(checked) => handleSpecialNeedsChange("gluten-free", checked as boolean)}
+                className="mr-3"
+              />
+              <Label htmlFor="gluten-free" className="text-lg cursor-pointer flex-1">
+                🌾 Gluten-Free
+              </Label>
+            </div>
+            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-colors">
+              <Checkbox
+                id="dairy-free"
+                checked={specialNeeds.includes("dairy-free")}
+                onCheckedChange={(checked) => handleSpecialNeedsChange("dairy-free", checked as boolean)}
+                className="mr-3"
+              />
+              <Label htmlFor="dairy-free" className="text-lg cursor-pointer flex-1">
+                🥛 Dairy-Free
+              </Label>
+            </div>
+            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-red-300 transition-colors">
+              <Checkbox
+                id="nut-allergy"
+                checked={specialNeeds.includes("nut-allergy")}
+                onCheckedChange={(checked) => handleSpecialNeedsChange("nut-allergy", checked as boolean)}
+                className="mr-3"
+              />
+              <Label htmlFor="nut-allergy" className="text-lg cursor-pointer flex-1">
+                🥜 Nut Allergy
+              </Label>
+            </div>
+          </div>
         </div>
 
         <UnifiedButton

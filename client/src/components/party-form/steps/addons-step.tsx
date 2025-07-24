@@ -65,12 +65,11 @@ export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsS
                 onCheckedChange={(checked) => handleAddonChange(addon.name, checked as boolean)}
                 className="mr-4"
               />
-              <Label htmlFor={addon.id.toString()} className="flex-1 flex items-center justify-between cursor-pointer">
+              <Label htmlFor={addon.id.toString()} className="flex-1 flex items-center cursor-pointer">
                 <div className="flex items-center">
                   <span className="text-xl mr-3">🎉</span>
                   <span className="text-lg">{addon.name}</span>
                 </div>
-                <span className="text-gray-500 text-sm">+${(addon.price / 100).toFixed(0)}</span>
               </Label>
             </div>
           ))

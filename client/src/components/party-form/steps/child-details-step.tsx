@@ -1,14 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NumberWheel } from "@/components/ui/number-wheel";
 import birthdayStarImage from "@assets/image_1752580458121.png";
 
 interface ChildDetailsStepProps {
@@ -20,8 +14,19 @@ interface ChildDetailsStepProps {
 
 export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: ChildDetailsStepProps) {
   const [childName, setChildName] = useState(formData.childName || "");
-  const [childAge, setChildAge] = useState(formData.childAge || "");
-  const [guestCount, setGuestCount] = useState(formData.guestCount || "");
+  const [childAge, setChildAge] = useState(formData.childAge?.toString() || "");
+  const [guestCount, setGuestCount] = useState(formData.guestCount?.toString() || "");
+
+  // Save to session storage whenever values change
+  useEffect(() => {
+    const sessionData = JSON.parse(sessionStorage.getItem('partyFormData') || '{}');
+    sessionStorage.setItem('partyFormData', JSON.stringify({
+      ...sessionData,
+      childName,
+      childAge: childAge ? parseInt(childAge) : undefined,
+      guestCount: guestCount ? parseInt(guestCount) : undefined
+    }));
+  }, [childName, childAge, guestCount]);
 
   const handleNext = () => {
     updateFormData({ 
@@ -33,6 +38,24 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
   };
 
   const isValid = childName && childAge && guestCount;
+
+  // Age options for wheel selector
+  const ageOptions = Array.from({ length: 15 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: `${i + 1} year${i + 1 > 1 ? 's' : ''} old`
+  }));
+
+  // Guest count options for wheel selector
+  const guestOptions = [
+    { value: "5", label: "5 children" },
+    { value: "8", label: "8 children" },
+    { value: "10", label: "10 children" },
+    { value: "12", label: "12 children" },
+    { value: "15", label: "15 children" },
+    { value: "18", label: "18 children" },
+    { value: "20", label: "20 children" },
+    { value: "25", label: "25 children (max)" }
+  ];
 
   return (
     <div className="text-center">
@@ -66,39 +89,24 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
           <Label className="text-sm font-medium text-gray-700 mb-2 block">
             How old are they turning?
           </Label>
-          <Select value={childAge} onValueChange={setChildAge}>
-            <SelectTrigger className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral">
-              <SelectValue placeholder="Select age" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((age) => (
-                <SelectItem key={age} value={age.toString()}>
-                  {age} year{age > 1 ? 's' : ''} old
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <NumberWheel
+            value={childAge}
+            onValueChange={setChildAge}
+            options={ageOptions}
+            placeholder="Select age"
+          />
         </div>
 
         <div>
           <Label className="text-sm font-medium text-gray-700 mb-2 block">
             How many kids will attend? (including birthday child)
           </Label>
-          <Select value={guestCount} onValueChange={setGuestCount}>
-            <SelectTrigger className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral">
-              <SelectValue placeholder="Select number" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5 children</SelectItem>
-              <SelectItem value="8">8 children</SelectItem>
-              <SelectItem value="10">10 children</SelectItem>
-              <SelectItem value="12">12 children</SelectItem>
-              <SelectItem value="15">15 children</SelectItem>
-              <SelectItem value="18">18 children</SelectItem>
-              <SelectItem value="20">20 children</SelectItem>
-              <SelectItem value="25">25 children (max)</SelectItem>
-            </SelectContent>
-          </Select>
+          <NumberWheel
+            value={guestCount}
+            onValueChange={setGuestCount}
+            options={guestOptions}
+            placeholder="Select number"
+          />
         </div>
 
         <UnifiedButton

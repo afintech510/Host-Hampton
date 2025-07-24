@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,24 +17,30 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
   const [parentLastName, setParentLastName] = useState(formData.parentLastName || "");
   const [parentEmail, setParentEmail] = useState(formData.parentEmail || "");
   const [parentPhone, setParentPhone] = useState(formData.parentPhone || "");
-  const [address, setAddress] = useState(formData.address || "");
-  const [city, setCity] = useState(formData.city || "");
-  const [zipCode, setZipCode] = useState(formData.zipCode || "");
+
+  // Save to session storage whenever values change
+  useEffect(() => {
+    const sessionData = JSON.parse(sessionStorage.getItem('partyFormData') || '{}');
+    sessionStorage.setItem('partyFormData', JSON.stringify({
+      ...sessionData,
+      parentFirstName,
+      parentLastName,
+      parentEmail,
+      parentPhone
+    }));
+  }, [parentFirstName, parentLastName, parentEmail, parentPhone]);
 
   const handleNext = () => {
     updateFormData({ 
       parentFirstName, 
       parentLastName, 
       parentEmail, 
-      parentPhone, 
-      address, 
-      city, 
-      zipCode 
+      parentPhone
     });
     onNext();
   };
 
-  const isValid = parentFirstName && parentLastName && parentEmail && parentPhone && address && city && zipCode;
+  const isValid = parentFirstName && parentLastName && parentEmail && parentPhone;
 
   return (
     <div className="text-center">
@@ -93,33 +99,6 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
             onChange={(e) => setParentPhone(e.target.value)}
             className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
           />
-        </div>
-
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">Address</Label>
-          <Input
-            type="text"
-            placeholder="Street address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral mb-3"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              type="text"
-              placeholder="City"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
-            />
-            <Input
-              type="text"
-              placeholder="ZIP Code"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
-            />
-          </div>
         </div>
 
         <UnifiedButton

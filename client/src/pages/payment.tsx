@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { PaymentForm } from "@/components/payment/payment-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle } from "lucide-react";
-import { useLocation } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, CreditCard } from "lucide-react";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
@@ -14,200 +13,196 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-export default function Payment() {
-  const [clientSecret, setClientSecret] = useState("");
-  const [paymentIntentId, setPaymentIntentId] = useState("");
-  const [bookingData, setBookingData] = useState<any>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'processing' | 'succeeded' | 'failed'>('processing');
-  const [, setLocation] = useLocation();
+const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    // Get client secret from URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const clientSecretFromUrl = urlParams.get('client_secret');
-    
-    if (clientSecretFromUrl) {
-      setClientSecret(clientSecretFromUrl);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
     }
 
-    // Get stored payment info from localStorage
-    const pendingPayment = localStorage.getItem('pendingPayment');
-    if (pendingPayment) {
-      const paymentInfo = JSON.parse(pendingPayment);
-      setPaymentIntentId(paymentInfo.paymentIntentId || '');
-      setBookingData(paymentInfo.bookingData || null);
-      
-      // Use stored client secret if URL doesn't have one
-      if (!clientSecretFromUrl && paymentInfo.clientSecret) {
-        setClientSecret(paymentInfo.clientSecret);
+    setIsProcessing(true);
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setIsProcessing(false);
+      return;
+    }
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: cardElement,
       }
+    });
+
+    setIsProcessing(false);
+
+    if (error) {
+      toast({
+        title: "Payment Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else if (paymentIntent.status === 'succeeded') {
+      toast({
+        title: "Payment Successful!",
+        description: "Thank you for your payment. We'll contact you soon with event details.",
+      });
+      
+      // Clear saved form data
+      sessionStorage.removeItem('partyFormData');
+      
+      // Redirect to success page or home
+      setTimeout(() => {
+        window.location.href = "/?payment=success";
+      }, 2000);
     }
-  }, []);
-
-  const handlePaymentSuccess = () => {
-    setPaymentStatus('succeeded');
-    // Clear stored payment info
-    localStorage.removeItem('pendingPayment');
-  };
-
-  const handlePaymentError = () => {
-    setPaymentStatus('failed');
-  };
-
-  const handleBackToBooking = () => {
-    setLocation('/book-event');
-  };
-
-  const handleBackToHome = () => {
-    setLocation('/themed-parties');
-  };
-
-  if (!clientSecret) {
-    return (
-      <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-red-600">Payment Error</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-gray-600">
-              No payment information found. Please start the booking process again.
-            </p>
-            <Button 
-              onClick={handleBackToBooking}
-              className="w-full"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Booking
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (paymentStatus === 'succeeded') {
-    return (
-      <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-green-600 flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 mr-2" />
-              Payment Successful!
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center space-y-2">
-              <p className="text-gray-700 font-medium">
-                Your reservation deposit has been processed successfully.
-              </p>
-              <p className="text-sm text-gray-600">
-                We'll contact you within 24 hours to finalize your event details and discuss any special requirements.
-              </p>
-              {bookingData && (
-                <div className="bg-pink-50 p-3 rounded-lg mt-4">
-                  <p className="text-sm text-pink-800">
-                    <strong>Booking ID:</strong> {bookingData.eventId}
-                  </p>
-                  <p className="text-sm text-pink-800">
-                    <strong>Invoice ID:</strong> {bookingData.invoiceId}
-                  </p>
-                </div>
-              )}
-            </div>
-            <Button 
-              onClick={handleBackToHome}
-              className="w-full bg-pink-400 hover:bg-pink-500"
-            >
-              Return to Home
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (paymentStatus === 'failed') {
-    return (
-      <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-red-600">Payment Failed</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-center text-gray-600">
-              There was an issue processing your payment. Please try again or contact us directly.
-            </p>
-            <div className="space-y-2">
-              <Button 
-                onClick={() => setPaymentStatus('processing')}
-                className="w-full"
-              >
-                Try Again
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={handleBackToBooking}
-                className="w-full"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Booking
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const appearance = {
-    theme: 'stripe' as const,
-    variables: {
-      colorPrimary: '#A1B5C8', // Dusty blue
-      colorBackground: '#ffffff',
-      colorText: '#374151',
-      colorDanger: '#ef4444',
-      fontFamily: 'Inter, system-ui, sans-serif',
-      spacingUnit: '4px',
-      borderRadius: '8px',
-    },
-  };
-
-  const options = {
-    clientSecret,
-    appearance,
   };
 
   return (
-    <div className="min-h-screen bg-dusty-blue flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="p-4 border rounded-lg">
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                  color: '#aab7c4',
+                },
+              },
+              invalid: {
+                color: '#9e2146',
+              },
+            },
+          }}
+        />
+      </div>
+      
+      <Button 
+        type="submit" 
+        disabled={!stripe || isProcessing}
+        className="w-full"
+        size="lg"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing Payment...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-4 w-4" />
+            Complete Payment
+          </>
+        )}
+      </Button>
+    </form>
+  );
+};
+
+export default function Payment() {
+  const [clientSecret, setClientSecret] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Get client secret from URL params or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientSecretParam = urlParams.get('client_secret');
+    
+    if (clientSecretParam) {
+      setClientSecret(clientSecretParam);
+      setIsLoading(false);
+    } else {
+      // Check if there's pending payment data in localStorage
+      const pendingPayment = localStorage.getItem('pendingPayment');
+      if (pendingPayment) {
+        try {
+          const paymentData = JSON.parse(pendingPayment);
+          setClientSecret(paymentData.clientSecret);
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Failed to parse pending payment:', error);
+          toast({
+            title: "Payment Error",
+            description: "Unable to load payment information. Please try booking again.",
+            variant: "destructive",
+          });
+          setTimeout(() => {
+            window.location.href = "/book-event";
+          }, 2000);
+        }
+      } else {
+        toast({
+          title: "Payment Error",
+          description: "No payment information found. Redirecting to booking...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/book-event";
+        }, 2000);
+      }
+    }
+  }, [toast]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading payment information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center">Complete Your Payment</CardTitle>
-            <p className="text-center text-gray-600 text-sm">
-              Secure payment processing powered by Stripe
-            </p>
+            <CardTitle className="text-red-600">Payment Error</CardTitle>
+            <CardDescription>
+              Unable to load payment information. Please try booking again.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Elements options={options} stripe={stripePromise}>
-              <PaymentForm 
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                bookingData={bookingData}
-              />
-            </Elements>
+            <Button 
+              onClick={() => window.location.href = "/book-event"}
+              className="w-full"
+            >
+              Return to Booking
+            </Button>
           </CardContent>
         </Card>
-        
-        <div className="mt-4 text-center">
-          <Button 
-            variant="ghost" 
-            onClick={handleBackToBooking}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Booking
-          </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-4">
+        <div className="max-w-md mx-auto">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Complete Your Payment</CardTitle>
+              <CardDescription>
+                Secure payment processing for your Host Hampton event
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <CheckoutForm clientSecret={clientSecret} />
+              </Elements>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
