@@ -10,6 +10,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,11 +30,12 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/">
-              <div className="flex items-center space-x-2 cursor-pointer">
-                <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">H</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Host Hampton</span>
+              <div className="flex items-center cursor-pointer">
+                <img 
+                  src={hostHamptonLogo} 
+                  alt="Host Hampton" 
+                  className="h-10 w-auto object-contain"
+                />
               </div>
             </Link>
           </div>
