@@ -11,35 +11,40 @@ interface EventTypeStepProps {
 const eventTypes = [
   {
     id: "birthday-party",
-    title: "Kids Birthday Party"
+    title: "Kids Birthday Party",
   },
   {
     id: "trucker-hat",
-    title: "Trucker Hat Bar"
+    title: "Trucker Hat Bar",
   },
   {
     id: "permanent-jewelry",
-    title: "Permanent Jewelry"
+    title: "Permanent Jewelry",
   },
   {
     id: "diy-party",
-    title: "DIY Party"
+    title: "D·I·Y Party",
   },
   {
     id: "private-event",
-    title: "Private Event"
+    title: "Private Event",
   },
   {
     id: "studio-rental",
-    title: "Partial Studio Rental"
+    title: "Partial Studio Rental",
   },
   {
     id: "workshop",
-    title: "Workshop/Class"
-  }
+    title: "Workshop/Class",
+  },
 ];
 
-export function EventTypeStep({ formData, updateFormData, onNext, onBack }: EventTypeStepProps) {
+export function EventTypeStep({
+  formData,
+  updateFormData,
+  onNext,
+  onBack,
+}: EventTypeStepProps) {
   const selectedEventType = formData.eventType;
 
   const handleEventTypeSelect = (eventType: string) => {
@@ -69,7 +74,7 @@ export function EventTypeStep({ formData, updateFormData, onNext, onBack }: Even
       <div className="space-y-3">
         {eventTypes.map((type, index) => {
           const isSelected = selectedEventType === type.id;
-          
+
           return (
             <motion.div
               key={type.id}
@@ -77,28 +82,28 @@ export function EventTypeStep({ formData, updateFormData, onNext, onBack }: Even
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <div 
+              <div
                 className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
-                  isSelected 
-                    ? 'border-pink-300 bg-pink-50' 
-                    : 'border-gray-200 bg-white hover:border-pink-200 hover:bg-pink-25'
+                  isSelected
+                    ? "border-pink-300 bg-pink-50"
+                    : "border-gray-200 bg-white hover:border-pink-200 hover:bg-pink-25"
                 }`}
                 onClick={() => handleEventTypeSelect(type.id)}
               >
                 <div className="flex items-center space-x-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    isSelected 
-                      ? 'border-pink-400 bg-pink-400' 
-                      : 'border-gray-300'
-                  }`}>
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      isSelected
+                        ? "border-pink-400 bg-pink-400"
+                        : "border-gray-300"
+                    }`}
+                  >
                     {isSelected && (
                       <div className="w-2 h-2 bg-white rounded-full" />
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">
-                      {type.title}
-                    </h3>
+                    <h3 className="font-medium text-gray-900">{type.title}</h3>
                   </div>
                 </div>
               </div>
@@ -108,14 +113,10 @@ export function EventTypeStep({ formData, updateFormData, onNext, onBack }: Even
       </div>
 
       <div className="flex space-x-3 pt-4">
-        <UnifiedButton 
-          variant="outline" 
-          onClick={onBack}
-          className="flex-1"
-        >
+        <UnifiedButton variant="outline" onClick={onBack} className="flex-1">
           Back
         </UnifiedButton>
-        <UnifiedButton 
+        <UnifiedButton
           onClick={handleNext}
           disabled={!selectedEventType}
           variant="primary"

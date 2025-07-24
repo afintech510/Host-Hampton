@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { NumberWheel } from "@/components/ui/number-wheel";
 
 interface EventDetailsStepProps {
   formData: any;
@@ -13,20 +13,20 @@ interface EventDetailsStepProps {
 
 export function EventDetailsStep({ formData, updateFormData, onNext, onBack }: EventDetailsStepProps) {
   const [eventDescription, setEventDescription] = useState(formData.eventDescription || "");
-  const [adultCount, setAdultCount] = useState(formData.adultCount || "");
-  const [childCount, setChildCount] = useState(formData.childCount || "");
+  const [adultCount, setAdultCount] = useState(formData.adultCount || 0);
+  const [childCount, setChildCount] = useState(formData.childCount || 0);
 
   const handleNext = () => {
     updateFormData({ 
       eventDescription, 
-      adultCount: parseInt(adultCount) || 0, 
-      childCount: parseInt(childCount) || 0 
+      adultCount, 
+      childCount 
     });
     onNext();
   };
 
-  const totalGuests = (parseInt(adultCount) || 0) + (parseInt(childCount) || 0);
-  const isValid = eventDescription.trim() && (adultCount || childCount);
+  const totalGuests = adultCount + childCount;
+  const isValid = eventDescription.trim() && (adultCount > 0 || childCount > 0);
 
   return (
     <div className="space-y-8">
@@ -57,24 +57,22 @@ export function EventDetailsStep({ formData, updateFormData, onNext, onBack }: E
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-2 block">How many adults?</Label>
-            <Input
-              type="number"
+            <NumberWheel
               value={adultCount}
-              onChange={(e) => setAdultCount(e.target.value)}
+              onChange={setAdultCount}
+              min={0}
+              max={100}
               placeholder="0"
-              min="0"
-              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300"
             />
           </div>
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-2 block">How many children?</Label>
-            <Input
-              type="number"
+            <NumberWheel
               value={childCount}
-              onChange={(e) => setChildCount(e.target.value)}
+              onChange={setChildCount}
+              min={0}
+              max={100}
               placeholder="0"
-              min="0"
-              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300"
             />
           </div>
         </div>
