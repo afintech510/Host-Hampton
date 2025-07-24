@@ -88,14 +88,11 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
         <div className="w-20 h-20 bg-gradient-to-br from-pink-100 to-orange-100 rounded-full mx-auto flex items-center justify-center">
           <div className="text-2xl">💰</div>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Event Quote
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Event Quotation</h2>
         <p className="text-gray-600">
           Review your event details and pricing
         </p>
       </div>
-
       <Card className="border-2 border-gray-200">
         <CardHeader className="bg-pink-50">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -185,13 +182,11 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
           </div>
         </CardContent>
       </Card>
-
       <div className="bg-blue-50 p-4 rounded-xl">
         <p className="text-sm text-blue-800">
           <strong>Next Steps:</strong> After payment, we'll contact you within 24 hours to finalize event details and discuss any special requirements.
         </p>
       </div>
-
       <div className="flex space-x-3 pt-4">
         <Button 
           variant="outline" 
