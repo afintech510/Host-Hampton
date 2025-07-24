@@ -244,6 +244,21 @@ export default function MyEvents() {
                     <Button
                       type="button"
                       variant="outline"
+                      className="w-full mt-2"
+                      onClick={() => {
+                        // Skip verification for testing - simulate successful auth
+                        setAuthState({
+                          isAuthenticated: true,
+                          customerEmail: email,
+                          customerId: 1, // Test customer ID
+                        });
+                      }}
+                    >
+                      Skip Verification (Testing)
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
                       className="w-full"
                       onClick={() => {
                         setShowCodeInput(false);
