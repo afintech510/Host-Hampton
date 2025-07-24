@@ -4,7 +4,7 @@ import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import partyHornImage from "@assets/image_1752580300891.png";
-import type { PartyExtra } from "@shared/schema";
+import type { Addon } from "@shared/schema";
 
 interface AddonsStepProps {
   formData: any;
@@ -16,9 +16,9 @@ interface AddonsStepProps {
 export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsStepProps) {
   const [partyAddons, setPartyAddons] = useState<string[]>(formData.partyAddons || []);
 
-  const { data: extrasData, isLoading } = useQuery({
-    queryKey: ["/api/party-extras"],
-    select: (data: any) => data.extras as PartyExtra[]
+  const { data: addonsData, isLoading } = useQuery({
+    queryKey: ["/api/addons"],
+    select: (data: any) => data.addons as Addon[]
   });
 
   const handleAddonChange = (addonValue: string, checked: boolean) => {
@@ -54,23 +54,23 @@ export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsS
             <div className="text-gray-500">Loading party extras...</div>
           </div>
         ) : (
-          extrasData?.map((extra) => (
+          addonsData?.map((addon) => (
             <div
-              key={extra.id}
+              key={addon.id}
               className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors"
             >
               <Checkbox
-                id={extra.id.toString()}
-                checked={partyAddons.includes(extra.name)}
-                onCheckedChange={(checked) => handleAddonChange(extra.name, checked as boolean)}
+                id={addon.id.toString()}
+                checked={partyAddons.includes(addon.name)}
+                onCheckedChange={(checked) => handleAddonChange(addon.name, checked as boolean)}
                 className="mr-4"
               />
-              <Label htmlFor={extra.id.toString()} className="flex-1 flex items-center justify-between cursor-pointer">
+              <Label htmlFor={addon.id.toString()} className="flex-1 flex items-center justify-between cursor-pointer">
                 <div className="flex items-center">
-                  <span className="text-xl mr-3">{extra.icon}</span>
-                  <span className="text-lg">{extra.name}</span>
+                  <span className="text-xl mr-3">🎉</span>
+                  <span className="text-lg">{addon.name}</span>
                 </div>
-                <span className="text-gray-500 text-sm">+${(extra.price / 100).toFixed(0)}</span>
+                <span className="text-gray-500 text-sm">+${(addon.price / 100).toFixed(0)}</span>
               </Label>
             </div>
           ))

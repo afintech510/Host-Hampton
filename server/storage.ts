@@ -75,17 +75,22 @@ export class MemStorage implements IStorage {
   private currentUserId: number;
   private currentReviewId: number;
   private currentThemeId: number;
+  private addons: Map<number, Addon>;
+  private currentAddonId: number;
 
   constructor() {
     this.users = new Map();
     this.reviews = new Map();
     this.partyThemes = new Map();
+    this.addons = new Map();
     this.currentUserId = 1;
     this.currentReviewId = 1;
     this.currentThemeId = 1;
+    this.currentAddonId = 1;
     
-    // Initialize party themes
+    // Initialize party themes and addons
     this.initializePartyThemes();
+    this.initializeAddons();
   }
   
   private initializePartyThemes() {
@@ -106,7 +111,30 @@ export class MemStorage implements IStorage {
         ...theme, 
         id,
         active: true,
-        description: theme.description
+        description: theme.description || null,
+        icon: theme.icon,
+        color: theme.color
+      });
+    });
+  }
+  
+  private initializeAddons() {
+    const addons = [
+      { name: "Face Painting", description: "Professional face painting for all guests", price: 7500, imageUrl: null, perGuest: false, active: true },
+      { name: "Balloon Animals", description: "Balloon twisting and animal sculptures", price: 5000, imageUrl: null, perGuest: false, active: true },
+      { name: "Magic Show", description: "45-minute interactive magic performance", price: 12000, imageUrl: null, perGuest: false, active: true },
+      { name: "Photo Booth", description: "Props and backdrop for memorable photos", price: 8500, imageUrl: null, perGuest: false, active: true },
+      { name: "Character Visit", description: "Themed character appearance for 30 minutes", price: 15000, imageUrl: null, perGuest: false, active: true },
+      { name: "Craft Station", description: "DIY craft activities with supplies included", price: 6000, imageUrl: null, perGuest: false, active: true },
+      { name: "Goodie Bags", description: "Pre-filled party favor bags per child", price: 800, imageUrl: null, perGuest: true, active: true },
+      { name: "Extra Hour", description: "Extend your party by one additional hour", price: 10000, imageUrl: null, perGuest: false, active: true }
+    ];
+    
+    addons.forEach(addon => {
+      const id = this.currentAddonId++;
+      this.addons.set(id, { 
+        ...addon, 
+        id
       });
     });
   }
@@ -195,11 +223,21 @@ export class MemStorage implements IStorage {
   }
 
   async getAddons(): Promise<Addon[]> {
-    return [];
+    return Array.from(this.addons.values()).filter(addon => addon.active);
   }
 
-  async createAddon(addon: InsertAddon): Promise<Addon> {
-    throw new Error("Not implemented in MemStorage");
+  async createAddon(insertAddon: InsertAddon): Promise<Addon> {
+    const id = this.currentAddonId++;
+    const addon: Addon = { 
+      ...insertAddon, 
+      id,
+      description: insertAddon.description || null,
+      imageUrl: insertAddon.imageUrl || null,
+      active: insertAddon.active !== undefined ? insertAddon.active : true,
+      perGuest: insertAddon.perGuest !== undefined ? insertAddon.perGuest : false
+    };
+    this.addons.set(id, addon);
+    return addon;
   }
 
   async getPartyThemes(): Promise<PartyTheme[]> {
@@ -790,4 +828,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
