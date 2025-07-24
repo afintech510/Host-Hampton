@@ -31,7 +31,7 @@ import { ContactStep } from "@/components/party-form/steps/contact-step";
 import { SummaryStep } from "@/components/party-form/steps/summary-step";
 import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, HelpCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
 const TOTAL_STEPS = 9;
@@ -387,6 +387,8 @@ export default function BookEvent() {
           formData.eventType && isStudioFlow(formData.eventType) ? 4 : 
           TOTAL_STEPS
         }
+        onHelpClick={handleHelpClick}
+        onContactClick={handleContactClick}
       />
       
       <main className="flex-1 flex items-center justify-center px-6 py-8">
@@ -404,26 +406,6 @@ export default function BookEvent() {
           </AnimatePresence>
         </div>
       </main>
-
-      {/* Help Button - Bottom Left */}
-      <div className="fixed bottom-6 left-6">
-        <Button
-          onClick={handleHelpClick}
-          className="bg-white text-gray-600 border-2 border-gray-200 rounded-full p-3 shadow-lg hover:shadow-xl hover:border-dusty-blue hover:text-dusty-blue transition-all duration-200 min-w-[48px] min-h-[48px]"
-        >
-          <HelpCircle className="w-6 h-6" />
-        </Button>
-      </div>
-
-      {/* Contact Button - Bottom Right */}
-      <div className="fixed bottom-6 right-6">
-        <Button
-          onClick={handleContactClick}
-          className="bg-white text-gray-600 border-2 border-gray-200 rounded-full p-3 shadow-lg hover:shadow-xl hover:border-dusty-blue hover:text-dusty-blue transition-all duration-200 min-w-[48px] min-h-[48px]"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </Button>
-      </div>
 
       {/* Help Dialog */}
       {showHelp && (
