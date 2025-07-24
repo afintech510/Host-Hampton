@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { bookingService } from "./booking-service";
 import { 
-  insertPartyBookingSchema, insertReviewSchema, 
+  insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
   insertAddonSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema 
 } from "@shared/schema";
@@ -276,77 +276,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create a new party booking (LEGACY ENDPOINT)
-  app.post("/api/party-bookings", async (req, res) => {
-    try {
-      const validatedData = insertPartyBookingSchema.parse(req.body);
-      const booking = await storage.createPartyBooking(validatedData);
-      
-      // Here you would normally send an email confirmation
-      // For now, we'll just log it
-      console.log(`New party booking created for ${booking.childName} on ${booking.partyDate}`);
-      
-      res.json({ 
-        success: true, 
-        booking: {
-          id: booking.id,
-          childName: booking.childName,
-          partyDate: booking.partyDate,
-          partyTime: booking.partyTime,
-          totalEstimate: booking.totalEstimate
-        }
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ 
-          success: false, 
-          message: "Validation error", 
-          errors: error.errors 
-        });
-      } else {
-        res.status(500).json({ 
-          success: false, 
-          message: "Failed to create booking" 
-        });
-      }
-    }
-  });
 
-  // Get all party bookings (for admin purposes)
-  app.get("/api/party-bookings", async (req, res) => {
-    try {
-      const bookings = await storage.getAllPartyBookings();
-      res.json({ success: true, bookings });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch bookings" 
-      });
-    }
-  });
 
-  // Get a specific party booking
-  app.get("/api/party-bookings/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const booking = await storage.getPartyBooking(id);
-      
-      if (!booking) {
-        res.status(404).json({ 
-          success: false, 
-          message: "Booking not found" 
-        });
-        return;
-      }
-      
-      res.json({ success: true, booking });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch booking" 
-      });
-    }
-  });
+
+
+
 
   // Create a new review
   app.post("/api/reviews", async (req, res) => {
@@ -399,19 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get party themes
-  app.get("/api/party-themes", async (req, res) => {
-    try {
-      const themes = await storage.getPartyThemes();
-      res.json({ success: true, themes });
-    } catch (error) {
-      console.error("Error fetching party themes:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch party themes" 
-      });
-    }
-  });
+
 
   // Get room rental pricing
   app.get("/api/room-rental-pricing", async (req, res) => {
@@ -543,19 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Get party extras
-  app.get("/api/party-extras", async (req, res) => {
-    try {
-      const extras = await storage.getPartyExtras();
-      res.json({ success: true, extras });
-    } catch (error) {
-      console.error("Error fetching party extras:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch party extras" 
-      });
-    }
-  });
+
 
   // ==== NEW DESIGNER TOOL API ROUTES ====
 

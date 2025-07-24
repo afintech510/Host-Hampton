@@ -1,7 +1,7 @@
 import { storage } from "./storage";
 import { 
   InsertCustomer, InsertEvent, InsertInvoice, InsertInvoiceItem, 
-  InsertEventCalendar, InsertCommunication, InsertPartyBooking 
+  InsertEventCalendar, InsertCommunication
 } from "@shared/schema";
 
 export interface BookingData {
@@ -44,7 +44,7 @@ class BookingService {
       
       switch (bookingData.eventType) {
         case "birthday-party":
-          return await this.processLegacyBirthdayParty(bookingData);
+          return await this.createEventBooking(bookingData, "Birthday Party");
         
         case "diy-party":
         case "private-event":
@@ -68,50 +68,7 @@ class BookingService {
     }
   }
 
-  /**
-   * Legacy birthday party flow - uses partyBookings table
-   */
-  private async processLegacyBirthdayParty(data: BookingData): Promise<BookingResult> {
-    try {
-      // Create legacy party booking
-      const partyBooking: InsertPartyBooking = {
-        partyDate: data.eventDate || "",
-        partyTime: data.startTime || "",
-        partyTheme: data.partyTheme || "",
-        partyAddons: data.partyAddons || [],
-        childName: data.childName || "",
-        childAge: data.childAge || 0,
-        guestCount: data.guestCount || 0,
-        foodChoice: data.foodChoice || "",
-        cupcakeFlavor: data.cupcakeFlavor || "",
-        parentFirstName: data.customerName.split(' ')[0] || "",
-        parentLastName: data.customerName.split(' ').slice(1).join(' ') || "",
-        parentEmail: data.customerEmail,
-        parentPhone: data.customerPhone,
-        address: data.address || "",
-        city: data.city || "",
-        zipCode: data.zipCode || "",
-        partyNotes: data.notes || "",
-        totalEstimate: data.totalEstimate || 0,
-      };
 
-      const booking = await storage.createPartyBooking(partyBooking);
-      
-      // Send confirmation email
-      await this.sendConfirmationEmail(data, booking.id, "birthday-party");
-      
-      // For legacy bookings, we don't create invoices here - that's handled separately
-      
-      return {
-        success: true,
-        eventId: booking.id,
-        message: "Birthday party booking created successfully"
-      };
-    } catch (error) {
-      console.error("Legacy birthday party booking error:", error);
-      return { success: false, error: "Failed to create birthday party booking" };
-    }
-  }
 
   /**
    * Custom events (DIY Party, Private Event) - paid events with invoicing

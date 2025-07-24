@@ -291,7 +291,7 @@ export default function ThemedParties() {
             {themes.map((theme, index) => {
               if (theme.isCTA) {
                 return (
-                  <Link key={index} href="/party-booking">
+                  <Link key={index} href="/book-event">
                     <Card className="bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-purple-300 hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer text-white">
                       <CardContent className="p-6 text-center h-full flex flex-col justify-center">
                         <div className="text-6xl mb-4">{theme.icon}</div>
@@ -328,7 +328,7 @@ export default function ThemedParties() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/party-booking">
+            <Link href="/book-event">
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg"
@@ -411,7 +411,7 @@ export default function ThemedParties() {
                 team crafts activities, themes, and experiences that match your
                 child's interests and developmental stage perfectly.
               </p>
-              <Link href="/party-booking">
+              <Link href="/book-event">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg"
@@ -573,7 +573,7 @@ export default function ThemedParties() {
                   Try New Designer Tool
                 </Button>
               </Link>
-              <Link href="/party-booking">
+              <Link href="/book-event">
                 <Button
                   variant="outline"
                   size="lg"
@@ -930,7 +930,7 @@ export default function ThemedParties() {
                 <h3 className="text-xl md:text-2xl font-bold mb-8">
                   Lock In Your Party Today!
                 </h3>
-                <Link href="/party-booking">
+                <Link href="/book-event">
                   <Button
                     size="lg"
                     className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-lg px-12 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all"
@@ -964,7 +964,7 @@ export default function ThemedParties() {
             </h3>
 
             <div className="space-y-6">
-              <Link href="/party-booking">
+              <Link href="/book-event">
                 <Button
                   size="lg"
                   className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-xl px-16 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all"

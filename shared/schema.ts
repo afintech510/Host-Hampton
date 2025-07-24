@@ -9,28 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
-export const partyBookings = pgTable("party_bookings", {
-  id: serial("id").primaryKey(),
-  partyDate: text("party_date").notNull(),
-  partyTime: text("party_time").notNull(),
-  partyTheme: text("party_theme").notNull(),
-  partyAddons: text("party_addons").array().default([]),
-  childName: text("child_name").notNull(),
-  childAge: integer("child_age").notNull(),
-  guestCount: integer("guest_count").notNull(),
-  foodChoice: text("food_choice").notNull(),
-  cupcakeFlavor: text("cupcake_flavor").notNull(),
-  parentFirstName: text("parent_first_name").notNull(),
-  parentLastName: text("parent_last_name").notNull(),
-  parentEmail: text("parent_email").notNull(),
-  parentPhone: text("parent_phone").notNull(),
-  address: text("address").notNull(),
-  city: text("city").notNull(),
-  zipCode: text("zip_code").notNull(),
-  partyNotes: text("party_notes"),
-  totalEstimate: integer("total_estimate").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+
 
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
@@ -44,25 +23,7 @@ export const reviews = pgTable("reviews", {
   featured: boolean("featured").default(false).notNull(), // For highlighting special reviews
 });
 
-export const partyThemes = pgTable("party_themes", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  price: integer("price").default(0).notNull(), // Price in cents
-  icon: text("icon").notNull(),
-  color: text("color").notNull(),
-  active: boolean("active").default(true).notNull(),
-});
 
-export const partyExtras = pgTable("party_extras", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  price: integer("price").notNull(), // Price in cents
-  pricingType: text("pricing_type").default("flat").notNull(), // "flat" or "per_person"
-  icon: text("icon").notNull(),
-  active: boolean("active").default(true).notNull(),
-});
 
 // New tables for the Kids Party Designer Tool
 export const eventTypes = pgTable("event_types", {
@@ -319,11 +280,6 @@ export const roomRentalPricing = pgTable("room_rental_pricing", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertPartyBookingSchema = createInsertSchema(partyBookings).omit({
-  id: true,
-  createdAt: true,
-});
-
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -332,14 +288,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   reviewDate: true,
-});
-
-export const insertPartyThemeSchema = createInsertSchema(partyThemes).omit({
-  id: true,
-});
-
-export const insertPartyExtraSchema = createInsertSchema(partyExtras).omit({
-  id: true,
 });
 
 // New insert schemas for the designer tool
@@ -395,9 +343,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   // Future: could relate to party bookings if needed
 }));
 
-export const partyBookingsRelations = relations(partyBookings, ({ one }) => ({
-  // Future: could relate to users if needed
-}));
+
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
   // Future: could relate to party bookings if needed
@@ -477,14 +423,8 @@ export const eventCalendarRelations = relations(eventCalendar, ({ one }) => ({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type InsertPartyBooking = z.infer<typeof insertPartyBookingSchema>;
-export type PartyBooking = typeof partyBookings.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
-export type InsertPartyTheme = z.infer<typeof insertPartyThemeSchema>;
-export type PartyTheme = typeof partyThemes.$inferSelect;
-export type InsertPartyExtra = z.infer<typeof insertPartyExtraSchema>;
-export type PartyExtra = typeof partyExtras.$inferSelect;
 
 // New types for the designer tool
 export type InsertEventType = z.infer<typeof insertEventTypeSchema>;

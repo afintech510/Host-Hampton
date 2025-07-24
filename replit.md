@@ -5,12 +5,13 @@
 This is a comprehensive party booking and management platform built for "Host Hampton" - a children's party planning service. The application features:
 
 1. **Marketing Landing Page**: Showcases themed party options with service tiles and contact modules
-2. **Legacy Booking Form**: Original multi-step form for party bookings  
-3. **Kids Party Designer Tool**: New interactive booking system with event type selection and real-time pricing
-4. **Admin Dashboard**: Complete management system for tracking bookings, quotes, payments, and inventory
-5. **Database Integration**: Full PostgreSQL schema supporting both legacy and new management systems
+2. **Unified Booking System**: Single modern booking system at `/book-event` with event type selection and real-time pricing
+3. **Kids Party Designer Tool**: Alternative interactive event designer with advanced customization options
+4. **Customer Portal**: Email-based authentication system with personalized event management at `/my-events`
+5. **Admin Dashboard**: Complete management system for tracking bookings, quotes, payments, and inventory
+6. **Database Integration**: Unified PostgreSQL schema supporting the modern event management system
 
-The platform serves as both a customer-facing booking tool and a comprehensive business management solution.
+The platform serves as both a customer-facing booking tool and a comprehensive business management solution with full system unification completed.
 
 ## User Preferences
 
@@ -46,14 +47,11 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Database Schema (`shared/schema.ts`)
-**Legacy Tables:**
+**Core Tables:**
 - **Users Table**: Basic user authentication (currently unused in main flow)
-- **Party Bookings Table**: Original booking system data
-- **Reviews, Party Themes, Party Extras**: Supporting data for legacy system
-  - **Party Themes**: Now includes price field (in cents) for theme-based pricing
-  - **Party Extras**: Enhanced with `pricing_type` field to distinguish between flat-fee ("flat") and per-person ("per_person") pricing
+- **Reviews Table**: Customer reviews with verification and featured flags for marketing
 
-**New Management System Tables:**
+**Unified Event Management System Tables:**
 - **Event Types**: Categorizes different service types - now populated with 7 active event types:
   - Birthday Party, Adult Workshop/Classes, Permanent Jewelry Party, Permanent Jewelry Pop-Up, Studio Rental, Host Your Client, Permanent Jewelry Appointment
 - **Customers**: Customer information with billing details
@@ -78,8 +76,6 @@ Preferred communication style: Simple, everyday language.
 
 ### API Endpoints (`server/routes.ts`)
 **Legacy Endpoints:**
-- `POST /api/party-bookings`: Creates new party booking
-- `GET /api/party-bookings`: Retrieves all bookings (admin function)
 - `GET /api/reviews/featured`: Fetches featured customer reviews
 
 **New Management System Endpoints:**
@@ -94,7 +90,7 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Components
 **Landing Page (`/themed-parties`)**: Marketing page with hero section, service tiles, contact modules, and navigation to both booking systems
 
-**Legacy Booking System (`/party-booking`)**: Original 8-step multi-step form with progress tracking and payment integration
+**Unified Booking System (`/book-event`)**: Modern multi-step form with event type selection, real-time pricing, and payment integration
 
 **New Management System:**
 - **Party Designer Tool (`/party-designer`)**: Interactive event type selection with detailed service options
@@ -112,6 +108,8 @@ Preferred communication style: Simple, everyday language.
 - **Database Storage**: PostgreSQL implementation with Drizzle ORM for production
 - **Memory Storage**: In-memory fallback implementation for testing
 - **Reviews System**: Full CRUD operations for customer reviews with featured/verified flags
+- **Unified Event System**: Complete CRUD operations for the modern event management system
+- **Legacy Code Removal**: All legacy party booking methods and references completely removed
 
 ## External Dependencies
 
@@ -161,3 +159,20 @@ Preferred communication style: Simple, everyday language.
 6. **Performance**: Vite bundling and React Query caching optimize user experience
 
 The application is specifically designed for Replit deployment with appropriate configurations for the platform's constraints and features.
+
+## Recent System Unification (January 2025)
+
+**Complete Legacy System Removal:**
+- ✅ Deleted all legacy database tables (partyBookings, partyThemes, partyExtras)
+- ✅ Removed all legacy API endpoints (/api/party-bookings, /api/party-themes, /api/party-extras)
+- ✅ Removed all legacy storage methods (createPartyBooking, getAllPartyBookings, getPartyThemes, getPartyExtras)
+- ✅ Deleted legacy party-booking.tsx page and removed from routing
+- ✅ Updated all navigation links from /party-booking to /book-event
+- ✅ Cleaned up all import statements and type references
+- ✅ Updated booking service to route birthday parties through modern event system
+
+**System Status:**
+- All booking types now use the unified events table
+- Single modern booking flow at `/book-event`
+- Complete elimination of duplicate functionality
+- Server running successfully with no legacy code remaining

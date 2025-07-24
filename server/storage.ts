@@ -1,9 +1,7 @@
 import { 
-  users, partyBookings, reviews, partyThemes, partyExtras,
-  eventTypes, customers, packages, addons, events, invoices, invoiceItems, eventCalendar,
+  users, reviews, eventTypes, customers, packages, addons, events, invoices, invoiceItems, eventCalendar,
   roomRentalPricing, verificationCodes,
-  type User, type InsertUser, type PartyBooking, type InsertPartyBooking, 
-  type Review, type InsertReview, type PartyTheme, type PartyExtra,
+  type User, type InsertUser, type Review, type InsertReview,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
@@ -14,18 +12,15 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  // Existing methods
+  // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  createPartyBooking(booking: InsertPartyBooking): Promise<PartyBooking>;
-  getPartyBooking(id: number): Promise<PartyBooking | undefined>;
-  getAllPartyBookings(): Promise<PartyBooking[]>;
+  
+  // Review methods
   createReview(review: InsertReview): Promise<Review>;
   getReviews(limit?: number): Promise<Review[]>;
   getFeaturedReviews(): Promise<Review[]>;
-  getPartyThemes(): Promise<PartyTheme[]>;
-  getPartyExtras(): Promise<PartyExtra[]>;
   
   // New Designer Tool methods
   getEventTypes(): Promise<EventType[]>;
@@ -72,18 +67,14 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private partyBookings: Map<number, PartyBooking>;
   private reviews: Map<number, Review>;
   private currentUserId: number;
-  private currentBookingId: number;
   private currentReviewId: number;
 
   constructor() {
     this.users = new Map();
-    this.partyBookings = new Map();
     this.reviews = new Map();
     this.currentUserId = 1;
-    this.currentBookingId = 1;
     this.currentReviewId = 1;
   }
 
@@ -104,26 +95,7 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  async createPartyBooking(insertBooking: InsertPartyBooking): Promise<PartyBooking> {
-    const id = this.currentBookingId++;
-    const booking: PartyBooking = { 
-      ...insertBooking,
-      partyAddons: Array.isArray(insertBooking.partyAddons) ? insertBooking.partyAddons : [],
-      partyNotes: insertBooking.partyNotes || null,
-      id,
-      createdAt: new Date()
-    };
-    this.partyBookings.set(id, booking);
-    return booking;
-  }
 
-  async getPartyBooking(id: number): Promise<PartyBooking | undefined> {
-    return this.partyBookings.get(id);
-  }
-
-  async getAllPartyBookings(): Promise<PartyBooking[]> {
-    return Array.from(this.partyBookings.values());
-  }
 
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = this.currentReviewId++;
@@ -150,14 +122,7 @@ export class MemStorage implements IStorage {
     return featuredReviews.sort((a, b) => b.reviewDate.getTime() - a.reviewDate.getTime());
   }
 
-  // Placeholder implementations for legacy system methods
-  async getPartyThemes(): Promise<PartyTheme[]> {
-    return [];
-  }
 
-  async getPartyExtras(): Promise<PartyExtra[]> {
-    return [];
-  }
 
   // New Designer Tool methods - placeholder implementations
   async getEventTypes(): Promise<EventType[]> {
@@ -510,22 +475,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createPartyBooking(insertBooking: InsertPartyBooking): Promise<PartyBooking> {
-    const [booking] = await db
-      .insert(partyBookings)
-      .values(insertBooking)
-      .returning();
-    return booking;
-  }
 
-  async getPartyBooking(id: number): Promise<PartyBooking | undefined> {
-    const [booking] = await db.select().from(partyBookings).where(eq(partyBookings.id, id));
-    return booking || undefined;
-  }
-
-  async getAllPartyBookings(): Promise<PartyBooking[]> {
-    return await db.select().from(partyBookings);
-  }
 
   async createReview(insertReview: InsertReview): Promise<Review> {
     const [review] = await db
@@ -543,13 +493,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(reviews).where(eq(reviews.featured, true)).orderBy(reviews.reviewDate);
   }
 
-  async getPartyThemes(): Promise<PartyTheme[]> {
-    return await db.select().from(partyThemes).where(eq(partyThemes.active, true));
-  }
 
-  async getPartyExtras(): Promise<PartyExtra[]> {
-    return await db.select().from(partyExtras).where(eq(partyExtras.active, true));
-  }
 
   // New Designer Tool methods - Database implementations
   async getEventTypes(): Promise<EventType[]> {
