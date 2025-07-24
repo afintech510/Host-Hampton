@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 - **Party Bookings Table**: Original booking system data
 - **Reviews, Party Themes, Party Extras**: Supporting data for legacy system
   - **Party Themes**: Now includes price field (in cents) for theme-based pricing
+  - **Party Extras**: Enhanced with `pricing_type` field to distinguish between flat-fee ("flat") and per-person ("per_person") pricing
 
 **New Management System Tables:**
 - **Event Types**: Categorizes different service types - now populated with 7 active event types:

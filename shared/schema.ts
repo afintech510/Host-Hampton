@@ -59,6 +59,7 @@ export const partyExtras = pgTable("party_extras", {
   name: text("name").notNull(),
   description: text("description"),
   price: integer("price").notNull(), // Price in cents
+  pricingType: text("pricing_type").default("flat").notNull(), // "flat" or "per_person"
   icon: text("icon").notNull(),
   active: boolean("active").default(true).notNull(),
 });
