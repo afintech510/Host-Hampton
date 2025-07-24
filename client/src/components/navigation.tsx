@@ -70,7 +70,7 @@ export default function Navigation() {
               {menuItems.map((item) => (
                 <Link key={item.name} href={item.href}>
                   <span
-                    className="text-gray-600 hover:text-pink-600 block px-3 py-2 rounded-md text-base font-medium cursor-pointer"
+                    className="text-gray-600 hover:text-pink-600 block px-3 py-2 rounded-md text-base font-medium cursor-pointer text-right"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
