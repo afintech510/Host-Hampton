@@ -223,22 +223,13 @@ export default function ThemedParties() {
               with our themed party experiences. Professional planning, magical
               decorations, and memories that last a lifetime.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/party-designer">
+            <div className="flex justify-center">
+              <Link href="/book-event">
                 <Button
                   size="lg"
                   className="bg-dusty-blue text-white hover:bg-dusty-blue hover:opacity-90 font-semibold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
                 >
-                  Try Designer Tool
-                </Button>
-              </Link>
-              <Link href="/book-event">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-2 border-blush-pink text-blush-pink hover:bg-blush-pink hover:text-slate-800 font-semibold text-lg px-8 py-4 rounded-full transition-all"
-                >
-                  Book Your Event
+                  Explore Options
                 </Button>
               </Link>
             </div>
