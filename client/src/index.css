@@ -3,30 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(15, 40%, 95%);
-  --foreground: hsl(155, 40%, 25%);
-  --muted: hsl(15, 25%, 90%);
-  --muted-foreground: hsl(155, 20%, 50%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(155, 40%, 25%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(155, 40%, 25%);
-  --border: hsl(15, 25%, 85%);
-  --input: hsl(15, 25%, 90%);
-  --primary: hsl(155, 40%, 25%);
+  /* Mood board inspired palette */
+  --background: hsl(35, 40%, 95%); /* Warm ivory */
+  --foreground: hsl(210, 15%, 40%); /* Dark slate gray */
+  --muted: hsl(350, 25%, 85%); /* Light blush pink */
+  --muted-foreground: hsl(210, 15%, 55%); /* Slate gray */
+  --popover: hsl(35, 40%, 98%); /* Soft cream */
+  --popover-foreground: hsl(210, 15%, 40%);
+  --card: hsl(35, 40%, 98%); /* Soft cream */
+  --card-foreground: hsl(210, 15%, 40%);
+  --border: hsl(350, 25%, 80%); /* Soft blush border */
+  --input: hsl(350, 20%, 85%); /* Light blush input */
+  --primary: hsl(210, 35%, 72%); /* Dusty blue */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(45, 60%, 80%);
-  --secondary-foreground: hsl(155, 40%, 25%);
-  --accent: hsl(45, 60%, 80%);
-  --accent-foreground: hsl(155, 40%, 25%);
+  --secondary: hsl(15, 25%, 73%); /* Mauve rose */
+  --secondary-foreground: hsl(210, 15%, 40%);
+  --accent: hsl(350, 35%, 80%); /* Soft blush pink */
+  --accent-foreground: hsl(210, 15%, 40%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(155, 40%, 25%);
+  --ring: hsl(210, 35%, 72%); /* Dusty blue ring */
   --radius: 1rem;
-  --peachy-pink: hsl(15, 40%, 92%);
-  --warm-gold: hsl(45, 60%, 80%);
-  --sage-green: hsl(155, 40%, 25%);
-  --soft-cream: hsl(45, 30%, 98%);
+  
+  /* Custom mood board colors */
+  --dusty-blue: hsl(210, 35%, 72%); /* #A1B5C8 */
+  --soft-blush-pink: hsl(350, 35%, 85%); /* #E8C7CB */
+  --warm-ivory: hsl(35, 40%, 95%); /* #F6F1EB */
+  --mauve-rose: hsl(15, 25%, 73%); /* #C9A9A6 */
+  --slate-gray: hsl(210, 15%, 55%); /* #7A8B99 */
 }
 
 .dark {
@@ -59,7 +63,7 @@
 
   body {
     @apply font-sans antialiased text-foreground;
-    background: linear-gradient(135deg, hsl(15, 40%, 95%) 0%, hsl(15, 30%, 92%) 100%);
+    background: linear-gradient(135deg, hsl(35, 40%, 95%) 0%, hsl(350, 25%, 90%) 50%, hsl(210, 25%, 85%) 100%);
     min-height: 100vh;
   }
 
@@ -75,24 +79,65 @@
   }
 }
 
-.coral {
-  color: hsl(0, 65%, 69%);
+/* Mood board utility classes */
+.dusty-blue {
+  color: hsl(210, 35%, 72%);
 }
 
-.bg-coral {
-  background-color: hsl(0, 65%, 69%);
+.bg-dusty-blue {
+  background-color: hsl(210, 35%, 72%);
 }
 
-.border-coral {
-  border-color: hsl(0, 65%, 69%);
+.border-dusty-blue {
+  border-color: hsl(210, 35%, 72%);
 }
 
-.hover\:bg-coral:hover {
-  background-color: hsl(0, 60%, 64%);
+.hover\:bg-dusty-blue:hover {
+  background-color: hsl(210, 35%, 68%);
 }
 
-.text-coral {
-  color: hsl(0, 65%, 69%);
+.text-dusty-blue {
+  color: hsl(210, 35%, 72%);
+}
+
+.blush-pink {
+  color: hsl(350, 35%, 75%);
+}
+
+.bg-blush-pink {
+  background-color: hsl(350, 35%, 85%);
+}
+
+.border-blush-pink {
+  border-color: hsl(350, 35%, 80%);
+}
+
+.hover\:bg-blush-pink:hover {
+  background-color: hsl(350, 35%, 80%);
+}
+
+.text-blush-pink {
+  color: hsl(350, 35%, 75%);
+}
+
+.mauve-rose {
+  color: hsl(15, 25%, 65%);
+}
+
+.bg-mauve-rose {
+  background-color: hsl(15, 25%, 73%);
+}
+
+.border-mauve-rose {
+  border-color: hsl(15, 25%, 70%);
+}
+
+.hover\:bg-mauve-rose:hover {
+  background-color: hsl(15, 25%, 68%);
+}
+
+.text-mauve-rose {
+  color: hsl(15, 25%, 65%);
 }
 
 .step-transition {
