@@ -27,7 +27,7 @@ function Router() {
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
       <Route path="/party-room-rental" component={PartyRoomRental} />
-      <Route path="/truck-hat-bar" component={TruckHatBar} />
+      <Route path="/trucker-hat-bar" component={TruckHatBar} />
       <Route path="/permanent-jewelry" component={PermanentJewelry} />
       <Route component={NotFound} />
     </Switch>

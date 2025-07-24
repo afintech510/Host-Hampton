@@ -19,7 +19,7 @@ export default function Navigation() {
     { name: "Shop Events", href: "/shop-events" },
     { name: "Theme Parties", href: "/themed-parties" },
     { name: "Party Room Rental", href: "/party-room-rental" },
-    { name: "Trucker Hat Bar", href: "/truck-hat-bar" },
+    { name: "Trucker Hat Bar", href: "/trucker-hat-bar" },
     { name: "Permanent Jewelry", href: "/permanent-jewelry" },
   ];
 

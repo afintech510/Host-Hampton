@@ -84,11 +84,11 @@ export default function TruckHatBar() {
         <div className="text-center mb-12">
           <div className="text-6xl mb-6">🚛👒</div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Truck Hat Bar
+            Trucker Hat Bar
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Bring the ultimate hat bar experience to your event! Our mobile truck hat bar 
-            comes directly to you with a curated collection of trendy hats and custom styling services.
+            Bring the ultimate trucker hat bar experience to your event! Our mobile trucker hat bar 
+            comes directly to you with a curated collection of trendy trucker hats and custom styling services.
           </p>
         </div>
 
