@@ -64,21 +64,41 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
 
   // Calculate pricing based on duration and day of week
   const calculatePricing = () => {
-    if (!startTime || !endTime || !partyDate || !pricingData?.success || !pricingData?.pricing) return null;
+    console.log('calculatePricing called with:', {
+      startTime,
+      endTime,
+      partyDate,
+      pricingDataSuccess: pricingData?.success,
+      pricingDataLength: pricingData?.pricing?.length,
+      isLoading
+    });
+    
+    if (!startTime || !endTime || !partyDate || !pricingData?.success || !pricingData?.pricing) {
+      console.log('Early return - missing required data');
+      return null;
+    }
     
     const start = new Date(`2000-01-01T${startTime}`);
     const end = new Date(`2000-01-01T${endTime}`);
     const diffHrs = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     
-    if (diffHrs <= 0) return null;
+    console.log('Duration calculation:', { diffHrs });
+    
+    if (diffHrs <= 0) {
+      console.log('Invalid duration - diffHrs <= 0');
+      return null;
+    }
     
     // Get the day of the week (0 = Sunday, 6 = Saturday)
     const dayOfWeek = new Date(partyDate).getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     
+    console.log('Date analysis:', { partyDate, dayOfWeek, isWeekend });
+    
     // Find the pricing tier based on duration
     let pricing = null;
     for (const tier of pricingData.pricing) {
+      console.log('Checking tier:', { tierDuration: tier.duration, diffHrs, matches: diffHrs <= tier.duration });
       if (diffHrs <= tier.duration) {
         pricing = tier;
         break;
@@ -88,12 +108,15 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
     // If duration exceeds all tiers, use the highest tier
     if (!pricing) {
       pricing = pricingData.pricing[pricingData.pricing.length - 1];
+      console.log('Using highest tier:', pricing);
+    } else {
+      console.log('Selected pricing tier:', pricing);
     }
     
     const basePrice = isWeekend ? pricing.weekendPrice : pricing.weekdayPrice;
     const securityDeposit = 20000; // $200 in cents
     
-    return {
+    const result = {
       basePrice,
       securityDeposit,
       total: basePrice + securityDeposit,
@@ -101,6 +124,9 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
       hours: Math.ceil(diffHrs),
       pricePerHour: Math.round(basePrice / pricing.duration)
     };
+    
+    console.log('Final pricing result:', result);
+    return result;
   };
 
   const duration = calculateDuration();
