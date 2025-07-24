@@ -203,7 +203,7 @@ export default function ThemedParties() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(15,50%,92%)] via-[hsl(15,40%,95%)] to-[hsl(45,40%,90%)] text-[hsl(155,40%,25%)]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-warm-ivory via-soft-blush-pink to-warm-ivory">
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-8">
@@ -213,12 +213,12 @@ export default function ThemedParties() {
                 className="h-20 md:h-24 mx-auto object-contain"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: 'hsl(210, 15%, 40%)' }}>
               Design Your
               <br />
-              <span className="text-[hsl(155,40%,35%)]">Party Experience</span>
+              <span className="text-dusty-blue">Party Experience</span>
             </h1>
-            <p className="text-lg md:text-xl mb-8 text-[hsl(155,20%,45%)] max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(210, 15%, 55%)' }}>
               Transform your child's special day into an unforgettable adventure
               with our themed party experiences. Professional planning, magical
               decorations, and memories that last a lifetime.
@@ -227,7 +227,7 @@ export default function ThemedParties() {
               <Link href="/party-designer">
                 <Button
                   size="lg"
-                  className="bg-[hsl(155,40%,25%)] text-white hover:bg-[hsl(155,40%,20%)] font-semibold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                  className="bg-dusty-blue text-white hover:bg-dusty-blue hover:opacity-90 font-semibold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
                 >
                   Try Designer Tool
                 </Button>
@@ -236,7 +236,7 @@ export default function ThemedParties() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-2 border-[hsl(155,40%,25%)] text-[hsl(155,40%,25%)] hover:bg-[hsl(155,40%,25%)] hover:text-white font-semibold text-lg px-8 py-4 rounded-full transition-all"
+                  className="border-2 border-blush-pink text-blush-pink hover:bg-blush-pink hover:text-slate-800 font-semibold text-lg px-8 py-4 rounded-full transition-all"
                 >
                   Book Your Event
                 </Button>
@@ -246,10 +246,10 @@ export default function ThemedParties() {
         </div>
 
         {/* Subtle Decorative Stars */}
-        <div className="absolute top-20 right-20 text-4xl text-[hsl(45,60%,70%)] animate-pulse">✦</div>
-        <div className="absolute top-40 left-20 text-2xl text-[hsl(45,60%,70%)] animate-pulse [animation-delay:-1s]">✦</div>
-        <div className="absolute bottom-32 right-32 text-3xl text-[hsl(45,60%,70%)] animate-pulse [animation-delay:-2s]">✦</div>
-        <div className="absolute bottom-40 left-32 text-2xl text-[hsl(45,60%,70%)] animate-pulse [animation-delay:-0.5s]">✦</div>
+        <div className="absolute top-20 right-20 text-4xl text-mauve-rose animate-pulse">✦</div>
+        <div className="absolute top-40 left-20 text-2xl text-mauve-rose animate-pulse [animation-delay:-1s]">✦</div>
+        <div className="absolute bottom-32 right-32 text-3xl text-mauve-rose animate-pulse [animation-delay:-2s]">✦</div>
+        <div className="absolute bottom-40 left-32 text-2xl text-mauve-rose animate-pulse [animation-delay:-0.5s]">✦</div>
       </section>
       {/* Benefits Section */}
       <section className="py-20 bg-white">
