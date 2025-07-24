@@ -1,24 +1,24 @@
-import { ChevronLeft, X, HelpCircle } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FormHeaderProps {
   currentStep: number;
   onBack: () => void;
+  onClose?: () => void;
 }
 
-export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
+export function FormHeader({ currentStep, onBack, onClose }: FormHeaderProps) {
   return (
     <header className="bg-white shadow-sm">
-      <div className="max-w-md mx-auto px-6 py-4 relative">
-        {/* Back button - positioned absolutely on the left */}
+      <div className="max-w-md mx-auto px-4 py-4 relative">
+        {/* Back button - enlarged for better mobile touch */}
         {currentStep > 1 && (
           <Button
             variant="ghost"
-            size="icon"
             onClick={onBack}
-            className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black hover:bg-gray-100 p-0 h-auto"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6" />
           </Button>
         )}
         
@@ -31,23 +31,14 @@ export function FormHeader({ currentStep, onBack }: FormHeaderProps) {
           />
         </div>
         
-        {/* Action buttons - positioned absolutely on the right */}
-        <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-black hover:bg-gray-100 p-0 h-auto"
-          >
-            <HelpCircle className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-black hover:bg-gray-100 p-0 h-auto"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
+        {/* Close button - enlarged for better mobile touch */}
+        <Button
+          variant="ghost"
+          onClick={onClose}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
+        >
+          <X className="w-6 h-6" />
+        </Button>
       </div>
     </header>
   );

@@ -31,7 +31,8 @@ import { ContactStep } from "@/components/party-form/steps/contact-step";
 import { SummaryStep } from "@/components/party-form/steps/summary-step";
 import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
-import { HelpCircle, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import { useLocation } from "wouter";
 
 const TOTAL_STEPS = 9;
 
@@ -58,6 +59,7 @@ const isStudioFlow = (eventType: string) => {
 export default function BookEvent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
+  const [, setLocation] = useLocation();
   const { formData, updateFormData, submitBooking, isSubmitting } = usePartyForm();
 
   const handleNextStep = () => {
@@ -70,6 +72,18 @@ export default function BookEvent() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleClose = () => {
+    setLocation("/themed-parties");
+  };
+
+  const handleHelpClick = () => {
+    setShowHelp(true);
+  };
+
+  const handleContactClick = () => {
+    setShowHelp(true);
   };
 
   const renderStep = () => {
@@ -359,7 +373,11 @@ export default function BookEvent() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(210, 20%, 98%)' }}>
-      <FormHeader currentStep={currentStep} onBack={handlePreviousStep} />
+      <FormHeader 
+        currentStep={currentStep} 
+        onBack={handlePreviousStep} 
+        onClose={handleClose}
+      />
       <ProgressBar 
         currentStep={currentStep} 
         totalSteps={
@@ -368,7 +386,9 @@ export default function BookEvent() {
           formData.eventType && isWorkshopFlow(formData.eventType) ? 6 : 
           formData.eventType && isStudioFlow(formData.eventType) ? 4 : 
           TOTAL_STEPS
-        } 
+        }
+        onHelpClick={handleHelpClick}
+        onContactClick={handleContactClick}
       />
       
       <main className="flex-1 flex items-center justify-center px-6 py-8">
@@ -387,33 +407,22 @@ export default function BookEvent() {
         </div>
       </main>
 
-      {/* Help Button */}
-      <div className="fixed bottom-6 right-6">
-        <Button
-          onClick={() => setShowHelp(true)}
-          className="bg-white text-coral border-2 border-gray-200 rounded-full p-4 shadow-lg hover:shadow-xl hover:border-coral transition-all duration-200"
-          size="icon"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </Button>
-      </div>
-
       {/* Help Dialog */}
       {showHelp && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
-            <h3 className="text-xl font-bold mb-3">Need help? 🤗</h3>
+            <h2 className="text-xl font-bold mb-3" style={{ fontFamily: "'Libre Baskerville', serif" }}>Need Help?</h2>
             <p className="text-gray-600 mb-4">
-              We're here to help you plan the perfect party! Contact us:
+              We're here to help you plan the perfect event! Contact us:
             </p>
             <div className="space-y-2 text-sm">
-              <p><strong>Phone:</strong> (555) 123-PARTY</p>
-              <p><strong>Email:</strong> info@hosthampton.com</p>
+              <p><strong>Phone:</strong> (631) 998-9325</p>
+              <p><strong>Email:</strong> events@hosthampton.com</p>
               <p><strong>Hours:</strong> Mon-Fri 9am-6pm</p>
             </div>
             <Button
               onClick={() => setShowHelp(false)}
-              className="w-full mt-6 bg-coral hover:bg-coral text-white"
+              className="w-full mt-6 bg-dusty-blue hover:bg-dusty-blue hover:opacity-90 text-white rounded-full"
             >
               Got it!
             </Button>
