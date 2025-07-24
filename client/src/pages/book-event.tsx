@@ -61,7 +61,8 @@ export default function BookEvent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
   const [, setLocation] = useLocation();
-  const { formData, updateFormData, submitBooking, isSubmitting } = usePartyForm();
+  const { formData, updateFormData, submitBooking, isSubmitting } =
+    usePartyForm();
 
   const handleNextStep = () => {
     if (currentStep < TOTAL_STEPS) {
@@ -93,7 +94,7 @@ export default function BookEvent() {
     const jewelryFlow = eventType ? isJewelryFlow(eventType) : false;
     const workshopFlow = eventType ? isWorkshopFlow(eventType) : false;
     const studioFlow = eventType ? isStudioFlow(eventType) : false;
-    
+
     switch (currentStep) {
       case 1:
         return <WelcomeStep onNext={handleNextStep} />;
@@ -373,23 +374,30 @@ export default function BookEvent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(210, 20%, 98%)' }}>
-      <FormHeader 
-        currentStep={currentStep} 
-        onBack={handlePreviousStep} 
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: "hsl(210, 20%, 98%)" }}
+    >
+      <FormHeader
+        currentStep={currentStep}
+        onBack={handlePreviousStep}
         onClose={handleClose}
       />
-      <ProgressBar 
-        currentStep={currentStep} 
+      <ProgressBar
+        currentStep={currentStep}
         totalSteps={
-          formData.eventType && isCustomFlow(formData.eventType) ? 6 : 
-          formData.eventType && isJewelryFlow(formData.eventType) ? 5 : 
-          formData.eventType && isWorkshopFlow(formData.eventType) ? 6 : 
-          formData.eventType && isStudioFlow(formData.eventType) ? 4 : 
-          TOTAL_STEPS
+          formData.eventType && isCustomFlow(formData.eventType)
+            ? 6
+            : formData.eventType && isJewelryFlow(formData.eventType)
+              ? 5
+              : formData.eventType && isWorkshopFlow(formData.eventType)
+                ? 6
+                : formData.eventType && isStudioFlow(formData.eventType)
+                  ? 4
+                  : TOTAL_STEPS
         }
       />
-      
+
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait">
@@ -416,7 +424,7 @@ export default function BookEvent() {
           >
             <HelpCircle className="w-6 h-6" />
           </Button>
-          
+
           <Button
             variant="ghost"
             onClick={handleContactClick}
@@ -436,15 +444,25 @@ export default function BookEvent() {
               alt="Allie - Your party planning assistant"
               className="w-16 h-16 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg"
             />
-            <h2 className="text-xl font-bold mb-3" style={{ fontFamily: "'Libre Baskerville', serif" }}>Need Help?</h2>
+            <h2
+              className="text-xl font-bold mb-3"
+              style={{ fontFamily: "'Libre Baskerville', serif" }}
+            >
+              Need Help?
+            </h2>
             <p className="text-gray-600 mb-4">
-              We're here to help you plan the perfect event!<br />
-              Contact Allie!
+              We're here to help you plan the perfect event 〜 Contact Allie!
             </p>
             <div className="space-y-2 text-sm text-left">
-              <p><strong>Phone:</strong> (631) 998-9325</p>
-              <p><strong>Email:</strong> hosthampton295@gmail.com</p>
-              <p><strong>Hours:</strong> By Appointment Only</p>
+              <p>
+                <strong>Phone:</strong> (631) 998-9325
+              </p>
+              <p>
+                <strong>Email:</strong> hosthampton295@gmail.com
+              </p>
+              <p>
+                <strong>Hours:</strong> By Appointment Only
+              </p>
             </div>
             <Button
               onClick={() => setShowHelp(false)}

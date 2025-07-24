@@ -1,12 +1,14 @@
 import { 
   users, partyBookings, reviews, partyThemes, partyExtras,
   eventTypes, customers, packages, addons, events, invoices, invoiceItems, eventCalendar,
+  roomRentalPricing,
   type User, type InsertUser, type PartyBooking, type InsertPartyBooking, 
   type Review, type InsertReview, type PartyTheme, type PartyExtra,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
-  type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar
+  type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar,
+  type RoomRentalPricing
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -60,6 +62,7 @@ export interface IStorage {
   getPayments(invoiceId?: number): Promise<any[]>;
   createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar>;
   getEventCalendar(): Promise<EventCalendar[]>;
+  getRoomRentalPricing(): Promise<RoomRentalPricing[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -425,6 +428,44 @@ export class MemStorage implements IStorage {
   async getEventCalendar(): Promise<EventCalendar[]> {
     return [];
   }
+
+  async getRoomRentalPricing(): Promise<RoomRentalPricing[]> {
+    // Return sample pricing data for room rentals
+    return [
+      {
+        id: 1,
+        duration: 3,
+        weekendPrice: 50000, // $500 in cents
+        weekdayPrice: 40000, // $400 in cents
+        active: true,
+        createdAt: new Date()
+      },
+      {
+        id: 2,
+        duration: 4,
+        weekendPrice: 60000, // $600 in cents
+        weekdayPrice: 47500, // $475 in cents
+        active: true,
+        createdAt: new Date()
+      },
+      {
+        id: 3,
+        duration: 5,
+        weekendPrice: 70000, // $700 in cents
+        weekdayPrice: 55000, // $550 in cents
+        active: true,
+        createdAt: new Date()
+      },
+      {
+        id: 4,
+        duration: 6,
+        weekendPrice: 80000, // $800 in cents
+        weekdayPrice: 62500, // $625 in cents
+        active: true,
+        createdAt: new Date()
+      }
+    ];
+  }
 }
 
 // Database Storage Implementation
@@ -635,6 +676,10 @@ export class DatabaseStorage implements IStorage {
 
   async getEventCalendar(): Promise<EventCalendar[]> {
     return await db.select().from(eventCalendar).orderBy(eventCalendar.eventDate);
+  }
+
+  async getRoomRentalPricing(): Promise<RoomRentalPricing[]> {
+    return await db.select().from(roomRentalPricing).where(eq(roomRentalPricing.active, true)).orderBy(roomRentalPricing.duration);
   }
 }
 

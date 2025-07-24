@@ -83,6 +83,24 @@ export function StudioContactStep({ formData, updateFormData, onNext, onBack }: 
             <span className="text-gray-600">Time:</span>
             <span className="font-medium text-gray-900">{timeRange}</span>
           </div>
+          {formData.studioRentalPricing && (
+            <>
+              <div className="border-t mt-3 pt-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Studio Rental:</span>
+                  <span className="font-medium text-gray-900">${(formData.studioRentalPricing.basePrice / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Security Deposit:</span>
+                  <span className="font-medium text-gray-900">${(formData.studioRentalPricing.securityDeposit / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between mt-2 font-semibold">
+                  <span className="text-gray-700">Total Due:</span>
+                  <span className="text-pink-700">${(formData.studioRentalPricing.total / 100).toFixed(2)}</span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

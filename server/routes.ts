@@ -181,6 +181,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get room rental pricing
+  app.get("/api/room-rental-pricing", async (req, res) => {
+    try {
+      const pricing = await storage.getRoomRentalPricing();
+      res.json({ success: true, pricing });
+    } catch (error) {
+      console.error("Error fetching room rental pricing:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch room rental pricing" 
+      });
+    }
+  });
+
   // Admin Dashboard API Endpoints
 
   // Events management

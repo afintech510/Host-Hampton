@@ -299,6 +299,16 @@ export const businessMetrics = pgTable("business_metrics", {
   metadata: json("metadata"), // Additional context
 });
 
+// Room rental pricing
+export const roomRentalPricing = pgTable("room_rental_pricing", {
+  id: serial("id").primaryKey(),
+  duration: integer("duration").notNull(), // Duration in hours
+  weekendPrice: integer("weekend_price").notNull(), // Price in cents for Fri-Sun
+  weekdayPrice: integer("weekday_price").notNull(), // Price in cents for Mon-Thurs
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertPartyBookingSchema = createInsertSchema(partyBookings).omit({
   id: true,
   createdAt: true,
@@ -367,6 +377,7 @@ export const insertEventInventoryUsageSchema = createInsertSchema(eventInventory
 export const insertCustomerPreferencesSchema = createInsertSchema(customerPreferences).omit({ id: true, updatedAt: true });
 export const insertBusinessMetricSchema = createInsertSchema(businessMetrics).omit({ id: true });
 export const insertEventCalendarSchema = createInsertSchema(eventCalendar).omit({ id: true, createdAt: true });
+export const insertRoomRentalPricingSchema = createInsertSchema(roomRentalPricing).omit({ id: true, createdAt: true });
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -505,3 +516,5 @@ export type InsertBusinessMetric = z.infer<typeof insertBusinessMetricSchema>;
 export type BusinessMetric = typeof businessMetrics.$inferSelect;
 export type InsertEventCalendar = z.infer<typeof insertEventCalendarSchema>;
 export type EventCalendar = typeof eventCalendar.$inferSelect;
+export type InsertRoomRentalPricing = z.infer<typeof insertRoomRentalPricingSchema>;
+export type RoomRentalPricing = typeof roomRentalPricing.$inferSelect;
