@@ -126,12 +126,16 @@ class BookingService {
         billingAddress: null,
       });
 
-      // Create event
+      // Create event with proper date handling
+      const eventDate = data.partyDate || data.eventDate;
+      const startTime = data.startTime || '14:00';
+      const eventDateTime = eventDate ? new Date(eventDate + 'T' + startTime) : new Date();
+      
       const event = await storage.createEvent({
         eventTypeId: await this.getEventTypeId(data.eventType),
         customerId: customer.id,
-        eventDate: new Date(data.eventDate + 'T' + (data.startTime || '14:00')),
-        guestCount: data.adultCount + data.childrenCount || data.guestCount || 0,
+        eventDate: eventDateTime,
+        guestCount: (data.adultCount || 0) + (data.childCount || 0) || data.guestCount || 0,
         status: "quote",
         notes: data.eventDescription || data.notes || "",
       });
