@@ -218,11 +218,7 @@ export default function ThemedParties() {
               <br />
               Party Experience
             </h1>
-            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(210, 15%, 55%)' }}>
-              Transform your child's special day into an unforgettable adventure
-              with our themed party experiences. Professional planning, magical
-              decorations, and memories that last a lifetime.
-            </p>
+            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(210, 15%, 55%)' }}>One Space. Endless Celebrations.</p>
             <div className="flex justify-center">
               <Link href="/book-event">
                 <Button
