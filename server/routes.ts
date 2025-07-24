@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import Stripe from "stripe";
 import { storage } from "./storage";
 import { bookingService } from "./booking-service";
 import { 
@@ -9,7 +10,144 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-06-30.basil",
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // INQUIRY CREATION ENDPOINT - For "Show Price" and contact form submissions
+  app.post("/api/create-inquiry", async (req, res) => {
+    try {
+      console.log("Creating inquiry:", req.body);
+      
+      const leadData = {
+        source: req.body.source || "website",
+        name: req.body.customerName || req.body.name,
+        email: req.body.customerEmail || req.body.email,
+        phone: req.body.customerPhone || req.body.phone,
+        eventType: req.body.eventType,
+        eventDate: req.body.eventDate ? new Date(req.body.eventDate) : null,
+        guestCount: req.body.guestCount || req.body.adultCount + req.body.childCount || null,
+        budget: req.body.estimatedBudget ? parseInt(req.body.estimatedBudget) * 100 : null, // Convert to cents
+        status: "new",
+        notes: JSON.stringify({
+          eventDescription: req.body.eventDescription,
+          dateChoice: req.body.dateChoice,
+          startTime: req.body.startTime,
+          endTime: req.body.endTime,
+          selectedAddons: req.body.selectedAddons,
+          rentalPricing: req.body.rentalPricing,
+          formType: req.body.formType || "party-booking",
+          rawFormData: req.body
+        })
+      };
+
+      const inquiry = await storage.createLead(leadData);
+      
+      res.json({
+        success: true,
+        message: "Inquiry created successfully - we'll contact you within 24 hours",
+        inquiryId: inquiry.id
+      });
+    } catch (error) {
+      console.error("Inquiry creation error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create inquiry"
+      });
+    }
+  });
+
+  // STRIPE PAYMENT INTENT CREATION ENDPOINT
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, currency = "usd", metadata = {} } = req.body;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount), // Amount should already be in cents
+        currency,
+        metadata: {
+          eventType: metadata.eventType || "",
+          customerName: metadata.customerName || "",
+          customerEmail: metadata.customerEmail || "",
+          ...metadata
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+      
+      res.json({ 
+        success: true,
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error: any) {
+      console.error("Payment intent creation error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
+  // BOOKING WITH PAYMENT ENDPOINT - For "Pay Reservation Deposit" clicks
+  app.post("/api/book-with-payment", async (req, res) => {
+    try {
+      console.log("Processing booking with payment:", req.body);
+      
+      // First create the full booking
+      const bookingResult = await bookingService.processBooking(req.body);
+      
+      if (!bookingResult.success) {
+        return res.status(400).json({
+          success: false,
+          message: bookingResult.error || "Failed to create booking"
+        });
+      }
+      
+      // Create payment intent for the deposit
+      const depositAmount = req.body.depositAmount || req.body.rentalPricing?.total || 0;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: depositAmount,
+        currency: "usd",
+        metadata: {
+          eventType: req.body.eventType || "",
+          customerName: req.body.customerName || "",
+          customerEmail: req.body.customerEmail || "",
+          eventId: bookingResult.eventId?.toString() || "",
+          invoiceId: bookingResult.invoiceId?.toString() || "",
+          bookingType: "reservation_deposit"
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+      
+      res.json({
+        success: true,
+        message: "Booking created successfully",
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        bookingData: {
+          customerId: bookingResult.customerId,
+          eventId: bookingResult.eventId,
+          invoiceId: bookingResult.invoiceId
+        }
+      });
+    } catch (error) {
+      console.error("Booking with payment error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to process booking with payment"
+      });
+    }
+  });
   
   // NEW COMPREHENSIVE BOOKING SUBMISSION ENDPOINT
   app.post("/api/submit-booking", async (req, res) => {

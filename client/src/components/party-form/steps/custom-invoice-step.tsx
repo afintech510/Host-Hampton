@@ -6,7 +6,7 @@ import { Calendar, Clock, User, Mail, Phone, MapPin } from "lucide-react";
 interface CustomInvoiceStepProps {
   formData: any;
   onBack: () => void;
-  onSubmit: () => void;
+  onSubmit: (options?: { action: 'inquiry' | 'payment' }) => void;
   isSubmitting: boolean;
 }
 
@@ -181,10 +181,10 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
               <p className="text-gray-600">${tax}.00</p>
             </div>
             
-            {pricing.hasRentalPricing && securityDeposit > 0 && (
+            {pricing.hasRentalPricing && (securityDeposit || 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <p className="text-gray-600">Security Deposit</p>
-                <p className="text-gray-600">${securityDeposit}.00</p>
+                <p className="text-gray-600">${securityDeposit || 0}.00</p>
               </div>
             )}
             
@@ -230,7 +230,15 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
           Back
         </Button>
         <Button 
-          onClick={onSubmit}
+          variant="outline"
+          onClick={() => onSubmit({ action: 'inquiry' })}
+          disabled={isSubmitting}
+          className="flex-1 border-pink-300 text-pink-600 hover:bg-pink-50"
+        >
+          {isSubmitting ? "Processing..." : "Show Price"}
+        </Button>
+        <Button 
+          onClick={() => onSubmit({ action: 'payment' })}
           disabled={isSubmitting}
           className="flex-1 bg-pink-400 hover:bg-pink-500 text-white disabled:bg-gray-200 disabled:text-gray-400"
         >

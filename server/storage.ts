@@ -609,6 +609,10 @@ export class DatabaseStorage implements IStorage {
     return invoice || undefined;
   }
 
+  async getInvoices(): Promise<Invoice[]> {
+    return await db.select().from(invoices);
+  }
+
   async getInvoiceByEventId(eventId: number): Promise<Invoice | undefined> {
     const [invoice] = await db.select().from(invoices).where(eq(invoices.eventId, eventId));
     return invoice || undefined;
@@ -644,7 +648,7 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
-  async createStaff(staff: any): Promise<any> {
+  async createStaffMember(staff: any): Promise<any> {
     // TODO: Implement with staff table
     return staff;
   }

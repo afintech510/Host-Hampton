@@ -65,6 +65,15 @@ interface FormData {
   studioPreferredDate?: string;
   studioStartTime?: string;
   studioEndTime?: string;
+  
+  // Room rental pricing
+  rentalPricing?: {
+    basePrice: number;
+    securityDeposit: number;
+    total: number;
+    hours: number;
+    isWeekend: boolean;
+  };
 }
 
 const ADDON_PRICES: Record<string, number> = {
@@ -112,6 +121,67 @@ export function usePartyForm() {
     return basePrice + themePrice + addonTotal;
   };
 
+  // Inquiry submission (for "Show Price" clicks)
+  const submitInquiryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/create-inquiry", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "🎉 Inquiry Submitted Successfully!",
+        description: "We'll contact you within 24 hours with your personalized quote and availability.",
+      });
+      
+      // Redirect to home after successful inquiry
+      setTimeout(() => {
+        window.location.href = "/themed-parties";
+      }, 2000);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Payment submission (for "Pay Reservation Deposit" clicks)
+  const submitPaymentMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/book-with-payment", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success && data.clientSecret) {
+        // Store payment info and redirect to Stripe payment
+        localStorage.setItem('pendingPayment', JSON.stringify({
+          clientSecret: data.clientSecret,
+          paymentIntentId: data.paymentIntentId,
+          bookingData: data.bookingData
+        }));
+        
+        // Redirect to payment page
+        window.location.href = `/payment?client_secret=${data.clientSecret}`;
+      } else {
+        toast({
+          title: "Booking Failed",
+          description: data.message || "Please try again or contact us directly.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Booking Failed",
+        description: error.message || "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Legacy booking submission (for existing birthday party flow)
   const submitBookingMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/submit-booking", data);
@@ -192,8 +262,9 @@ export function usePartyForm() {
     setFormData((prev) => ({ ...prev, ...newData }));
   };
 
-  const submitBooking = async () => {
+  const submitBooking = async (options?: { action?: 'inquiry' | 'payment' }) => {
     const eventType = formData.eventType || "";
+    const action = options?.action || 'legacy';
     
     // Create comprehensive booking data that includes all form fields
     const bookingData = {
@@ -211,15 +282,33 @@ export function usePartyForm() {
       
       // Calculate totals for legacy flow
       totalEstimate: eventType === "birthday-party" ? calculateTotal(formData) : undefined,
+      
+      // Add deposit amount for payment flow
+      depositAmount: formData.rentalPricing?.total || 
+        (eventType === "diy-party" ? 12500 : eventType === "private-event" ? 20000 : 10000), // Default deposits in cents
     };
 
-    await submitBookingMutation.mutateAsync(bookingData);
+    // Route to appropriate mutation based on action
+    switch (action) {
+      case 'inquiry':
+        await submitInquiryMutation.mutateAsync(bookingData);
+        break;
+      case 'payment':
+        await submitPaymentMutation.mutateAsync(bookingData);
+        break;
+      default:
+        // Legacy booking flow
+        await submitBookingMutation.mutateAsync(bookingData);
+        break;
+    }
   };
 
   return {
     formData,
     updateFormData,
     submitBooking,
-    isSubmitting: submitBookingMutation.isPending,
+    isSubmitting: submitBookingMutation.isPending || 
+                 submitInquiryMutation.isPending || 
+                 submitPaymentMutation.isPending,
   };
 }
