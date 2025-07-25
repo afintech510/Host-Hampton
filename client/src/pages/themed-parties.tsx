@@ -740,16 +740,31 @@ export default function ThemedParties() {
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="space-y-1">
-                      <p className="text-gray-700">• Westhampton</p>
-                      <p className="text-gray-700">• Hampton Bays</p>
-                      <p className="text-gray-700">• Eastport</p>
-                      <p className="text-gray-700">• Remsenburg</p>
-                    </div>
-                    <div className="space-y-1">
+                      <p className="text-gray-700">• Patchogue</p>
+                      <p className="text-gray-700">• Medford</p>
+                      <p className="text-gray-700">• Bellport</p>
+                      <p className="text-gray-700">• Shirley</p>
+                      <p className="text-gray-700">• Mastic</p>
                       <p className="text-gray-700">• Moriches</p>
                       <p className="text-gray-700">• Center Moriches</p>
                       <p className="text-gray-700">• East Moriches</p>
+                      <p className="text-gray-700">• Eastport</p>
+                      <p className="text-gray-700">• Remsenburg</p>
+                      <p className="text-gray-700">• Speonk</p>
+                      <p className="text-gray-700">• Westhampton</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-gray-700">• Westhampton Beach</p>
+                      <p className="text-gray-700">• Hampton Bays</p>
+                      <p className="text-gray-700">• Quogue</p>
+                      <p className="text-gray-700">• Southampton</p>
+                      <p className="text-gray-700">• Bridgehampton</p>
+                      <p className="text-gray-700">• Sagaponack</p>
+                      <p className="text-gray-700">• East Hampton</p>
+                      <p className="text-gray-700">• Amagansett</p>
+                      <p className="text-gray-700">• Montauk</p>
                       <p className="text-gray-700">• Manorville</p>
+                      <p className="text-gray-700">• & Surrounding Areas</p>
                     </div>
                   </div>
                 </CardContent>
