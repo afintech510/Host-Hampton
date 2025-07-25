@@ -33,7 +33,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         >
           Let's start planning! 🎉
         </UnifiedButton>
-        <Link href="/my-events">
+        <Link href="/my-events" className="block">
           <UnifiedButton
             variant="outline"
             size="lg"
