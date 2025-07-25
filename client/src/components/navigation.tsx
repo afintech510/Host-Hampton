@@ -47,9 +47,9 @@ export default function Navigation() {
                 My Events
               </Button>
             </Link>
-            <Link href="/book-event">
-              <Button className="bg-pink-600 hover:bg-pink-700 text-white rounded-full">
-                Book Now
+            <Link href="/shop-events">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
+                Upcoming Events
               </Button>
             </Link>
 
