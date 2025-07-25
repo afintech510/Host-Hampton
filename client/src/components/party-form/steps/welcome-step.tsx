@@ -24,7 +24,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <UnifiedButton
           onClick={onNext}
           variant="primary"
