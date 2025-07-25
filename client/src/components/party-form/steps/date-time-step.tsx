@@ -26,10 +26,16 @@ export function DateTimeStep({ formData, updateFormData, onNext, onBack }: DateT
   };
 
   const handleUnsureToggle = () => {
-    setIsUnsure(!isUnsure);
     if (!isUnsure) {
+      // If clicking to select "unsure", advance immediately
+      setIsUnsure(true);
       setPartyDate("");
       setPartyTime("");
+      updateFormData({ partyDate: "", partyTime: "", isUnsure: true });
+      onNext();
+    } else {
+      // If clicking to unselect "unsure", just toggle back
+      setIsUnsure(false);
     }
   };
 
