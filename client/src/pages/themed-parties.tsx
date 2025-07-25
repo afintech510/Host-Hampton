@@ -28,6 +28,7 @@ import {
 import { Link } from "wouter";
 import { ReviewsSection } from "@/components/reviews-section";
 import Navigation from "@/components/navigation";
+import GoogleMap from "@/components/google-map";
 import toddlerImage from "@assets/image_1752647828958.png";
 import preschoolImage from "@assets/image_1752648592321.png";
 import elementaryImage from "@assets/image_1752649999301.png";
@@ -721,8 +722,25 @@ export default function ThemedParties() {
                         type="text"
                         placeholder="Enter your address or zip code"
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const address = (e.target as HTMLInputElement).value;
+                            if (address) {
+                              window.open(`https://www.google.com/maps/dir/${encodeURIComponent(address)}/295+Montauk+Hwy,+Speonk,+NY+11972`, '_blank');
+                            }
+                          }
+                        }}
                       />
-                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6">
+                      <Button 
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6"
+                        onClick={() => {
+                          const input = document.querySelector('input[placeholder="Enter your address or zip code"]') as HTMLInputElement;
+                          const address = input?.value;
+                          if (address) {
+                            window.open(`https://www.google.com/maps/dir/${encodeURIComponent(address)}/295+Montauk+Hwy,+Speonk,+NY+11972`, '_blank');
+                          }
+                        }}
+                      >
                         Get Directions
                       </Button>
                     </div>
@@ -780,35 +798,11 @@ export default function ThemedParties() {
               </Card>
             </div>
 
-            {/* Map Placeholder */}
+            {/* Google Map */}
             <div className="lg:h-full">
               <Card className="border-0 shadow-lg h-full min-h-[500px]">
                 <CardContent className="p-0 h-full">
-                  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
-                    {/* Map placeholder with visual elements */}
-                    <div className="absolute inset-0 opacity-10">
-                      {/* Road lines */}
-                      <div className="absolute top-1/4 left-0 right-0 h-0.5 bg-gray-400 transform rotate-12"></div>
-                      <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-400 transform -rotate-6"></div>
-                      <div className="absolute top-3/4 left-0 right-0 h-0.5 bg-gray-400 transform rotate-3"></div>
-                      <div className="absolute left-1/4 top-0 bottom-0 w-0.5 bg-gray-400 transform rotate-12"></div>
-                      <div className="absolute left-3/4 top-0 bottom-0 w-0.5 bg-gray-400 transform -rotate-12"></div>
-                    </div>
-
-                    {/* Location marker */}
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <span className="text-white text-2xl">📍</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-700 mb-2">
-                        Host Hampton
-                      </h3>
-                      <p className="text-gray-600">Speonk, NY</p>
-                      <p className="text-sm text-gray-500 mt-4">
-                        Interactive map coming soon
-                      </p>
-                    </div>
-                  </div>
+                  <GoogleMap className="w-full h-full min-h-[500px] rounded-lg" />
                 </CardContent>
               </Card>
             </div>
