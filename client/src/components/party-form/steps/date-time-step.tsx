@@ -14,13 +14,26 @@ interface DateTimeStepProps {
 export function DateTimeStep({ formData, updateFormData, onNext, onBack }: DateTimeStepProps) {
   const [partyDate, setPartyDate] = useState(formData.partyDate || "");
   const [partyTime, setPartyTime] = useState(formData.partyTime || "");
+  const [isUnsure, setIsUnsure] = useState(formData.isUnsure || false);
 
   const handleNext = () => {
-    updateFormData({ partyDate, partyTime });
+    if (isUnsure) {
+      updateFormData({ partyDate: "", partyTime: "", isUnsure: true });
+    } else {
+      updateFormData({ partyDate, partyTime, isUnsure: false });
+    }
     onNext();
   };
 
-  const isValid = partyDate && partyTime;
+  const handleUnsureToggle = () => {
+    setIsUnsure(!isUnsure);
+    if (!isUnsure) {
+      setPartyDate("");
+      setPartyTime("");
+    }
+  };
+
+  const isValid = isUnsure || (partyDate && partyTime);
 
   return (
     <div className="text-center">
@@ -37,45 +50,63 @@ export function DateTimeStep({ formData, updateFormData, onNext, onBack }: DateT
       </div>
 
       <div className="space-y-6 text-left">
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">Party Date</Label>
-          <Input
-            type="date"
-            value={partyDate}
-            onChange={(e) => setPartyDate(e.target.value)}
-            className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
-          />
+        {/* I'm Unsure Option */}
+        <div 
+          className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+            isUnsure 
+              ? 'border-gray-400 bg-gray-50' 
+              : 'border-gray-200 hover:border-gray-300'
+          }`}
+          onClick={handleUnsureToggle}
+        >
+          <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
+            isUnsure ? 'border-gray-400 bg-gray-400' : 'border-gray-300'
+          }`}>
+            {isUnsure && <div className="w-2 h-2 rounded-full bg-white" />}
+          </div>
+          <Label className="text-lg cursor-pointer flex-1 text-gray-600">
+            📅 I'm unsure, exploring options
+          </Label>
         </div>
 
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-3 block">Time Slot</Label>
-          <RadioGroup value={partyTime} onValueChange={setPartyTime} className="space-y-3">
-            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
-              <RadioGroupItem value="10am-12pm" id="time1" className="mr-3" />
-              <Label htmlFor="time1" className="text-lg cursor-pointer flex-1">
-                10:00 AM - 12:00 PM
-              </Label>
+        {/* Date and Time Fields - Hidden when unsure */}
+        {!isUnsure && (
+          <>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Party Date</Label>
+              <Input
+                type="date"
+                value={partyDate}
+                onChange={(e) => setPartyDate(e.target.value)}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
+              />
             </div>
-            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
-              <RadioGroupItem value="1pm-3pm" id="time2" className="mr-3" />
-              <Label htmlFor="time2" className="text-lg cursor-pointer flex-1">
-                1:00 PM - 3:00 PM
-              </Label>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-3 block">Time Slot</Label>
+              <RadioGroup value={partyTime} onValueChange={setPartyTime} className="space-y-3">
+                <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+                  <RadioGroupItem value="10am-12pm" id="time1" className="mr-3" />
+                  <Label htmlFor="time1" className="text-lg cursor-pointer flex-1">
+                    10:00 AM - 12:00 PM
+                  </Label>
+                </div>
+                <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+                  <RadioGroupItem value="1pm-3pm" id="time2" className="mr-3" />
+                  <Label htmlFor="time2" className="text-lg cursor-pointer flex-1">
+                    1:00 PM - 3:00 PM
+                  </Label>
+                </div>
+                <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+                  <RadioGroupItem value="4pm-6pm" id="time3" className="mr-3" />
+                  <Label htmlFor="time3" className="text-lg cursor-pointer flex-1">
+                    4:00 PM - 6:00 PM
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
-            <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
-              <RadioGroupItem value="4pm-6pm" id="time3" className="mr-3" />
-              <Label htmlFor="time3" className="text-lg cursor-pointer flex-1">
-                4:00 PM - 6:00 PM
-              </Label>
-            </div>
-            <div className="flex items-center p-4 border-2 border-purple-200 rounded-xl hover:border-purple-400 transition-colors bg-purple-50">
-              <RadioGroupItem value="unsure" id="time4" className="mr-3" />
-              <Label htmlFor="time4" className="text-lg cursor-pointer flex-1 text-purple-700">
-                📅 I'm unsure, exploring options
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
+          </>
+        )}
 
         <UnifiedButton
           onClick={handleNext}
