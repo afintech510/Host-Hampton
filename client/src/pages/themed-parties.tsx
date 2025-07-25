@@ -35,6 +35,7 @@ import tweensImage from "@assets/image_1752648836877.png";
 
 export default function ThemedParties() {
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
+  const [isFAQDialogOpen, setIsFAQDialogOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -43,6 +44,33 @@ export default function ThemedParties() {
   });
   const [scrollProgress, setScrollProgress] = useState(0);
   const { toast } = useToast();
+
+  const faqs = [
+    {
+      question: "What ages do you cater to for birthday parties?",
+      answer: "We specialize in parties for children ages 3-12, with themed activities and entertainment tailored to each age group. Our party packages can be customized for toddlers, preschoolers, and elementary school children."
+    },
+    {
+      question: "How far in advance should I book my party?",
+      answer: "We recommend booking at least 2-3 weeks in advance, especially for weekend dates. Popular party dates like holidays fill up quickly, so booking early ensures you get your preferred date and time."
+    },
+    {
+      question: "What's included in the party packages?",
+      answer: "All packages include decorations, themed activities, party host, setup and cleanup, and basic party supplies. You can add extras like face painting, magic shows, balloon animals, and professional photography."
+    },
+    {
+      question: "Do you provide food and cake?",
+      answer: "You're welcome to bring your own cake and food, or we can recommend local bakeries and catering options. We provide plates, cups, napkins, and utensils as part of our party packages."
+    },
+    {
+      question: "What's your cancellation policy?",
+      answer: "We understand plans can change! You can reschedule your party up to 7 days before the event. Cancellations made more than 14 days in advance receive a full refund minus a small processing fee."
+    },
+    {
+      question: "How many children can attend?",
+      answer: "Our standard packages accommodate 8-15 children. We can host larger parties with our premium packages that support up to 25 children. Additional staff and space are included for larger groups."
+    }
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -786,142 +814,54 @@ export default function ThemedParties() {
                 </p>
               </div>
               <div className="flex-shrink-0 flex flex-col sm:flex-row gap-4">
-                <Button
-                  size="lg"
-                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
-                >
-                  View FAQs
-                </Button>
-
-                <Dialog
-                  open={isContactDialogOpen}
-                  onOpenChange={setIsContactDialogOpen}
-                >
+                <Dialog open={isFAQDialogOpen} onOpenChange={setIsFAQDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
                       size="lg"
-                      variant="outline"
-                      className="border-2 border-white text-white hover:bg-white hover:text-pink-500 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                      className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
                     >
-                      Contact Us
+                      View FAQs
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
+                  <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="text-2xl font-bold text-gray-900">
-                        Contact Host Hampton
+                        Frequently Asked Questions
                       </DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleContactSubmit} className="space-y-4">
-                      <div>
-                        <Label
-                          htmlFor="name"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Name *
-                        </Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          value={contactForm.name}
-                          onChange={(e) =>
-                            setContactForm((prev) => ({
-                              ...prev,
-                              name: e.target.value,
-                            }))
-                          }
-                          placeholder="Your full name"
-                          className="mt-1"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label
-                          htmlFor="email"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Email *
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={contactForm.email}
-                          onChange={(e) =>
-                            setContactForm((prev) => ({
-                              ...prev,
-                              email: e.target.value,
-                            }))
-                          }
-                          placeholder="your.email@example.com"
-                          className="mt-1"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label
-                          htmlFor="phone"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Phone
-                        </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={contactForm.phone}
-                          onChange={(e) =>
-                            setContactForm((prev) => ({
-                              ...prev,
-                              phone: e.target.value,
-                            }))
-                          }
-                          placeholder="(555) 123-4567"
-                          className="mt-1"
-                        />
-                      </div>
-
-                      <div>
-                        <Label
-                          htmlFor="message"
-                          className="text-sm font-medium text-gray-700"
-                        >
-                          Message *
-                        </Label>
-                        <Textarea
-                          id="message"
-                          value={contactForm.message}
-                          onChange={(e) =>
-                            setContactForm((prev) => ({
-                              ...prev,
-                              message: e.target.value,
-                            }))
-                          }
-                          placeholder="Tell us about your party needs or ask any questions..."
-                          className="mt-1 min-h-[100px]"
-                          required
-                        />
-                      </div>
-
-                      <div className="flex gap-3 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setIsContactDialogOpen(false)}
-                          className="flex-1"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                        >
-                          Send Message
-                        </Button>
-                      </div>
-                    </form>
+                    <div className="space-y-6">
+                      {faqs.map((faq, index) => (
+                        <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            {faq.question}
+                          </h3>
+                          <p className="text-gray-600 leading-relaxed">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-center pt-4">
+                      <Button
+                        onClick={() => setIsFAQDialogOpen(false)}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                      >
+                        Close FAQs
+                      </Button>
+                    </div>
                   </DialogContent>
                 </Dialog>
+
+                <Link href="/book-event">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-white text-black bg-white hover:bg-gray-100 font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
+                  >
+                    Contact Us
+                  </Button>
+                </Link>
+
               </div>
             </div>
           </div>
