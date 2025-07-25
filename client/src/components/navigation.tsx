@@ -16,6 +16,7 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
+    { name: "My Events", href: "/my-events" },
     { name: "Shop Events", href: "/shop-events" },
     { name: "Theme Parties", href: "/themed-parties" },
     { name: "Party Room Rental", href: "/party-room-rental" },
@@ -40,13 +41,8 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Right side - My Events, Book Now Button and Menu Button */}
+          {/* Right side - Upcoming Events Button and Menu Button */}
           <div className="flex items-center space-x-4">
-            <Link href="/my-events">
-              <Button className="bg-pink-100 hover:bg-pink-200 text-black rounded-full">
-                My Events
-              </Button>
-            </Link>
             <Link href="/shop-events">
               <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
                 Upcoming Events
