@@ -1,4 +1,5 @@
 import { UnifiedButton } from "@/components/ui/unified-button";
+import { Link } from "wouter";
 import allieImage from "@assets/image_1752579343744.png";
 
 interface WelcomeStepProps {
@@ -32,13 +33,15 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         >
           Let's start planning! 🎉
         </UnifiedButton>
-        <UnifiedButton
-          variant="outline"
-          size="lg"
-          className="w-full"
-        >
-          I have an existing booking
-        </UnifiedButton>
+        <Link href="/my-events">
+          <UnifiedButton
+            variant="outline"
+            size="lg"
+            className="w-full"
+          >
+            I have an existing booking
+          </UnifiedButton>
+        </Link>
       </div>
     </div>
   );
