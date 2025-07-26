@@ -9,7 +9,7 @@ import LeadManagement from "@/components/admin/lead-management";
 import EventCalendar from "@/components/admin/event-calendar";
 import EventDetailsDialog from "@/components/admin/event-details-dialog";
 import InvoiceDetailsDialog from "@/components/admin/invoice-details-dialog";
-import NewEventDialog from "@/components/admin/new-event-dialog";
+import NewEventPanel from "@/components/admin/new-event-dialog";
 import { 
   Calendar, 
   Users, 
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [eventDialogMode, setEventDialogMode] = useState<"view" | "edit">("view");
   const [invoiceDialogMode, setInvoiceDialogMode] = useState<"view" | "edit">("view");
-  const [newEventDialogOpen, setNewEventDialogOpen] = useState(false);
+  const [showNewEventPanel, setShowNewEventPanel] = useState(false);
 
   // Fetch dashboard data
   const { data: events = [], isLoading: eventsLoading } = useQuery({
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
             </div>
             <Button 
               variant="outline"
-              onClick={() => setNewEventDialogOpen(true)}
+              onClick={() => setShowNewEventPanel(true)}
             >
               <Plus className="w-4 h-4 mr-2" />
               New Event
@@ -287,136 +287,142 @@ export default function AdminDashboard() {
 
           {/* Events Tab */}
           <TabsContent value="events" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Event Management</h2>
-              <div className="flex items-center space-x-2">
-                <div className="flex rounded-md shadow-sm">
-                  <button
-                    onClick={() => setEventViewMode("list")}
-                    className={`px-4 py-2 text-sm font-medium rounded-l-md border ${
-                      eventViewMode === "list"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    List View
-                  </button>
-                  <button
-                    onClick={() => setEventViewMode("calendar")}
-                    className={`px-4 py-2 text-sm font-medium rounded-r-md border-t border-r border-b ${
-                      eventViewMode === "calendar"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    Calendar View
-                  </button>
-                </div>
-                <Button onClick={() => setNewEventDialogOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Event
-                </Button>
+            {showNewEventPanel ? (
+              <div className="space-y-4">
+                <NewEventPanel onClose={() => setShowNewEventPanel(false)} />
               </div>
-            </div>
-
-            {eventViewMode === "calendar" ? (
-              <EventCalendar />
             ) : (
               <>
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Event Details
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Date & Time
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Estimated Cost
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {eventsLoading ? (
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">Event Management</h2>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex rounded-md shadow-sm">
+                      <button
+                        onClick={() => setEventViewMode("list")}
+                        className={`px-4 py-2 text-sm font-medium rounded-l-md border ${
+                          eventViewMode === "list"
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        List View
+                      </button>
+                      <button
+                        onClick={() => setEventViewMode("calendar")}
+                        className={`px-4 py-2 text-sm font-medium rounded-r-md border-t border-r border-b ${
+                          eventViewMode === "calendar"
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        Calendar View
+                      </button>
+                    </div>
+                    <Button onClick={() => setShowNewEventPanel(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Event
+                    </Button>
+                  </div>
+                </div>
+
+                {eventViewMode === "calendar" ? (
+                  <EventCalendar />
+                ) : (
+                  <Card>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
                             <tr>
-                              <td colSpan={5} className="px-6 py-4 text-center">
-                                <div className="animate-spin w-6 h-6 border-4 border-blue-300 border-t-transparent rounded-full mx-auto" />
-                              </td>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Event Details
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date & Time
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estimated Cost
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
                             </tr>
-                          ) : events.length === 0 ? (
-                            <tr>
-                              <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                                No events found
-                              </td>
-                            </tr>
-                          ) : (
-                            events.map((event: Event) => (
-                              <tr key={event.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div>
-                                    <div className="text-sm font-medium text-gray-900">Event #{event.id}</div>
-                                    <div className="text-sm text-gray-500">{event.guestCount} guests</div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {event.eventDate ? new Date(event.eventDate).toLocaleDateString() : 'TBD'}
-                                  <br />
-                                  <span className="text-gray-500">
-                                    {event.startTime} - {event.endTime}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <Badge className={getStatusColor(event.status)}>
-                                    {event.status || 'pending'}
-                                  </Badge>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                  <span className="font-medium text-gray-900">
-                                    ${(event.estimatedCost ? event.estimatedCost / 100 : 0).toFixed(2)}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <div className="flex space-x-2">
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      onClick={() => {
-                                        setSelectedEventId(event.id);
-                                        setEventDialogMode("view");
-                                      }}
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      onClick={() => {
-                                        setSelectedEventId(event.id);
-                                        setEventDialogMode("edit");
-                                      }}
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                  </div>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {eventsLoading ? (
+                              <tr>
+                                <td colSpan={5} className="px-6 py-4 text-center">
+                                  <div className="animate-spin w-6 h-6 border-4 border-blue-300 border-t-transparent rounded-full mx-auto" />
                                 </td>
                               </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
+                            ) : events.length === 0 ? (
+                              <tr>
+                                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                                  No events found
+                                </td>
+                              </tr>
+                            ) : (
+                              events.map((event: Event) => (
+                                <tr key={event.id}>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                      <div className="text-sm font-medium text-gray-900">Event #{event.id}</div>
+                                      <div className="text-sm text-gray-500">{event.guestCount} guests</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {event.eventDate ? new Date(event.eventDate).toLocaleDateString() : 'TBD'}
+                                    <br />
+                                    <span className="text-gray-500">
+                                      {event.startTime} - {event.endTime}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <Badge className={getStatusColor(event.status)}>
+                                      {event.status || 'pending'}
+                                    </Badge>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span className="font-medium text-gray-900">
+                                      ${(event.estimatedCost ? event.estimatedCost / 100 : 0).toFixed(2)}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div className="flex space-x-2">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedEventId(event.id);
+                                          setEventDialogMode("view");
+                                        }}
+                                      >
+                                        <Eye className="w-4 h-4" />
+                                      </Button>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedEventId(event.id);
+                                          setEventDialogMode("edit");
+                                        }}
+                                      >
+                                        <Edit className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </>
             )}
           </TabsContent>
@@ -612,11 +618,7 @@ export default function AdminDashboard() {
           mode={invoiceDialogMode}
         />
 
-        {/* New Event Dialog */}
-        <NewEventDialog
-          open={newEventDialogOpen}
-          onOpenChange={setNewEventDialogOpen}
-        />
+
       </div>
     </div>
   );

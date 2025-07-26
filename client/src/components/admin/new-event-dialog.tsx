@@ -3,15 +3,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Calendar, MapPin, Users, DollarSign, Clock, Tag } from "lucide-react";
+import { Calendar, MapPin, Users, DollarSign, Clock, Tag, X } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -48,12 +42,11 @@ const newEventSchema = z.object({
 
 type NewEventFormData = z.infer<typeof newEventSchema>;
 
-interface NewEventDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface NewEventPanelProps {
+  onClose: () => void;
 }
 
-export default function NewEventDialog({ open, onOpenChange }: NewEventDialogProps) {
+export default function NewEventPanel({ onClose }: NewEventPanelProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -97,7 +90,7 @@ export default function NewEventDialog({ open, onOpenChange }: NewEventDialogPro
       });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       form.reset();
-      onOpenChange(false);
+      onClose();
     },
     onError: (error: Error) => {
       toast({
@@ -146,17 +139,27 @@ export default function NewEventDialog({ open, onOpenChange }: NewEventDialogPro
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
             <Tag className="w-5 h-5" />
             Create New Event for Sale
-          </DialogTitle>
-          <DialogDescription>
-            Create a new event that will be available for customers to purchase on the Shop Events page.
-          </DialogDescription>
-        </DialogHeader>
+          </CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onClose}
+            className="h-8 w-8 p-0"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        <p className="text-sm text-gray-600">
+          Create a new event that will be available for customers to purchase on the Shop Events page.
+        </p>
+      </CardHeader>
+      <CardContent>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -356,7 +359,7 @@ export default function NewEventDialog({ open, onOpenChange }: NewEventDialogPro
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => onOpenChange(false)}
+                onClick={onClose}
                 disabled={isSubmitting}
               >
                 Cancel
@@ -378,7 +381,7 @@ export default function NewEventDialog({ open, onOpenChange }: NewEventDialogPro
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 }
