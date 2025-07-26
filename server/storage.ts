@@ -651,16 +651,7 @@ export class MemStorage implements IStorage {
   }
   
   // Customer authentication methods (in-memory placeholder)
-  async createVerificationCode(email: string, code: string): Promise<void> {
-    // In memory implementation - code would expire after 10 minutes
-    console.log(`Verification code ${code} created for ${email}`);
-  }
-  
-  async verifyCode(email: string, code: string): Promise<{ customerId: number } | null> {
-    // In memory placeholder - always return null
-    console.log(`Verifying code ${code} for ${email}`);
-    return null;
-  }
+
   
   async getCustomerEvents(customerId: number): Promise<any[]> {
     // In memory placeholder
@@ -1109,9 +1100,11 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(verificationCodes)
       .where(
-        eq(verificationCodes.email, email) &&
-        eq(verificationCodes.code, code) &&
-        eq(verificationCodes.used, false)
+        and(
+          eq(verificationCodes.email, email),
+          eq(verificationCodes.code, code),
+          eq(verificationCodes.used, false)
+        )
       )
       .orderBy(verificationCodes.createdAt);
     
