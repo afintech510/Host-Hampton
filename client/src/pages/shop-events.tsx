@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ const formatDate = (date: Date) => {
 export default function ShopEvents() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
   // Fetch products
   const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
@@ -54,6 +55,9 @@ export default function ShopEvents() {
       });
 
       if (!response.ok) throw new Error("Failed to add to cart");
+
+      // Invalidate cart cache to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/cart", sessionId] });
 
       toast({
         title: "Added to Cart",
