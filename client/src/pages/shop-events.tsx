@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Product, CartItem } from "@shared/schema";
+import Navigation from "@/components/navigation";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
@@ -226,43 +227,46 @@ export default function ShopEvents() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Shop Events & Workshops</h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Join us for exciting hands-on workshops and special events. Perfect for date nights, 
-          girls' trips, or learning new creative skills!
-        </p>
-      </div>
+    <div className="min-h-screen bg-white">
+      <Navigation cartItemCount={cartItems.length} />
+      
+      <div className="container mx-auto px-4 py-8 pt-24">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Shop Events & Workshops</h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Join us for exciting hands-on workshops and special events. Perfect for date nights, 
+            girls' trips, or learning new creative skills!
+          </p>
+        </div>
 
-      {/* Cart Summary */}
-      {cartItems.length > 0 && (
-        <div className="mb-8 p-4 bg-primary/5 rounded-lg border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="font-medium">
-                Cart: {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} - {formatPrice(cartTotal)}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setCartOpen(true)}>
-                View Cart
-              </Button>
-              <UnifiedButton
-                onClick={() => checkoutMutation.mutate()}
-                disabled={cartItems.length === 0 || checkoutMutation.isPending}
-              >
-                {checkoutMutation.isPending ? "Processing..." : "Checkout"}
-              </UnifiedButton>
+        {/* Cart Summary */}
+        {cartItems.length > 0 && (
+          <div className="mb-8 p-4 bg-primary/5 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                <span className="font-medium">
+                  Cart: {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} - {formatPrice(cartTotal)}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setCartOpen(true)}>
+                  View Cart
+                </Button>
+                <UnifiedButton
+                  onClick={() => checkoutMutation.mutate()}
+                  disabled={cartItems.length === 0 || checkoutMutation.isPending}
+                >
+                  {checkoutMutation.isPending ? "Processing..." : "Checkout"}
+                </UnifiedButton>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Products Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Products Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {products.map((product) => (
           <Card key={product.id} className="overflow-hidden">
             {product.imageUrl && (
@@ -326,16 +330,16 @@ export default function ShopEvents() {
             </CardFooter>
           </Card>
         ))}
-      </div>
-
-      {products.length === 0 && (
-        <div className="text-center py-16">
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Events Available</h3>
-          <p className="text-gray-600">Check back soon for upcoming workshops and events!</p>
         </div>
-      )}
 
-      {/* Cart Dialog */}
+        {products.length === 0 && (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Events Available</h3>
+            <p className="text-gray-600">Check back soon for upcoming workshops and events!</p>
+          </div>
+        )}
+
+        {/* Cart Dialog */}
       <Dialog open={cartOpen} onOpenChange={setCartOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -417,7 +421,7 @@ export default function ShopEvents() {
         </DialogContent>
       </Dialog>
 
-      {/* Checkout Dialog */}
+        {/* Checkout Dialog */}
       <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -434,6 +438,7 @@ export default function ShopEvents() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

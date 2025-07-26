@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -12,7 +12,11 @@ import {
 } from "@/components/ui/navigation-menu";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
 
-export default function Navigation() {
+interface NavigationProps {
+  cartItemCount?: number;
+}
+
+export default function Navigation({ cartItemCount = 0 }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
@@ -41,8 +45,20 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Right side - Upcoming Events Button and Menu Button */}
+          {/* Right side - Cart Icon, Upcoming Events Button and Menu Button */}
           <div className="flex items-center space-x-4">
+            {/* Shopping Cart Icon */}
+            <Link href="/shop-events">
+              <div className="relative cursor-pointer">
+                <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
+              </div>
+            </Link>
+
             <Link href="/shop-events">
               <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
                 Upcoming Events
