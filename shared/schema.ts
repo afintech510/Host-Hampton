@@ -75,13 +75,27 @@ export const partyThemes = pgTable("party_themes", {
 
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
+  leadId: integer("lead_id"), // Reference to original lead if converted
   eventTypeId: integer("event_type_id").notNull(),
   customerId: integer("customer_id").notNull(),
-  eventDate: timestamp("event_date").notNull(),
+  eventDate: timestamp("event_date"),
+  startTime: text("start_time"), // "14:00"
+  endTime: text("end_time"), // "18:00"
   guestCount: integer("guest_count"),
-  status: text("status").default("quote").notNull(), // quote, booked, deposit_paid, final_paid, cancelled
+  status: text("status").default("inquiry").notNull(), // inquiry, quote_requested, quote_sent, follow_up, deposit_paid, confirmed, planning, completed, follow_up_sent, reviewed, cancelled
+  inquirySource: text("inquiry_source").default("website").notNull(), // website, phone, referral, social, campaign
+  leadScore: text("lead_score").default("warm").notNull(), // hot, warm, cold
+  statusHistory: json("status_history").default([]).notNull(), // Track all status changes with timestamps
+  followUpDate: timestamp("follow_up_date"),
+  completedAt: timestamp("completed_at"),
+  reviewRequestSent: boolean("review_request_sent").default(false).notNull(),
+  selectedPackageId: integer("selected_package_id"), // Reference to chosen package
+  selectedAddons: json("selected_addons").default([]).notNull(), // Array of addon IDs and quantities
+  partyThemeId: integer("party_theme_id"), // For theme parties
+  estimatedCost: integer("estimated_cost"), // In cents, calculated from selections
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const invoices = pgTable("invoices", {
@@ -178,17 +192,55 @@ export const leads = pgTable("leads", {
   id: serial("id").primaryKey(),
   source: text("source").notNull(), // "website", "referral", "social", "campaign"
   campaignId: integer("campaign_id"), // If from a campaign
+  
+  // Contact Information
   name: text("name"),
   email: text("email"),
   phone: text("phone"),
-  eventType: text("event_type"),
+  
+  // Event Details from form
+  eventTypeId: integer("event_type_id"), // Maps to eventTypes table
+  eventType: text("event_type"), // "Theme Party", "Room Rental", "Appointment", "HH Event"
   eventDate: timestamp("event_date"),
+  isDateUnsure: boolean("is_date_unsure").default(false).notNull(),
+  timeSlot: text("time_slot"), // "10am-12pm", "1pm-3pm", "4pm-6pm"
   guestCount: integer("guest_count"),
-  budget: integer("budget"), // In cents
+  
+  // Party Details (for Theme Parties)
+  childName: text("child_name"),
+  childAge: integer("child_age"),
+  partyThemeId: integer("party_theme_id"),
+  
+  // Package and Add-ons Selection
+  selectedPackageId: integer("selected_package_id"),
+  selectedAddons: json("selected_addons").default([]).notNull(), // [{id: number, quantity: number, name: string}]
+  
+  // Location and Setup
+  location: text("location"), // "studio", "customer_location"
+  customerAddress: json("customer_address"), // {street, city, state, zip}
+  
+  // Pricing Information
+  estimatedCost: integer("estimated_cost"), // In cents, calculated total
+  budget: integer("budget"), // In cents, customer's budget range
+  
+  // Lead Tracking
   status: text("status").default("new").notNull(), // "new", "contacted", "quoted", "converted", "lost"
+  leadScore: text("lead_score").default("warm").notNull(), // "hot", "warm", "cold"
+  followUpDate: timestamp("follow_up_date"),
+  lastContactedAt: timestamp("last_contacted_at"),
+  
+  // Conversion Tracking  
+  convertedCustomerId: integer("converted_customer_id"), // If lead converted to customer
+  convertedEventId: integer("converted_event_id"), // If lead converted to event
+  convertedAt: timestamp("converted_at"),
+  
+  // Form metadata
+  formStep: text("form_step"), // Track which step user reached
+  formData: json("form_data"), // Complete form data for recovery
+  
   notes: text("notes"),
-  convertedCustomerId: integer("converted_customer_id"), // If lead converted
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Payment tracking and transaction history
@@ -270,6 +322,32 @@ export const eventCalendar = pgTable("event_calendar", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Event status tracking and automation
+export const eventStatusHistory = pgTable("event_status_history", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull(),
+  leadId: integer("lead_id"), // Track status changes for leads too
+  oldStatus: text("old_status"),
+  newStatus: text("new_status").notNull(),
+  changedBy: text("changed_by"), // "system", "admin", "customer"
+  automationTriggered: boolean("automation_triggered").default(false).notNull(),
+  notes: text("notes"),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const eventStageTemplates = pgTable("event_stage_templates", {
+  id: serial("id").primaryKey(),
+  stage: text("stage").notNull(), // "inquiry", "quote_sent", "follow_up", "confirmation", "reminder", "completion"
+  eventTypeId: integer("event_type_id"), // Null for all event types
+  templateType: text("template_type").notNull(), // "email", "sms"
+  subject: text("subject"),
+  content: text("content").notNull(),
+  triggerDaysOffset: integer("trigger_days_offset").default(0).notNull(), // Days before/after event
+  autoSend: boolean("auto_send").default(false).notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Business analytics and reporting
 export const businessMetrics = pgTable("business_metrics", {
   id: serial("id").primaryKey(),
@@ -325,6 +403,7 @@ export const insertPartyThemeSchema = createInsertSchema(partyThemes).omit({
 export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
@@ -342,7 +421,7 @@ export const insertStaffSchema = createInsertSchema(staff).omit({ id: true, crea
 export const insertEventStaffAssignmentSchema = createInsertSchema(eventStaffAssignments).omit({ id: true });
 export const insertCommunicationSchema = createInsertSchema(communications).omit({ id: true, sentAt: true });
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({ id: true, createdAt: true });
-export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
+export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertPaymentSchema = createInsertSchema(payments).omit({ id: true, createdAt: true });
 export const insertInventorySchema = createInsertSchema(inventory).omit({ id: true });
 export const insertEventInventoryUsageSchema = createInsertSchema(eventInventoryUsage).omit({ id: true });
@@ -351,6 +430,8 @@ export const insertBusinessMetricSchema = createInsertSchema(businessMetrics).om
 export const insertEventCalendarSchema = createInsertSchema(eventCalendar).omit({ id: true, createdAt: true });
 export const insertRoomRentalPricingSchema = createInsertSchema(roomRentalPricing).omit({ id: true, createdAt: true });
 export const insertVerificationCodeSchema = createInsertSchema(verificationCodes).omit({ id: true, createdAt: true });
+export const insertEventStatusHistorySchema = createInsertSchema(eventStatusHistory).omit({ id: true, timestamp: true });
+export const insertEventStageTemplateSchema = createInsertSchema(eventStageTemplates).omit({ id: true, createdAt: true });
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -378,7 +459,15 @@ export const packagesRelations = relations(packages, ({ one }) => ({
 export const eventsRelations = relations(events, ({ one, many }) => ({
   eventType: one(eventTypes, { fields: [events.eventTypeId], references: [eventTypes.id] }),
   customer: one(customers, { fields: [events.customerId], references: [customers.id] }),
+  lead: one(leads, { fields: [events.leadId], references: [leads.id] }),
+  selectedPackage: one(packages, { fields: [events.selectedPackageId], references: [packages.id] }),
+  partyTheme: one(partyThemes, { fields: [events.partyThemeId], references: [partyThemes.id] }),
   invoice: one(invoices),
+  statusHistory: many(eventStatusHistory),
+  calendarEntry: one(eventCalendar),
+  staffAssignments: many(eventStaffAssignments),
+  communications: many(communications),
+  inventoryUsage: many(eventInventoryUsage),
 }));
 
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({
@@ -409,9 +498,15 @@ export const campaignsRelations = relations(campaigns, ({ many }) => ({
   leads: many(leads),
 }));
 
-export const leadsRelations = relations(leads, ({ one }) => ({
+export const leadsRelations = relations(leads, ({ one, many }) => ({
   campaign: one(campaigns, { fields: [leads.campaignId], references: [campaigns.id] }),
+  eventType: one(eventTypes, { fields: [leads.eventTypeId], references: [eventTypes.id] }),
+  partyTheme: one(partyThemes, { fields: [leads.partyThemeId], references: [partyThemes.id] }),
+  selectedPackage: one(packages, { fields: [leads.selectedPackageId], references: [packages.id] }),
   convertedCustomer: one(customers, { fields: [leads.convertedCustomerId], references: [customers.id] }),
+  convertedEvent: one(events, { fields: [leads.convertedEventId], references: [events.id] }),
+  statusHistory: many(eventStatusHistory),
+  communications: many(communications),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -485,3 +580,7 @@ export type InsertEventCalendar = z.infer<typeof insertEventCalendarSchema>;
 export type EventCalendar = typeof eventCalendar.$inferSelect;
 export type InsertRoomRentalPricing = z.infer<typeof insertRoomRentalPricingSchema>;
 export type RoomRentalPricing = typeof roomRentalPricing.$inferSelect;
+export type InsertEventStatusHistory = z.infer<typeof insertEventStatusHistorySchema>;
+export type EventStatusHistory = typeof eventStatusHistory.$inferSelect;
+export type InsertEventStageTemplate = z.infer<typeof insertEventStageTemplateSchema>;
+export type EventStageTemplate = typeof eventStageTemplates.$inferSelect;

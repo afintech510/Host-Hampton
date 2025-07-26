@@ -1,13 +1,13 @@
 import { 
   users, reviews, eventTypes, customers, packages, addons, partyThemes, events, invoices, invoiceItems, eventCalendar,
-  roomRentalPricing, verificationCodes,
+  roomRentalPricing, verificationCodes, leads, eventStatusHistory,
   type User, type InsertUser, type Review, type InsertReview,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
   type PartyTheme, type InsertPartyTheme,
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
   type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar,
-  type RoomRentalPricing
+  type RoomRentalPricing, type Lead, type InsertLead, type EventStatusHistory, type InsertEventStatusHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -54,8 +54,19 @@ export interface IStorage {
   createTimeSlot(slot: any): Promise<any>;
   getStaff(): Promise<any[]>;
   createStaffMember(staff: any): Promise<any>;
-  createLead(lead: any): Promise<any>;
-  getLeads(): Promise<any[]>;
+  
+  // Lead management methods
+  createLead(lead: InsertLead): Promise<Lead>;
+  getLeads(): Promise<Lead[]>;
+  getLead(id: number): Promise<Lead | undefined>;
+  updateLead(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined>;
+  convertLeadToEvent(leadId: number, customerId: number): Promise<{ lead: Lead; event: Event; customer: Customer } | undefined>;
+  
+  // Event status tracking
+  updateEventStatus(id: number, status: string, changedBy?: string, notes?: string): Promise<Event | undefined>;
+  createEventStatusHistory(history: InsertEventStatusHistory): Promise<EventStatusHistory>;
+  getEventStatusHistory(eventId: number): Promise<EventStatusHistory[]>;
+  
   createPayment(payment: any): Promise<any>;
   getPayments(invoiceId?: number): Promise<any[]>;
   createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar>;
@@ -72,7 +83,9 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private reviews: Map<number, Review>;
   private partyThemes: Map<number, PartyTheme>;
+  private leads: Map<number, Lead>;
   private currentUserId: number;
+  private currentLeadId: number;
   private currentReviewId: number;
   private currentThemeId: number;
   private addons: Map<number, Addon>;
@@ -95,6 +108,7 @@ export class MemStorage implements IStorage {
     this.events = new Map();
     this.invoices = new Map();
     this.invoiceItems = new Map();
+    this.leads = new Map();
     this.currentUserId = 1;
     this.currentReviewId = 1;
     this.currentThemeId = 1;
@@ -103,6 +117,7 @@ export class MemStorage implements IStorage {
     this.currentEventId = 1;
     this.currentInvoiceId = 1;
     this.currentInvoiceItemId = 1;
+    this.currentLeadId = 1;
     
     // Initialize party themes and addons
     this.initializePartyThemes();
@@ -489,44 +504,45 @@ export class MemStorage implements IStorage {
     return { ...staff, id: Date.now() };
   }
 
-  async createLead(lead: any): Promise<any> {
-    return { ...lead, id: Date.now() };
+  async createLead(lead: InsertLead): Promise<Lead> {
+    const id = this.currentLeadId++;
+    const newLead: Lead = {
+      ...lead,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as Lead;
+    this.leads.set(id, newLead);
+    return newLead;
   }
 
-  async getLeads(): Promise<any[]> {
-    // Sample lead data for demonstration
-    return [
-      {
-        id: 1,
-        name: "Jessica Miller",
-        email: "jessica@email.com",
-        phone: "(555) 123-4567",
-        source: "website",
-        status: "new",
-        eventType: "Birthday Party",
-        createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
-      },
-      {
-        id: 2,
-        name: "Robert Chen",
-        email: "robert@email.com",
-        phone: "(555) 987-6543",
-        source: "referral",
-        status: "contacted",
-        eventType: "Permanent Jewelry Party",
-        createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
-      },
-      {
-        id: 3,
-        name: "Amanda Rodriguez",
-        email: "amanda@email.com",
-        phone: "(555) 456-7890",
-        source: "social",
-        status: "quoted",
-        eventType: "Studio Rental",
-        createdAt: new Date(Date.now() - 259200000).toISOString() // 3 days ago
-      }
-    ];
+  async getLeads(): Promise<Lead[]> {
+    return Array.from(this.leads.values());
+  }
+
+  async getLead(id: number): Promise<Lead | undefined> {
+    return this.leads.get(id);
+  }
+
+  async updateLead(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+    const lead = this.leads.get(id);
+    if (!lead) return undefined;
+    
+    const updatedLead = { ...lead, ...updates, updatedAt: new Date() };
+    this.leads.set(id, updatedLead);
+    return updatedLead;
+  }
+
+  async convertLeadToEvent(leadId: number, customerId: number): Promise<{ lead: Lead; event: Event; customer: Customer } | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async createEventStatusHistory(history: InsertEventStatusHistory): Promise<EventStatusHistory> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getEventStatusHistory(eventId: number): Promise<EventStatusHistory[]> {
+    return [];
   }
 
   async createPayment(payment: any): Promise<any> {
@@ -716,8 +732,24 @@ export class DatabaseStorage implements IStorage {
     return event || undefined;
   }
 
-  async updateEventStatus(id: number, status: string): Promise<Event | undefined> {
-    const [updated] = await db.update(events).set({ status }).where(eq(events.id, id)).returning();
+  async updateEventStatus(id: number, status: string, changedBy: string = "system", notes?: string): Promise<Event | undefined> {
+    const [updated] = await db.update(events).set({ 
+      status,
+      updatedAt: new Date(),
+      statusHistory: db.select().from(events).where(eq(events.id, id))
+    }).where(eq(events.id, id)).returning();
+    
+    // Create status history record
+    if (updated) {
+      await this.createEventStatusHistory({
+        eventId: id,
+        newStatus: status,
+        changedBy,
+        notes: notes || `Status changed to ${status}`,
+        automationTriggered: changedBy === "system"
+      });
+    }
+    
     return updated || undefined;
   }
 
@@ -775,14 +807,99 @@ export class DatabaseStorage implements IStorage {
     return staff;
   }
 
-  async createLead(lead: any): Promise<any> {
-    // TODO: Implement with leads table
-    return lead;
+  // Lead management methods - Complete implementation
+  async createLead(lead: InsertLead): Promise<Lead> {
+    const [created] = await db.insert(leads).values(lead).returning();
+    
+    // Create initial status history
+    await this.createEventStatusHistory({
+      leadId: created.id,
+      newStatus: created.status,
+      changedBy: "system",
+      notes: "Lead created from website form",
+      automationTriggered: true
+    });
+    
+    return created;
   }
 
-  async getLeads(): Promise<any[]> {
-    // TODO: Implement with leads table
-    return [];
+  async getLeads(): Promise<Lead[]> {
+    return await db.select().from(leads);
+  }
+
+  async getLead(id: number): Promise<Lead | undefined> {
+    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
+    return lead || undefined;
+  }
+
+  async updateLead(id: number, updates: Partial<InsertLead>): Promise<Lead | undefined> {
+    const [updated] = await db.update(leads).set({
+      ...updates,
+      updatedAt: new Date()
+    }).where(eq(leads.id, id)).returning();
+    
+    // Track status change if status was updated
+    if (updates.status && updated) {
+      await this.createEventStatusHistory({
+        leadId: id,
+        newStatus: updates.status,
+        changedBy: "admin",
+        notes: `Lead status updated to ${updates.status}`,
+        automationTriggered: false
+      });
+    }
+    
+    return updated || undefined;
+  }
+
+  async convertLeadToEvent(leadId: number, customerId: number): Promise<{ lead: Lead; event: Event; customer: Customer } | undefined> {
+    const lead = await this.getLead(leadId);
+    const customer = await this.getCustomer(customerId);
+    
+    if (!lead || !customer) return undefined;
+    
+    // Create event from lead data
+    const eventData: InsertEvent = {
+      leadId: leadId,
+      eventTypeId: lead.eventTypeId || 1,
+      customerId: customerId,
+      eventDate: lead.eventDate,
+      startTime: lead.timeSlot?.split('-')[0] || null,
+      endTime: lead.timeSlot?.split('-')[1] || null,
+      guestCount: lead.guestCount,
+      status: "quote_requested",
+      inquirySource: lead.source,
+      leadScore: lead.leadScore,
+      selectedPackageId: lead.selectedPackageId,
+      selectedAddons: lead.selectedAddons,
+      partyThemeId: lead.partyThemeId,
+      estimatedCost: lead.estimatedCost,
+      notes: lead.notes
+    };
+    
+    const event = await this.createEvent(eventData);
+    
+    // Update lead to mark as converted
+    const updatedLead = await this.updateLead(leadId, {
+      status: "converted",
+      convertedCustomerId: customerId,
+      convertedEventId: event.id,
+      convertedAt: new Date()
+    });
+    
+    if (!updatedLead) return undefined;
+    
+    return { lead: updatedLead, event, customer };
+  }
+
+  // Event status tracking methods
+  async createEventStatusHistory(history: InsertEventStatusHistory): Promise<EventStatusHistory> {
+    const [created] = await db.insert(eventStatusHistory).values(history).returning();
+    return created;
+  }
+
+  async getEventStatusHistory(eventId: number): Promise<EventStatusHistory[]> {
+    return await db.select().from(eventStatusHistory).where(eq(eventStatusHistory.eventId, eventId));
   }
 
   async createPayment(payment: any): Promise<any> {

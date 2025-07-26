@@ -77,6 +77,7 @@ interface FormData {
 // Addon prices will be loaded from database - no more mock data
 
 export function usePartyForm() {
+  const [leadId, setLeadId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Partial<FormData>>(() => {
     // Initialize from session storage
     if (typeof window !== 'undefined') {
@@ -92,6 +93,35 @@ export function usePartyForm() {
     return {};
   });
   const { toast } = useToast();
+
+  // Lead creation mutation for when contact info is entered
+  const createLeadMutation = useMutation({
+    mutationFn: async (leadData: any) => {
+      const response = await apiRequest("POST", "/api/leads", leadData);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setLeadId(data.lead.id);
+      console.log("Lead created successfully:", data.lead);
+    },
+    onError: (error) => {
+      console.error("Failed to create lead:", error);
+    },
+  });
+
+  // Lead update mutation for form progress tracking
+  const updateLeadMutation = useMutation({
+    mutationFn: async ({ leadId, updates }: { leadId: number; updates: any }) => {
+      const response = await apiRequest("PATCH", `/api/leads/${leadId}`, updates);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log("Lead updated successfully:", data.lead);
+    },
+    onError: (error) => {
+      console.error("Failed to update lead:", error);
+    },
+  });
 
   // Save to session storage whenever formData changes
   useEffect(() => {
@@ -269,7 +299,9 @@ export function usePartyForm() {
           eventId: data.data.eventId,
           invoiceId: data.data.invoiceId,
           amount: paymentAmount,
-          eventType: formData.eventType
+          eventType: formData.eventType,
+          leadId: leadId, // Include lead ID for conversion
+          customerEmail: formData.customerEmail || formData.parentEmail
         });
       } else {
         // For request-only events (jewelry, studio rental)
@@ -295,6 +327,66 @@ export function usePartyForm() {
     },
   });
 
+  // Function to create lead when contact info is provided
+  const createLeadFromContact = (contactData: Partial<FormData>) => {
+    const hasContactInfo = contactData.customerName && 
+                          contactData.customerEmail && 
+                          contactData.customerPhone;
+    
+    if (hasContactInfo && !leadId) {
+      const leadData = {
+        customerName: contactData.customerName,
+        customerEmail: contactData.customerEmail,
+        customerPhone: contactData.customerPhone,
+        eventTypeId: getEventTypeId(contactData.eventType || "birthday"),
+        guestCount: contactData.guestCount || null,
+        eventDate: contactData.partyDate || 
+                  contactData.customPreferredDate || 
+                  contactData.jewelryPreferredDate || 
+                  contactData.preferredDate || 
+                  contactData.studioPreferredDate || null,
+        timeSlot: contactData.partyTime || 
+                 contactData.customStartTime || 
+                 contactData.jewelryPreferredTime || 
+                 contactData.startTime || 
+                 contactData.studioStartTime || null,
+        notes: contactData.partyNotes || contactData.eventDescription || null,
+        estimatedCost: contactData.totalEstimate || null,
+        selectedAddons: contactData.partyAddons || 
+                       contactData.selectedCustomAddons || 
+                       contactData.selectedJewelryPieces || 
+                       contactData.selectedWorkshopAddons || null,
+        partyThemeId: contactData.partyTheme ? getPartyThemeId(contactData.partyTheme) : null,
+        formData: contactData
+      };
+      
+      createLeadMutation.mutate(leadData);
+    }
+  };
+
+  // Helper function to map event types to IDs
+  const getEventTypeId = (eventType: string): number => {
+    const mapping: { [key: string]: number } = {
+      "birthday": 1,
+      "birthday-party": 1,
+      "workshop": 2,
+      "permanent-jewelry": 3,
+      "permanent-jewelry-popup": 4,
+      "studio-rental": 5,
+      "host-your-client": 6,
+      "permanent-jewelry-appointment": 7,
+      "diy-party": 1,
+      "private-event": 1
+    };
+    return mapping[eventType] || 1;
+  };
+
+  // Helper function to get party theme ID
+  const getPartyThemeId = (themeName: string): number | null => {
+    const theme = themes.find((t: any) => t.name === themeName);
+    return theme?.id || null;
+  };
+
   const updateFormData = (newData: Partial<FormData>) => {
     setFormData((prev) => {
       const updated = { ...prev, ...newData };
@@ -303,6 +395,24 @@ export function usePartyForm() {
       if (newData.partyTheme || newData.partyAddons || newData.guestCount) {
         const calculatedTotal = calculateTotal(updated);
         updated.totalEstimate = Number(calculatedTotal) || 400; // Ensure it's a number
+      }
+      
+      // Create lead when contact info is provided for the first time
+      createLeadFromContact(updated);
+      
+      // Update lead progress if lead exists
+      if (leadId) {
+        updateLeadMutation.mutate({
+          leadId,
+          updates: {
+            formData: updated,
+            estimatedCost: updated.totalEstimate,
+            guestCount: updated.guestCount,
+            eventDate: updated.partyDate || updated.customPreferredDate || updated.jewelryPreferredDate || updated.preferredDate || updated.studioPreferredDate,
+            timeSlot: updated.partyTime || updated.customStartTime || updated.jewelryPreferredTime || updated.startTime || updated.studioStartTime,
+            notes: updated.partyNotes || updated.eventDescription
+          }
+        });
       }
       
       // Immediately save to session storage
@@ -337,6 +447,7 @@ export function usePartyForm() {
       // Add deposit amount for payment flow
       depositAmount: formData.rentalPricing?.total || 
         (eventType === "diy-party" ? 12500 : eventType === "private-event" ? 20000 : 10000), // Default deposits in cents
+      leadId: leadId // Include lead ID for potential conversion
     };
 
     // Route to appropriate mutation based on action
@@ -358,6 +469,8 @@ export function usePartyForm() {
     formData,
     updateFormData,
     submitBooking,
+    leadId,
+    createLeadFromContact,
     isSubmitting: submitBookingMutation.isPending || 
                  submitInquiryMutation.isPending || 
                  submitPaymentMutation.isPending,

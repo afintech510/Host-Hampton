@@ -6,7 +6,8 @@ import { bookingService } from "./booking-service";
 import { 
   insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
-  insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema 
+  insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema,
+  insertLeadSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -216,6 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customerEmail: req.body.customerEmail || "",
           eventId: bookingResult.eventId?.toString() || "",
           invoiceId: bookingResult.invoiceId?.toString() || "",
+          leadId: req.body.leadId?.toString() || "",
           bookingType: "reservation_deposit"
         },
         automatic_payment_methods: {
@@ -421,7 +423,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced lead capture from booking form
   app.post("/api/leads", async (req, res) => {
+    try {
+      const leadData = insertLeadSchema.parse(req.body);
+      
+      // Set default values for new leads from website
+      const enrichedLead = {
+        ...leadData,
+        source: "website",
+        status: "new",
+        leadScore: "warm",
+        formStep: req.body.formStep || "contact-info",
+        formData: req.body.formData || {}
+      };
+      
+      const lead = await storage.createLead(enrichedLead);
+      res.status(201).json({ success: true, lead });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating lead:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create lead" 
+      });
+    }
+  });
+
+  // Update lead (for form progress tracking)
+  app.patch("/api/leads/:id", async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedLead = await storage.updateLead(leadId, updates);
+      
+      if (!updatedLead) {
+        return res.status(404).json({
+          success: false,
+          message: "Lead not found"
+        });
+      }
+      
+      res.json({ success: true, lead: updatedLead });
+    } catch (error) {
+      console.error("Error updating lead:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update lead" 
+      });
+    }
+  });
+
+  // Convert lead to event (when payment is made)
+  app.post("/api/leads/:id/convert", async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.id);
+      const { customerId } = req.body;
+      
+      if (!customerId) {
+        return res.status(400).json({
+          success: false,
+          message: "Customer ID is required for conversion"
+        });
+      }
+      
+      const result = await storage.convertLeadToEvent(leadId, customerId);
+      
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: "Lead or customer not found"
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Lead successfully converted to event",
+        ...result 
+      });
+    } catch (error) {
+      console.error("Error converting lead:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to convert lead" 
+      });
+    }
+  });
+
+  // Original leads endpoint for backward compatibility
+  app.post("/api/leads/legacy", async (req, res) => {
     try {
       const leadData = req.body;
       const lead = await storage.createLead(leadData);
@@ -773,6 +870,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to create payment intent"
+      });
+    }
+  });
+
+  // Payment success webhook - converts leads to events upon successful payment
+  app.post("/api/payment-success", async (req, res) => {
+    try {
+      const { paymentIntentId, leadId, customerEmail } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({
+          success: false,
+          message: "Payment intent ID is required"
+        });
+      }
+
+      // Retrieve payment intent to verify success
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({
+          success: false,
+          message: "Payment has not succeeded yet"
+        });
+      }
+
+      // Extract metadata for lead conversion
+      const metadata = paymentIntent.metadata;
+      const metadataLeadId = metadata.leadId || leadId;
+      const metadataCustomerEmail = metadata.customerEmail || customerEmail;
+
+      // If there's a lead to convert, handle the conversion
+      if (metadataLeadId && metadataCustomerEmail) {
+        // Find or create customer
+        let customer = await storage.getCustomerByEmail(metadataCustomerEmail);
+        
+        if (!customer) {
+          const lead = await storage.getLead(parseInt(metadataLeadId));
+          if (lead) {
+            customer = await storage.createCustomer({
+              name: lead.customerName,
+              email: lead.customerEmail,
+              phone: lead.customerPhone
+            });
+          }
+        }
+
+        if (customer) {
+          // Convert lead to event
+          const result = await storage.convertLeadToEvent(parseInt(metadataLeadId), customer.id);
+          
+          if (result) {
+            console.log(`Lead ${metadataLeadId} successfully converted to event ${result.event.id}`);
+            
+            // Update event status to deposit_paid
+            await storage.updateEventStatus(result.event.id, "deposit_paid", "payment_system", "Deposit payment received via Stripe");
+            
+            return res.json({
+              success: true,
+              message: "Payment processed and lead converted to event",
+              eventId: result.event.id,
+              customerId: customer.id
+            });
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "Payment processed successfully"
+      });
+    } catch (error: any) {
+      console.error("Payment success processing error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to process payment success"
       });
     }
   });
