@@ -108,7 +108,7 @@ export function CustomContactStep({ formData, updateFormData, onNext, onBack }: 
           disabled={!isValid}
           className="flex-1 bg-pink-300 hover:bg-pink-400 text-white disabled:bg-gray-200 disabled:text-gray-400"
         >
-          {consentChecked ? "Show Price" : "Please check consent to continue"}
+          Show Price
         </Button>
       </div>
     </div>
