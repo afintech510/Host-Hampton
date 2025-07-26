@@ -749,7 +749,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updated = await storage.updateEvent(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Event not found" });
+      }
+      res.json({ success: true, event: updated });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to update event" });
+    }
+  });
+
   // Invoices
+  app.get("/api/invoices/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      res.json({ success: true, invoice });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.patch("/api/invoices/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updated = await storage.updateInvoice(id, req.body);
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      res.json({ success: true, invoice: updated });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to update invoice" });
+    }
+  });
+
   app.post("/api/invoices", async (req, res) => {
     try {
       const invoice = insertInvoiceSchema.parse(req.body);
@@ -911,9 +950,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const lead = await storage.getLead(parseInt(metadataLeadId));
           if (lead) {
             customer = await storage.createCustomer({
-              name: lead.customerName,
-              email: lead.customerEmail,
-              phone: lead.customerPhone
+              name: lead.name || '',
+              email: lead.email || '',
+              phone: lead.phone || ''
             });
           }
         }

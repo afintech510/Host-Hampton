@@ -40,9 +40,11 @@ export interface IStorage {
   getEvents(): Promise<Event[]>;
   createEvent(event: InsertEvent): Promise<Event>;
   getEvent(id: number): Promise<Event | undefined>;
+  updateEvent(id: number, updates: any): Promise<Event | undefined>;
   updateEventStatus(id: number, status: string): Promise<Event | undefined>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   getInvoice(id: number): Promise<Invoice | undefined>;
+  updateInvoice(id: number, updates: any): Promise<Invoice | undefined>;
   getInvoices(): Promise<Invoice[]>;
   getInvoiceByEventId(eventId: number): Promise<Invoice | undefined>;
   createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem>;
@@ -390,16 +392,41 @@ export class MemStorage implements IStorage {
   // createEvent is already implemented above
 
   async getEvent(id: number): Promise<Event | undefined> {
+    const events = await this.getEvents();
+    return events.find(event => event.id === id);
+  }
+
+  async updateEvent(id: number, updates: any): Promise<Event | undefined> {
+    const event = this.events.get(id);
+    if (event) {
+      Object.assign(event, updates);
+      return event;
+    }
     return undefined;
   }
 
   async updateEventStatus(id: number, status: string): Promise<Event | undefined> {
-    throw new Error("Not implemented in MemStorage");
+    const event = this.events.get(id);
+    if (event) {
+      event.status = status;
+      return event;
+    }
+    return undefined;
   }
 
   // createInvoice is already implemented above
 
   async getInvoice(id: number): Promise<Invoice | undefined> {
+    const invoices = await this.getInvoices();
+    return invoices.find(invoice => invoice.id === id);
+  }
+
+  async updateInvoice(id: number, updates: any): Promise<Invoice | undefined> {
+    const invoice = this.invoices.get(id);
+    if (invoice) {
+      Object.assign(invoice, updates);
+      return invoice;
+    }
     return undefined;
   }
 
@@ -719,7 +746,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getEvents(): Promise<Event[]> {
-    return await db.select().from(events);
+    return await db.select().from(events).orderBy(events.eventDate);
   }
 
   async createEvent(event: InsertEvent): Promise<Event> {
@@ -893,6 +920,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Event status tracking methods
+  async updateEvent(id: number, updates: any): Promise<Event | undefined> {
+    const [updated] = await db.update(events).set({
+      ...updates,
+      updatedAt: new Date()
+    }).where(eq(events.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async updateInvoice(id: number, updates: any): Promise<Invoice | undefined> {
+    const [updated] = await db.update(invoices).set({
+      ...updates,
+      updatedAt: new Date()
+    }).where(eq(invoices.id, id)).returning();
+    return updated || undefined;
+  }
+
   async createEventStatusHistory(history: InsertEventStatusHistory): Promise<EventStatusHistory> {
     const [created] = await db.insert(eventStatusHistory).values(history).returning();
     return created;
@@ -1009,4 +1052,7 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Use MemStorage for development, DatabaseStorage for production
+export const storage: IStorage = process.env.NODE_ENV === 'production' 
+  ? new DatabaseStorage() 
+  : new MemStorage();

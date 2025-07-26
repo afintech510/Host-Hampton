@@ -325,7 +325,7 @@ export const eventCalendar = pgTable("event_calendar", {
 // Event status tracking and automation
 export const eventStatusHistory = pgTable("event_status_history", {
   id: serial("id").primaryKey(),
-  eventId: integer("event_id").notNull(),
+  eventId: integer("event_id"), // Optional - can be null for lead-only tracking
   leadId: integer("lead_id"), // Track status changes for leads too
   oldStatus: text("old_status"),
   newStatus: text("new_status").notNull(),
