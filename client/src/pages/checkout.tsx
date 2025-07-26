@@ -199,14 +199,16 @@ export default function Checkout() {
     queryKey: ['/api/products'],
   });
 
-  // Calculate totals with tax
+  // Calculate totals with tax and credit card fee
   const subtotal = cartItems.reduce((sum, item) => {
     const product = products.find(p => p.id === item.productId);
     return sum + (product?.price || 0) * item.quantity;
   }, 0);
   
   const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
-  const totalAmount = subtotal + salesTax;
+  const subtotalWithTax = subtotal + salesTax;
+  const creditCardFee = Math.round(subtotalWithTax * 0.03); // 3% credit card fee
+  const totalAmount = subtotalWithTax + creditCardFee;
 
   const onSubmit = async (data: CheckoutFormData) => {
     if (!sessionId) {
@@ -346,6 +348,10 @@ export default function Checkout() {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Sales Tax (8.75%):</span>
                       <span>${(salesTax / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Credit Card Fee (3%):</span>
+                      <span>${(creditCardFee / 100).toFixed(2)}</span>
                     </div>
                   </div>
                   

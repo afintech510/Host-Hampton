@@ -1285,9 +1285,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Calculate sales tax (8.75%)
       const salesTax = Math.round(subtotal * 0.0875);
-      const totalAmount = subtotal + salesTax;
+      const subtotalWithTax = subtotal + salesTax;
+      
+      // Calculate credit card fee (3%)
+      const creditCardFee = Math.round(subtotalWithTax * 0.03);
+      const totalAmount = subtotalWithTax + creditCardFee;
 
-      // Create Stripe payment intent with tax included
+      // Create Stripe payment intent with tax and fees included
       const paymentIntent = await stripe.paymentIntents.create({
         amount: totalAmount,
         currency: "usd",
@@ -1296,7 +1300,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: "shop_event_purchase",
           subtotal: subtotal.toString(),
           salesTax: salesTax.toString(),
-          taxRate: "8.75"
+          creditCardFee: creditCardFee.toString(),
+          taxRate: "8.75",
+          ccFeeRate: "3.0"
         }
       });
 
@@ -1304,7 +1310,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         clientSecret: paymentIntent.client_secret,
         amount: totalAmount,
         subtotal,
-        salesTax 
+        salesTax,
+        creditCardFee
       });
     } catch (error) {
       console.error("Error creating checkout session:", error);
