@@ -74,13 +74,6 @@ Preferred communication style: Simple, everyday language.
 - **Customer Preferences**: Contact preferences, marketing opt-ins, and special needs
 - **Business Metrics**: Analytics and reporting data for business intelligence
 
-**Adult Event Types Added (January 2025):**
-- **Sourdough Workshop**: Bread making classes for beginners ($55)
-- **Mahjong Classes**: Advanced beginner Mahjong course ($180)
-- **Psychic Medium Events**: Spiritual sessions with medium Kayla ($50)
-- **Mom Morning Coffee & Soft Play**: Social play sessions for mothers with children ($10)
-- **Creative Arts Workshops**: Various craft classes including cake decorating, scrapbooking, bath bombs, marbled mugs, and charm necklaces ($45)
-
 ### API Endpoints (`server/routes.ts`)
 **Legacy Endpoints:**
 - `GET /api/reviews/featured`: Fetches featured customer reviews
