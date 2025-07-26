@@ -203,7 +203,7 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
             <div className="flex items-start space-x-3">
               <MapPin className="w-5 h-5 text-pink-600 mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-pink-800">Host Hampton Studio</h3>
+                <h3 className="font-semibold text-pink-800">Host Hampton</h3>
                 <p className="text-pink-700">{HOST_HAMPTON_LOCATION.address}</p>
                 <p className="text-sm text-pink-600 mt-1">
                   Phone: (631) 998-9325 • Hours: By Appointment Only

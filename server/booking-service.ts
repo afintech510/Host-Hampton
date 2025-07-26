@@ -556,7 +556,7 @@ class BookingService {
         eventType: "event", // This should map from eventTypeId
         customerName: customer.name,
         guestCount: event.guestCount,
-        location: "Host Hampton Studio",
+        location: "Host Hampton",
         status: "confirmed",
         notes: event.notes,
       };

@@ -85,7 +85,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
           <p><strong>Event ID:</strong> #{{eventId}}</p>
           <p><strong>Date:</strong> {{eventDate}}</p>
           <p><strong>Time:</strong> {{eventTime}}</p>
-          <p><strong>Venue:</strong> Host Hampton Studio</p>
+          <p><strong>Venue:</strong> Host Hampton</p>
         </div>
         <p><strong>Next Steps:</strong></p>
         <ul>

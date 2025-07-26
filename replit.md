@@ -162,6 +162,13 @@ The application is specifically designed for Replit deployment with appropriate 
 
 ## Recent System Unification (January 2025)
 
+**Brand Update (January 2025):**
+- ✅ Updated all instances of "Host Hampton Studio" to "Host Hampton" throughout the application
+- ✅ Changed branding in location dialogs, admin forms, email templates, storage defaults, and database schemas
+- ✅ Maintained consistent brand naming across frontend and backend components
+
+## Recent System Unification (January 2025)
+
 **Complete Legacy System Removal:**
 - ✅ Deleted all legacy database tables (partyBookings, partyThemes, partyExtras)
 - ✅ Removed all legacy API endpoints (/api/party-bookings, /api/party-themes, /api/party-extras)

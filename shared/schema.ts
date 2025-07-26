@@ -316,7 +316,7 @@ export const eventCalendar = pgTable("event_calendar", {
   eventType: text("event_type").notNull(), // "birthday", "private-event", "workshop", etc.
   customerName: text("customer_name").notNull(),
   guestCount: integer("guest_count"),
-  location: text("location").default("Host Hampton Studio").notNull(),
+  location: text("location").default("Host Hampton").notNull(),
   status: text("status").default("confirmed").notNull(), // "confirmed", "cancelled", "completed"
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

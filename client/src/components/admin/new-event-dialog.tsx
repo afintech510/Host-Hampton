@@ -58,7 +58,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
       category: "",
       price: "",
       eventDate: "",
-      location: "Host Hampton Studio",
+      location: "Host Hampton",
       maxTickets: "",
       eventType: "",
     },
@@ -315,7 +315,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
                     </FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="Host Hampton Studio" 
+                        placeholder="Host Hampton" 
                         {...field} 
                       />
                     </FormControl>

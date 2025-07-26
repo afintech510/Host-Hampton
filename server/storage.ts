@@ -679,7 +679,7 @@ export class MemStorage implements IStorage {
         imageUrl: "/images/permanent-jewelry.jpg",
         category: "Workshop",
         eventDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
-        location: "Host Hampton Studio",
+        location: "Host Hampton",
         maxTickets: 12,
         availableTickets: 8,
         isActive: true,
@@ -694,7 +694,7 @@ export class MemStorage implements IStorage {
         imageUrl: "/images/charm-bracelet.jpg",
         category: "Class",
         eventDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 3 weeks from now
-        location: "Host Hampton Studio",
+        location: "Host Hampton",
         maxTickets: 15,
         availableTickets: 12,
         isActive: true,
@@ -1169,7 +1169,7 @@ export class DatabaseStorage implements IStorage {
       paidAmount: event.paidAmount || 0,
       description: event.description || event.notes || "",
       guestCount: event.guestCount,
-      location: "Host Hampton Studio" // Default location
+      location: "Host Hampton" // Default location
     }));
   }
 
