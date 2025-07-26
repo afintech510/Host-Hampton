@@ -1274,28 +1274,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Cart is empty" });
       }
 
-      // Calculate total amount from cart items
-      let totalAmount = 0;
+      // Calculate subtotal from cart items
+      let subtotal = 0;
       for (const item of cartItems) {
         const product = await storage.getProduct(item.productId!);
         if (product) {
-          totalAmount += product.price * item.quantity;
+          subtotal += product.price * item.quantity;
         }
       }
 
-      // Create Stripe payment intent
+      // Calculate sales tax (8.75%)
+      const salesTax = Math.round(subtotal * 0.0875);
+      const totalAmount = subtotal + salesTax;
+
+      // Create Stripe payment intent with tax included
       const paymentIntent = await stripe.paymentIntents.create({
         amount: totalAmount,
         currency: "usd",
         metadata: {
           sessionId,
-          type: "shop_event_purchase"
+          type: "shop_event_purchase",
+          subtotal: subtotal.toString(),
+          salesTax: salesTax.toString(),
+          taxRate: "8.75"
         }
       });
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
-        amount: totalAmount 
+        amount: totalAmount,
+        subtotal,
+        salesTax 
       });
     } catch (error) {
       console.error("Error creating checkout session:", error);

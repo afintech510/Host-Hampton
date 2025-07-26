@@ -59,8 +59,8 @@ export default function Cart() {
   });
 
   const removeItemMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      await apiRequest("DELETE", `/api/cart/${sessionId}/${productId}`);
+    mutationFn: async (cartItemId: number) => {
+      await apiRequest("DELETE", `/api/cart/${cartItemId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart", sessionId] });
@@ -101,10 +101,13 @@ export default function Cart() {
     }).format(cents / 100);
   };
 
-  const cartTotal = cartItems.reduce((sum, item) => {
+  const subtotal = cartItems.reduce((sum, item) => {
     const product = products.find(p => p.id === item.productId);
     return sum + (product ? product.price * item.quantity : 0);
   }, 0);
+
+  const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
+  const cartTotal = subtotal + salesTax;
 
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
@@ -246,7 +249,7 @@ export default function Cart() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => removeItemMutation.mutate(product.id)}
+                            onClick={() => removeItemMutation.mutate(item.id)}
                             disabled={removeItemMutation.isPending}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
@@ -283,6 +286,19 @@ export default function Cart() {
                         </div>
                       );
                     })}
+                  </div>
+                  
+                  <hr />
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="font-medium">{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Sales Tax (8.75%)</span>
+                      <span className="font-medium">{formatPrice(salesTax)}</span>
+                    </div>
                   </div>
                   
                   <hr />
