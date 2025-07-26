@@ -584,3 +584,86 @@ export type InsertEventStatusHistory = z.infer<typeof insertEventStatusHistorySc
 export type EventStatusHistory = typeof eventStatusHistory.$inferSelect;
 export type InsertEventStageTemplate = z.infer<typeof insertEventStageTemplateSchema>;
 export type EventStageTemplate = typeof eventStageTemplates.$inferSelect;
+
+// E-commerce Products for Shop Events
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(), // Price in cents
+  imageUrl: text("image_url"),
+  category: text("category"),
+  eventDate: timestamp("event_date"),
+  location: text("location"),
+  maxTickets: integer("max_tickets"),
+  availableTickets: integer("available_tickets"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Shopping Cart
+export const cartItems = pgTable("cart_items", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  productId: integer("product_id").references(() => products.id),
+  quantity: integer("quantity").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Orders for completed purchases
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id"),
+  customerEmail: text("customer_email").notNull(),
+  customerName: text("customer_name"),
+  customerPhone: text("customer_phone"),
+  totalAmount: integer("total_amount").notNull(), // Amount in cents
+  status: text("status").default("pending"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Order Items
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id),
+  productId: integer("product_id").references(() => products.id),
+  quantity: integer("quantity").notNull(),
+  price: integer("price").notNull(), // Price in cents at time of purchase
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// E-commerce types
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+export type CartItem = typeof cartItems.$inferSelect;
+export type InsertCartItem = typeof cartItems.$inferInsert;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = typeof orders.$inferInsert;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type InsertOrderItem = typeof orderItems.$inferInsert;
+
+// E-commerce schemas
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCartItemSchema = createInsertSchema(cartItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
+  id: true,
+  createdAt: true,
+});

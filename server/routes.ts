@@ -7,7 +7,7 @@ import {
   insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
   insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema,
-  insertLeadSchema
+  insertLeadSchema, insertProductSchema, insertCartItemSchema, insertOrderSchema, insertOrderItemSchema
 } from "@shared/schema";
 import { sendEmail, sendTemplateEmail, getEmailTemplates } from "./email-service";
 import { z } from "zod";
@@ -1032,6 +1032,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: error.message || "Failed to send email" 
       });
+    }
+  });
+
+  // E-COMMERCE ENDPOINTS FOR SHOP EVENTS
+  
+  // Product management
+  app.get("/api/products", async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  app.get("/api/products/:id", async (req, res) => {
+    try {
+      const product = await storage.getProduct(parseInt(req.params.id));
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
+  app.post("/api/products", async (req, res) => {
+    try {
+      const validation = insertProductSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          errors: validation.error.issues 
+        });
+      }
+      
+      const product = await storage.createProduct(validation.data);
+      res.status(201).json(product);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  // Cart management
+  app.get("/api/cart/:sessionId", async (req, res) => {
+    try {
+      const cartItems = await storage.getCartItems(req.params.sessionId);
+      res.json(cartItems);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      res.status(500).json({ message: "Failed to fetch cart" });
+    }
+  });
+
+  app.post("/api/cart", async (req, res) => {
+    try {
+      const validation = insertCartItemSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid cart item data", 
+          errors: validation.error.issues 
+        });
+      }
+      
+      const cartItem = await storage.addToCart(validation.data);
+      res.status(201).json(cartItem);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      res.status(500).json({ message: "Failed to add to cart" });
+    }
+  });
+
+  app.put("/api/cart/:id", async (req, res) => {
+    try {
+      const { quantity } = req.body;
+      const cartItem = await storage.updateCartItem(parseInt(req.params.id), quantity);
+      if (!cartItem) {
+        return res.status(404).json({ message: "Cart item not found" });
+      }
+      res.json(cartItem);
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      res.status(500).json({ message: "Failed to update cart item" });
+    }
+  });
+
+  app.delete("/api/cart/:id", async (req, res) => {
+    try {
+      const success = await storage.removeFromCart(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: "Cart item not found" });
+      }
+      res.json({ message: "Item removed from cart" });
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+      res.status(500).json({ message: "Failed to remove from cart" });
+    }
+  });
+
+  // Order management
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const validation = insertOrderSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid order data", 
+          errors: validation.error.issues 
+        });
+      }
+      
+      const order = await storage.createOrder(validation.data);
+      res.status(201).json(order);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  app.get("/api/orders", async (req, res) => {
+    try {
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Stripe checkout for shop events
+  app.post("/api/create-checkout-session", async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID is required" });
+      }
+
+      // Get cart items
+      const cartItems = await storage.getCartItems(sessionId);
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
+
+      // Calculate total amount from cart items
+      let totalAmount = 0;
+      for (const item of cartItems) {
+        const product = await storage.getProduct(item.productId!);
+        if (product) {
+          totalAmount += product.price * item.quantity;
+        }
+      }
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: "usd",
+        metadata: {
+          sessionId,
+          type: "shop_event_purchase"
+        }
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: totalAmount 
+      });
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ message: "Failed to create checkout session" });
     }
   });
 

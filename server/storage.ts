@@ -1,13 +1,15 @@
 import { 
   users, reviews, eventTypes, customers, packages, addons, partyThemes, events, invoices, invoiceItems, eventCalendar,
-  roomRentalPricing, verificationCodes, leads, eventStatusHistory,
+  roomRentalPricing, verificationCodes, leads, eventStatusHistory, products, cartItems, orders, orderItems,
   type User, type InsertUser, type Review, type InsertReview,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
   type PartyTheme, type InsertPartyTheme,
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
   type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar,
-  type RoomRentalPricing, type Lead, type InsertLead, type EventStatusHistory, type InsertEventStatusHistory
+  type RoomRentalPricing, type Lead, type InsertLead, type EventStatusHistory, type InsertEventStatusHistory,
+  type Product, type InsertProduct, type CartItem, type InsertCartItem,
+  type Order, type InsertOrder, type OrderItem, type InsertOrderItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -73,6 +75,28 @@ export interface IStorage {
   getPayments(invoiceId?: number): Promise<any[]>;
   createEventCalendar(calendarEntry: InsertEventCalendar): Promise<EventCalendar>;
   getEventCalendar(): Promise<EventCalendar[]>;
+  
+  // E-commerce methods
+  getProducts(): Promise<Product[]>;
+  getProduct(id: number): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product | undefined>;
+  deleteProduct(id: number): Promise<boolean>;
+  
+  // Cart management
+  getCartItems(sessionId: string): Promise<CartItem[]>;
+  addToCart(cartItem: InsertCartItem): Promise<CartItem>;
+  updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
+  removeFromCart(id: number): Promise<boolean>;
+  clearCart(sessionId: string): Promise<void>;
+  
+  // Order management
+  createOrder(order: InsertOrder): Promise<Order>;
+  getOrder(id: number): Promise<Order | undefined>;
+  getOrders(): Promise<Order[]>;
+  updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+  createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem>;
+  getOrderItems(orderId: number): Promise<OrderItem[]>;
   getRoomRentalPricing(): Promise<RoomRentalPricing[]>;
   
   // Customer authentication methods
@@ -642,6 +666,104 @@ export class MemStorage implements IStorage {
     // In memory placeholder
     return [];
   }
+
+  // E-commerce methods for MemStorage (placeholder implementations)
+  async getProducts(): Promise<Product[]> {
+    // Return sample products for demonstration
+    return [
+      {
+        id: 1,
+        name: "Permanent Jewelry Workshop",
+        description: "Join us for a fun permanent jewelry making workshop where you'll create beautiful, lasting pieces.",
+        price: 7500, // $75.00 in cents
+        imageUrl: "/images/permanent-jewelry.jpg",
+        category: "Workshop",
+        eventDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
+        location: "Host Hampton Studio",
+        maxTickets: 12,
+        availableTickets: 8,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        name: "Holiday Charm Bracelet Class",
+        description: "Create festive charm bracelets perfect for the holiday season. All materials included.",
+        price: 5500, // $55.00 in cents
+        imageUrl: "/images/charm-bracelet.jpg",
+        category: "Class",
+        eventDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 3 weeks from now
+        location: "Host Hampton Studio",
+        maxTickets: 15,
+        availableTickets: 12,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const products = await this.getProducts();
+    return products.find(p => p.id === id);
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getCartItems(sessionId: string): Promise<CartItem[]> {
+    return [];
+  }
+
+  async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async updateCartItem(id: number, quantity: number): Promise<CartItem | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async removeFromCart(id: number): Promise<boolean> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async clearCart(sessionId: string): Promise<void> {
+    // No-op in memory
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    return undefined;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return [];
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+    return [];
+  }
 }
 
 // Database Storage Implementation
@@ -1049,6 +1171,116 @@ export class DatabaseStorage implements IStorage {
       guestCount: event.guestCount,
       location: "Host Hampton Studio" // Default location
     }));
+  }
+
+  // E-commerce methods implementation
+  async getProducts(): Promise<Product[]> {
+    return await db.select().from(products).where(eq(products.isActive, true)).orderBy(products.createdAt);
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product;
+  }
+
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const [newProduct] = await db.insert(products).values(product).returning();
+    return newProduct;
+  }
+
+  async updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product | undefined> {
+    const [updatedProduct] = await db
+      .update(products)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(products.id, id))
+      .returning();
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    const result = await db.update(products)
+      .set({ isActive: false })
+      .where(eq(products.id, id));
+    return result.count > 0;
+  }
+
+  // Cart management
+  async getCartItems(sessionId: string): Promise<CartItem[]> {
+    return await db.select().from(cartItems).where(eq(cartItems.sessionId, sessionId));
+  }
+
+  async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
+    // Check if item already exists in cart
+    const existingItems = await db
+      .select()
+      .from(cartItems)
+      .where(eq(cartItems.sessionId, cartItem.sessionId))
+      .where(eq(cartItems.productId, cartItem.productId!));
+
+    if (existingItems.length > 0) {
+      // Update quantity if item exists
+      const [updatedItem] = await db
+        .update(cartItems)
+        .set({ quantity: existingItems[0].quantity + cartItem.quantity })
+        .where(eq(cartItems.id, existingItems[0].id))
+        .returning();
+      return updatedItem;
+    } else {
+      // Create new cart item
+      const [newItem] = await db.insert(cartItems).values(cartItem).returning();
+      return newItem;
+    }
+  }
+
+  async updateCartItem(id: number, quantity: number): Promise<CartItem | undefined> {
+    const [updatedItem] = await db
+      .update(cartItems)
+      .set({ quantity })
+      .where(eq(cartItems.id, id))
+      .returning();
+    return updatedItem;
+  }
+
+  async removeFromCart(id: number): Promise<boolean> {
+    const result = await db.delete(cartItems).where(eq(cartItems.id, id));
+    return result.count > 0;
+  }
+
+  async clearCart(sessionId: string): Promise<void> {
+    await db.delete(cartItems).where(eq(cartItems.sessionId, sessionId));
+  }
+
+  // Order management
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(orders.createdAt);
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+    const [updatedOrder] = await db
+      .update(orders)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(orders.id, id))
+      .returning();
+    return updatedOrder;
+  }
+
+  async createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem> {
+    const [newOrderItem] = await db.insert(orderItems).values(orderItem).returning();
+    return newOrderItem;
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+    return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
 }
 
