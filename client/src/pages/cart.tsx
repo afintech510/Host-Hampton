@@ -86,10 +86,16 @@ export default function Cart() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart", sessionId] });
-      localStorage.removeItem('shop_session_id');
       toast({
         title: "Cart Cleared",
         description: "All items removed from cart",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to clear cart",
+        variant: "destructive",
       });
     },
   });

@@ -1161,7 +1161,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ message: "Cart cleared" });
       } else {
         // Remove individual cart item by ID
-        const success = await storage.removeFromCart(parseInt(idParam));
+        const itemId = parseInt(idParam);
+        if (isNaN(itemId)) {
+          return res.status(400).json({ message: "Invalid cart item ID" });
+        }
+        const success = await storage.removeFromCart(itemId);
         if (!success) {
           return res.status(404).json({ message: "Cart item not found" });
         }
