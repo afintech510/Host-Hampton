@@ -5,70 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Plus, Minus, ShoppingCart, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import Navigation from "@/components/navigation";
 import { UnifiedButton } from "@/components/ui/unified-button";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { CartItem, Product } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
-function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!stripe || !elements) return;
-    
-    setIsLoading(true);
-    
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin + "/cart?success=true",
-      },
-    });
-
-    if (error) {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      onSuccess();
-    }
-    
-    setIsLoading(false);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement />
-      <UnifiedButton
-        type="submit"
-        disabled={!stripe || isLoading}
-        className="w-full"
-      >
-        {isLoading ? "Processing..." : "Complete Payment"}
-      </UnifiedButton>
-    </form>
-  );
-}
 
 export default function Cart() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [sessionId, setSessionId] = useState<string>('');
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   useEffect(() => {
     let storedSessionId = localStorage.getItem('shop_session_id');
@@ -129,25 +78,7 @@ export default function Cart() {
     },
   });
 
-  const checkoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/create-checkout-session", {
-        sessionId,
-      });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setClientSecret(data.clientSecret);
-      setCheckoutOpen(true);
-    },
-    onError: () => {
-      toast({
-        title: "Checkout Error",
-        description: "Failed to start checkout process",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
@@ -175,14 +106,16 @@ export default function Cart() {
     return sum + (product ? product.price * item.quantity : 0);
   }, 0);
 
-  const handleCheckoutSuccess = () => {
-    setCheckoutOpen(false);
-    setClientSecret(null);
-    clearCartMutation.mutate();
-    toast({
-      title: "Payment Successful!",
-      description: "Thank you for your purchase. You will receive a confirmation email shortly.",
-    });
+  const handleProceedToCheckout = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Please add items to your cart before checking out.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLocation('/checkout');
   };
 
   if (cartLoading) {
@@ -361,11 +294,11 @@ export default function Cart() {
 
                   <div className="space-y-2 pt-4">
                     <UnifiedButton
-                      onClick={() => checkoutMutation.mutate()}
-                      disabled={cartItems.length === 0 || checkoutMutation.isPending}
+                      onClick={handleProceedToCheckout}
+                      disabled={cartItems.length === 0}
                       className="w-full"
                     >
-                      {checkoutMutation.isPending ? "Processing..." : "Proceed to Checkout"}
+                      Proceed to Checkout
                     </UnifiedButton>
                     
                     <Button
@@ -383,22 +316,7 @@ export default function Cart() {
           </div>
         )}
 
-        {/* Checkout Dialog */}
-        <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Complete Purchase</DialogTitle>
-              <DialogDescription>
-                Total: {formatPrice(cartTotal)}
-              </DialogDescription>
-            </DialogHeader>
-            {clientSecret && (
-              <Elements stripe={stripePromise} options={{ clientSecret }}>
-                <CheckoutForm onSuccess={handleCheckoutSuccess} />
-              </Elements>
-            )}
-          </DialogContent>
-        </Dialog>
+
       </div>
     </div>
   );

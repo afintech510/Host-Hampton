@@ -1164,6 +1164,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/orders/:id", async (req, res) => {
+    try {
+      const order = await storage.getOrder(parseInt(req.params.id));
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  app.patch("/api/orders/:id", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedOrder = await storage.updateOrderStatus(orderId, updates.status);
+      if (!updatedOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+
   // Stripe checkout for shop events
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
