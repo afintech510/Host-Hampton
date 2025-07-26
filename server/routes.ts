@@ -9,6 +9,7 @@ import {
   insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema,
   insertLeadSchema
 } from "@shared/schema";
+import { sendEmail, sendTemplateEmail, getEmailTemplates } from "./email-service";
 import { z } from "zod";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -946,6 +947,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: error.message || "Failed to process payment success"
+      });
+    }
+  });
+
+  // Email API endpoints
+  app.get("/api/email-templates", async (req, res) => {
+    try {
+      const templates = await getEmailTemplates();
+      res.json({ success: true, templates });
+    } catch (error) {
+      console.error("Error fetching email templates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch email templates" 
+      });
+    }
+  });
+
+  app.post("/api/send-email", async (req, res) => {
+    try {
+      const { to, subject, html, templateId, leadId } = req.body;
+      
+      let result;
+      if (templateId) {
+        result = await sendTemplateEmail(templateId, to, req.body);
+      } else {
+        result = await sendEmail({ to, subject, html });
+      }
+
+      if (result.success) {
+        // Update last contacted timestamp for lead
+        if (leadId) {
+          await storage.updateLead(leadId, { 
+            lastContactedAt: new Date(),
+            status: 'follow_up'
+          });
+        }
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error sending email:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message || "Failed to send email" 
       });
     }
   });

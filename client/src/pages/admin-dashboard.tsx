@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import LeadManagement from "@/components/admin/lead-management";
 import { 
   Calendar, 
   Users, 
@@ -141,7 +142,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4">
+        <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img 
@@ -159,7 +160,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="w-full px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -339,7 +340,7 @@ export default function AdminDashboard() {
                               </Badge>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ${(event.totalAmount / 100).toFixed(2)}
+                              ${(event.estimatedCost ? event.estimatedCost / 100 : 0).toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
@@ -384,13 +385,16 @@ export default function AdminDashboard() {
                           Customer
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Amount
+                          Event
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
+                          Total Amount
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Due Date
+                          Balance Due
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
@@ -400,35 +404,42 @@ export default function AdminDashboard() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {invoicesLoading ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-4 text-center">
+                          <td colSpan={7} className="px-6 py-4 text-center">
                             <div className="animate-spin w-6 h-6 border-4 border-blue-300 border-t-transparent rounded-full mx-auto" />
                           </td>
                         </tr>
                       ) : invoices.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                          <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                             No invoices found
                           </td>
                         </tr>
                       ) : (
-                        invoices.map((invoice: Invoice) => (
+                        invoices.map((invoice: any) => (
                           <tr key={invoice.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {invoice.invoiceNumber}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {invoice.customerName || 'Unknown Customer'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ${(invoice.totalAmount / 100).toFixed(2)}
+                              #{invoice.id.toString().padStart(4, '0')}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <Badge className={getStatusColor(invoice.status)}>
-                                {invoice.status || 'pending'}
-                              </Badge>
+                              <div className="text-sm text-gray-900">{invoice.customerName || 'Unknown Customer'}</div>
+                              <div className="text-sm text-gray-500">{invoice.customerEmail || ''}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(invoice.dueDate).toLocaleDateString()}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{invoice.eventTypeName || 'Event'}</div>
+                              <div className="text-sm text-gray-500">
+                                {invoice.eventDate ? new Date(invoice.eventDate).toLocaleDateString() : ''}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                              ${(invoice.total ? invoice.total / 100 : 0).toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <span className={`font-medium ${invoice.balanceDue && invoice.balanceDue > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                ${(invoice.balanceDue ? invoice.balanceDue / 100 : 0).toFixed(2)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
@@ -452,92 +463,7 @@ export default function AdminDashboard() {
 
           {/* Leads/Inquiries Tab */}
           <TabsContent value="leads" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Lead Management</h2>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                New Lead
-              </Button>
-            </div>
-
-            <Card>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Contact Info
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Source
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Created
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {leadsLoading ? (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-4 text-center">
-                            <div className="animate-spin w-6 h-6 border-4 border-blue-300 border-t-transparent rounded-full mx-auto" />
-                          </td>
-                        </tr>
-                      ) : leads.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                            No leads found
-                          </td>
-                        </tr>
-                      ) : (
-                        leads.map((lead: Lead) => (
-                          <tr key={lead.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">{lead.name}</div>
-                                <div className="text-sm text-gray-500">{lead.email}</div>
-                                <div className="text-sm text-gray-500">{lead.phone}</div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {lead.source}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Badge className={getStatusColor(lead.status)}>
-                                {lead.status || 'new'}
-                              </Badge>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(lead.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
-                                <Button variant="ghost" size="sm">
-                                  <Phone className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Mail className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+            <LeadManagement />
           </TabsContent>
 
           {/* Staff Tab */}
