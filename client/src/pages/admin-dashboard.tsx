@@ -9,6 +9,7 @@ import LeadManagement from "@/components/admin/lead-management";
 import EventCalendar from "@/components/admin/event-calendar";
 import EventDetailsDialog from "@/components/admin/event-details-dialog";
 import InvoiceDetailsDialog from "@/components/admin/invoice-details-dialog";
+import NewEventDialog from "@/components/admin/new-event-dialog";
 import { 
   Calendar, 
   Users, 
@@ -80,6 +81,7 @@ export default function AdminDashboard() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [eventDialogMode, setEventDialogMode] = useState<"view" | "edit">("view");
   const [invoiceDialogMode, setInvoiceDialogMode] = useState<"view" | "edit">("view");
+  const [newEventDialogOpen, setNewEventDialogOpen] = useState(false);
 
   // Fetch dashboard data
   const { data: events = [], isLoading: eventsLoading } = useQuery({
@@ -165,7 +167,10 @@ export default function AdminDashboard() {
               />
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             </div>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => setNewEventDialogOpen(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Event
             </Button>
@@ -307,7 +312,7 @@ export default function AdminDashboard() {
                     Calendar View
                   </button>
                 </div>
-                <Button>
+                <Button onClick={() => setNewEventDialogOpen(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   New Event
                 </Button>
@@ -605,6 +610,12 @@ export default function AdminDashboard() {
           isOpen={!!selectedInvoiceId}
           onClose={() => setSelectedInvoiceId(null)}
           mode={invoiceDialogMode}
+        />
+
+        {/* New Event Dialog */}
+        <NewEventDialog
+          open={newEventDialogOpen}
+          onOpenChange={setNewEventDialogOpen}
         />
       </div>
     </div>
