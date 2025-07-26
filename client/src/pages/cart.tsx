@@ -261,6 +261,19 @@ export default function Cart() {
                   </Card>
                 );
               })}
+              
+              {/* Clear Cart Button */}
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => clearCartMutation.mutate()}
+                  disabled={clearCartMutation.isPending}
+                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear Cart
+                </Button>
+              </div>
             </div>
 
             {/* Order Summary */}
@@ -308,7 +321,7 @@ export default function Cart() {
                     <span className="text-primary">{formatPrice(cartTotal)}</span>
                   </div>
 
-                  <div className="space-y-2 pt-4">
+                  <div className="pt-4">
                     <UnifiedButton
                       onClick={handleProceedToCheckout}
                       disabled={cartItems.length === 0}
@@ -316,15 +329,6 @@ export default function Cart() {
                     >
                       Proceed to Checkout
                     </UnifiedButton>
-                    
-                    <Button
-                      variant="outline"
-                      onClick={() => clearCartMutation.mutate()}
-                      disabled={clearCartMutation.isPending}
-                      className="w-full"
-                    >
-                      Clear Cart
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
