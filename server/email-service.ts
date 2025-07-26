@@ -120,6 +120,42 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
       </div>
     `,
     variables: ['customerName', 'eventType', 'eventDate', 'availabilityDays', 'senderName']
+  },
+  order_confirmation: {
+    id: 'order_confirmation',
+    name: 'Order Confirmation',
+    subject: 'Order Confirmation - Thank you for your purchase!',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Thank you for your order, \${customerName}!</h2>
+        <p>Your order has been confirmed and we're excited to see you at your event.</p>
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3>Order Details</h3>
+          <p><strong>Order ID:</strong> #\${orderId}</p>
+          <p><strong>Order Date:</strong> \${orderDate}</p>
+          <p><strong>Total Amount:</strong> $\${totalAmount}</p>
+        </div>
+        <div style="margin: 20px 0;">
+          <h3>Items Ordered</h3>
+          \${orderItems.map(item => \`
+          <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+            <p><strong>\${item.product?.name || 'Unknown Product'}</strong></p>
+            <p>Quantity: \${item.quantity} | Price: $\${(item.price / 100).toFixed(2)}</p>
+            \${item.product?.eventDate ? \`<p>Event Date: \${new Date(item.product.eventDate).toLocaleDateString()}</p>\` : ''}
+          </div>
+          \`).join('')}
+        </div>
+        <p><strong>What's Next:</strong></p>
+        <ul>
+          <li>You'll receive event details and instructions 1 week before your scheduled date</li>
+          <li>Our team will contact you to confirm final arrangements</li>
+          <li>Arrive 15 minutes early on your event day</li>
+        </ul>
+        <p>Questions? Contact us at events@hosthampton.com or call (757) 123-4567</p>
+        <p>Best regards,<br>The Host Hampton Team</p>
+      </div>
+    `,
+    variables: ['customerName', 'orderId', 'orderDate', 'totalAmount', 'orderItems']
   }
 };
 
@@ -132,17 +168,23 @@ export async function sendEmail(params: EmailParams): Promise<{ success: boolean
       };
     }
 
-    const msg = {
+    const msg: any = {
       to: params.to,
       from: params.from || 'events@hosthampton.com', // Default from address
       subject: params.subject,
-      text: params.text,
-      html: params.html,
-      ...(params.templateId && {
-        templateId: params.templateId,
-        dynamicTemplateData: params.dynamicTemplateData
-      })
     };
+
+    if (params.templateId) {
+      msg.templateId = params.templateId;
+      msg.dynamicTemplateData = params.dynamicTemplateData;
+    } else {
+      if (params.html) {
+        msg.html = params.html;
+      }
+      if (params.text) {
+        msg.text = params.text;
+      }
+    }
 
     const [response] = await sgMail.send(msg);
     

@@ -1146,7 +1146,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const order = await storage.createOrder(validation.data);
+      const orderData = validation.data;
+      
+      // Create the order
+      const order = await storage.createOrder(orderData);
+      
+      // Get cart items for this session
+      if (orderData.sessionId) {
+        const cartItems = await storage.getCartItems(orderData.sessionId);
+        
+        // Create order items from cart items
+        for (const cartItem of cartItems) {
+          if (cartItem.productId) {
+            const product = await storage.getProduct(cartItem.productId);
+            if (product) {
+              await storage.createOrderItem({
+                orderId: order.id,
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                price: product.price // Store price at time of purchase
+              });
+            }
+          }
+        }
+        
+        // Clear the cart after creating order items
+        await storage.clearCart(orderData.sessionId);
+      }
+      
       res.status(201).json(order);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -1186,6 +1213,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!updatedOrder) {
         return res.status(404).json({ message: "Order not found" });
       }
+      
+      // Send confirmation email when order is completed
+      if (updates.status === "completed" && updatedOrder.customerEmail) {
+        try {
+          // Get order items for email
+          const orderItems = await storage.getOrderItems(orderId);
+          const orderItemsWithProducts = await Promise.all(
+            orderItems.map(async (item) => {
+              const product = await storage.getProduct(item.productId!);
+              return {
+                ...item,
+                product
+              };
+            })
+          );
+          
+          // Send order confirmation email
+          const emailResult = await sendTemplateEmail(
+            "order_confirmation",
+            updatedOrder.customerEmail,
+            {
+              customerName: updatedOrder.customerName || "Valued Customer",
+              orderId: updatedOrder.id,
+              orderItems: orderItemsWithProducts,
+              totalAmount: (updatedOrder.totalAmount / 100).toFixed(2),
+              orderDate: new Date(updatedOrder.createdAt!).toLocaleDateString()
+            }
+          );
+          
+          if (emailResult.success) {
+            console.log(`Order confirmation email sent to ${updatedOrder.customerEmail}`);
+          } else {
+            console.error("Failed to send order confirmation email:", emailResult.error);
+          }
+        } catch (emailError) {
+          console.error("Error sending order confirmation email:", emailError);
+        }
+      }
+      
       res.json(updatedOrder);
     } catch (error) {
       console.error("Error updating order:", error);

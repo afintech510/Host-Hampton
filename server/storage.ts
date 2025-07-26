@@ -12,7 +12,7 @@ import {
   type Order, type InsertOrder, type OrderItem, type InsertOrderItem
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -1214,8 +1214,12 @@ export class DatabaseStorage implements IStorage {
     const existingItems = await db
       .select()
       .from(cartItems)
-      .where(eq(cartItems.sessionId, cartItem.sessionId))
-      .where(eq(cartItems.productId, cartItem.productId!));
+      .where(
+        and(
+          eq(cartItems.sessionId, cartItem.sessionId),
+          eq(cartItems.productId, cartItem.productId!)
+        )
+      );
 
     if (existingItems.length > 0) {
       // Update quantity if item exists
@@ -1243,7 +1247,7 @@ export class DatabaseStorage implements IStorage {
 
   async removeFromCart(id: number): Promise<boolean> {
     const result = await db.delete(cartItems).where(eq(cartItems.id, id));
-    return result.count > 0;
+    return result.rowCount > 0;
   }
 
   async clearCart(sessionId: string): Promise<void> {
