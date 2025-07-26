@@ -21,6 +21,7 @@ export default function Navigation({ cartItemCount = 0 }: NavigationProps) {
 
   const menuItems = [
     { name: "Shop Events", href: "/shop-events" },
+    { name: "Cart", href: "/cart" },
     { name: "Theme Parties", href: "/themed-parties" },
     { name: "Party Room Rental", href: "/party-room-rental" },
     { name: "Trucker Hat Bar", href: "/trucker-hat-bar" },
@@ -45,10 +46,16 @@ export default function Navigation({ cartItemCount = 0 }: NavigationProps) {
             </Link>
           </div>
 
-          {/* Right side - Cart Icon, Upcoming Events Button and Menu Button */}
+          {/* Right side - Upcoming Events Button, Cart Icon and Menu Button */}
           <div className="flex items-center space-x-4">
-            {/* Shopping Cart Icon */}
             <Link href="/shop-events">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
+                Upcoming Events
+              </Button>
+            </Link>
+
+            {/* Shopping Cart Icon - moved to the right side */}
+            <Link href="/cart">
               <div className="relative cursor-pointer">
                 <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
                 {cartItemCount > 0 && (
@@ -57,12 +64,6 @@ export default function Navigation({ cartItemCount = 0 }: NavigationProps) {
                   </span>
                 )}
               </div>
-            </Link>
-
-            <Link href="/shop-events">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
-                Upcoming Events
-              </Button>
             </Link>
 
             {/* Menu button - now visible on all screen sizes */}

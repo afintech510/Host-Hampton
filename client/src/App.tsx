@@ -10,6 +10,7 @@ import PartyDesigner from "@/pages/party-designer";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Payment from "@/pages/payment";
 import ShopEvents from "@/pages/shop-events";
+import Cart from "@/pages/cart";
 import PartyRoomRental from "@/pages/party-room-rental";
 import TruckHatBar from "@/pages/truck-hat-bar";
 import PermanentJewelry from "@/pages/permanent-jewelry";
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
+      <Route path="/cart" component={Cart} />
       <Route path="/party-room-rental" component={PartyRoomRental} />
       <Route path="/trucker-hat-bar" component={TruckHatBar} />
       <Route path="/permanent-jewelry" component={PermanentJewelry} />
