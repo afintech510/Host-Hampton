@@ -1,7 +1,8 @@
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ShoppingCart } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -11,13 +12,36 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
+import type { CartItem } from "@shared/schema";
 
 interface NavigationProps {
   cartItemCount?: number;
 }
 
-export default function Navigation({ cartItemCount = 0 }: NavigationProps) {
+export default function Navigation({ cartItemCount }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+
+  useEffect(() => {
+    const storedSessionId = localStorage.getItem('shop_session_id');
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+    }
+  }, []);
+
+  // Fetch cart items to get actual count
+  const { data: cartItems = [] } = useQuery<CartItem[]>({
+    queryKey: ["/api/cart", sessionId],
+    queryFn: async () => {
+      if (!sessionId) return [];
+      const response = await fetch(`/api/cart/${sessionId}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!sessionId,
+  });
+
+  const actualCartCount = cartItemCount ?? cartItems.length;
 
   const menuItems = [
     { name: "Shop Events", href: "/shop-events" },
@@ -58,9 +82,9 @@ export default function Navigation({ cartItemCount = 0 }: NavigationProps) {
             <Link href="/cart">
               <div className="relative cursor-pointer">
                 <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
-                {cartItemCount > 0 && (
+                {actualCartCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItemCount}
+                    {actualCartCount}
                   </span>
                 )}
               </div>

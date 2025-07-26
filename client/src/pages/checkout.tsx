@@ -87,10 +87,14 @@ function CheckoutForm({
           variant: "destructive",
         });
       } else {
-        // Payment succeeded, update order status
+        // Payment succeeded, update order status and clear cart
         await apiRequest("PATCH", `/api/orders/${order.id}`, {
           status: "completed"
         });
+        
+        // Clear the cart after successful payment
+        localStorage.removeItem('shop_session_id');
+        
         onSuccess();
       }
     } catch (error) {
