@@ -10,19 +10,25 @@ interface LocationDialogProps {
 
 // Host Hampton's location
 const HOST_HAMPTON_LOCATION = {
-  lat: 40.8676,
-  lng: -72.6501,
-  address: "295 Hampton Rd, Southampton, NY 11968"
+  lat: 40.8187,
+  lng: -72.7042,
+  address: "295 Montauk Hwy, Speonk, NY 11972",
 };
 
 export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [directionsService, setDirectionsService] = useState<google.maps.DirectionsService | null>(null);
-  const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer | null>(null);
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
-  const [travelInfo, setTravelInfo] = useState<{ duration: string; distance: string } | null>(null);
+  const [directionsService, setDirectionsService] =
+    useState<google.maps.DirectionsService | null>(null);
+  const [directionsRenderer, setDirectionsRenderer] =
+    useState<google.maps.DirectionsRenderer | null>(null);
+  const [autocomplete, setAutocomplete] =
+    useState<google.maps.places.Autocomplete | null>(null);
+  const [travelInfo, setTravelInfo] = useState<{
+    duration: string;
+    distance: string;
+  } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState("");
-  
+
   const mapRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,9 +46,9 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
           {
             featureType: "poi",
             elementType: "labels",
-            stylers: [{ visibility: "off" }]
-          }
-        ]
+            stylers: [{ visibility: "off" }],
+          },
+        ],
       });
 
       // Add marker for Host Hampton
@@ -51,15 +57,17 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
         map: mapInstance,
         title: "Host Hampton",
         icon: {
-          url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          url:
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="16" cy="16" r="12" fill="#EC4899" stroke="white" stroke-width="4"/>
               <circle cx="16" cy="16" r="4" fill="white"/>
             </svg>
           `),
           scaledSize: new google.maps.Size(32, 32),
-          anchor: new google.maps.Point(16, 16)
-        }
+          anchor: new google.maps.Point(16, 16),
+        },
       });
 
       // Initialize directions service and renderer
@@ -69,24 +77,31 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
         polylineOptions: {
           strokeColor: "#EC4899",
           strokeWeight: 4,
-          strokeOpacity: 0.8
-        }
+          strokeOpacity: 0.8,
+        },
       });
-      
+
       directionsRendererInstance.setMap(mapInstance);
 
       // Initialize autocomplete for search input
       if (searchInputRef.current) {
-        const autocompleteInstance = new google.maps.places.Autocomplete(searchInputRef.current, {
-          types: ['address'],
-          componentRestrictions: { country: 'us' }
-        });
+        const autocompleteInstance = new google.maps.places.Autocomplete(
+          searchInputRef.current,
+          {
+            types: ["address"],
+            componentRestrictions: { country: "us" },
+          },
+        );
 
-        autocompleteInstance.addListener('place_changed', () => {
+        autocompleteInstance.addListener("place_changed", () => {
           const place = autocompleteInstance.getPlace();
           if (place.geometry && place.formatted_address) {
             setSelectedAddress(place.formatted_address);
-            calculateRoute(place.geometry.location!, directionsServiceInstance, directionsRendererInstance);
+            calculateRoute(
+              place.geometry.location!,
+              directionsServiceInstance,
+              directionsRendererInstance,
+            );
           }
         });
 
@@ -106,7 +121,7 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
   const calculateRoute = (
     destination: google.maps.LatLng,
     directionsService: google.maps.DirectionsService,
-    directionsRenderer: google.maps.DirectionsRenderer
+    directionsRenderer: google.maps.DirectionsRenderer,
   ) => {
     const request: google.maps.DirectionsRequest = {
       origin: HOST_HAMPTON_LOCATION,
@@ -115,15 +130,15 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
     };
 
     directionsService.route(request, (result, status) => {
-      if (status === 'OK' && result) {
+      if (status === "OK" && result) {
         directionsRenderer.setDirections(result);
-        
+
         const route = result.routes[0];
         const leg = route.legs[0];
-        
+
         setTravelInfo({
-          duration: leg.duration?.text || '',
-          distance: leg.distance?.text || ''
+          duration: leg.duration?.text || "",
+          distance: leg.distance?.text || "",
         });
       }
     });
@@ -131,7 +146,9 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
 
   const clearRoute = () => {
     if (directionsRenderer) {
-      directionsRenderer.setDirections({ routes: [] } as google.maps.DirectionsResult);
+      directionsRenderer.setDirections({
+        routes: [],
+      } as google.maps.DirectionsResult);
     }
     setTravelInfo(null);
     setSelectedAddress("");
@@ -152,8 +169,12 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
               <MapPin className="w-5 h-5 text-pink-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Find Host Hampton</h2>
-              <p className="text-sm text-gray-600">Get directions to our studio</p>
+              <h2 className="text-xl font-bold text-gray-900">
+                Find Host Hampton
+              </h2>
+              <p className="text-sm text-gray-600">
+                Get directions to our studio
+              </p>
             </div>
           </div>
           <Button
@@ -195,7 +216,9 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
             <div className="flex items-start space-x-3">
               <MapPin className="w-5 h-5 text-pink-600 mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-pink-800">Host Hampton Studio</h3>
+                <h3 className="font-semibold text-pink-800">
+                  Host Hampton Studio
+                </h3>
                 <p className="text-pink-700">{HOST_HAMPTON_LOCATION.address}</p>
                 <p className="text-sm text-pink-600 mt-1">
                   Phone: (631) 998-9325 • Hours: By Appointment Only
@@ -228,8 +251,8 @@ export function LocationDialog({ isOpen, onClose }: LocationDialogProps) {
           )}
 
           {/* Map */}
-          <div 
-            ref={mapRef} 
+          <div
+            ref={mapRef}
             className="w-full h-96 rounded-xl border-2 border-gray-200 bg-gray-100"
           />
         </div>
