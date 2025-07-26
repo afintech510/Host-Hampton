@@ -39,7 +39,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store verification code in database
       await storage.createVerificationCode(email, code);
       
-      // TODO: Send email with verification code using SendGrid
+      // Send verification email
+      try {
+        const emailResult = await sendEmail({
+          to: email,
+          subject: "Host Hampton - Your Verification Code",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2>Host Hampton - Access Your Events</h2>
+              <p>Your verification code is:</p>
+              <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 3px; margin: 20px 0; border-radius: 8px;">
+                ${code}
+              </div>
+              <p>This code will expire in 10 minutes.</p>
+              <p>If you didn't request this code, please ignore this email.</p>
+              <p>Best regards,<br>The Host Hampton Team</p>
+            </div>
+          `
+        });
+
+        if (!emailResult.success) {
+          console.error("Failed to send verification email:", emailResult.error);
+          // Still continue with success response since code is stored in database
+        }
+      } catch (emailError) {
+        console.error("Error sending verification email:", emailError);
+        // Continue with success response since code is stored in database
+      }
+      
+      // Also log for debugging
       console.log(`Verification code for ${email}: ${code}`);
       
       res.json({
@@ -1124,11 +1152,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/cart/:id", async (req, res) => {
     try {
-      const success = await storage.removeFromCart(parseInt(req.params.id));
-      if (!success) {
-        return res.status(404).json({ message: "Cart item not found" });
+      // Check if the ID is a session ID (string) vs cart item ID (number)
+      const idParam = req.params.id;
+      
+      if (idParam.startsWith('session_')) {
+        // Clear entire cart by session ID
+        await storage.clearCart(idParam);
+        res.json({ message: "Cart cleared" });
+      } else {
+        // Remove individual cart item by ID
+        const success = await storage.removeFromCart(parseInt(idParam));
+        if (!success) {
+          return res.status(404).json({ message: "Cart item not found" });
+        }
+        res.json({ message: "Item removed from cart" });
       }
-      res.json({ message: "Item removed from cart" });
     } catch (error) {
       console.error("Error removing from cart:", error);
       res.status(500).json({ message: "Failed to remove from cart" });
