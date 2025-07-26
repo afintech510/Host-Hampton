@@ -23,6 +23,7 @@ import {
   Trash2,
   Plus
 } from "lucide-react";
+import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
 
 interface Event {
   id: number;
@@ -158,9 +159,9 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img 
-                src="/images/host-hampton-logo.png" 
+                src={hostHamptonLogo} 
                 alt="Host Hampton" 
-                className="h-8 object-contain"
+                className="h-12 md:h-14 w-auto object-contain"
               />
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             </div>
@@ -174,12 +175,12 @@ export default function AdminDashboard() {
 
       <div className="w-full px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="invoices">Invoices</TabsTrigger>
-            <TabsTrigger value="leads">Inquiries</TabsTrigger>
-            <TabsTrigger value="staff">Staff</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-slate-100 data-[state=active]:bg-slate-600 data-[state=active]:text-white">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Overview</TabsTrigger>
+            <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Events</TabsTrigger>
+            <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Invoices</TabsTrigger>
+            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Inquiries</TabsTrigger>
+            <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Staff</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
