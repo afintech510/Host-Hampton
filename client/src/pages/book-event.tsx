@@ -31,7 +31,8 @@ import { ContactStep } from "@/components/party-form/steps/contact-step";
 import { SummaryStep } from "@/components/party-form/steps/summary-step";
 import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, HelpCircle } from "lucide-react";
+import { LocationDialog } from "@/components/ui/location-dialog";
+import { MessageCircle, HelpCircle, MapPin } from "lucide-react";
 import { useLocation } from "wouter";
 import allieImage from "@assets/image_1752579343744.png";
 
@@ -60,6 +61,7 @@ const isStudioFlow = (eventType: string) => {
 export default function BookEvent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [, setLocation] = useLocation();
   const { formData, updateFormData, submitBooking, isSubmitting } =
     usePartyForm();
@@ -80,8 +82,8 @@ export default function BookEvent() {
     setLocation("/themed-parties");
   };
 
-  const handleHelpClick = () => {
-    setShowHelp(true);
+  const handleLocationClick = () => {
+    setShowLocationDialog(true);
   };
 
   const handleContactClick = () => {
@@ -419,10 +421,10 @@ export default function BookEvent() {
         <div className="w-full max-w-md mx-auto flex justify-between items-center">
           <Button
             variant="ghost"
-            onClick={handleHelpClick}
+            onClick={handleLocationClick}
             className="text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
           >
-            <HelpCircle className="w-6 h-6" />
+            <MapPin className="w-6 h-6" />
           </Button>
 
           <Button
@@ -473,6 +475,12 @@ export default function BookEvent() {
           </div>
         </div>
       )}
+
+      {/* Location Dialog */}
+      <LocationDialog 
+        isOpen={showLocationDialog} 
+        onClose={() => setShowLocationDialog(false)} 
+      />
     </div>
   );
 }
