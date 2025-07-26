@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CustomContactStepProps {
   formData: any;
@@ -14,17 +15,19 @@ export function CustomContactStep({ formData, updateFormData, onNext, onBack }: 
   const [name, setName] = useState(formData.customerName || "");
   const [email, setEmail] = useState(formData.customerEmail || "");
   const [phone, setPhone] = useState(formData.customerPhone || "");
+  const [consentChecked, setConsentChecked] = useState(formData.consentChecked || false);
 
   const handleNext = () => {
     updateFormData({ 
       customerName: name, 
       customerEmail: email, 
-      customerPhone: phone 
+      customerPhone: phone,
+      consentChecked: consentChecked
     });
     onNext();
   };
 
-  const isValid = name.trim() && email.trim() && phone.trim();
+  const isValid = name.trim() && email.trim() && phone.trim() && consentChecked;
 
   return (
     <div className="space-y-8">
@@ -73,6 +76,23 @@ export function CustomContactStep({ formData, updateFormData, onNext, onBack }: 
             className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300"
           />
         </div>
+
+        <div className="border-t pt-6">
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="consent"
+              checked={consentChecked}
+              onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
+              className="mt-1 flex-shrink-0"
+            />
+            <Label 
+              htmlFor="consent" 
+              className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+            >
+              I consent to Host Hampton contacting me via email, phone, or text regarding this booking and future events. This helps us provide you with updates about your event and information about our services. *
+            </Label>
+          </div>
+        </div>
       </div>
 
       <div className="flex space-x-3 pt-4">
@@ -88,7 +108,7 @@ export function CustomContactStep({ formData, updateFormData, onNext, onBack }: 
           disabled={!isValid}
           className="flex-1 bg-pink-300 hover:bg-pink-400 text-white disabled:bg-gray-200 disabled:text-gray-400"
         >
-          Show Price
+          {consentChecked ? "Show Price" : "Please check consent to continue"}
         </Button>
       </div>
     </div>
