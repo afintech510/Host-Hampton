@@ -32,7 +32,7 @@ import { SummaryStep } from "@/components/party-form/steps/summary-step";
 import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
 import { LocationDialog } from "@/components/ui/location-dialog";
-import { MessageCircle, HelpCircle, MapPin } from "lucide-react";
+import { MessageCircle, MapPin } from "lucide-react";
 import { useLocation } from "wouter";
 import allieImage from "@assets/image_1752579343744.png";
 
