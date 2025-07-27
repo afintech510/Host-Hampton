@@ -157,7 +157,7 @@ export default function MyEvents() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#E8C7CB' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#F6F1EB' }}>
       <Navigation />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
