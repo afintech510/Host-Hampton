@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, ShoppingCart } from "lucide-react";
@@ -16,11 +23,11 @@ const formatPrice = (priceInCents: number) => {
 };
 
 const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   }).format(new Date(date));
 };
 
@@ -30,7 +37,9 @@ export default function ShopEvents() {
   const queryClient = useQueryClient();
 
   // Fetch products
-  const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
+  const { data: products = [], isLoading: productsLoading } = useQuery<
+    Product[]
+  >({
     queryKey: ["/api/products"],
   });
 
@@ -38,10 +47,10 @@ export default function ShopEvents() {
   const handleAddToCart = async (product: Product) => {
     try {
       // Get or create session
-      let sessionId = localStorage.getItem('shop_session_id');
+      let sessionId = localStorage.getItem("shop_session_id");
       if (!sessionId) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('shop_session_id', sessionId);
+        localStorage.setItem("shop_session_id", sessionId);
       }
 
       const response = await fetch("/api/cart", {
@@ -90,21 +99,26 @@ export default function ShopEvents() {
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-8 pt-24">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Shop Events & Workshops</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Shop Events & Workshops
+          </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Join us for exciting hands-on workshops and special events. Perfect for date nights, 
-            girls' trips, or learning new creative skills!
+            Join us for exciting hands-on workshops and special events. Perfect
+            for date nights, girls' trips, or learning new creative skills!
           </p>
         </div>
 
         {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
-            <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card
+              key={product.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow"
+            >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <Badge variant="secondary" className="mb-2">
@@ -131,15 +145,18 @@ export default function ShopEvents() {
                       {formatDate(product.eventDate)}
                     </div>
                   )}
-                  
+
                   <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="h-4 w-4 mr-2 text-primary" />
-                    Host Hampton Studio
+                    Host Hampton
                   </div>
-                  
+
                   <div className="flex items-center text-sm text-gray-600">
                     <Users className="h-4 w-4 mr-2 text-primary" />
-                    Limited spots available
+                    {product.availableTickets !== null && product.availableTickets !== undefined 
+                      ? `${product.availableTickets} tickets available`
+                      : 'Limited spots available'
+                    }
                   </div>
                 </div>
               </CardContent>
@@ -159,8 +176,12 @@ export default function ShopEvents() {
 
         {products.length === 0 && (
           <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Events Available</h3>
-            <p className="text-gray-600">Check back soon for upcoming workshops and events!</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No Events Available
+            </h3>
+            <p className="text-gray-600">
+              Check back soon for upcoming workshops and events!
+            </p>
           </div>
         )}
       </div>
