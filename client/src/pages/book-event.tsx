@@ -32,7 +32,7 @@ import { SummaryStep } from "@/components/party-form/steps/summary-step";
 import { usePartyForm } from "@/hooks/use-party-form";
 import { Button } from "@/components/ui/button";
 import { LocationDialog } from "@/components/ui/location-dialog";
-import { MessageCircle, MapPin } from "lucide-react";
+import { MessageCircle, MapPin, RotateCcw } from "lucide-react";
 import { useLocation } from "wouter";
 import allieImage from "@assets/image_1752579343744.png";
 
@@ -62,8 +62,9 @@ export default function BookEvent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [, setLocation] = useLocation();
-  const { formData, updateFormData, submitBooking, isSubmitting } =
+  const { formData, updateFormData, submitBooking, isSubmitting, resetForm } =
     usePartyForm();
 
   const handleNextStep = () => {
@@ -88,6 +89,20 @@ export default function BookEvent() {
 
   const handleContactClick = () => {
     setShowHelp(true);
+  };
+
+  const handleResetClick = () => {
+    setShowResetConfirm(true);
+  };
+
+  const handleResetConfirm = () => {
+    resetForm();
+    setCurrentStep(1);
+    setShowResetConfirm(false);
+  };
+
+  const handleResetCancel = () => {
+    setShowResetConfirm(false);
   };
 
   const renderStep = () => {
@@ -416,7 +431,7 @@ export default function BookEvent() {
         </div>
       </main>
 
-      {/* Footer bar with help and contact buttons */}
+      {/* Footer bar with help, reset, and contact buttons */}
       <footer className="bg-white border-t border-gray-200 px-6 py-4">
         <div className="w-full max-w-md mx-auto flex justify-between items-center">
           <Button
@@ -425,6 +440,14 @@ export default function BookEvent() {
             className="text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
           >
             <MapPin className="w-6 h-6" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            onClick={handleResetClick}
+            className="text-gray-400 hover:text-black hover:bg-gray-100 p-3 h-auto min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
+          >
+            <RotateCcw className="w-6 h-6" />
           </Button>
 
           <Button
@@ -472,6 +495,41 @@ export default function BookEvent() {
             >
               Got it!
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Confirmation Dialog */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+            <div className="mb-4">
+              <RotateCcw className="w-16 h-16 mx-auto text-gray-400" />
+            </div>
+            <h2
+              className="text-xl font-bold mb-3"
+              style={{ fontFamily: "'Libre Baskerville', serif" }}
+            >
+              Reset Form?
+            </h2>
+            <p className="text-gray-600 mb-6">
+              This will clear all your form data except contact information and return you to the first step. Are you sure?
+            </p>
+            <div className="flex space-x-3">
+              <Button
+                onClick={handleResetCancel}
+                variant="outline"
+                className="flex-1 rounded-full"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleResetConfirm}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full"
+              >
+                Reset
+              </Button>
+            </div>
           </div>
         </div>
       )}

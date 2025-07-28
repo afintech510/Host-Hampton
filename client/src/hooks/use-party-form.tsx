@@ -423,6 +423,30 @@ export function usePartyForm() {
     });
   };
 
+  const resetForm = () => {
+    // Save contact info before resetting
+    const contactInfoToKeep = {
+      customerName: formData.customerName,
+      customerEmail: formData.customerEmail,
+      customerPhone: formData.customerPhone,
+      parentFirstName: formData.parentFirstName,
+      parentLastName: formData.parentLastName,
+      parentEmail: formData.parentEmail,
+      parentPhone: formData.parentPhone,
+    };
+    
+    // Reset form data but keep contact info
+    setFormData(contactInfoToKeep);
+    
+    // Clear session storage and reset with contact info only
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('partyFormData', JSON.stringify(contactInfoToKeep));
+    }
+    
+    // Reset lead ID so a new lead can be created if needed
+    setLeadId(null);
+  };
+
   const submitBooking = async (options?: { action?: 'inquiry' | 'payment' }) => {
     const eventType = formData.eventType || "";
     const action = options?.action || 'legacy';
@@ -469,6 +493,7 @@ export function usePartyForm() {
     formData,
     updateFormData,
     submitBooking,
+    resetForm,
     leadId,
     createLeadFromContact,
     isSubmitting: submitBookingMutation.isPending || 
