@@ -1,0 +1,54 @@
+Lets look at optimizing the design for the /book-event form, the database, the /admin dashboard, and invoice management. 
+New inquiries come in on the /book-event form.
+Inquiries will be of varying topics, review the outline below and lets update the /book-event form accordingly.
+-	Kids Themed Parties, step flow:
+o	Select Party Theme, add a custom option where the user can type
+o	Select Party Value Package (need to create party packages)
+o	Select Party Add-ons
+o	Party Date, Childs Info (name, age), Attendee Count
+o	Select Food, Cupcakes, Special Needs
+o	Contact info (name, email, phone), Questions / Requests
+o	Review the Details- add package and add-ons to summary.
+-	Studio Rental:  make a single option for “Studio Rental”
+o	For the next step in this flow have user select:
+	DIY Party, Private Event, Host My Client, Photography Shoot, Meeting, Other (please specify)
+	Additional Details
+o	How many people, Group Type (adults, children, mixed)
+o	Date & Time pref (make this not required), Time notes, add select option for “Not sure yet.”
+o	Contact information
+-	Trucker Hat Bar 
+o	This flow needs a complete revamp
+o	How many party attendees
+o	Age Range of the group
+o	Color and Patch theme
+o	Date / time or “not sure yet”
+o	Location - @Host Hampton or mobile
+	If mobile – where?
+o	Contact information
+-	Workshop / Class: 
+o	Class format
+o	workshop type
+o	expected attendees
+o	schedule
+o	schedule notes
+o	remove workshop add-ons
+o	contact info
+-	Permanent Jewelry Appointment: 
+o	Jewelry Pieces
+o	How many people
+o	Date preference
+o	contact info
+-	General Inquiry
+o	Contact information 
+Make sure for all form flows, the contact info page has first name, last name, email, phone#, message box and consent checkbox (I consent to Host Hampton contacting me via email, phone, or text regarding this booking and future events. This helps us provide you with updates about your event and information about our services. *)
+Most importantly- after contact info is entered and button on that step is pushed – all form info should be emailed to hosthampton295@gmail.com AND the info should be stored in the database as a lead (inquires).
+In the admin dashboard, we should be able to view and manage leads and convert a lead to an invoice and then edit that invoice. 
+We should be able to edit invoices and email to customer right in the dashboard. We need to be able to edit invoices at all times, we should have a mechanism to lock it after it has been finalized and paid. An invoice should create an event entry in the database that can be viewed on the event mgmt tab /  calendar on the admin panel. Invoices should link to customers and events.  
+A financial dashboard for tracking payments linked to orders, customers, events, etc. Attach expenses to events. Add general expenses, to track overhead, material purchases, etc. Track expense type.  
+Integrate automated email & SMS reminders & marketing. Use Twilio for SMS. 
+Have a marketing tab on dashboard to email our subscribers (at 500 contacts now).
+Create reminder email templates for event reminder (day before, and day of)
+We would like to email & text a reminder day before and a SMS the day of the event. 
+Invoice management must all for invoices to be emailed and texted. For kids parties and studio rentals we contact single contact. While for public events (we sell tickets thru our /shop-events page)  for example: kids character visit, adult craft event, bingo, kids craft class, workshop, etc.; event reminders go out to the customers who purchase tickets. We also need a mechanism to manually send communication to all event attendees for updates, etc. 
+
+

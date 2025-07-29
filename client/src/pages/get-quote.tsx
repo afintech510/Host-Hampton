@@ -39,27 +39,32 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import allieImage from "@assets/image_1752579343744.png";
 
-const TOTAL_STEPS = 9;
-
-// Custom flow for DIY Party and Private Event (6 steps)
-const isCustomFlow = (eventType: string) => {
-  return eventType === "diy-party" || eventType === "private-event";
+// New flow structure based on requirements
+const getFlowSteps = (eventType: string) => {
+  switch (eventType) {
+    case "kids-themed-party":
+      return 7; // Theme → Package → Add-ons → Party Details → Food → Contact → Review
+    case "studio-rental":
+      return 5; // Purpose → Details → Date/Time → Contact → Review
+    case "trucker-hat-bar":
+      return 6; // Attendees → Age Range → Theme → Date/Time → Location → Contact
+    case "workshop-class":
+      return 6; // Format → Type → Attendees → Schedule → Notes → Contact
+    case "permanent-jewelry":
+      return 4; // Pieces → People Count → Date → Contact
+    case "general-inquiry":
+      return 1; // Contact only
+    default:
+      return 7;
+  }
 };
 
-// Permanent Jewelry flow (5 steps)
-const isJewelryFlow = (eventType: string) => {
-  return eventType === "permanent-jewelry";
-};
-
-// Workshop/Class flow (6 steps)
-const isWorkshopFlow = (eventType: string) => {
-  return eventType === "workshop";
-};
-
-// Studio Rental flow (4 steps)
-const isStudioFlow = (eventType: string) => {
-  return eventType === "studio-rental";
-};
+const isKidsPartyFlow = (eventType: string) => eventType === "kids-themed-party";
+const isStudioRentalFlow = (eventType: string) => eventType === "studio-rental";
+const isTruckerHatFlow = (eventType: string) => eventType === "trucker-hat-bar";
+const isWorkshopFlow = (eventType: string) => eventType === "workshop-class";
+const isJewelryFlow = (eventType: string) => eventType === "permanent-jewelry";
+const isGeneralInquiry = (eventType: string) => eventType === "general-inquiry";
 
 export default function GetQuote() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -110,7 +115,8 @@ export default function GetQuote() {
   };
 
   const handleNextStep = () => {
-    if (currentStep < TOTAL_STEPS) {
+    const maxSteps = formData.eventType ? getFlowSteps(formData.eventType) : 7;
+    if (currentStep < maxSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -149,10 +155,18 @@ export default function GetQuote() {
 
   const renderStep = () => {
     const eventType = formData.eventType || "";
-    const customFlow = eventType ? isCustomFlow(eventType) : false;
-    const jewelryFlow = eventType ? isJewelryFlow(eventType) : false;
-    const workshopFlow = eventType ? isWorkshopFlow(eventType) : false;
-    const studioFlow = eventType ? isStudioFlow(eventType) : false;
+
+    // Handle General Inquiry (single step)
+    if (isGeneralInquiry(eventType)) {
+      return (
+        <ContactStep
+          formData={formData}
+          updateFormData={updateFormData}
+          onNext={handleSubmitQuote}
+          onBack={handlePreviousStep}
+        />
+      );
+    }
 
     switch (currentStep) {
       case 1:
@@ -167,10 +181,10 @@ export default function GetQuote() {
           />
         );
       case 3:
-        // Custom flow for DIY Party and Private Event
-        if (customFlow) {
+        // Kids Themed Party: Select Theme
+        if (isKidsPartyFlow(eventType)) {
           return (
-            <EventDetailsStep
+            <ThemeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -178,30 +192,8 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry flow
-        if (jewelryFlow) {
-          return (
-            <JewelryPiecesStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Workshop flow
-        if (workshopFlow) {
-          return (
-            <WorkshopDetailsStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Studio Rental flow
-        if (studioFlow) {
+        // Studio Rental: Purpose Selection
+        if (isStudioRentalFlow(eventType)) {
           return (
             <StudioPurposeStep
               formData={formData}
@@ -211,19 +203,10 @@ export default function GetQuote() {
             />
           );
         }
-        return (
-          <DateTimeStep
-            formData={formData}
-            updateFormData={updateFormData}
-            onNext={handleNextStep}
-            onBack={handlePreviousStep}
-          />
-        );
-      case 4:
-        // Custom flow: Date/Time step
-        if (customFlow) {
+        // Trucker Hat Bar: Attendees
+        if (isTruckerHatFlow(eventType)) {
           return (
-            <CustomDateTimeStep
+            <EventDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -231,10 +214,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry flow: People count
-        if (jewelryFlow) {
+        // Workshop/Class: Format
+        if (isWorkshopFlow(eventType)) {
           return (
-            <JewelryPeopleCountStep
+            <WorkshopDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -242,21 +225,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop flow: Schedule
-        if (workshopFlow) {
+        // Permanent Jewelry: Jewelry Pieces
+        if (isJewelryFlow(eventType)) {
           return (
-            <WorkshopScheduleStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Studio Rental flow: Client count
-        if (studioFlow) {
-          return (
-            <StudioClientsStep
+            <JewelryPiecesStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -272,11 +244,75 @@ export default function GetQuote() {
             onBack={handlePreviousStep}
           />
         );
+      case 4:
+        // Kids Themed Party: Select Package
+        if (isKidsPartyFlow(eventType)) {
+          return (
+            <AddonsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental: Details (People, Group Type)
+        if (isStudioRentalFlow(eventType)) {
+          return (
+            <StudioClientsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Trucker Hat Bar: Age Range
+        if (isTruckerHatFlow(eventType)) {
+          return (
+            <EventDetailsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Workshop/Class: Type
+        if (isWorkshopFlow(eventType)) {
+          return (
+            <WorkshopScheduleStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry: People Count
+        if (isJewelryFlow(eventType)) {
+          return (
+            <JewelryPeopleCountStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        return (
+          <DateTimeStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+          />
+        );
       case 5:
-        // Custom flow: Add-ons step
-        if (customFlow) {
+        // Kids Themed Party: Add-ons
+        if (isKidsPartyFlow(eventType)) {
           return (
-            <CustomAddonsStep
+            <AddonsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -284,32 +320,43 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry flow: Date/Time preference
-        if (jewelryFlow) {
-          return (
-            <JewelryDateTimeStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Workshop flow: Add-ons
-        if (workshopFlow) {
-          return (
-            <WorkshopAddonsStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Studio Rental flow: Date/Time
-        if (studioFlow) {
+        // Studio Rental: Date/Time (final step before contact)
+        if (isStudioRentalFlow(eventType)) {
           return (
             <StudioDateTimeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Trucker Hat Bar: Color/Patch Theme
+        if (isTruckerHatFlow(eventType)) {
+          return (
+            <ThemeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Workshop/Class: Attendees
+        if (isWorkshopFlow(eventType)) {
+          return (
+            <EventDetailsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry: Date (final step before contact)
+        if (isJewelryFlow(eventType)) {
+          return (
+            <JewelryDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -326,10 +373,10 @@ export default function GetQuote() {
           />
         );
       case 6:
-        // Custom flow: Contact step
-        if (customFlow) {
+        // Kids Themed Party: Party Details (Date, Child Info, Count)
+        if (isKidsPartyFlow(eventType)) {
           return (
-            <CustomContactStep
+            <ChildDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -337,10 +384,32 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry flow: Contact & Submit
-        if (jewelryFlow) {
+        // Trucker Hat Bar: Date/Time
+        if (isTruckerHatFlow(eventType)) {
           return (
-            <JewelryContactStep
+            <DateTimeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Workshop/Class: Schedule
+        if (isWorkshopFlow(eventType)) {
+          return (
+            <WorkshopScheduleStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental: Contact & Submit (Final Step)
+        if (isStudioRentalFlow(eventType)) {
+          return (
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleSubmitQuote}
@@ -348,21 +417,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop flow: Contact
-        if (workshopFlow) {
+        // Permanent Jewelry: Contact & Submit (Final Step)
+        if (isJewelryFlow(eventType)) {
           return (
-            <CustomContactStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Studio Rental flow: Contact & Submit
-        if (studioFlow) {
-          return (
-            <StudioContactStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleSubmitQuote}
@@ -379,25 +437,36 @@ export default function GetQuote() {
           />
         );
       case 7:
-        // Custom flow: Quote step (instead of invoice)
-        if (customFlow) {
+        // Kids Themed Party: Food Selection
+        if (isKidsPartyFlow(eventType)) {
           return (
-            <CustomInvoiceStep
+            <FoodStep
               formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
-              onSubmit={handleSubmitQuote}
-              isSubmitting={submitQuoteMutation.isPending}
             />
           );
         }
-        // Workshop flow: Quote step (instead of invoice)
-        if (workshopFlow) {
+        // Trucker Hat Bar: Location (Final Step)
+        if (isTruckerHatFlow(eventType)) {
           return (
-            <WorkshopInvoiceStep
+            <ContactStep
               formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
-              onSubmit={handleSubmitQuote}
-              isSubmitting={submitQuoteMutation.isPending}
+            />
+          );
+        }
+        // Workshop/Class: Notes (Final Step)
+        if (isWorkshopFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
+              onBack={handlePreviousStep}
             />
           );
         }
@@ -410,6 +479,17 @@ export default function GetQuote() {
           />
         );
       case 8:
+        // Kids Themed Party: Contact Information
+        if (isKidsPartyFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         return (
           <ContactStep
             formData={formData}
@@ -419,6 +499,17 @@ export default function GetQuote() {
           />
         );
       case 9:
+        // Kids Themed Party: Review & Submit (Final Step)
+        if (isKidsPartyFlow(eventType)) {
+          return (
+            <SummaryStep
+              formData={formData}
+              onBack={handlePreviousStep}
+              onSubmit={handleSubmitQuote}
+              isSubmitting={submitQuoteMutation.isPending}
+            />
+          );
+        }
         return (
           <SummaryStep
             formData={formData}
@@ -444,17 +535,7 @@ export default function GetQuote() {
       />
       <ProgressBar
         currentStep={currentStep}
-        totalSteps={
-          formData.eventType && isCustomFlow(formData.eventType)
-            ? 6
-            : formData.eventType && isJewelryFlow(formData.eventType)
-              ? 5
-              : formData.eventType && isWorkshopFlow(formData.eventType)
-                ? 6
-                : formData.eventType && isStudioFlow(formData.eventType)
-                  ? 4
-                  : TOTAL_STEPS
-        }
+        totalSteps={formData.eventType ? getFlowSteps(formData.eventType) : 7}
       />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-8">
