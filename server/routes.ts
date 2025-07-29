@@ -475,6 +475,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Create lead data
+      const eventDateString = quoteData.partyDate || quoteData.studioDate || quoteData.truckerDate || quoteData.workshopDate || quoteData.jewelryDate;
+      const eventDate = eventDateString ? new Date(eventDateString) : null;
+      
       const leadData = {
         source: "website",
         name: `${quoteData.firstName} ${quoteData.lastName}`,
@@ -485,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         guestCount: parseInt(quoteData.attendeeCount || quoteData.studioAttendeeCount || quoteData.truckerAttendeeCount || quoteData.workshopAttendeeCount || quoteData.jewelryAttendeeCount) || null,
         childName: quoteData.childName || null,
         childAge: parseInt(quoteData.childAge) || null,
-        eventDate: quoteData.partyDate || quoteData.studioDate || quoteData.truckerDate || quoteData.workshopDate || quoteData.jewelryDate || null,
+        eventDate: eventDate,
         timeSlot: quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
         notes: quoteData.message || "",
         status: "new",
