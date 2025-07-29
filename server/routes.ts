@@ -474,11 +474,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Map service types to event type IDs
       const serviceTypeMapping: { [key: string]: number } = {
-        "kids-party": 1, // Birthday Party
+        "birthday-party": 1, // Birthday Party
         "studio-rental": 5, // Studio Rental
         "trucker-hat": 1, // Use Birthday Party for now
         "workshop": 2, // Adult Workshop/Classes
-        "jewelry": 3, // Permanent Jewelry Party
+        "permanent-jewelry": 3, // Permanent Jewelry Party
+        "diy-party": 1, // DIY Party
+        "private-event": 1, // Private Event
         "general": 1 // Default to Birthday Party
       };
 
@@ -516,38 +518,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send email notification to Host Hampton
       const serviceTypeNames: { [key: string]: string } = {
-        "kids-party": "Kids Themed Party",
-        "studio-rental": "Studio Rental",
+        "birthday-party": "Kids Birthday Party",
+        "studio-rental": "Studio Rental", 
         "trucker-hat": "Trucker Hat Bar",
         "workshop": "Workshop/Class",
-        "jewelry": "Permanent Jewelry",
+        "permanent-jewelry": "Permanent Jewelry",
+        "diy-party": "DIY Party",
+        "private-event": "Private Event",
         "general": "General Inquiry"
       };
 
       const serviceName = serviceTypeNames[quoteData.serviceType] || quoteData.serviceType;
       
-      // Format quote details for email
+      // Format quote details for email using the extracted field names
       let quoteDetails = `
         <h3>New Quote Request - ${serviceName}</h3>
         <p><strong>Contact Information:</strong></p>
         <ul>
-          <li>Name: ${quoteData.firstName} ${quoteData.lastName}</li>
-          <li>Email: ${quoteData.email}</li>
-          <li>Phone: ${quoteData.phone}</li>
+          <li>Name: ${firstName} ${lastName}</li>
+          <li>Email: ${email}</li>
+          <li>Phone: ${phone}</li>
         </ul>
       `;
 
       // Add service-specific details
-      if (quoteData.serviceType === 'kids-party') {
+      if (quoteData.serviceType === 'birthday-party') {
         quoteDetails += `
-          <p><strong>Party Details:</strong></p>
+          <p><strong>Birthday Party Details:</strong></p>
           <ul>
-            ${quoteData.partyTheme ? `<li>Theme: ${quoteData.partyTheme}${quoteData.customTheme ? ` (${quoteData.customTheme})` : ''}</li>` : ''}
-            ${quoteData.partyPackage ? `<li>Package: ${quoteData.partyPackage}</li>` : ''}
             ${quoteData.childName ? `<li>Child's Name: ${quoteData.childName}</li>` : ''}
             ${quoteData.childAge ? `<li>Child's Age: ${quoteData.childAge}</li>` : ''}
-            ${quoteData.attendeeCount ? `<li>Attendee Count: ${quoteData.attendeeCount}</li>` : ''}
+            ${quoteData.guestCount ? `<li>Guest Count: ${quoteData.guestCount}</li>` : ''}
+            ${quoteData.partyTheme ? `<li>Theme: ${quoteData.partyTheme}</li>` : ''}
+            ${quoteData.partyAddons && quoteData.partyAddons.length > 0 ? `<li>Add-ons: ${quoteData.partyAddons.map(addon => addon.name || addon).join(', ')}</li>` : ''}
+            ${quoteData.foodChoice ? `<li>Food Choice: ${quoteData.foodChoice}</li>` : ''}
+            ${quoteData.cupcakeFlavor ? `<li>Cupcake Flavor: ${quoteData.cupcakeFlavor}</li>` : ''}
             ${quoteData.partyDate ? `<li>Party Date: ${quoteData.partyDate}</li>` : ''}
+            ${quoteData.totalEstimate ? `<li>Estimated Total: $${quoteData.totalEstimate}</li>` : ''}
+            ${quoteData.specialNeeds && quoteData.specialNeeds.length > 0 ? `<li>Special Needs: ${quoteData.specialNeeds.join(', ')}</li>` : ''}
           </ul>
         `;
       } else if (quoteData.serviceType === 'studio-rental') {
