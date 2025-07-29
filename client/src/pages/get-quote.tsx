@@ -39,31 +39,37 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import allieImage from "@assets/image_1752579343744.png";
 
-// New flow structure based on requirements
+// New flow structure based on requirements - using actual event type IDs from EventTypeStep
 const getFlowSteps = (eventType: string) => {
   switch (eventType) {
-    case "kids-themed-party":
-      return 7; // Theme → Package → Add-ons → Party Details → Food → Contact → Review
+    case "birthday-party":
+      return 8; // Welcome → EventType → Theme → Package → Addons → PartyDetails → Food → Contact
     case "studio-rental":
-      return 5; // Purpose → Details → Date/Time → Contact → Review
-    case "trucker-hat-bar":
-      return 6; // Attendees → Age Range → Theme → Date/Time → Location → Contact
-    case "workshop-class":
-      return 6; // Format → Type → Attendees → Schedule → Notes → Contact
+      return 5; // Welcome → EventType → Purpose → Details → Contact
+    case "trucker-hat":
+      return 7; // Welcome → EventType → Attendees → Age Range → Theme → DateTime → Contact
+    case "workshop":
+      return 7; // Welcome → EventType → Format → Type → Attendees → Schedule → Contact
     case "permanent-jewelry":
-      return 4; // Pieces → People Count → Date → Contact
+      return 5; // Welcome → EventType → Pieces → People Count → Contact
+    case "diy-party":
+      return 5; // Welcome → EventType → Details → DateTime → Contact
+    case "private-event":
+      return 5; // Welcome → EventType → Details → DateTime → Contact
     case "general-inquiry":
-      return 1; // Contact only
+      return 3; // Welcome → EventType → Contact
     default:
-      return 7;
+      return 8;
   }
 };
 
-const isKidsPartyFlow = (eventType: string) => eventType === "kids-themed-party";
+const isKidsPartyFlow = (eventType: string) => eventType === "birthday-party";
 const isStudioRentalFlow = (eventType: string) => eventType === "studio-rental";
-const isTruckerHatFlow = (eventType: string) => eventType === "trucker-hat-bar";
-const isWorkshopFlow = (eventType: string) => eventType === "workshop-class";
+const isTruckerHatFlow = (eventType: string) => eventType === "trucker-hat";
+const isWorkshopFlow = (eventType: string) => eventType === "workshop";
 const isJewelryFlow = (eventType: string) => eventType === "permanent-jewelry";
+const isDiyPartyFlow = (eventType: string) => eventType === "diy-party";
+const isPrivateEventFlow = (eventType: string) => eventType === "private-event";
 const isGeneralInquiry = (eventType: string) => eventType === "general-inquiry";
 
 export default function GetQuote() {
@@ -110,7 +116,13 @@ export default function GetQuote() {
   });
 
   const handleSubmitQuote = async () => {
-    const quoteData = { ...formData };
+    // Map form data to the expected quote format
+    const quoteData = {
+      ...formData,
+      serviceType: formData.eventType, // Map eventType to serviceType
+      consent: true // Add required consent field
+    };
+    console.log("Submitting quote data:", quoteData);
     await submitQuoteMutation.mutateAsync(quoteData);
   };
 
@@ -156,17 +168,8 @@ export default function GetQuote() {
   const renderStep = () => {
     const eventType = formData.eventType || "";
 
-    // Handle General Inquiry (single step)
-    if (isGeneralInquiry(eventType)) {
-      return (
-        <ContactStep
-          formData={formData}
-          updateFormData={updateFormData}
-          onNext={handleSubmitQuote}
-          onBack={handlePreviousStep}
-        />
-      );
-    }
+    // Handle General Inquiry (single step) - but this should be handled in step logic, not here
+    // Removed to fix step progression
 
     switch (currentStep) {
       case 1:
@@ -203,7 +206,18 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Attendees
+        // DIY Party & Private Event: Event Details
+        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
+          return (
+            <EventDetailsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Trucker Hat Bar: Attendees Count
         if (isTruckerHatFlow(eventType)) {
           return (
             <EventDetailsStep
@@ -232,6 +246,17 @@ export default function GetQuote() {
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // General Inquiry: Contact Only
+        if (isGeneralInquiry(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -267,6 +292,17 @@ export default function GetQuote() {
             />
           );
         }
+        // DIY Party & Private Event: Date/Time
+        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
+          return (
+            <CustomDateTimeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         // Trucker Hat Bar: Age Range
         if (isTruckerHatFlow(eventType)) {
           return (
@@ -278,7 +314,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop/Class: Type
+        // Workshop/Class: Type  
         if (isWorkshopFlow(eventType)) {
           return (
             <WorkshopScheduleStep
@@ -320,13 +356,13 @@ export default function GetQuote() {
             />
           );
         }
-        // Studio Rental: Date/Time (final step before contact)
+        // Studio Rental: Contact (final step)
         if (isStudioRentalFlow(eventType)) {
           return (
-            <StudioDateTimeStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -353,13 +389,13 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry: Date (final step before contact)
+        // Permanent Jewelry: Contact (final step)
         if (isJewelryFlow(eventType)) {
           return (
-            <JewelryDateTimeStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -479,13 +515,13 @@ export default function GetQuote() {
           />
         );
       case 8:
-        // Kids Themed Party: Contact Information
+        // Kids Themed Party: Contact Information (Final Step)
         if (isKidsPartyFlow(eventType)) {
           return (
             <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -494,28 +530,18 @@ export default function GetQuote() {
           <ContactStep
             formData={formData}
             updateFormData={updateFormData}
-            onNext={handleNextStep}
+            onNext={handleSubmitQuote}
             onBack={handlePreviousStep}
           />
         );
       case 9:
-        // Kids Themed Party: Review & Submit (Final Step)
-        if (isKidsPartyFlow(eventType)) {
-          return (
-            <SummaryStep
-              formData={formData}
-              onBack={handlePreviousStep}
-              onSubmit={handleSubmitQuote}
-              isSubmitting={submitQuoteMutation.isPending}
-            />
-          );
-        }
+        // No case 9 needed - all flows should end at contact step
         return (
-          <SummaryStep
+          <ContactStep
             formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleSubmitQuote}
             onBack={handlePreviousStep}
-            onSubmit={handleSubmitQuote}
-            isSubmitting={submitQuoteMutation.isPending}
           />
         );
       default:
