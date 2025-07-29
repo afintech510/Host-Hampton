@@ -582,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         await sendEmail({
           to: "hosthampton295@gmail.com",
-          subject: `New Quote Request: ${serviceName} - ${quoteData.firstName} ${quoteData.lastName}`,
+          subject: `New Quote Request: ${serviceName} - ${firstName} ${lastName}`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
               ${quoteDetails}
@@ -603,9 +603,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error processing quote:", error);
+      console.error("Failed to create lead:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid lead data", 
+          errors: error.errors 
+        });
+      }
+      
       res.status(500).json({ 
         success: false, 
-        message: "Failed to submit quote request" 
+        message: "Failed to create quote request" 
       });
     }
   });

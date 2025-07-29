@@ -951,14 +951,8 @@ export class DatabaseStorage implements IStorage {
   async createLead(lead: InsertLead): Promise<Lead> {
     const [created] = await db.insert(leads).values(lead).returning();
     
-    // Create initial status history
-    await this.createEventStatusHistory({
-      leadId: created.id,
-      newStatus: created.status,
-      changedBy: "system",
-      notes: "Lead created from website form",
-      automationTriggered: true
-    });
+    // TODO: Create lead status history tracking (separate from event status history)
+    // For now, just return the created lead without status history
     
     return created;
   }
@@ -978,16 +972,16 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date()
     }).where(eq(leads.id, id)).returning();
     
-    // Track status change if status was updated
-    if (updates.status && updated) {
-      await this.createEventStatusHistory({
-        leadId: id,
-        newStatus: updates.status,
-        changedBy: "admin",
-        notes: `Lead status updated to ${updates.status}`,
-        automationTriggered: false
-      });
-    }
+    // TODO: Track lead status change with proper lead status history
+    // if (updates.status && updated) {
+    //   await this.createLeadStatusHistory({
+    //     leadId: id,
+    //     newStatus: updates.status,
+    //     changedBy: "admin",
+    //     notes: `Lead status updated to ${updates.status}`,
+    //     automationTriggered: false
+    //   });
+    // }
     
     return updated || undefined;
   }
