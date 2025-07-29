@@ -79,39 +79,57 @@ export default function GetQuote() {
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-
   const { formData, updateFormData, resetForm } = usePartyForm();
+  const { toast } = useToast();
 
   // Quote submission mutation
   const submitQuoteMutation = useMutation({
     mutationFn: async (quoteData: any) => {
-      const response = await apiRequest("POST", "/api/quotes", quoteData);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Quote Request Submitted! 🎉",
-        description: "We'll contact you within 24 hours with your personalized quote and pricing details.",
+      const response = await fetch("/api/quotes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(quoteData),
       });
       
-      // Redirect to home after successful submission
-      setTimeout(() => {
-        setLocation("/themed-parties");
-      }, 2000);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || "Failed to submit quote");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Quote Request Submitted!",
+        description: "We'll contact you within 24 hours with your custom quote.",
+      });
+      setLocation("/themed-parties");
     },
     onError: (error: any) => {
       toast({
-        title: "Submission Failed",
-        description: error.message || "Please try again or contact us directly.",
+        title: "Error",
+        description: error.message || "Failed to submit quote request. Please try again.",
         variant: "destructive",
       });
     },
   });
 
+  const handleSubmitQuote = async () => {
+    // Map form data to the expected quote format
+    const quoteData = {
+      ...formData,
+      serviceType: formData.eventType, // Map eventType to serviceType
+      consent: true // Add required consent field
+    };
+    console.log("Submitting quote data:", quoteData);
+    await submitQuoteMutation.mutateAsync(quoteData);
+  };
+
   const handleNextStep = () => {
-    const totalSteps = getFlowSteps(formData.eventType || "birthday-party");
-    if (currentStep < totalSteps) {
+    const maxSteps = formData.eventType ? getFlowSteps(formData.eventType) : 7;
+    if (currentStep < maxSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -120,17 +138,6 @@ export default function GetQuote() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
-  };
-
-  const handleSubmitQuote = () => {
-    // Prepare quote data
-    const quoteData = {
-      ...formData,
-      serviceType: formData.eventType,
-      // Add any additional processing here
-    };
-    
-    submitQuoteMutation.mutate(quoteData);
   };
 
   const handleClose = () => {
@@ -161,6 +168,9 @@ export default function GetQuote() {
 
   const renderStep = () => {
     const eventType = formData.eventType || "";
+
+    // Handle General Inquiry (single step) - but this should be handled in step logic, not here
+    // Removed to fix step progression
 
     switch (currentStep) {
       case 1:
@@ -286,7 +296,7 @@ export default function GetQuote() {
         // DIY Party & Private Event: Date/Time
         if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
           return (
-            <CustomDateTimeStep
+            <EventDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -294,7 +304,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Age Range & Color/Patch Theme
+        // Trucker Hat Bar: Location & Theme
         if (isTruckerHatFlow(eventType)) {
           return (
             <EventDetailsStep
@@ -340,6 +350,82 @@ export default function GetQuote() {
             />
           );
         }
+        // Studio Rental: Details (People, Group Type)
+        if (isStudioRentalFlow(eventType)) {
+          return (
+            <StudioClientsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // DIY Party & Private Event: Date/Time
+        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
+          return (
+            <CustomDateTimeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Trucker Hat Bar: Age Range & Color/Patch Theme
+        if (isTruckerHatFlow(eventType)) {
+          return (
+            <EventDetailsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Workshop/Class: Expected Attendees
+        if (isWorkshopFlow(eventType)) {
+          return (
+            <WorkshopScheduleStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry: People Count
+        if (isJewelryFlow(eventType)) {
+          return (
+            <JewelryPeopleCountStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        break;
+        return (
+          <DateTimeStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+          />
+        );
+      case 5:
+        // Kids Themed Party: Add-ons
+        if (isKidsPartyFlow(eventType)) {
+          return (
+            <AddonsStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         // Studio Rental: Contact (final step)
         if (isStudioRentalFlow(eventType)) {
           return (
@@ -351,21 +437,10 @@ export default function GetQuote() {
             />
           );
         }
-        // DIY Party & Private Event: Contact (final step)
-        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
-          return (
-            <ContactStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Trucker Hat Bar: Date/Time or Location
+        // Trucker Hat Bar: Color/Patch Theme
         if (isTruckerHatFlow(eventType)) {
           return (
-            <CustomDateTimeStep
+            <ThemeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -373,7 +448,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop/Class: Expected Attendees
+        // Workshop/Class: Attendees
         if (isWorkshopFlow(eventType)) {
           return (
             <EventDetailsStep
@@ -395,9 +470,16 @@ export default function GetQuote() {
             />
           );
         }
-        break;
+        return (
+          <AddonsStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+          />
+        );
       case 6:
-        // Kids Themed Party: Child Details
+        // Kids Themed Party: Party Details (Date, Child Info, Count)
         if (isKidsPartyFlow(eventType)) {
           return (
             <ChildDetailsStep
@@ -408,10 +490,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Location (if mobile vs studio)
+        // Trucker Hat Bar: Date/Time
         if (isTruckerHatFlow(eventType)) {
           return (
-            <EventDetailsStep
+            <DateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -419,7 +501,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop/Class: Schedule Notes
+        // Workshop/Class: Schedule
         if (isWorkshopFlow(eventType)) {
           return (
             <WorkshopScheduleStep
@@ -430,9 +512,38 @@ export default function GetQuote() {
             />
           );
         }
-        break;
+        // Studio Rental: Contact & Submit (Final Step)
+        if (isStudioRentalFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry: Contact & Submit (Final Step)
+        if (isJewelryFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        return (
+          <ChildDetailsStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+          />
+        );
       case 7:
-        // Kids Themed Party: Food & Special Needs
+        // Kids Themed Party: Food Selection
         if (isKidsPartyFlow(eventType)) {
           return (
             <FoodStep
@@ -443,7 +554,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Contact (final step)
+        // Trucker Hat Bar: Location (Final Step)
         if (isTruckerHatFlow(eventType)) {
           return (
             <ContactStep
@@ -454,7 +565,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop/Class: Contact (final step)
+        // Workshop/Class: Notes (Final Step)
         if (isWorkshopFlow(eventType)) {
           return (
             <ContactStep
@@ -465,9 +576,16 @@ export default function GetQuote() {
             />
           );
         }
-        break;
+        return (
+          <FoodStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleNextStep}
+            onBack={handlePreviousStep}
+          />
+        );
       case 8:
-        // Kids Themed Party: Contact (final step)
+        // Kids Themed Party: Contact Information (Final Step)
         if (isKidsPartyFlow(eventType)) {
           return (
             <ContactStep
@@ -478,7 +596,24 @@ export default function GetQuote() {
             />
           );
         }
-        break;
+        return (
+          <ContactStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleSubmitQuote}
+            onBack={handlePreviousStep}
+          />
+        );
+      case 9:
+        // No case 9 needed - all flows should end at contact step
+        return (
+          <ContactStep
+            formData={formData}
+            updateFormData={updateFormData}
+            onNext={handleSubmitQuote}
+            onBack={handlePreviousStep}
+          />
+        );
       default:
         return <WelcomeStep onNext={handleNextStep} />;
     }
@@ -544,70 +679,33 @@ export default function GetQuote() {
         </div>
       </footer>
 
-      {/* Location Dialog */}
-      <LocationDialog
-        isOpen={showLocationDialog}
-        onClose={() => setShowLocationDialog(false)}
-      />
-
-      {/* Help Dialog */}
-      {showHelp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex items-center mb-4">
-              <img
-                src={allieImage}
-                alt="Allie"
-                className="w-12 h-12 rounded-full mr-3 object-cover"
-              />
-              <div>
-                <h3 className="font-semibold text-gray-900">Hi, I'm Allie!</h3>
-                <p className="text-sm text-gray-600">Party Planning Specialist</p>
-              </div>
-            </div>
-            <p className="text-gray-700 mb-4">
-              Need help with your party planning? I'm here to assist! Feel free to call or text me directly at{" "}
-              <a href="tel:631-400-8080" className="text-coral font-medium">
-                631-400-8080
-              </a>{" "}
-              for immediate assistance.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setShowHelp(false)}
-                variant="outline"
-                className="flex-1"
-              >
-                Close
-              </Button>
-              <Button asChild className="flex-1">
-                <a href="tel:631-400-8080">Call Now</a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Reset Confirmation Dialog */}
       {showResetConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="font-semibold text-gray-900 mb-2">Reset Form?</h3>
-            <p className="text-gray-600 mb-4">
-              This will clear all your current selections and start over. Are you sure?
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <RotateCcw className="w-8 h-8 text-red-600" />
+            </div>
+            <h2
+              className="text-xl font-bold mb-3"
+              style={{ fontFamily: "'Libre Baskerville', serif" }}
+            >
+              Reset Form?
+            </h2>
+            <p className="text-gray-600 mb-6">
+              This will clear all your information and start over. Are you sure?
             </p>
             <div className="flex gap-3">
               <Button
-                onClick={handleResetCancel}
                 variant="outline"
+                onClick={handleResetCancel}
                 className="flex-1"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleResetConfirm}
-                variant="destructive"
-                className="flex-1"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               >
                 Reset
               </Button>
@@ -615,6 +713,54 @@ export default function GetQuote() {
           </div>
         </div>
       )}
+
+      {/* Help Dialog */}
+      {showHelp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+            <img
+              src={allieImage}
+              alt="Allie - Your party planning assistant"
+              className="w-16 h-16 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg"
+            />
+            <h2
+              className="text-xl font-bold mb-3"
+              style={{ fontFamily: "'Libre Baskerville', serif" }}
+            >
+              Need Help?
+            </h2>
+            <p className="text-gray-600 mb-4">
+              We're here to help you plan the perfect event 〜 Contact Allie!
+            </p>
+            <div className="space-y-2 text-sm text-left">
+              <p>
+                <strong>Phone:</strong> (757) 295-9098
+              </p>
+              <p>
+                <strong>Email:</strong> hosthampton295@gmail.com
+              </p>
+              <p>
+                <strong>Address:</strong> 709 S Military Hwy, Virginia Beach, VA 23464
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowHelp(false)}
+              className="w-full mt-4"
+              style={{
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Location Dialog */}
+      <LocationDialog
+        isOpen={showLocationDialog}
+        onClose={() => setShowLocationDialog(false)}
+      />
     </div>
   );
 }
