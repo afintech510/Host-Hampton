@@ -17,12 +17,14 @@ import PartyRoomRental from "@/pages/party-room-rental";
 import TruckHatBar from "@/pages/truck-hat-bar";
 import PermanentJewelry from "@/pages/permanent-jewelry";
 import MyEvents from "@/pages/my-events";
+import Quote from "@/pages/quote-new";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={ThemedParties} />
       <Route path="/book-event" component={BookEvent} />
+      <Route path="/quote" component={Quote} />
       <Route path="/themed-parties" component={ThemedParties} />
       <Route path="/party-designer" component={PartyDesigner} />
       <Route path="/admin" component={AdminDashboard} />

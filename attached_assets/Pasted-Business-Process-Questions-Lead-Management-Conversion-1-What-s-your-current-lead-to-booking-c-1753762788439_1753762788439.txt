@@ -1,0 +1,44 @@
+Business Process Questions:
+Lead Management & Conversion:
+1.	What's your current lead-to-booking conversion rate? Are you losing leads due to slow follow-up or unclear pricing?
+We book very high ratio, nearly 100%. We just need more leads and more efficient operations management. 
+2.	Do you want automated lead scoring (high-value leads get priority) based on event type, guest count, or budget?
+No
+3.	Should we set up automated follow-up sequences for leads that don't convert within X days?
+No
+Pricing & Packages:
+4. For the new "Party Value Packages" - are you thinking tiered pricing (Basic/Premium/Deluxe) or packages based on guest count ranges?
+Kids party packages start at $875 for 11 attendees incl. birthday child. Additional attendees are $35 each. 
+We need to Create packages which include extra items – (for ex. Goodie bags, ballon tower, photo booth, extra activity, more [fancy] deserts, etc.) I think two levels of package – Make it Shine add $25 per attendee, Party Envy +$50 per attendee.  (open to suggestion on pricing)
+5.	Should pricing be displayed upfront in the booking form, or kept hidden until quote stage?
+Pricing kept hidden until quote stage, after contact info is submitted. 
+Operational Efficiency:
+6. What's your biggest current pain point - is it managing multiple inquiries, invoice creation, or event day logistics?
+Invoice creation and mgmt is very inefficient currently using canva. We like the canva template – see attached pdf. But we want the template to be web based, they click link and pay deposit via stripe and than are able to pay the party balance via card (3% fee) or pay cash prior to the event. 
+
+We want to improve marketing and likely pay for facebook / ig / google / tiktok ads to increase deal flow. So we need to plan for managing multiple inquires, auto generated suggested responses using an AI chat agent would be a nice feature. 
+Event day logistics is a non issue.
+7.	Do you want calendar integration to prevent double-bookings and show your availability in real-time?
+Yes a calendar integration sounds like a feature. If a party inquiry comes in with overlapping time / date, accept the inquiry and quote but do not allow the customer to purchase, suggest this time is already booked, select another date / time. Host Hampton events, kids parties, room rentals, all events which utilize host Hampton as the event space. If the customer is looking for mobile party services, don’t enforce this time conflict – host Hampton can host parties in their studio and send entertainers out to your location. 
+
+8.	Should we add inventory tracking for supplies/decorations to automatically calculate costs per event?
+We want to track supplies and décor to calc cost per events, but we do not need to track inventory. But also allow for general non-event specific expenses. 
+Suggested Business Improvements:
+Revenue Optimization:
+•	Dynamic Pricing: Adjust pricing based on date (weekends higher), season, or demand
+We currently do offer discount for weekend vs. weekday. This can be adjusted in the new model. Easiest may be offer weekday discount over the event – possibly 20%. 
+•	Upsell Automation: Suggest relevant add-ons based on selected themes/packages
+There will be a premium for some party themes. 
+•	Deposit Management: Automated deposit collection with payment plans for larger events –
+No payment plan options is needed. We typically collect a $200 deposit for room rentals and kids parties. Sometimes the kids party may require additional. for studio rentals the $200 down is a security deposit which will be returned upon the studio being returned in original condition. 
+
+Customer Experience:
+•	Real-time Chat: For immediate questions during booking process
+No
+•	Event Portal: Customers should be able to see all their events past and future on their /my-events page. Two tabs, default to future. All the customer to see past event details. Allow the customer to see future events and to send inquiry right from a quick contact form- they can request cancellation for 90% refund, or save 100% as future credit. If under 36hrs from the event there is no-refund or credit offered, they can however gift their ticket(s) to a friend. 
+Business Intelligence:
+•	Profit Analysis: Track profit margins per event type to focus on most profitable services 
+Which of these areas should we prioritize first? I'm thinking we start with the form redesign and lead management system, then build out the admin dashboard. What's most critical for your immediate business needs?
+
+start with ( the form redesign BUT rebuild this in a new form(page) use /quote ) and the lead management system, then build out the admin dashboard. 
+Most critical for business needs is a more efficient way to create invoices from the inquiry form (/quote) and the ability to manually generate an invoice. Send the link to customer via email (and text ) so they pay the deposit and lock in. 

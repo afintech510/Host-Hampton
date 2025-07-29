@@ -452,6 +452,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quote submission endpoint - creates lead and sends email notification
+  app.post("/api/quotes", async (req, res) => {
+    try {
+      const quoteData = req.body;
+      
+      if (!quoteData.firstName || !quoteData.lastName || !quoteData.email || !quoteData.phone || !quoteData.consent) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required contact information" 
+        });
+      }
+
+      // Map service types to event type IDs
+      const serviceTypeMapping: { [key: string]: number } = {
+        "kids-party": 1, // Birthday Party
+        "studio-rental": 5, // Studio Rental
+        "trucker-hat": 1, // Use Birthday Party for now
+        "workshop": 2, // Adult Workshop/Classes
+        "jewelry": 3, // Permanent Jewelry Party
+        "general": 1 // Default to Birthday Party
+      };
+
+      // Create lead data
+      const leadData = {
+        source: "website",
+        name: `${quoteData.firstName} ${quoteData.lastName}`,
+        email: quoteData.email,
+        phone: quoteData.phone,
+        eventTypeId: serviceTypeMapping[quoteData.serviceType] || 1,
+        eventType: quoteData.serviceType,
+        guestCount: parseInt(quoteData.attendeeCount || quoteData.studioAttendeeCount || quoteData.truckerAttendeeCount || quoteData.workshopAttendeeCount || quoteData.jewelryAttendeeCount) || null,
+        childName: quoteData.childName || null,
+        childAge: parseInt(quoteData.childAge) || null,
+        eventDate: quoteData.partyDate || quoteData.studioDate || quoteData.truckerDate || quoteData.workshopDate || quoteData.jewelryDate || null,
+        timeSlot: quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
+        notes: quoteData.message || "",
+        status: "new",
+        leadScore: "warm",
+        formStep: "completed",
+        formData: quoteData
+      };
+      
+      const lead = await storage.createLead(leadData);
+
+      // Send email notification to Host Hampton
+      const serviceTypeNames: { [key: string]: string } = {
+        "kids-party": "Kids Themed Party",
+        "studio-rental": "Studio Rental",
+        "trucker-hat": "Trucker Hat Bar",
+        "workshop": "Workshop/Class",
+        "jewelry": "Permanent Jewelry",
+        "general": "General Inquiry"
+      };
+
+      const serviceName = serviceTypeNames[quoteData.serviceType] || quoteData.serviceType;
+      
+      // Format quote details for email
+      let quoteDetails = `
+        <h3>New Quote Request - ${serviceName}</h3>
+        <p><strong>Contact Information:</strong></p>
+        <ul>
+          <li>Name: ${quoteData.firstName} ${quoteData.lastName}</li>
+          <li>Email: ${quoteData.email}</li>
+          <li>Phone: ${quoteData.phone}</li>
+        </ul>
+      `;
+
+      // Add service-specific details
+      if (quoteData.serviceType === 'kids-party') {
+        quoteDetails += `
+          <p><strong>Party Details:</strong></p>
+          <ul>
+            ${quoteData.partyTheme ? `<li>Theme: ${quoteData.partyTheme}${quoteData.customTheme ? ` (${quoteData.customTheme})` : ''}</li>` : ''}
+            ${quoteData.partyPackage ? `<li>Package: ${quoteData.partyPackage}</li>` : ''}
+            ${quoteData.childName ? `<li>Child's Name: ${quoteData.childName}</li>` : ''}
+            ${quoteData.childAge ? `<li>Child's Age: ${quoteData.childAge}</li>` : ''}
+            ${quoteData.attendeeCount ? `<li>Attendee Count: ${quoteData.attendeeCount}</li>` : ''}
+            ${quoteData.partyDate ? `<li>Party Date: ${quoteData.partyDate}</li>` : ''}
+          </ul>
+        `;
+      } else if (quoteData.serviceType === 'studio-rental') {
+        quoteDetails += `
+          <p><strong>Studio Rental Details:</strong></p>
+          <ul>
+            ${quoteData.studioSubType ? `<li>Rental Type: ${quoteData.studioSubType}${quoteData.customStudioType ? ` (${quoteData.customStudioType})` : ''}</li>` : ''}
+            ${quoteData.studioDescription ? `<li>Description: ${quoteData.studioDescription}</li>` : ''}
+            ${quoteData.studioAttendeeCount ? `<li>Number of People: ${quoteData.studioAttendeeCount}</li>` : ''}
+            ${quoteData.studioGroupType ? `<li>Group Type: ${quoteData.studioGroupType}</li>` : ''}
+            ${quoteData.studioDate ? `<li>Preferred Date: ${quoteData.studioDate}</li>` : ''}
+            ${quoteData.studioTime ? `<li>Time: ${quoteData.studioTime} - ${quoteData.studioEndTime || 'TBD'}</li>` : ''}
+            ${quoteData.studioTimeNotes ? `<li>Time Notes: ${quoteData.studioTimeNotes}</li>` : ''}
+          </ul>
+        `;
+      }
+
+      if (quoteData.message) {
+        quoteDetails += `<p><strong>Additional Message:</strong><br>${quoteData.message}</p>`;
+      }
+
+      quoteDetails += `<p><strong>Lead ID:</strong> ${lead.id}</p>`;
+
+      try {
+        await sendEmail({
+          to: "hosthampton295@gmail.com",
+          subject: `New Quote Request: ${serviceName} - ${quoteData.firstName} ${quoteData.lastName}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+              ${quoteDetails}
+              <hr style="margin: 20px 0;">
+              <p><em>This quote request was submitted through the Host Hampton website.</em></p>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error("Failed to send quote notification email:", emailError);
+        // Continue with success response even if email fails
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Quote request submitted successfully",
+        leadId: lead.id 
+      });
+    } catch (error: any) {
+      console.error("Error processing quote:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to submit quote request" 
+      });
+    }
+  });
+
   // Enhanced lead capture from booking form
   app.post("/api/leads", async (req, res) => {
     try {
