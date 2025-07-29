@@ -474,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "general": 1 // Default to Birthday Party
       };
 
-      // Create lead data
+      // Create lead data with proper timestamp handling
       const eventDateString = quoteData.partyDate || quoteData.studioDate || quoteData.truckerDate || quoteData.workshopDate || quoteData.jewelryDate;
       const eventDate = eventDateString ? new Date(eventDateString) : null;
       
@@ -489,15 +489,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         childName: quoteData.childName || null,
         childAge: parseInt(quoteData.childAge) || null,
         eventDate: eventDate,
+        isDateUnsure: !eventDateString, // Set to true if no date provided
         timeSlot: quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
         notes: quoteData.message || "",
         status: "new",
         leadScore: "warm",
         formStep: "completed",
-        formData: quoteData
+        formData: quoteData,
+        // Explicitly set optional timestamp fields to null to avoid issues
+        followUpDate: null,
+        lastContactedAt: null,
+        convertedAt: null
       };
       
-      const lead = await storage.createLead(leadData);
+      // Validate the lead data using the schema before insertion
+      const validatedLeadData = insertLeadSchema.parse(leadData);
+      const lead = await storage.createLead(validatedLeadData);
 
       // Send email notification to Host Hampton
       const serviceTypeNames: { [key: string]: string } = {
