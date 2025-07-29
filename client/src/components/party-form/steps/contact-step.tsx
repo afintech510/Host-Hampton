@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import CnP_15072025_075736 from "@assets/CnP_15072025_075736.png";
 
@@ -17,6 +18,7 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
   const [parentLastName, setParentLastName] = useState(formData.parentLastName || "");
   const [parentEmail, setParentEmail] = useState(formData.parentEmail || "");
   const [parentPhone, setParentPhone] = useState(formData.parentPhone || "");
+  const [consent, setConsent] = useState(formData.consent || false);
 
   // Save to session storage whenever values change
   useEffect(() => {
@@ -26,21 +28,23 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
       parentFirstName,
       parentLastName,
       parentEmail,
-      parentPhone
+      parentPhone,
+      consent
     }));
-  }, [parentFirstName, parentLastName, parentEmail, parentPhone]);
+  }, [parentFirstName, parentLastName, parentEmail, parentPhone, consent]);
 
   const handleNext = () => {
     updateFormData({ 
       parentFirstName, 
       parentLastName, 
       parentEmail, 
-      parentPhone
+      parentPhone,
+      consent
     });
     onNext();
   };
 
-  const isValid = parentFirstName && parentLastName && parentEmail && parentPhone;
+  const isValid = parentFirstName && parentLastName && parentEmail && parentPhone && consent;
 
   return (
     <div className="text-center">
@@ -99,6 +103,19 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
             onChange={(e) => setParentPhone(e.target.value)}
             className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
           />
+        </div>
+
+        <div className="flex items-start space-x-3">
+          <Checkbox
+            id="consent"
+            checked={consent}
+            onCheckedChange={(checked) => setConsent(checked as boolean)}
+            className="mt-1"
+          />
+          <Label htmlFor="consent" className="text-sm text-gray-600 leading-relaxed">
+            I agree to receive communication about my event via email and phone. 
+            Host Hampton may contact me to confirm details and provide updates about my party booking.
+          </Label>
         </div>
 
         <UnifiedButton

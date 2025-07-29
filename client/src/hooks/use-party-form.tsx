@@ -329,15 +329,20 @@ export function usePartyForm() {
 
   // Function to create lead when contact info is provided
   const createLeadFromContact = (contactData: Partial<FormData>) => {
-    const hasContactInfo = contactData.customerName && 
-                          contactData.customerEmail && 
-                          contactData.customerPhone;
+    // Handle both field name formats (parentFirstName vs customerName)
+    const firstName = contactData.parentFirstName || contactData.customerName || contactData.firstName;
+    const lastName = contactData.parentLastName || contactData.lastName;
+    const email = contactData.parentEmail || contactData.customerEmail || contactData.email;
+    const phone = contactData.parentPhone || contactData.customerPhone || contactData.phone;
+    
+    const hasContactInfo = firstName && email && phone;
     
     if (hasContactInfo && !leadId) {
       const leadData = {
-        customerName: contactData.customerName,
-        customerEmail: contactData.customerEmail,
-        customerPhone: contactData.customerPhone,
+        source: "website", // Required field
+        name: lastName ? `${firstName} ${lastName}` : firstName,
+        email: email,
+        phone: phone,
         eventTypeId: getEventTypeId(contactData.eventType || "birthday"),
         guestCount: contactData.guestCount || null,
         eventDate: contactData.partyDate || 
