@@ -58,21 +58,19 @@ export function EventDetailsStep({ formData, updateFormData, onNext, onBack }: E
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-2 block">How many adults?</Label>
             <NumberWheel
-              value={adultCount}
-              onChange={setAdultCount}
-              min={0}
-              max={100}
-              placeholder="0"
+              value={adultCount.toString()}
+              onValueChange={(value) => setAdultCount(parseInt(value) || 0)}
+              options={Array.from({ length: 21 }, (_, i) => ({ value: i.toString(), label: i.toString() }))}
+              placeholder="Select number"
             />
           </div>
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-2 block">How many children?</Label>
             <NumberWheel
-              value={childCount}
-              onChange={setChildCount}
-              min={0}
-              max={100}
-              placeholder="0"
+              value={childCount.toString()}
+              onValueChange={(value) => setChildCount(parseInt(value) || 0)}
+              options={Array.from({ length: 21 }, (_, i) => ({ value: i.toString(), label: i.toString() }))}
+              placeholder="Select number"
             />
           </div>
         </div>

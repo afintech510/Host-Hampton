@@ -457,7 +457,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const quoteData = req.body;
       
-      if (!quoteData.firstName || !quoteData.lastName || !quoteData.email || !quoteData.phone || !quoteData.consent) {
+      // Check for contact information in various field formats
+      const firstName = quoteData.firstName || quoteData.parentFirstName;
+      const lastName = quoteData.lastName || quoteData.parentLastName;
+      const email = quoteData.email || quoteData.parentEmail || quoteData.customerEmail;
+      const phone = quoteData.phone || quoteData.parentPhone || quoteData.customerPhone;
+      const consent = quoteData.consent;
+
+      if (!firstName || !lastName || !email || !phone || !consent) {
+        console.log("Missing fields check:", { firstName, lastName, email, phone, consent });
         return res.status(400).json({ 
           success: false, 
           message: "Missing required contact information" 
@@ -480,9 +488,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const leadData = {
         source: "website",
-        name: `${quoteData.firstName} ${quoteData.lastName}`,
-        email: quoteData.email,
-        phone: quoteData.phone,
+        name: `${firstName} ${lastName}`,
+        email: email,
+        phone: phone,
         eventTypeId: serviceTypeMapping[quoteData.serviceType] || 1,
         eventType: quoteData.serviceType,
         guestCount: parseInt(quoteData.attendeeCount || quoteData.studioAttendeeCount || quoteData.truckerAttendeeCount || quoteData.workshopAttendeeCount || quoteData.jewelryAttendeeCount) || null,
