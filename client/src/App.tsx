@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import BookEvent from "@/pages/book-event";
+import GetQuote from "@/pages/get-quote";
 import ThemedParties from "@/pages/themed-parties";  
 import PartyDesigner from "@/pages/party-designer";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -24,6 +25,7 @@ function Router() {
     <Switch>
       <Route path="/" component={ThemedParties} />
       <Route path="/book-event" component={BookEvent} />
+      <Route path="/get-quote" component={GetQuote} />
       <Route path="/quote" component={Quote} />
       <Route path="/themed-parties" component={ThemedParties} />
       <Route path="/party-designer" component={PartyDesigner} />
