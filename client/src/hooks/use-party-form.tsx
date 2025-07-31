@@ -365,16 +365,24 @@ export function usePartyForm() {
         phone: phone,
         eventTypeId: getEventTypeId(contactData.eventType || "birthday"),
         guestCount: contactData.guestCount || null,
-        eventDate: contactData.partyDate || 
-                  contactData.customPreferredDate || 
-                  contactData.jewelryPreferredDate || 
-                  contactData.preferredDate || 
-                  contactData.studioPreferredDate ? 
-                  new Date(contactData.partyDate || 
-                          contactData.customPreferredDate || 
-                          contactData.jewelryPreferredDate || 
-                          contactData.preferredDate || 
-                          contactData.studioPreferredDate) : null,
+        eventDate: (() => {
+          const dateStr = contactData.partyDate || 
+                         contactData.customPreferredDate || 
+                         contactData.jewelryPreferredDate || 
+                         contactData.preferredDate || 
+                         contactData.studioPreferredDate;
+          
+          if (!dateStr || dateStr === "" || contactData.dateChoice === "unsure") {
+            return null;
+          }
+          
+          try {
+            const date = new Date(dateStr);
+            return isNaN(date.getTime()) ? null : date;
+          } catch (e) {
+            return null;
+          }
+        })(),
         timeSlot: contactData.partyTime || 
                  contactData.customStartTime || 
                  contactData.jewelryPreferredTime || 

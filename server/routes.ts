@@ -629,7 +629,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced lead capture from booking form
   app.post("/api/leads", async (req, res) => {
     try {
-      const leadData = insertLeadSchema.parse(req.body);
+      const rawData = req.body;
+      
+      // Preprocess date fields to handle empty strings and invalid dates
+      const processedData = {
+        ...rawData,
+        eventDate: (() => {
+          if (!rawData.eventDate || rawData.eventDate === "" || rawData.isDateUnsure) {
+            return null;
+          }
+          try {
+            const date = new Date(rawData.eventDate);
+            return isNaN(date.getTime()) ? null : date;
+          } catch (e) {
+            return null;
+          }
+        })(),
+        // Ensure timestamp fields are properly handled
+        followUpDate: rawData.followUpDate ? (rawData.followUpDate === "" ? null : new Date(rawData.followUpDate)) : null,
+        lastContactedAt: rawData.lastContactedAt ? (rawData.lastContactedAt === "" ? null : new Date(rawData.lastContactedAt)) : null,
+        convertedAt: rawData.convertedAt ? (rawData.convertedAt === "" ? null : new Date(rawData.convertedAt)) : null,
+      };
+      
+      const leadData = insertLeadSchema.parse(processedData);
       
       // Set default values for new leads from website
       const enrichedLead = {
@@ -637,8 +659,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         source: "website",
         status: "new",
         leadScore: "warm",
-        formStep: req.body.formStep || "contact-info",
-        formData: req.body.formData || {}
+        formStep: rawData.formStep || "contact-info",
+        formData: rawData.formData || {}
       };
       
       const lead = await storage.createLead(enrichedLead);
