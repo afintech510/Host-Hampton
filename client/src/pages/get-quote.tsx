@@ -302,10 +302,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Age Range & Color/Patch Theme
+        // Trucker Hat Bar: Theme Selection (skip duplicate EventDetailsStep)
         if (isTruckerHatFlow(eventType)) {
           return (
-            <EventDetailsStep
+            <ThemeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}

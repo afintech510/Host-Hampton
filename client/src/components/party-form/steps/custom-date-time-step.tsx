@@ -31,6 +31,7 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
   const [partyDate, setPartyDate] = useState(formData.partyDate || "");
   const [startTime, setStartTime] = useState(formData.startTime || "");
   const [endTime, setEndTime] = useState(formData.endTime || "");
+  const [unsureDetails, setUnsureDetails] = useState(formData.unsureDetails || "");
 
   // Fetch room rental pricing from the database
   const { data: pricingData, isLoading, error } = useQuery<PricingResponse>({
@@ -125,8 +126,8 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
 
   const handleNext = () => {
     const dateData = dateChoice === "unsure" 
-      ? { dateChoice, partyDate: "", startTime: "", endTime: "", rentalPricing: null }
-      : { dateChoice, partyDate, startTime, endTime, rentalPricing: pricing };
+      ? { dateChoice, partyDate: "", startTime: "", endTime: "", rentalPricing: null, unsureDetails }
+      : { dateChoice, partyDate, startTime, endTime, rentalPricing: pricing, unsureDetails: "" };
     
     updateFormData(dateData);
     onNext();
@@ -239,6 +240,26 @@ export function CustomDateTimeStep({ formData, updateFormData, onNext, onBack }:
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {dateChoice === "unsure" && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                Tell us more about your timing preferences (optional)
+              </Label>
+              <textarea
+                value={unsureDetails}
+                onChange={(e) => setUnsureDetails(e.target.value)}
+                placeholder="e.g., weekends only, after 3pm, flexible timing, specific season..."
+                className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300 min-h-[100px] resize-none"
+                rows={4}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                This helps us suggest the best times and availability for your event.
+              </p>
+            </div>
           </div>
         )}
       </div>
