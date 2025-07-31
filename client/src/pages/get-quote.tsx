@@ -105,9 +105,7 @@ export default function GetQuote() {
       clearFormData();
       
       // Redirect to home after successful submission
-      setTimeout(() => {
-        setLocation("/themed-parties");
-      }, 2000);
+      setLocation("/themed-parties");
     },
     onError: (error: any) => {
       toast({
