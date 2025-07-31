@@ -48,7 +48,7 @@ const getFlowSteps = (eventType: string) => {
     case "studio-rental":
       return 5; // Welcome → EventType → Purpose → Details → Contact
     case "trucker-hat":
-      return 7; // Welcome → EventType → Attendees → Age Range → Theme → DateTime → Contact
+      return 5; // Welcome → EventType → Event Details (head count) → Date/Time → Contact
     case "workshop":
       return 7; // Welcome → EventType → Format → Type → Attendees → Schedule → Contact
     case "permanent-jewelry":
@@ -302,10 +302,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Theme Selection (skip duplicate EventDetailsStep)
+        // Trucker Hat Bar: Date/Time  
         if (isTruckerHatFlow(eventType)) {
           return (
-            <ThemeStep
+            <CustomDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -370,13 +370,13 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Date/Time or Location
+        // Trucker Hat Bar: Contact (final step)
         if (isTruckerHatFlow(eventType)) {
           return (
-            <CustomDateTimeStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -416,17 +416,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Location (if mobile vs studio)
-        if (isTruckerHatFlow(eventType)) {
-          return (
-            <EventDetailsStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
+        // Trucker Hat Bar: No step 6 needed (flow ends at step 5)
         // Workshop/Class: Schedule Notes
         if (isWorkshopFlow(eventType)) {
           return (
