@@ -238,6 +238,26 @@ export const leads = pgTable("leads", {
   formStep: text("form_step"), // Track which step user reached
   formData: json("form_data"), // Complete form data for recovery
   
+  // Enhanced fields for comprehensive event data mapping (for auto-invoice building)
+  eventDescription: text("event_description"), // General event description for all non-birthday events
+  adultCount: integer("adult_count"), // Number of adults attending
+  childCount: integer("child_count"), // Number of children attending (different from birthday child)
+  attendeeCount: integer("attendee_count"), // Generic attendee count for workshops, jewelry, etc.
+  eventLocation: text("event_location"), // "studio", "mobile", "client-location"
+  mobileAddress: text("mobile_address"), // Address for mobile events
+  startTime: text("start_time"), // Event start time "14:00"
+  endTime: text("end_time"), // Event end time "18:00"
+  dateFlexible: boolean("date_flexible").default(false), // If date/time is flexible
+  scheduleNotes: text("schedule_notes"), // Date/time flexibility notes
+  pricingDetails: json("pricing_details"), // Complex pricing structures (rental pricing, etc.)
+  specialRequirements: json("special_requirements"), // Allergies, dietary restrictions, special needs
+  workshopType: text("workshop_type"), // For workshops: "Art", "Craft", etc.
+  classFormat: text("class_format"), // For workshops: "single", "series"
+  jewelryPieces: json("jewelry_pieces"), // For permanent jewelry: selected pieces
+  studioUsage: text("studio_usage"), // For studio rental: specific usage type
+  packageSelection: text("package_selection"), // Selected package name/type
+  foodPreferences: json("food_preferences"), // Food choices, cupcake flavors, etc.
+  
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

@@ -88,22 +88,62 @@ export default function InvoiceCreate() {
     enabled: !!leadId
   });
 
-  // Populate form with lead data
+  // Populate form with lead data using enhanced field mapping
   useEffect(() => {
     if (lead) {
       const formData = lead.formData || {};
       
-      // Build detailed event description from form data
+      // Build comprehensive event description from mapped fields
       let eventDetails = `Event Type: ${lead.eventType}\n`;
+      
+      // Birthday party specific details
       if (lead.childName) eventDetails += `Child: ${lead.childName}`;
       if (lead.childAge) eventDetails += ` (Age ${lead.childAge})`;
       if (lead.childName || lead.childAge) eventDetails += '\n';
-      if (lead.guestCount) eventDetails += `Guest Count: ${lead.guestCount}\n`;
+      
+      // General attendee information
+      if (lead.guestCount) eventDetails += `Guests: ${lead.guestCount}\n`;
+      if (lead.adultCount) eventDetails += `Adults: ${lead.adultCount}\n`;
+      if (lead.childCount) eventDetails += `Children: ${lead.childCount}\n`;
+      if (lead.attendeeCount) eventDetails += `Attendees: ${lead.attendeeCount}\n`;
+      
+      // Event specific details using mapped fields
+      if (lead.eventDescription) eventDetails += `Description: ${lead.eventDescription}\n`;
       if (formData.partyTheme) eventDetails += `Theme: ${formData.partyTheme}\n`;
-      if (formData.partyPackage) eventDetails += `Package: ${formData.partyPackage}\n`;
-      if (formData.specialNeeds && formData.specialNeeds.length > 0) {
-        eventDetails += `Special Needs: ${formData.specialNeeds.join(', ')}\n`;
+      if (lead.packageSelection) eventDetails += `Package: ${lead.packageSelection}\n`;
+      if (lead.workshopType) eventDetails += `Workshop Type: ${lead.workshopType}\n`;
+      if (lead.classFormat) eventDetails += `Class Format: ${lead.classFormat}\n`;
+      if (lead.jewelryPieces && lead.jewelryPieces.length > 0) {
+        eventDetails += `Jewelry Pieces: ${lead.jewelryPieces.join(', ')}\n`;
       }
+      if (lead.studioUsage) eventDetails += `Studio Usage: ${lead.studioUsage}\n`;
+      
+      // Location and timing
+      if (lead.eventLocation) eventDetails += `Location: ${lead.eventLocation}\n`;
+      if (lead.mobileAddress) eventDetails += `Mobile Address: ${lead.mobileAddress}\n`;
+      if (lead.startTime || lead.endTime) {
+        eventDetails += `Time: ${lead.startTime || 'TBD'} - ${lead.endTime || 'TBD'}\n`;
+      }
+      if (lead.dateFlexible) eventDetails += `Date Flexible: Yes\n`;
+      if (lead.scheduleNotes) eventDetails += `Schedule Notes: ${lead.scheduleNotes}\n`;
+      
+      // Special requirements and preferences
+      if (lead.specialRequirements && lead.specialRequirements.length > 0) {
+        eventDetails += `Special Requirements: ${lead.specialRequirements.join(', ')}\n`;
+      }
+      if (lead.foodPreferences && (lead.foodPreferences.foodChoice || lead.foodPreferences.cupcakeFlavor)) {
+        eventDetails += `Food Preferences: `;
+        if (lead.foodPreferences.foodChoice) eventDetails += `${lead.foodPreferences.foodChoice}`;
+        if (lead.foodPreferences.cupcakeFlavor) eventDetails += `, ${lead.foodPreferences.cupcakeFlavor} cupcakes`;
+        eventDetails += '\n';
+      }
+      
+      // Pricing details
+      if (lead.pricingDetails) {
+        eventDetails += `Pricing Details: ${JSON.stringify(lead.pricingDetails, null, 2)}\n`;
+      }
+      
+      // Notes from various sources
       if (formData.questions || formData.partyNotes || lead.notes) {
         eventDetails += `Notes: ${formData.questions || formData.partyNotes || lead.notes}\n`;
       }
@@ -117,18 +157,47 @@ export default function InvoiceCreate() {
         // Event information
         description: `${lead.eventType} for ${lead.name}`,
         eventDetails: eventDetails.trim(),
-        eventDate: lead.eventDate || formData.partyDate || '',
-        eventStartTime: formData.partyTime || formData.startTime || '10:00',
-        eventEndTime: formData.endTime || '12:00'
+        eventDate: lead.eventDate || formData.partyDate || formData.studioPreferredDate || '',
+        eventStartTime: lead.startTime || formData.partyTime || formData.studioStartTime || '10:00',
+        eventEndTime: lead.endTime || formData.studioEndTime || '12:00'
       }));
 
-      // Set initial invoice item based on lead
-      setInvoiceItems([{
-        description: `${lead.eventType}${lead.guestCount ? ` (${lead.guestCount} guests)` : ''}`,
+      // Build comprehensive invoice items from mapped data
+      const items = [];
+      
+      // Main event package
+      const mainEventDescription = lead.eventType + 
+        (lead.guestCount ? ` (${lead.guestCount} guests)` : '') +
+        (lead.adultCount || lead.childCount ? ` (${lead.adultCount || 0} adults, ${lead.childCount || 0} children)` : '') +
+        (lead.attendeeCount ? ` (${lead.attendeeCount} attendees)` : '');
+      
+      items.push({
+        description: mainEventDescription,
         quantity: 1,
         unitPrice: (lead.estimatedCost || 87500) / 100, // Convert cents to dollars
         total: (lead.estimatedCost || 87500) / 100
-      }]);
+      });
+      
+      // Add pricing details if available
+      if (lead.pricingDetails && lead.pricingDetails.basePrice) {
+        items.push({
+          description: 'Base Price',
+          quantity: 1,
+          unitPrice: lead.pricingDetails.basePrice / 100,
+          total: lead.pricingDetails.basePrice / 100
+        });
+        
+        if (lead.pricingDetails.securityDeposit) {
+          items.push({
+            description: 'Security Deposit',
+            quantity: 1,
+            unitPrice: lead.pricingDetails.securityDeposit / 100,
+            total: lead.pricingDetails.securityDeposit / 100
+          });
+        }
+      }
+      
+      setInvoiceItems(items);
     }
   }, [lead]);
 

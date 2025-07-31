@@ -506,26 +506,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "general": "general"
       };
 
+      // Comprehensive field mapping for all event types
       const leadData = {
         source: "website",
         name: `${firstName} ${lastName}`,
         email: email,
         phone: phone,
         eventTypeId: serviceTypeMapping[quoteData.serviceType] || 1,
-        eventType: eventTypeNames[quoteData.serviceType] || quoteData.serviceType, // Use mapped event type
+        eventType: eventTypeNames[quoteData.serviceType] || quoteData.serviceType,
+        
+        // Basic event details
         guestCount: parseInt(quoteData.guestCount || quoteData.attendeeCount || quoteData.studioAttendeeCount || quoteData.truckerAttendeeCount || quoteData.workshopAttendeeCount || quoteData.jewelryAttendeeCount) || null,
         childName: quoteData.childName || null,
         childAge: parseInt(quoteData.childAge) || null,
-        eventDate: eventDate, // This should now be properly set from the form
-        isDateUnsure: !eventDateString, // Set to true if no date provided
+        eventDate: eventDate,
+        isDateUnsure: !eventDateString || quoteData.dateChoice === "unsure" || quoteData.scheduleChoice === "unsure" || quoteData.studioDateFlexible,
         timeSlot: quoteData.partyTime || quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
+        
+        // Enhanced mapping for comprehensive data
+        eventDescription: quoteData.eventDescription || quoteData.studioDescription || quoteData.workshopDescription || null,
+        adultCount: parseInt(quoteData.adultCount) || null,
+        childCount: parseInt(quoteData.childCount) || null,
+        attendeeCount: parseInt(quoteData.expectedAttendees || quoteData.studioAttendeeCount || quoteData.jewelryPeopleCount) || null,
+        eventLocation: quoteData.eventLocation || (quoteData.studioUsage ? "studio" : null),
+        mobileAddress: quoteData.mobileAddress || null,
+        startTime: quoteData.startTime || quoteData.studioStartTime || null,
+        endTime: quoteData.endTime || quoteData.studioEndTime || null,
+        dateFlexible: quoteData.studioDateFlexible || quoteData.scheduleChoice === "unsure" || quoteData.dateChoice === "unsure" || false,
+        scheduleNotes: quoteData.unsureDetails || quoteData.scheduleNotes || quoteData.studioTimeNotes || null,
+        pricingDetails: quoteData.rentalPricing || null,
+        specialRequirements: quoteData.specialNeeds ? [quoteData.specialNeeds].flat() : null,
+        workshopType: quoteData.workshopType || null,
+        classFormat: quoteData.classFormat || null,
+        jewelryPieces: quoteData.selectedJewelryPieces || null,
+        studioUsage: quoteData.studioUsage || quoteData.studioSubType || null,
+        packageSelection: quoteData.partyPackage || null,
+        foodPreferences: {
+          foodChoice: quoteData.foodChoice || null,
+          cupcakeFlavor: quoteData.cupcakeFlavor || null
+        },
+        
+        // Standard lead tracking fields
         selectedAddons: quoteData.partyAddons || [],
-        notes: quoteData.partyNotes || quoteData.message || "",
+        estimatedCost: quoteData.totalEstimate ? parseInt(quoteData.totalEstimate) * 100 : null, // Convert to cents
+        notes: quoteData.questions || quoteData.partyNotes || quoteData.message || "",
         status: "new",
         leadScore: "warm",
         formStep: "completed",
         formData: quoteData,
-        // Explicitly set optional timestamp fields to null to avoid issues
+        
+        // Explicitly set optional timestamp fields to null
         followUpDate: null,
         lastContactedAt: null,
         convertedAt: null
