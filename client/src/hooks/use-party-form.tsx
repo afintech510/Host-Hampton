@@ -94,20 +94,20 @@ export function usePartyForm() {
   });
   const { toast } = useToast();
 
-  // Lead creation mutation for when contact info is entered
-  const createLeadMutation = useMutation({
-    mutationFn: async (leadData: any) => {
-      const response = await apiRequest("POST", "/api/leads", leadData);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setLeadId(data.lead.id);
-      console.log("Lead created successfully:", data.lead);
-    },
-    onError: (error) => {
-      console.error("Failed to create lead:", error);
-    },
-  });
+  // DISABLED: Lead creation is now handled by the quotes endpoint to prevent duplicates
+  // const createLeadMutation = useMutation({
+  //   mutationFn: async (leadData: any) => {
+  //     const response = await apiRequest("POST", "/api/leads", leadData);
+  //     return response.json();
+  //   },
+  //   onSuccess: (data) => {
+  //     setLeadId(data.lead.id);
+  //     console.log("Lead created successfully:", data.lead);
+  //   },
+  //   onError: (error) => {
+  //     console.error("Failed to create lead:", error);
+  //   },
+  // });
 
   // Lead update mutation for form progress tracking
   const updateLeadMutation = useMutation({
@@ -347,59 +347,12 @@ export function usePartyForm() {
     },
   });
 
-  // Function to create lead when contact info is provided
+  // DISABLED: Function to create lead when contact info is provided
+  // Lead creation is now handled by the quotes endpoint to prevent duplicates
   const createLeadFromContact = (contactData: Partial<FormData>) => {
-    // Handle both field name formats (parentFirstName vs customerName)
-    const firstName = contactData.parentFirstName || contactData.customerName || contactData.firstName;
-    const lastName = contactData.parentLastName || contactData.lastName;
-    const email = contactData.parentEmail || contactData.customerEmail || contactData.email;
-    const phone = contactData.parentPhone || contactData.customerPhone || contactData.phone;
-    
-    const hasContactInfo = firstName && email && phone;
-    
-    if (hasContactInfo && !leadId) {
-      const leadData = {
-        source: "website", // Required field
-        name: lastName ? `${firstName} ${lastName}` : firstName,
-        email: email,
-        phone: phone,
-        eventTypeId: getEventTypeId(contactData.eventType || "birthday"),
-        guestCount: contactData.guestCount || null,
-        eventDate: (() => {
-          const dateStr = contactData.partyDate || 
-                         contactData.customPreferredDate || 
-                         contactData.jewelryPreferredDate || 
-                         contactData.preferredDate || 
-                         contactData.studioPreferredDate;
-          
-          if (!dateStr || dateStr === "" || contactData.dateChoice === "unsure") {
-            return null;
-          }
-          
-          try {
-            const date = new Date(dateStr);
-            return isNaN(date.getTime()) ? null : date;
-          } catch (e) {
-            return null;
-          }
-        })(),
-        timeSlot: contactData.partyTime || 
-                 contactData.customStartTime || 
-                 contactData.jewelryPreferredTime || 
-                 contactData.startTime || 
-                 contactData.studioStartTime || null,
-        notes: contactData.partyNotes || contactData.eventDescription || null,
-        estimatedCost: contactData.totalEstimate || null,
-        selectedAddons: contactData.partyAddons || 
-                       contactData.selectedCustomAddons || 
-                       contactData.selectedJewelryPieces || 
-                       contactData.selectedWorkshopAddons || [],
-        partyThemeId: contactData.partyTheme ? getPartyThemeId(contactData.partyTheme) : null,
-        formData: contactData
-      };
-      
-      createLeadMutation.mutate(leadData);
-    }
+    // This function is disabled to prevent duplicate lead creation
+    // Lead creation now happens in the /api/quotes endpoint
+    console.log("Lead creation skipped - handled by quotes endpoint");
   };
 
   // Helper function to map event types to IDs
@@ -435,8 +388,8 @@ export function usePartyForm() {
         updated.totalEstimate = Number(calculatedTotal) || 400; // Ensure it's a number
       }
       
-      // Create lead when contact info is provided for the first time
-      createLeadFromContact(updated);
+      // DISABLED: Lead creation is now handled by quotes endpoint
+      // createLeadFromContact(updated);
       
       // Update lead progress if lead exists
       if (leadId) {
