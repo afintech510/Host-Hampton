@@ -97,21 +97,14 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
               <div className="flex items-center space-x-3">
                 <RadioGroupItem value="base" id="base" />
                 <Label htmlFor="base" className="flex-1 cursor-pointer">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Base Birthday Party</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Complete party package with decorations, activities, and setup
-                      </p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Up to 11 guests (including birthday child), $35 per additional guest
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">
-                        ${calculatePackagePrice(packagesData?.find((p: any) => p.name === "Base Birthday Party"))}
-                      </div>
-                    </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Base Birthday Party</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Complete party package with decorations, activities, and setup
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Up to 11 guests (including birthday child), $35 per additional guest
+                    </p>
                   </div>
                 </Label>
               </div>
@@ -138,12 +131,6 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
                         Base package + premium touches and enhanced activities
                       </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">
-                        ${getPackageTotal()}
-                      </div>
-                      <div className="text-sm text-gray-500">total</div>
-                    </div>
                   </div>
                 </Label>
               </div>
@@ -169,12 +156,6 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
                       <p className="text-sm text-gray-600 mt-1">
                         Ultimate premium package with all the bells and whistles
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">
-                        ${getPackageTotal()}
-                      </div>
-                      <div className="text-sm text-gray-500">total</div>
                     </div>
                   </div>
                 </Label>
