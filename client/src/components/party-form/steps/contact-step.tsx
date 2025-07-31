@@ -9,7 +9,7 @@ import CnP_15072025_075736 from "@assets/CnP_15072025_075736.png";
 interface ContactStepProps {
   formData: any;
   updateFormData: (data: any) => void;
-  onNext: () => void;
+  onNext: (contactData?: any) => void;
   onBack: () => void;
 }
 
@@ -42,13 +42,15 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
       consent
     };
     
-    // Update form data and ensure it's available before calling onNext
+    // Update form data for persistence
     updateFormData(contactData);
     
-    // Use setTimeout to ensure the update is processed before calling onNext
-    setTimeout(() => {
+    // Pass contact data directly to onNext if it accepts parameters (for submit case)
+    if (onNext.length > 0) {
+      onNext(contactData);
+    } else {
       onNext();
-    }, 10);
+    }
   };
 
   const isValid = parentFirstName && parentLastName && parentEmail && parentPhone && consent;

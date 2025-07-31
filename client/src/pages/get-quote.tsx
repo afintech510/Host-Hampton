@@ -130,10 +130,11 @@ export default function GetQuote() {
     }
   };
 
-  const handleSubmitQuote = () => {
-    // Prepare quote data
+  const handleSubmitQuote = (contactData?: any) => {
+    // Prepare quote data - use contactData if provided, otherwise use formData
     const quoteData = {
       ...formData,
+      ...(contactData || {}), // Merge in contact data if provided
       serviceType: formData.eventType,
       // Add any additional processing here
     };
