@@ -1,0 +1,65 @@
+Console.js:61 Calculated total (debug): {basePrice: 400, themePrice: 800, addonTotal: 0, total: 1200, typeofTotal: 'number', …}
+Console.js:61 Final calculated total: 1200 number
+queryClient.ts:15  POST https://e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/api/leads 400 (Bad Request)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:15
+mutationFn @ use-party-form.tsx:100
+fn @ @tanstack_react-query.js?v=190dc2c2:1189
+run @ @tanstack_react-query.js?v=190dc2c2:494
+start @ @tanstack_react-query.js?v=190dc2c2:536
+execute @ @tanstack_react-query.js?v=190dc2c2:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=190dc2c2:2630
+(anonymous) @ @tanstack_react-query.js?v=190dc2c2:3295
+createLeadFromContact @ use-party-form.tsx:368
+(anonymous) @ use-party-form.tsx:406
+basicStateReducer @ chunk-RPCDYKBN.js?v=190dc2c2:11703
+dispatchSetState @ chunk-RPCDYKBN.js?v=190dc2c2:12385
+updateFormData @ use-party-form.tsx:396
+handleNext @ theme-step.tsx:40
+callCallback2 @ chunk-RPCDYKBN.js?v=190dc2c2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=190dc2c2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=190dc2c2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=190dc2c2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=190dc2c2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=190dc2c2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=190dc2c2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=190dc2c2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=190dc2c2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=190dc2c2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=190dc2c2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=190dc2c2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=190dc2c2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=190dc2c2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=190dc2c2:5449
+Console.js:61 Failed to create lead: Error: 400: {"success":false,"message":"Invalid lead data","errors":[{"code":"invalid_type","expected":"date","received":"string","path":["eventDate"],"message":"Expected date, received string"}]}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async Object.mutationFn (use-party-form.tsx:100:24)
+Mt.forEach.n.<computed> @ Console.js:61
+onError @ use-party-form.tsx:108
+execute @ @tanstack_react-query.js?v=190dc2c2:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=190dc2c2:2630
+(anonymous) @ @tanstack_react-query.js?v=190dc2c2:3295
+createLeadFromContact @ use-party-form.tsx:368
+(anonymous) @ use-party-form.tsx:406
+basicStateReducer @ chunk-RPCDYKBN.js?v=190dc2c2:11703
+dispatchSetState @ chunk-RPCDYKBN.js?v=190dc2c2:12385
+updateFormData @ use-party-form.tsx:396
+handleNext @ theme-step.tsx:40
+callCallback2 @ chunk-RPCDYKBN.js?v=190dc2c2:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=190dc2c2:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=190dc2c2:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=190dc2c2:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=190dc2c2:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=190dc2c2:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=190dc2c2:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=190dc2c2:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=190dc2c2:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=190dc2c2:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=190dc2c2:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=190dc2c2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=190dc2c2:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=190dc2c2:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=190dc2c2:5449

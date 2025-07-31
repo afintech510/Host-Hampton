@@ -349,7 +349,12 @@ export function usePartyForm() {
                   contactData.customPreferredDate || 
                   contactData.jewelryPreferredDate || 
                   contactData.preferredDate || 
-                  contactData.studioPreferredDate || null,
+                  contactData.studioPreferredDate ? 
+                  new Date(contactData.partyDate || 
+                          contactData.customPreferredDate || 
+                          contactData.jewelryPreferredDate || 
+                          contactData.preferredDate || 
+                          contactData.studioPreferredDate) : null,
         timeSlot: contactData.partyTime || 
                  contactData.customStartTime || 
                  contactData.jewelryPreferredTime || 
@@ -360,7 +365,7 @@ export function usePartyForm() {
         selectedAddons: contactData.partyAddons || 
                        contactData.selectedCustomAddons || 
                        contactData.selectedJewelryPieces || 
-                       contactData.selectedWorkshopAddons || null,
+                       contactData.selectedWorkshopAddons || [],
         partyThemeId: contactData.partyTheme ? getPartyThemeId(contactData.partyTheme) : null,
         formData: contactData
       };

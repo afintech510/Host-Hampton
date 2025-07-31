@@ -501,6 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         eventDate: eventDate,
         isDateUnsure: !eventDateString, // Set to true if no date provided
         timeSlot: quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
+        selectedAddons: quoteData.partyAddons || [],
         notes: quoteData.message || "",
         status: "new",
         leadScore: "warm",
@@ -550,12 +551,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ${quoteData.childAge ? `<li>Child's Age: ${quoteData.childAge}</li>` : ''}
             ${quoteData.guestCount ? `<li>Guest Count: ${quoteData.guestCount}</li>` : ''}
             ${quoteData.partyTheme ? `<li>Theme: ${quoteData.partyTheme}</li>` : ''}
+            ${quoteData.partyPackage ? `<li>Package: ${quoteData.partyPackage === 'make-it-shine' ? 'Make it Shine (+$25/guest)' : quoteData.partyPackage === 'party-envy' ? 'Party Envy (+$50/guest)' : 'Basic Package'}</li>` : ''}
+            ${quoteData.packageTotal ? `<li>Package Total: $${quoteData.packageTotal}</li>` : ''}
             ${quoteData.partyAddons && quoteData.partyAddons.length > 0 ? `<li>Add-ons: ${quoteData.partyAddons.map(addon => addon.name || addon).join(', ')}</li>` : ''}
             ${quoteData.foodChoice ? `<li>Food Choice: ${quoteData.foodChoice}</li>` : ''}
             ${quoteData.cupcakeFlavor ? `<li>Cupcake Flavor: ${quoteData.cupcakeFlavor}</li>` : ''}
             ${quoteData.partyDate ? `<li>Party Date: ${quoteData.partyDate}</li>` : ''}
+            ${quoteData.partyTime ? `<li>Party Time: ${quoteData.partyTime}</li>` : ''}
+            ${quoteData.partyLocation ? `<li>Party Location: ${quoteData.partyLocation}</li>` : ''}
             ${quoteData.totalEstimate ? `<li>Estimated Total: $${quoteData.totalEstimate}</li>` : ''}
             ${quoteData.specialNeeds && quoteData.specialNeeds.length > 0 ? `<li>Special Needs: ${quoteData.specialNeeds.join(', ')}</li>` : ''}
+            ${quoteData.partyNotes ? `<li>Additional Notes: ${quoteData.partyNotes}</li>` : ''}
           </ul>
         `;
       } else if (quoteData.serviceType === 'studio-rental') {
