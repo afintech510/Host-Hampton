@@ -15,8 +15,8 @@ interface ChildDetailsStepProps {
 
 export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: ChildDetailsStepProps) {
   const [childName, setChildName] = useState(formData.childName || "");
-  const [childAge, setChildAge] = useState(formData.childAge || 1);
-  const [guestCount, setGuestCount] = useState(formData.guestCount || 5);
+  const [childAge, setChildAge] = useState(formData.childAge || 5);
+  const [guestCount, setGuestCount] = useState(formData.guestCount || 12);
 
   // Save to session storage whenever values change
   useEffect(() => {
