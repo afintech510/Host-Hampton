@@ -45,7 +45,13 @@ export default function InvoiceCreate() {
     leadId: leadId ? parseInt(leadId) : null,
     customerId: null,
     invoiceNumber: `INV-${Date.now()}`,
+    // Client information
+    clientName: '',
+    clientEmail: '',
+    clientPhone: '',
+    // Event details
     description: '',
+    eventDetails: '', // New text area field for detailed event description
     eventDate: '',
     eventStartTime: '',
     eventEndTime: '',
@@ -86,20 +92,42 @@ export default function InvoiceCreate() {
   useEffect(() => {
     if (lead) {
       const formData = lead.formData || {};
+      
+      // Build detailed event description from form data
+      let eventDetails = `Event Type: ${lead.eventType}\n`;
+      if (lead.childName) eventDetails += `Child: ${lead.childName}`;
+      if (lead.childAge) eventDetails += ` (Age ${lead.childAge})`;
+      if (lead.childName || lead.childAge) eventDetails += '\n';
+      if (lead.guestCount) eventDetails += `Guest Count: ${lead.guestCount}\n`;
+      if (formData.partyTheme) eventDetails += `Theme: ${formData.partyTheme}\n`;
+      if (formData.partyPackage) eventDetails += `Package: ${formData.partyPackage}\n`;
+      if (formData.specialNeeds && formData.specialNeeds.length > 0) {
+        eventDetails += `Special Needs: ${formData.specialNeeds.join(', ')}\n`;
+      }
+      if (formData.questions || formData.partyNotes || lead.notes) {
+        eventDetails += `Notes: ${formData.questions || formData.partyNotes || lead.notes}\n`;
+      }
+
       setInvoiceData(prev => ({
         ...prev,
+        // Client information from lead
+        clientName: lead.name || '',
+        clientEmail: lead.email || '',
+        clientPhone: lead.phone || '',
+        // Event information
         description: `${lead.eventType} for ${lead.name}`,
-        eventDate: lead.eventDate || '',
-        eventStartTime: formData.startTime || '10:00',
+        eventDetails: eventDetails.trim(),
+        eventDate: lead.eventDate || formData.partyDate || '',
+        eventStartTime: formData.partyTime || formData.startTime || '10:00',
         eventEndTime: formData.endTime || '12:00'
       }));
 
       // Set initial invoice item based on lead
       setInvoiceItems([{
-        description: `${lead.eventType} (${lead.guestCount} guests)`,
+        description: `${lead.eventType}${lead.guestCount ? ` (${lead.guestCount} guests)` : ''}`,
         quantity: 1,
-        unitPrice: lead.estimatedCost || 875,
-        total: lead.estimatedCost || 875
+        unitPrice: (lead.estimatedCost || 87500) / 100, // Convert cents to dollars
+        total: (lead.estimatedCost || 87500) / 100
       }]);
     }
   }, [lead]);
@@ -170,7 +198,7 @@ export default function InvoiceCreate() {
   const handleSave = (status: 'draft' | 'sent') => {
     const invoicePayload = {
       ...invoiceData,
-      leadId: parseInt(leadId), // Include leadId for backend to create event from lead data
+      leadId: leadId ? parseInt(leadId) : null, // Include leadId for backend to create event from lead data
       status,
       subtotal,
       taxAmount,
@@ -237,6 +265,47 @@ export default function InvoiceCreate() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Invoice Form */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Client Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Client Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="clientName">Client Name</Label>
+                    <Input
+                      id="clientName"
+                      value={invoiceData.clientName}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, clientName: e.target.value }))}
+                      placeholder="Client full name"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="clientEmail">Email</Label>
+                      <Input
+                        id="clientEmail"
+                        type="email"
+                        value={invoiceData.clientEmail}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, clientEmail: e.target.value }))}
+                        placeholder="client@email.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="clientPhone">Phone</Label>
+                      <Input
+                        id="clientPhone"
+                        value={invoiceData.clientPhone}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -269,6 +338,17 @@ export default function InvoiceCreate() {
                     value={invoiceData.description}
                     onChange={(e) => setInvoiceData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="Event description"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="eventDetails">Event Details</Label>
+                  <Textarea
+                    id="eventDetails"
+                    value={invoiceData.eventDetails}
+                    onChange={(e) => setInvoiceData(prev => ({ ...prev, eventDetails: e.target.value }))}
+                    placeholder="Detailed event information, notes, special requirements..."
+                    rows={4}
+                    className="resize-none"
                   />
                 </div>
               </CardContent>
