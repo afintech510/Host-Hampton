@@ -34,14 +34,21 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
   }, [parentFirstName, parentLastName, parentEmail, parentPhone, consent]);
 
   const handleNext = () => {
-    updateFormData({ 
+    const contactData = { 
       parentFirstName, 
       parentLastName, 
       parentEmail, 
       parentPhone,
       consent
-    });
-    onNext();
+    };
+    
+    // Update form data and ensure it's available before calling onNext
+    updateFormData(contactData);
+    
+    // Use setTimeout to ensure the update is processed before calling onNext
+    setTimeout(() => {
+      onNext();
+    }, 10);
   };
 
   const isValid = parentFirstName && parentLastName && parentEmail && parentPhone && consent;
