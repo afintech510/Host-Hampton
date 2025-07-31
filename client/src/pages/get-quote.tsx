@@ -24,6 +24,8 @@ import { StudioPurposeStep } from "@/components/party-form/steps/studio-purpose-
 import { StudioClientsStep } from "@/components/party-form/steps/studio-clients-step";
 import { StudioDateTimeStep } from "@/components/party-form/steps/studio-datetime-step";
 import { StudioContactStep } from "@/components/party-form/steps/studio-contact-step";
+import { StudioUsageStep } from "@/components/party-form/steps/studio-usage-step";
+import { StudioDetailsStep } from "@/components/party-form/steps/studio-details-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
 import { PackageStep } from "@/components/party-form/steps/package-step";
 import { AddonsStep } from "@/components/party-form/steps/addons-step";
@@ -47,17 +49,14 @@ const getFlowSteps = (eventType: string) => {
     case "birthday-party":
       return 8; // Welcome → EventType → Theme → Package → Addons → PartyDetails → Food → Contact
     case "studio-rental":
-      return 5; // Welcome → EventType → Purpose → Details → Contact
+      return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
       return 5; // Welcome → EventType → Event Details (head count) → Date/Time → Contact
     case "workshop":
       return 5; // Welcome → EventType → Workshop Details → Schedule → Contact
     case "permanent-jewelry":
       return 6; // Welcome → EventType → Pieces → Vision & People Count → When & Where → Contact
-    case "diy-party":
-      return 5; // Welcome → EventType → Details → DateTime → Contact
-    case "private-event":
-      return 5; // Welcome → EventType → Details → DateTime → Contact
+
     case "general-inquiry":
       return 3; // Welcome → EventType → Contact
     default:
@@ -70,8 +69,7 @@ const isStudioRentalFlow = (eventType: string) => eventType === "studio-rental";
 const isTruckerHatFlow = (eventType: string) => eventType === "trucker-hat";
 const isWorkshopFlow = (eventType: string) => eventType === "workshop";
 const isJewelryFlow = (eventType: string) => eventType === "permanent-jewelry";
-const isDiyPartyFlow = (eventType: string) => eventType === "diy-party";
-const isPrivateEventFlow = (eventType: string) => eventType === "private-event";
+
 const isGeneralInquiry = (eventType: string) => eventType === "general-inquiry";
 
 export default function GetQuote() {
@@ -194,10 +192,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Studio Rental: Purpose Selection
+        // Studio Rental: Usage Selection
         if (isStudioRentalFlow(eventType)) {
           return (
-            <StudioPurposeStep
+            <StudioUsageStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -205,17 +203,7 @@ export default function GetQuote() {
             />
           );
         }
-        // DIY Party & Private Event: Event Details
-        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
-          return (
-            <EventDetailsStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
+
         // Trucker Hat Bar: Attendees Count
         if (isTruckerHatFlow(eventType)) {
           return (
@@ -280,10 +268,10 @@ export default function GetQuote() {
             />
           );
         }
-        // Studio Rental: Client Info
+        // Studio Rental: Details (Description & People Count)
         if (isStudioRentalFlow(eventType)) {
           return (
-            <StudioClientsStep
+            <StudioDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -291,17 +279,7 @@ export default function GetQuote() {
             />
           );
         }
-        // DIY Party & Private Event: Date/Time
-        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
-          return (
-            <CustomDateTimeStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
+
         // Trucker Hat Bar: Date/Time  
         if (isTruckerHatFlow(eventType)) {
           return (
@@ -348,28 +326,18 @@ export default function GetQuote() {
             />
           );
         }
-        // Studio Rental: Contact (final step)
+        // Studio Rental: Date/Time
         if (isStudioRentalFlow(eventType)) {
           return (
-            <ContactStep
+            <StudioDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
             />
           );
         }
-        // DIY Party & Private Event: Contact (final step)
-        if (isDiyPartyFlow(eventType) || isPrivateEventFlow(eventType)) {
-          return (
-            <ContactStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
+
         // Trucker Hat Bar: Contact (final step)
         if (isTruckerHatFlow(eventType)) {
           return (
@@ -412,6 +380,17 @@ export default function GetQuote() {
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental: Contact (final step)
+        if (isStudioRentalFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );

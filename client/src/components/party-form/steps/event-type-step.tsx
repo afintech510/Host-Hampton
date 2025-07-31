@@ -22,16 +22,8 @@ const eventTypes = [
     title: "Permanent Jewelry",
   },
   {
-    id: "diy-party",
-    title: "D·I·Y Party",
-  },
-  {
-    id: "private-event",
-    title: "Private Event",
-  },
-  {
     id: "studio-rental",
-    title: "Partial Studio Rental",
+    title: "Studio Rental",
   },
   {
     id: "workshop",
