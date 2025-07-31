@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NumberWheel } from "@/components/ui/number-wheel";
+import { Minus, Plus } from "lucide-react";
 import birthdayStarImage from "@assets/image_1752580458121.png";
 
 interface ChildDetailsStepProps {
@@ -14,8 +15,8 @@ interface ChildDetailsStepProps {
 
 export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: ChildDetailsStepProps) {
   const [childName, setChildName] = useState(formData.childName || "");
-  const [childAge, setChildAge] = useState(formData.childAge?.toString() || "");
-  const [guestCount, setGuestCount] = useState(formData.guestCount?.toString() || "");
+  const [childAge, setChildAge] = useState(formData.childAge || 1);
+  const [guestCount, setGuestCount] = useState(formData.guestCount || 5);
 
   // Save to session storage whenever values change
   useEffect(() => {
@@ -23,33 +24,37 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
     sessionStorage.setItem('partyFormData', JSON.stringify({
       ...sessionData,
       childName,
-      childAge: childAge ? parseInt(childAge) : undefined,
-      guestCount: guestCount ? parseInt(guestCount) : undefined
+      childAge,
+      guestCount
     }));
   }, [childName, childAge, guestCount]);
 
   const handleNext = () => {
     updateFormData({ 
       childName, 
-      childAge: parseInt(childAge), 
-      guestCount: parseInt(guestCount) 
+      childAge, 
+      guestCount 
     });
     onNext();
   };
 
+  const incrementAge = () => {
+    setChildAge(Math.min(childAge + 1, 15));
+  };
+
+  const decrementAge = () => {
+    setChildAge(Math.max(childAge - 1, 1));
+  };
+
+  const incrementGuestCount = () => {
+    setGuestCount(Math.min(guestCount + 1, 35));
+  };
+
+  const decrementGuestCount = () => {
+    setGuestCount(Math.max(guestCount - 1, 5));
+  };
+
   const isValid = childName && childAge && guestCount;
-
-  // Age options for wheel selector
-  const ageOptions = Array.from({ length: 15 }, (_, i) => ({
-    value: (i + 1).toString(),
-    label: `${i + 1} year${i + 1 > 1 ? 's' : ''} old`
-  }));
-
-  // Guest count options for wheel selector - numerical from 5 to 35
-  const guestOptions = Array.from({ length: 31 }, (_, i) => ({
-    value: (i + 5).toString(),
-    label: (i + 5).toString()
-  }));
 
   return (
     <div className="text-center">
@@ -80,27 +85,81 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
         </div>
 
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">
             How old are they turning?
           </Label>
-          <NumberWheel
-            value={childAge}
-            onValueChange={setChildAge}
-            options={ageOptions}
-            placeholder="Select age"
-          />
+          <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={decrementAge}
+              disabled={childAge <= 1}
+              className="h-10 w-10 rounded-full"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              value={childAge}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setChildAge(Math.max(1, Math.min(15, value)));
+              }}
+              className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+              min="1"
+              max="15"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={incrementAge}
+              disabled={childAge >= 15}
+              className="h-10 w-10 rounded-full"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">
             How many kids will attend? (including birthday child)
           </Label>
-          <NumberWheel
-            value={guestCount}
-            onValueChange={setGuestCount}
-            options={guestOptions}
-            placeholder="Select number (5-35)"
-          />
+          <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={decrementGuestCount}
+              disabled={guestCount <= 5}
+              className="h-10 w-10 rounded-full"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              value={guestCount}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 5;
+                setGuestCount(Math.max(5, Math.min(35, value)));
+              }}
+              className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+              min="5"
+              max="35"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={incrementGuestCount}
+              disabled={guestCount >= 35}
+              className="h-10 w-10 rounded-full"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <UnifiedButton
