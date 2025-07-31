@@ -1,0 +1,70 @@
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-3696f0681438c975.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'battery'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-3696f0681438c975.js:1
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+ Date parsing debug: Object
+e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/api/quotes:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/api/quotes:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+ Lead created successfully: Object

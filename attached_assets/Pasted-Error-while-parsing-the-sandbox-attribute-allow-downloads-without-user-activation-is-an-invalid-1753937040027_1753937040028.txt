@@ -1,0 +1,176 @@
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-3696f0681438c975.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'battery'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-3696f0681438c975.js:1
+framework-3696f0681438c975.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-3696f0681438c975.js:1
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+ Date parsing debug: Object
+e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/api/quotes:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/api/quotes:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+ Lead created successfully: Object
+  PATCH https://e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/api/leads/28 500 (Internal Server Error)
+window.fetch @ eruda.js:2
+apiRequest @ e4626b2b-099a-4d5c-b…ib/queryClient.ts:9
+mutationFn @ e4626b2b-099a-4d5c-b…e-party-form.tsx:57
+fn @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:1189
+run @ e4626b2b-099a-4d5c-b…y.js?v=190dc2c2:494
+start @ e4626b2b-099a-4d5c-b…y.js?v=190dc2c2:536
+execute @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:1225
+await in execute
+mutate @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:2630
+(anonymous) @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3295
+(anonymous) @ e4626b2b-099a-4d5c-b…-party-form.tsx:306
+basicStateReducer @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:11703
+dispatchSetState @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:12385
+updateFormData @ e4626b2b-099a-4d5c-b…-party-form.tsx:298
+handleNext @ e4626b2b-099a-4d5c-b…contact-step.tsx:43
+callCallback2 @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3674
+invokeGuardedCallbackDev @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3699
+invokeGuardedCallback @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3733
+invokeGuardedCallbackAndCatchFirstError @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3736
+executeDispatch @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7014
+processDispatchQueueItemsInOrder @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7034
+processDispatchQueue @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7043
+dispatchEventsForPlugins @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7051
+(anonymous) @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7174
+batchedUpdates$1 @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18913
+batchedUpdates @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3579
+dispatchEventForPluginEventSystem @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5478
+dispatchEvent @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5472
+dispatchDiscreteEvent @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5449
+ Failed to update lead: Error: 500: {"success":false,"message":"Failed to update lead"}
+    at throwIfResNotOk (e4626b2b-099a-4d5c-b…queryClient.ts:5:11)
+    at async apiRequest (e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/src/lib/queryClient.ts:15:3)
+    at async Object.mutationFn (e4626b2b-099a-4d5c-b8f7-69ee540e9959-00-1pv6vu4wtjctu.spock.replit.dev/src/hooks/use-party-form.tsx:57:24)
+Mt.forEach.n.<computed> @ eruda.js:2
+onError @ e4626b2b-099a-4d5c-b…e-party-form.tsx:64
+execute @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:1254
+await in execute
+mutate @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:2630
+(anonymous) @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3295
+(anonymous) @ e4626b2b-099a-4d5c-b…-party-form.tsx:306
+basicStateReducer @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:11703
+dispatchSetState @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:12385
+updateFormData @ e4626b2b-099a-4d5c-b…-party-form.tsx:298
+handleNext @ e4626b2b-099a-4d5c-b…contact-step.tsx:43
+callCallback2 @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3674
+invokeGuardedCallbackDev @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3699
+invokeGuardedCallback @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3733
+invokeGuardedCallbackAndCatchFirstError @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3736
+executeDispatch @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7014
+processDispatchQueueItemsInOrder @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7034
+processDispatchQueue @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7043
+dispatchEventsForPlugins @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7051
+(anonymous) @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7174
+batchedUpdates$1 @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18913
+batchedUpdates @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3579
+dispatchEventForPluginEventSystem @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5478
+dispatchEvent @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5472
+dispatchDiscreteEvent @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5449
+ Google Maps JavaScript API: A Map's styles property cannot be set when a mapId is present. When a mapId is present, map styles are controlled via the cloud console. Please see documentation at https://developers.google.com/maps/documentation/javascript/styling#cloud_tooling
+Mt.forEach.n.<computed> @ eruda.js:2
+styles_changed @ main.js:409
+dn @ main.js:169
+_.bn.bindTo @ main.js:326
+Eba @ main.js:197
+_.Er @ main.js:243
+initMap @ e4626b2b-099a-4d5c-b…s/google-map.tsx:43
+await in initMap
+(anonymous) @ e4626b2b-099a-4d5c-b…s/google-map.tsx:81
+commitHookEffectListMount @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:16915
+commitPassiveMountOnFiber @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18156
+commitPassiveMountEffects_complete @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18129
+commitPassiveMountEffects_begin @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18119
+commitPassiveMountEffects @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18109
+flushPassiveEffectsImpl @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:19490
+flushPassiveEffects @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:19447
+commitRootImpl @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:19416
+commitRoot @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:19277
+performSyncWorkOnRoot @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18895
+flushSyncCallbacks @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:9119
+(anonymous) @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18627
+setTimeout
+onSuccess @ e4626b2b-099a-4d5c-b…s/get-quote.tsx:101
+execute @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:1233
+await in execute
+mutate @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:2630
+(anonymous) @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3295
+handleSubmitQuote @ e4626b2b-099a-4d5c-b…s/get-quote.tsx:130
+handleNext @ e4626b2b-099a-4d5c-b…contact-step.tsx:50
+callCallback2 @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3674
+invokeGuardedCallbackDev @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3699
+invokeGuardedCallback @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3733
+invokeGuardedCallbackAndCatchFirstError @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3736
+executeDispatch @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7014
+processDispatchQueueItemsInOrder @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7034
+processDispatchQueue @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7043
+dispatchEventsForPlugins @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7051
+(anonymous) @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7174
+batchedUpdates$1 @ e4626b2b-099a-4d5c-b…js?v=190dc2c2:18913
+batchedUpdates @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:3579
+dispatchEventForPluginEventSystem @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5478
+dispatchEvent @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5472
+dispatchDiscreteEvent @ e4626b2b-099a-4d5c-b….js?v=190dc2c2:5449

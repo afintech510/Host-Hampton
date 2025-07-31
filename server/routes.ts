@@ -458,11 +458,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quoteData = req.body;
       
       // Check for contact information in various field formats
-      const firstName = quoteData.firstName || quoteData.parentFirstName;
-      const lastName = quoteData.lastName || quoteData.parentLastName;
+      const firstName = quoteData.firstName || quoteData.parentFirstName || quoteData.customerName;
+      const lastName = quoteData.lastName || quoteData.parentLastName || quoteData.customerLastName;
       const email = quoteData.email || quoteData.parentEmail || quoteData.customerEmail;
       const phone = quoteData.phone || quoteData.parentPhone || quoteData.customerPhone;
-      const consent = quoteData.consent;
+      const consent = quoteData.consent || quoteData.parentConsent;
 
       if (!firstName || !lastName || !email || !phone || !consent) {
         console.log("Missing fields check:", { firstName, lastName, email, phone, consent });
@@ -685,9 +685,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/leads/:id", async (req, res) => {
     try {
       const leadId = parseInt(req.params.id);
-      const updates = req.body;
+      const rawUpdates = req.body;
       
-      const updatedLead = await storage.updateLead(leadId, updates);
+      // Preprocess date fields in updates to handle empty strings and invalid dates
+      const processedUpdates = {
+        ...rawUpdates,
+        eventDate: (() => {
+          if (rawUpdates.eventDate === undefined) return undefined; // Don't update if not provided
+          if (!rawUpdates.eventDate || rawUpdates.eventDate === "" || rawUpdates.isDateUnsure) {
+            return null;
+          }
+          try {
+            const date = new Date(rawUpdates.eventDate);
+            return isNaN(date.getTime()) ? null : date;
+          } catch (e) {
+            return null;
+          }
+        })(),
+        // Handle other timestamp fields
+        followUpDate: rawUpdates.followUpDate === undefined ? undefined : 
+                     (rawUpdates.followUpDate && rawUpdates.followUpDate !== "" ? new Date(rawUpdates.followUpDate) : null),
+        lastContactedAt: rawUpdates.lastContactedAt === undefined ? undefined : 
+                        (rawUpdates.lastContactedAt && rawUpdates.lastContactedAt !== "" ? new Date(rawUpdates.lastContactedAt) : null),
+        convertedAt: rawUpdates.convertedAt === undefined ? undefined : 
+                    (rawUpdates.convertedAt && rawUpdates.convertedAt !== "" ? new Date(rawUpdates.convertedAt) : null),
+      };
+      
+      const updatedLead = await storage.updateLead(leadId, processedUpdates);
       
       if (!updatedLead) {
         return res.status(404).json({
