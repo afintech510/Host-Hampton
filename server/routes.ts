@@ -494,21 +494,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventDateString = quoteData.partyDate || quoteData.studioDate || quoteData.truckerDate || quoteData.workshopDate || quoteData.jewelryDate;
       const eventDate = eventDateString ? new Date(eventDateString) : null;
       
+      // Map service types to proper event type names for database
+      const eventTypeNames: { [key: string]: string } = {
+        "birthday-party": "kids-party", // Fix: Map to kids-party for database
+        "studio-rental": "studio-rental",
+        "trucker-hat": "trucker-hat",
+        "workshop": "workshop",
+        "permanent-jewelry": "permanent-jewelry",
+        "diy-party": "diy-party",
+        "private-event": "private-event",
+        "general": "general"
+      };
+
       const leadData = {
         source: "website",
         name: `${firstName} ${lastName}`,
         email: email,
         phone: phone,
         eventTypeId: serviceTypeMapping[quoteData.serviceType] || 1,
-        eventType: quoteData.serviceType,
-        guestCount: parseInt(quoteData.attendeeCount || quoteData.studioAttendeeCount || quoteData.truckerAttendeeCount || quoteData.workshopAttendeeCount || quoteData.jewelryAttendeeCount) || null,
+        eventType: eventTypeNames[quoteData.serviceType] || quoteData.serviceType, // Use mapped event type
+        guestCount: parseInt(quoteData.guestCount || quoteData.attendeeCount || quoteData.studioAttendeeCount || quoteData.truckerAttendeeCount || quoteData.workshopAttendeeCount || quoteData.jewelryAttendeeCount) || null,
         childName: quoteData.childName || null,
         childAge: parseInt(quoteData.childAge) || null,
-        eventDate: eventDate,
+        eventDate: eventDate, // This should now be properly set from the form
         isDateUnsure: !eventDateString, // Set to true if no date provided
-        timeSlot: quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
+        timeSlot: quoteData.partyTime || quoteData.studioTime || quoteData.truckerTime || quoteData.workshopTime || quoteData.jewelryTime || null,
         selectedAddons: quoteData.partyAddons || [],
-        notes: quoteData.message || "",
+        notes: quoteData.partyNotes || quoteData.message || "",
         status: "new",
         leadScore: "warm",
         formStep: "completed",
@@ -518,6 +530,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastContactedAt: null,
         convertedAt: null
       };
+
+      console.log("Creating lead with data:", leadData);
+      console.log("Event date parsed:", eventDate, "from", eventDateString);
       
       // Validate the lead data using the schema before insertion
       const validatedLeadData = insertLeadSchema.parse(leadData);
