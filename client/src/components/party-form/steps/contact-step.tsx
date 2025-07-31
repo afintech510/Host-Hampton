@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import CnP_15072025_075736 from "@assets/CnP_15072025_075736.png";
@@ -18,6 +19,7 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
   const [parentLastName, setParentLastName] = useState(formData.parentLastName || "");
   const [parentEmail, setParentEmail] = useState(formData.parentEmail || "");
   const [parentPhone, setParentPhone] = useState(formData.parentPhone || "");
+  const [questions, setQuestions] = useState(formData.questions || "");
   const [consent, setConsent] = useState(formData.consent || false);
 
   // Save to session storage whenever values change
@@ -29,9 +31,10 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
       parentLastName,
       parentEmail,
       parentPhone,
+      questions,
       consent
     }));
-  }, [parentFirstName, parentLastName, parentEmail, parentPhone, consent]);
+  }, [parentFirstName, parentLastName, parentEmail, parentPhone, questions, consent]);
 
   const handleNext = () => {
     const contactData = { 
@@ -39,6 +42,7 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
       parentLastName, 
       parentEmail, 
       parentPhone,
+      questions,
       consent
     };
     
@@ -111,6 +115,16 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
             value={parentPhone}
             onChange={(e) => setParentPhone(e.target.value)}
             className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium text-gray-700 mb-2 block">Questions / Requests ?</Label>
+          <Textarea
+            placeholder="Tell us about any special requests, questions, or additional details..."
+            value={questions}
+            onChange={(e) => setQuestions(e.target.value)}
+            className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral min-h-[100px]"
           />
         </div>
 
