@@ -484,6 +484,19 @@ export default function LeadManagement() {
                   <Edit className="w-4 h-4 mr-1" />
                   Update
                 </Button>
+                
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => {
+                    window.location.href = `/admin-dashboard/invoice/create?leadId=${lead.id}`;
+                  }}
+                  disabled={lead.status === 'converted'}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <DollarSign className="w-4 h-4 mr-1" />
+                  Create Invoice
+                </Button>
               </div>
             </CardContent>
           </Card>

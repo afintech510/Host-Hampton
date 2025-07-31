@@ -19,6 +19,9 @@ import TruckHatBar from "@/pages/truck-hat-bar";
 import PermanentJewelry from "@/pages/permanent-jewelry";
 import MyEvents from "@/pages/my-events";
 import Quote from "@/pages/quote-new";
+import InvoiceCreate from "@/pages/admin/invoice-create";
+import InvoiceView from "@/pages/invoice-view";
+import InvoicePayment from "@/pages/invoice-payment";
 
 function Router() {
   return (
@@ -30,6 +33,10 @@ function Router() {
       <Route path="/themed-parties" component={ThemedParties} />
       <Route path="/party-designer" component={PartyDesigner} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/admin-dashboard/invoice/create" component={InvoiceCreate} />
+      <Route path="/invoice/:invoiceId" component={InvoiceView} />
+      <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
       <Route path="/cart" component={Cart} />

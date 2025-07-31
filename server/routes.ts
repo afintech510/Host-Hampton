@@ -559,7 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ${quoteData.partyTheme ? `<li>Theme: ${quoteData.partyTheme}</li>` : ''}
             ${quoteData.partyPackage ? `<li>Package: ${quoteData.partyPackage === 'make-it-shine' ? 'Make it Shine (+$25/guest)' : quoteData.partyPackage === 'party-envy' ? 'Party Envy (+$50/guest)' : 'Basic Package'}</li>` : ''}
             ${quoteData.packageTotal ? `<li>Package Total: $${quoteData.packageTotal}</li>` : ''}
-            ${quoteData.partyAddons && quoteData.partyAddons.length > 0 ? `<li>Add-ons: ${quoteData.partyAddons.map(addon => addon.name || addon).join(', ')}</li>` : ''}
+            ${quoteData.partyAddons && quoteData.partyAddons.length > 0 ? `<li>Add-ons: ${quoteData.partyAddons.map((addon: any) => addon.name || addon).join(', ')}</li>` : ''}
             ${quoteData.foodChoice ? `<li>Food Choice: ${quoteData.foodChoice}</li>` : ''}
             ${quoteData.cupcakeFlavor ? `<li>Cupcake Flavor: ${quoteData.cupcakeFlavor}</li>` : ''}
             ${quoteData.partyDate ? `<li>Party Date: ${quoteData.partyDate}</li>` : ''}
@@ -1016,19 +1016,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Invoices
-  app.get("/api/invoices/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const invoice = await storage.getInvoice(id);
-      if (!invoice) {
-        return res.status(404).json({ success: false, message: "Invoice not found" });
-      }
-      res.json({ success: true, invoice });
-    } catch (error) {
-      res.status(500).json({ success: false, message: "Failed to fetch invoice" });
-    }
-  });
+  // Invoices - Remove duplicate, keep the one with items
 
   app.patch("/api/invoices/:id", async (req, res) => {
     try {
@@ -1056,17 +1044,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single invoice with customer details and items
   app.get("/api/invoices/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const invoice = await storage.getInvoice(id);
+      const invoice = await storage.getInvoiceById(id);
       if (!invoice) {
         return res.status(404).json({ success: false, message: "Invoice not found" });
       }
-      const items = await storage.getInvoiceItems(id);
-      res.json({ success: true, invoice: { ...invoice, items } });
+      res.json({ success: true, invoice });
     } catch (error) {
       res.status(500).json({ success: false, message: "Failed to fetch invoice" });
+    }
+  });
+
+  // Process payment for invoice
+  app.post("/api/invoices/:id/payments", async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const paymentData = req.body;
+      
+      // In a real implementation, this would integrate with Stripe
+      // For now, we'll simulate payment processing
+      const payment = await storage.processInvoicePayment(invoiceId, paymentData);
+      
+      if (!payment) {
+        return res.status(400).json({
+          success: false,
+          message: "Payment processing failed"
+        });
+      }
+      
+      res.json({ success: true, payment });
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to process payment" 
+      });
+    }
+  });
+
+  // Get single lead for invoice creation
+  app.get("/api/leads/:id", async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.id);
+      const lead = await storage.getLeadById(leadId);
+      
+      if (!lead) {
+        return res.status(404).json({
+          success: false,
+          message: "Lead not found"
+        });
+      }
+      
+      res.json({ success: true, lead });
+    } catch (error) {
+      console.error("Error fetching lead:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch lead" 
+      });
     }
   });
 

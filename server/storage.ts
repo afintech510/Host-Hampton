@@ -103,6 +103,11 @@ export interface IStorage {
   createVerificationCode(email: string, code: string): Promise<void>;
   verifyCode(email: string, code: string): Promise<{ customerId: number } | null>;
   getCustomerEvents(customerId: number): Promise<any[]>;
+  
+  // Enhanced invoice and lead methods
+  getInvoiceById(id: number): Promise<any | null>;
+  processInvoicePayment(invoiceId: number, paymentData: any): Promise<any | null>;
+  getLeadById(id: number): Promise<any | null>;
 }
 
 export class MemStorage implements IStorage {
@@ -755,6 +760,83 @@ export class MemStorage implements IStorage {
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
     return [];
   }
+
+  // Customer authentication methods
+  async createVerificationCode(email: string, code: string): Promise<void> {
+    // In-memory implementation would need a verification codes storage
+    // For now, just log it
+    console.log(`Verification code for ${email}: ${code}`);
+  }
+
+  async verifyCode(email: string, code: string): Promise<{ customerId: number } | null> {
+    // In-memory implementation would check against stored codes
+    // For demo purposes, accept any 6-digit code
+    if (code.length === 6) {
+      const customer = await this.getCustomerByEmail(email);
+      return customer ? { customerId: customer.id } : null;
+    }
+    return null;
+  }
+
+  async getCustomerEvents(customerId: number): Promise<any[]> {
+    return [];
+  }
+
+  // Enhanced invoice and lead methods
+  async getInvoiceById(id: number): Promise<any | null> {
+    const invoice = this.invoices.get(id);
+    if (!invoice) return null;
+    
+    // Get customer details
+    const customer = this.customers.get(invoice.customerId || 0);
+    
+    // Get invoice items
+    const items = Array.from(this.invoiceItems.values())
+      .filter(item => item.invoiceId === id);
+    
+    return {
+      ...invoice,
+      customer: customer ? {
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone
+      } : null,
+      items
+    };
+  }
+
+  async processInvoicePayment(invoiceId: number, paymentData: any): Promise<any | null> {
+    const invoice = this.invoices.get(invoiceId);
+    if (!invoice) return null;
+
+    // Update invoice status based on payment type
+    let newStatus = 'paid';
+    if (paymentData.paymentType === 'deposit') {
+      newStatus = 'deposit_paid';
+    }
+
+    const updatedInvoice = {
+      ...invoice,
+      status: newStatus,
+      updatedAt: new Date()
+    };
+
+    this.invoices.set(invoiceId, updatedInvoice);
+
+    // Return payment confirmation
+    return {
+      id: Date.now(),
+      invoiceId,
+      amount: paymentData.amount,
+      paymentType: paymentData.paymentType,
+      status: 'completed',
+      processedAt: new Date()
+    };
+  }
+
+  async getLeadById(id: number): Promise<any | null> {
+    return this.leads.get(id) || null;
+  }
 }
 
 // Database Storage Implementation
@@ -1272,6 +1354,130 @@ export class DatabaseStorage implements IStorage {
 
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
     return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+  }
+
+  // Customer authentication methods
+  async createVerificationCode(email: string, code: string): Promise<void> {
+    // In a real implementation, you'd store this in a verification_codes table
+    // For now, we'll use a simple approach and rely on email delivery
+    console.log(`Verification code for ${email}: ${code}`);
+  }
+
+  async verifyCode(email: string, code: string): Promise<{ customerId: number } | null> {
+    // In a real implementation, you'd check against stored verification codes
+    // For demo purposes, we'll accept a simple pattern
+    if (code.length === 6) {
+      const customer = await this.getCustomerByEmail(email);
+      return customer ? { customerId: customer.id } : null;
+    }
+    return null;
+  }
+
+  async getCustomerEvents(customerId: number): Promise<any[]> {
+    // Get events for this customer with related data
+    return await db
+      .select({
+        id: events.id,
+        eventDate: events.eventDate,
+        startTime: events.startTime,
+        endTime: events.endTime,
+        status: events.status,
+        eventTypeName: eventTypes.name,
+        notes: events.notes
+      })
+      .from(events)
+      .leftJoin(eventTypes, eq(events.eventTypeId, eventTypes.id))
+      .where(eq(events.customerId, customerId))
+      .orderBy(events.eventDate);
+  }
+
+  // Enhanced invoice and lead methods
+  async getInvoiceById(id: number): Promise<any | null> {
+    const [invoice] = await db
+      .select({
+        id: invoices.id,
+        invoiceNumber: invoices.invoiceNumber,
+        leadId: invoices.leadId,
+        customerId: invoices.customerId,
+        description: invoices.description,
+        eventDate: invoices.eventDate,
+        eventStartTime: invoices.eventStartTime,
+        eventEndTime: invoices.eventEndTime,
+        eventLocation: invoices.eventLocation,
+        subtotal: invoices.subtotal,
+        taxAmount: invoices.taxAmount,
+        totalAmount: invoices.totalAmount,
+        depositAmount: invoices.depositAmount,
+        balanceDue: invoices.balanceDue,
+        depositPercentage: invoices.depositPercentage,
+        taxRate: invoices.taxRate,
+        status: invoices.status,
+        dueDate: invoices.dueDate,
+        termsAndConditions: invoices.termsAndConditions,
+        customerName: customers.name,
+        customerEmail: customers.email,
+        customerPhone: customers.phone
+      })
+      .from(invoices)
+      .leftJoin(customers, eq(invoices.customerId, customers.id))
+      .where(eq(invoices.id, id));
+
+    if (!invoice) return null;
+
+    // Get invoice items
+    const items = await db
+      .select()
+      .from(invoiceItems)
+      .where(eq(invoiceItems.invoiceId, id));
+
+    return {
+      ...invoice,
+      customer: {
+        name: invoice.customerName,
+        email: invoice.customerEmail,
+        phone: invoice.customerPhone
+      },
+      items
+    };
+  }
+
+  async processInvoicePayment(invoiceId: number, paymentData: any): Promise<any | null> {
+    const invoice = await this.getInvoice(invoiceId);
+    if (!invoice) return null;
+
+    // Update invoice status based on payment type
+    let newStatus = 'paid';
+    if (paymentData.paymentType === 'deposit') {
+      newStatus = 'deposit_paid';
+    }
+
+    await db
+      .update(invoices)
+      .set({ 
+        status: newStatus,
+        updatedAt: new Date()
+      })
+      .where(eq(invoices.id, invoiceId));
+
+    // In a real implementation, you'd also create a payment record
+    // Return payment confirmation
+    return {
+      id: Date.now(),
+      invoiceId,
+      amount: paymentData.amount,
+      paymentType: paymentData.paymentType,
+      status: 'completed',
+      processedAt: new Date()
+    };
+  }
+
+  async getLeadById(id: number): Promise<any | null> {
+    const [lead] = await db
+      .select()
+      .from(leads)
+      .where(eq(leads.id, id));
+    
+    return lead || null;
   }
 }
 
