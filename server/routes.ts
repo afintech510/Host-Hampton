@@ -1033,16 +1033,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/invoices", async (req, res) => {
     try {
-      const invoice = insertInvoiceSchema.parse(req.body);
+      console.log("Creating invoice with data:", req.body);
+      
+      const { leadId, ...invoiceData } = req.body;
+      
+      // If we have a leadId, get the lead data to create an event first
+      if (leadId) {
+        const lead = await storage.getLeadById(leadId);
+        if (!lead) {
+          return res.status(404).json({ success: false, message: "Lead not found" });
+        }
+        
+        console.log("Lead data:", lead);
+        console.log("Lead form_data:", lead.formData);
+        
+        // Map lead form_data to event data
+        const formData = lead.formData || {};
+        
+        // Create an event from the lead data first
+        const eventData = {
+          eventTypeId: getEventTypeIdFromService(formData.serviceType || 'birthday-party'),
+          customerId: invoiceData.customerId,
+          leadId: leadId,
+          status: 'quoted',
+          eventDate: formData.partyDate ? new Date(formData.partyDate) : null,
+          startTime: formData.partyTime || null,
+          endTime: null,
+          location: formData.partyLocation || formData.eventLocation || null,
+          guestCount: parseInt(formData.guestCount) || 0,
+          notes: formData.partyNotes || formData.message || null,
+          estimatedCost: parseFloat(formData.totalEstimate) || 0
+        };
+        
+        console.log("Creating event with data:", eventData);
+        const createdEvent = await storage.createEvent(eventData);
+        console.log("Created event:", createdEvent);
+        
+        // Now create the invoice with the event ID
+        invoiceData.eventId = createdEvent.id;
+      }
+      
+      const invoice = insertInvoiceSchema.parse(invoiceData);
       const created = await storage.createInvoice(invoice);
       res.status(201).json({ success: true, invoice: created });
     } catch (error: any) {
+      console.error("Error creating invoice:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ success: false, message: "Failed to create invoice" });
     }
   });
+
+  // Helper function to map service types to event type IDs
+  function getEventTypeIdFromService(serviceType: string): number {
+    const mapping: Record<string, number> = {
+      'birthday-party': 1,
+      'studio-rental': 2,
+      'trucker-hat': 3,
+      'workshop': 4,
+      'permanent-jewelry': 5,
+      'general': 7
+    };
+    return mapping[serviceType] || 1; // Default to birthday party
+  }
 
   // Get single invoice with customer details and items
   app.get("/api/invoices/:id", async (req, res) => {

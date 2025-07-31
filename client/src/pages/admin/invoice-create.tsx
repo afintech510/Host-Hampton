@@ -170,6 +170,7 @@ export default function InvoiceCreate() {
   const handleSave = (status: 'draft' | 'sent') => {
     const invoicePayload = {
       ...invoiceData,
+      leadId: parseInt(leadId), // Include leadId for backend to create event from lead data
       status,
       subtotal,
       taxAmount,
@@ -179,6 +180,7 @@ export default function InvoiceCreate() {
       items: invoiceItems.filter(item => item.description.trim() !== '')
     };
 
+    console.log('Creating invoice with payload:', invoicePayload);
     createInvoiceMutation.mutate(invoicePayload);
   };
 
