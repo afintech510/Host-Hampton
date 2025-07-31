@@ -55,13 +55,13 @@ export default function InvoiceCreate() {
     eventDate: '',
     eventStartTime: '',
     eventEndTime: '',
-    eventLocation: 'Host Hampton Studio, Speonk NY',
-    depositPercentage: 50,
-    taxRate: 8.625, // NY sales tax
+    eventLocation: 'Host Hampton, Speonk NY',
+    depositAmount: 200, // Fixed $200 deposit
+    taxRate: 8.75, // NY sales tax
     dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
     status: 'draft',
     termsAndConditions: `Terms and Conditions:
-1. A 50% deposit is required to secure your booking
+1. A $200 deposit is required to secure your booking
 2. Final payment is due 7 days before event date
 3. Cancellations made 14+ days before event: full refund minus processing fee
 4. Cancellations made 7-13 days before: 50% refund
@@ -167,7 +167,7 @@ export default function InvoiceCreate() {
   const subtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
   const taxAmount = subtotal * (invoiceData.taxRate / 100);
   const totalAmount = subtotal + taxAmount;
-  const depositAmount = totalAmount * (invoiceData.depositPercentage / 100);
+  const depositAmount = invoiceData.depositAmount || 200; // Use fixed deposit amount
   const balanceDue = totalAmount - depositAmount;
 
   // Create invoice mutation
@@ -474,21 +474,15 @@ export default function InvoiceCreate() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="depositPercentage">Deposit Percentage</Label>
-                    <Select
-                      value={invoiceData.depositPercentage.toString()}
-                      onValueChange={(value) => setInvoiceData(prev => ({ ...prev, depositPercentage: parseInt(value) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="25">25%</SelectItem>
-                        <SelectItem value="50">50%</SelectItem>
-                        <SelectItem value="75">75%</SelectItem>
-                        <SelectItem value="100">100% (Full Payment)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="depositAmount">Deposit Amount ($)</Label>
+                    <Input
+                      id="depositAmount"
+                      type="number"
+                      value={invoiceData.depositAmount}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, depositAmount: parseFloat(e.target.value) || 200 }))}
+                      step="1"
+                      min="0"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="taxRate">Tax Rate (%)</Label>
@@ -593,7 +587,7 @@ export default function InvoiceCreate() {
 
                   <div className="space-y-1">
                     <div className="flex justify-between">
-                      <span>Deposit ({invoiceData.depositPercentage}%):</span>
+                      <span>Deposit:</span>
                       <span>${depositAmount.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-medium">
