@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FormHeader } from "@/components/party-form/form-header";
 import { ProgressBar } from "@/components/party-form/progress-bar";
@@ -81,7 +81,12 @@ export default function GetQuote() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { formData, updateFormData, resetForm } = usePartyForm();
+  const { formData, updateFormData, resetForm, clearFormData } = usePartyForm();
+
+  // Clear form data when component mounts to ensure fresh start
+  useEffect(() => {
+    clearFormData();
+  }, []); // Only run on mount
 
   // Quote submission mutation
   const submitQuoteMutation = useMutation({
@@ -94,6 +99,9 @@ export default function GetQuote() {
         title: "Quote Request Submitted! 🎉",
         description: "We'll contact you within 24 hours with your personalized quote and pricing details.",
       });
+      
+      // Clear form data after successful submission
+      clearFormData();
       
       // Redirect to home after successful submission
       setTimeout(() => {

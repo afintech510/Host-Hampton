@@ -112,7 +112,13 @@ export function usePartyForm() {
   // Lead update mutation for form progress tracking
   const updateLeadMutation = useMutation({
     mutationFn: async ({ leadId, updates }: { leadId: number; updates: any }) => {
-      const response = await apiRequest("PATCH", `/api/leads/${leadId}`, updates);
+      // Fix date conversion issues - ensure dates are properly formatted
+      const processedUpdates = { ...updates };
+      if (processedUpdates.eventDate && typeof processedUpdates.eventDate === 'string') {
+        processedUpdates.eventDate = new Date(processedUpdates.eventDate).toISOString();
+      }
+      
+      const response = await apiRequest("PATCH", `/api/leads/${leadId}`, processedUpdates);
       return response.json();
     },
     onSuccess: (data) => {
@@ -294,6 +300,13 @@ export function usePartyForm() {
           calculatedTotal
         });
 
+        // Clear form data on successful submission
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('partyFormData');
+        }
+        setFormData({});
+        setLeadId(null);
+
         // Create Stripe payment intent and redirect to checkout
         submitPaymentMutation.mutate({
           eventId: data.data.eventId,
@@ -309,6 +322,13 @@ export function usePartyForm() {
           title: "🎉 Request Submitted Successfully!",
           description: "We'll contact you within 24 hours to discuss your request.",
         });
+        
+        // Clear form data on successful submission
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('partyFormData');
+        }
+        setFormData({});
+        setLeadId(null);
         
         // Redirect to confirmation page after a brief delay
         setTimeout(() => {
@@ -434,26 +454,24 @@ export function usePartyForm() {
   };
 
   const resetForm = () => {
-    // Save contact info before resetting
-    const contactInfoToKeep = {
-      customerName: formData.customerName,
-      customerEmail: formData.customerEmail,
-      customerPhone: formData.customerPhone,
-      parentFirstName: formData.parentFirstName,
-      parentLastName: formData.parentLastName,
-      parentEmail: formData.parentEmail,
-      parentPhone: formData.parentPhone,
-    };
+    // Reset form data completely
+    setFormData({});
     
-    // Reset form data but keep contact info
-    setFormData(contactInfoToKeep);
-    
-    // Clear session storage and reset with contact info only
+    // Clear session storage completely
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('partyFormData', JSON.stringify(contactInfoToKeep));
+      sessionStorage.removeItem('partyFormData');
     }
     
     // Reset lead ID so a new lead can be created if needed
+    setLeadId(null);
+  };
+
+  const clearFormData = () => {
+    // Clear form data when starting a new quote
+    setFormData({});
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('partyFormData');
+    }
     setLeadId(null);
   };
 
@@ -504,6 +522,7 @@ export function usePartyForm() {
     updateFormData,
     submitBooking,
     resetForm,
+    clearFormData,
     leadId,
     createLeadFromContact,
     isSubmitting: submitBookingMutation.isPending || 
