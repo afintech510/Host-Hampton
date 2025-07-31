@@ -2,7 +2,9 @@ import { useState } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { NumberWheel } from "@/components/ui/number-wheel";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Minus, Plus } from "lucide-react";
 
 interface EventDetailsStepProps {
   formData: any;
@@ -15,18 +17,49 @@ export function EventDetailsStep({ formData, updateFormData, onNext, onBack }: E
   const [eventDescription, setEventDescription] = useState(formData.eventDescription || "");
   const [adultCount, setAdultCount] = useState(formData.adultCount || 0);
   const [childCount, setChildCount] = useState(formData.childCount || 0);
+  const [eventLocation, setEventLocation] = useState(formData.eventLocation || "studio");
+  const [mobileAddress, setMobileAddress] = useState(formData.mobileAddress || "");
 
   const handleNext = () => {
     updateFormData({ 
       eventDescription, 
       adultCount, 
-      childCount 
+      childCount,
+      eventLocation,
+      mobileAddress: eventLocation === "mobile" ? mobileAddress : ""
     });
     onNext();
   };
 
+  const handleCountChange = (type: 'adult' | 'child', operation: 'increment' | 'decrement') => {
+    if (type === 'adult') {
+      const newCount = operation === 'increment' 
+        ? Math.min(adultCount + 1, 50) 
+        : Math.max(adultCount - 1, 0);
+      setAdultCount(newCount);
+    } else {
+      const newCount = operation === 'increment' 
+        ? Math.min(childCount + 1, 50) 
+        : Math.max(childCount - 1, 0);
+      setChildCount(newCount);
+    }
+  };
+
+  const handleNumberInputChange = (type: 'adult' | 'child', value: string) => {
+    const num = parseInt(value) || 0;
+    const clampedNum = Math.max(0, Math.min(50, num));
+    if (type === 'adult') {
+      setAdultCount(clampedNum);
+    } else {
+      setChildCount(clampedNum);
+    }
+  };
+
   const totalGuests = adultCount + childCount;
-  const isValid = eventDescription.trim() && (adultCount > 0 || childCount > 0);
+  const isValid = eventDescription.trim() && 
+                  (adultCount > 0 || childCount > 0) && 
+                  eventLocation && 
+                  (eventLocation === "studio" || (eventLocation === "mobile" && mobileAddress.trim()));
 
   return (
     <div className="space-y-8">
@@ -54,24 +87,93 @@ export function EventDetailsStep({ formData, updateFormData, onNext, onBack }: E
           />
         </div>
 
+        <div>
+          <Label className="text-sm font-medium text-gray-700 mb-2 block">Event Location *</Label>
+          <Select value={eventLocation} onValueChange={setEventLocation}>
+            <SelectTrigger className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300">
+              <SelectValue placeholder="Select location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="studio">Host Hampton in Speonk, NY</SelectItem>
+              <SelectItem value="mobile">Mobile (specify address below)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {eventLocation === "mobile" && (
+          <div className="animate-in fade-in duration-300">
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">Mobile Event Address *</Label>
+            <Input
+              value={mobileAddress}
+              onChange={(e) => setMobileAddress(e.target.value)}
+              placeholder="Enter the address for your mobile event"
+              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300"
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-2 block">How many adults?</Label>
-            <NumberWheel
-              value={adultCount.toString()}
-              onValueChange={(value) => setAdultCount(parseInt(value) || 0)}
-              options={Array.from({ length: 21 }, (_, i) => ({ value: i.toString(), label: i.toString() }))}
-              placeholder="Select number"
-            />
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => handleCountChange('adult', 'decrement')}
+                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
+                disabled={adultCount <= 0}
+              >
+                <Minus className="w-6 h-6 text-pink-600" />
+              </button>
+              <Input
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={adultCount}
+                onChange={(e) => handleNumberInputChange('adult', e.target.value)}
+                className="flex-1 text-center text-lg font-semibold p-4 border-2 border-gray-200 rounded-xl focus:border-pink-300"
+                min="0"
+                max="50"
+              />
+              <button
+                type="button"
+                onClick={() => handleCountChange('adult', 'increment')}
+                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
+                disabled={adultCount >= 50}
+              >
+                <Plus className="w-6 h-6 text-pink-600" />
+              </button>
+            </div>
           </div>
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-2 block">How many children?</Label>
-            <NumberWheel
-              value={childCount.toString()}
-              onValueChange={(value) => setChildCount(parseInt(value) || 0)}
-              options={Array.from({ length: 21 }, (_, i) => ({ value: i.toString(), label: i.toString() }))}
-              placeholder="Select number"
-            />
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => handleCountChange('child', 'decrement')}
+                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
+                disabled={childCount <= 0}
+              >
+                <Minus className="w-6 h-6 text-pink-600" />
+              </button>
+              <Input
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={childCount}
+                onChange={(e) => handleNumberInputChange('child', e.target.value)}
+                className="flex-1 text-center text-lg font-semibold p-4 border-2 border-gray-200 rounded-xl focus:border-pink-300"
+                min="0"
+                max="50"
+              />
+              <button
+                type="button"
+                onClick={() => handleCountChange('child', 'increment')}
+                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
+                disabled={childCount >= 50}
+              >
+                <Plus className="w-6 h-6 text-pink-600" />
+              </button>
+            </div>
           </div>
         </div>
 
