@@ -22,7 +22,7 @@ export function StudioDetailsStep({
   onBack,
 }: StudioDetailsStepProps) {
   const [eventDescription, setEventDescription] = useState(formData.eventDescription || "");
-  const [adultCount, setAdultCount] = useState(formData.adultCount || 1);
+  const [adultCount, setAdultCount] = useState(formData.adultCount || 0);
   const [childCount, setChildCount] = useState(formData.childCount || 0);
   const [eventLocation, setEventLocation] = useState(formData.eventLocation || "studio");
   const [mobileAddress, setMobileAddress] = useState(formData.mobileAddress || "");
@@ -38,7 +38,7 @@ export function StudioDetailsStep({
     onNext();
   };
 
-  const isValid = eventDescription.trim() !== "" && adultCount > 0;
+  const isValid = eventDescription.trim() !== "" && (adultCount > 0 || childCount > 0);
 
   const incrementCount = (type: 'adult' | 'child') => {
     if (type === 'adult') {
@@ -50,7 +50,7 @@ export function StudioDetailsStep({
 
   const decrementCount = (type: 'adult' | 'child') => {
     if (type === 'adult') {
-      setAdultCount(Math.max(adultCount - 1, 1));
+      setAdultCount(Math.max(adultCount - 1, 0));
     } else {
       setChildCount(Math.max(childCount - 1, 0));
     }
@@ -95,7 +95,7 @@ export function StudioDetailsStep({
                 variant="outline"
                 size="icon"
                 onClick={() => decrementCount('adult')}
-                disabled={adultCount <= 1}
+                disabled={adultCount <= 0}
                 className="h-10 w-10 rounded-full"
               >
                 <Minus className="h-4 w-4" />
@@ -104,11 +104,11 @@ export function StudioDetailsStep({
                 type="number"
                 value={adultCount}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 1;
-                  setAdultCount(Math.max(1, Math.min(50, value)));
+                  const value = parseInt(e.target.value) || 0;
+                  setAdultCount(Math.max(0, Math.min(50, value)));
                 }}
                 className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
-                min="1"
+                min="0"
                 max="50"
               />
               <Button
