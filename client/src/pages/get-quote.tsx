@@ -51,7 +51,7 @@ const getFlowSteps = (eventType: string) => {
     case "trucker-hat":
       return 5; // Welcome → EventType → Event Details (head count) → Date/Time → Contact
     case "workshop":
-      return 7; // Welcome → EventType → Format → Type → Attendees → Schedule → Contact
+      return 5; // Welcome → EventType → Workshop Details → Schedule → Contact
     case "permanent-jewelry":
       return 6; // Welcome → EventType → Pieces → Vision & People Count → When & Where → Contact
     case "diy-party":
@@ -383,13 +383,13 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop/Class: Expected Attendees
+        // Workshop/Class: Contact (final step)
         if (isWorkshopFlow(eventType)) {
           return (
-            <EventDetailsStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -430,17 +430,7 @@ export default function GetQuote() {
           );
         }
         // Trucker Hat Bar: No step 6 needed (flow ends at step 5)
-        // Workshop/Class: Schedule Notes
-        if (isWorkshopFlow(eventType)) {
-          return (
-            <WorkshopScheduleStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
+        // Workshop/Class: No step 6 needed (flow ends at step 5)
         break;
       case 7:
         // Kids Themed Party: Food & Special Needs
@@ -465,17 +455,7 @@ export default function GetQuote() {
             />
           );
         }
-        // Workshop/Class: Contact (final step)
-        if (isWorkshopFlow(eventType)) {
-          return (
-            <ContactStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
+        // Workshop/Class: No step 7 needed (flow ends at step 5)
         break;
       case 8:
         // Kids Themed Party: Contact (final step)
