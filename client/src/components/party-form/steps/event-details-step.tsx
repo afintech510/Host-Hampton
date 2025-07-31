@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -112,67 +113,75 @@ export function EventDetailsStep({ formData, updateFormData, onNext, onBack }: E
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">How many adults?</Label>
-            <div className="flex items-center space-x-2">
-              <button
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">
+              How many adults?
+            </Label>
+            <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => handleCountChange('adult', 'decrement')}
-                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
                 disabled={adultCount <= 0}
+                className="h-10 w-10 rounded-full"
               >
-                <Minus className="w-6 h-6 text-pink-600" />
-              </button>
+                <Minus className="h-4 w-4" />
+              </Button>
               <Input
                 type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 value={adultCount}
                 onChange={(e) => handleNumberInputChange('adult', e.target.value)}
-                className="flex-1 text-center text-lg font-semibold p-4 border-2 border-gray-200 rounded-xl focus:border-pink-300"
+                className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
                 min="0"
                 max="50"
               />
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => handleCountChange('adult', 'increment')}
-                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
                 disabled={adultCount >= 50}
+                className="h-10 w-10 rounded-full"
               >
-                <Plus className="w-6 h-6 text-pink-600" />
-              </button>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">How many children?</Label>
-            <div className="flex items-center space-x-2">
-              <button
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">
+              How many children?
+            </Label>
+            <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => handleCountChange('child', 'decrement')}
-                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
                 disabled={childCount <= 0}
+                className="h-10 w-10 rounded-full"
               >
-                <Minus className="w-6 h-6 text-pink-600" />
-              </button>
+                <Minus className="h-4 w-4" />
+              </Button>
               <Input
                 type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 value={childCount}
                 onChange={(e) => handleNumberInputChange('child', e.target.value)}
-                className="flex-1 text-center text-lg font-semibold p-4 border-2 border-gray-200 rounded-xl focus:border-pink-300"
+                className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
                 min="0"
                 max="50"
               />
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => handleCountChange('child', 'increment')}
-                className="w-12 h-12 bg-pink-100 hover:bg-pink-200 rounded-xl flex items-center justify-center transition-colors"
                 disabled={childCount >= 50}
+                className="h-10 w-10 rounded-full"
               >
-                <Plus className="w-6 h-6 text-pink-600" />
-              </button>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
