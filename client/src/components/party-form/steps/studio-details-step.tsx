@@ -1,6 +1,7 @@
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -99,9 +100,17 @@ export function StudioDetailsStep({
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="text-2xl font-semibold w-12 text-center">
-                {adultCount}
-              </span>
+              <Input
+                type="number"
+                value={adultCount}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  setAdultCount(Math.max(1, Math.min(50, value)));
+                }}
+                className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+                min="1"
+                max="50"
+              />
               <Button
                 type="button"
                 variant="outline"
@@ -130,9 +139,17 @@ export function StudioDetailsStep({
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="text-2xl font-semibold w-12 text-center">
-                {childCount}
-              </span>
+              <Input
+                type="number"
+                value={childCount}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 0;
+                  setChildCount(Math.max(0, Math.min(50, value)));
+                }}
+                className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+                min="0"
+                max="50"
+              />
               <Button
                 type="button"
                 variant="outline"
