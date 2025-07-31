@@ -287,7 +287,7 @@ export default function ThemedParties() {
         <div className="absolute bottom-32 right-32 text-3xl text-mauve-rose animate-pulse [animation-delay:-2s]">
           ✦
         </div>
-        <div className="absolute bottom-40 left-32 text-2xl text-mauve-rose animate-pulse [animation-delay:-0.5s]">
+        <div className="absolute bottom-72 left-32 text-2xl text-mauve-rose animate-pulse [animation-delay:-0.5s]">
           ✦
         </div>
       </section>
