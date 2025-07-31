@@ -457,6 +457,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const quoteData = req.body;
       
+      // Debug logging to see what fields are being sent
+      console.log("Quote data received:", JSON.stringify(quoteData, null, 2));
+      
       // Check for contact information in various field formats
       const firstName = quoteData.firstName || quoteData.parentFirstName || quoteData.customerName;
       const lastName = quoteData.lastName || quoteData.parentLastName || quoteData.customerLastName;
@@ -464,8 +467,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const phone = quoteData.phone || quoteData.parentPhone || quoteData.customerPhone;
       const consent = quoteData.consent || quoteData.parentConsent;
 
+      console.log("Field extraction:", { firstName, lastName, email, phone, consent });
+
       if (!firstName || !lastName || !email || !phone || !consent) {
         console.log("Missing fields check:", { firstName, lastName, email, phone, consent });
+        console.log("Available fields in quoteData:", Object.keys(quoteData));
         return res.status(400).json({ 
           success: false, 
           message: "Missing required contact information" 
