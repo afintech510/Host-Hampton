@@ -13,6 +13,7 @@ import { CustomContactStep } from "@/components/party-form/steps/custom-contact-
 import { CustomInvoiceStep } from "@/components/party-form/steps/custom-invoice-step";
 import { JewelryPiecesStep } from "@/components/party-form/steps/jewelry-pieces-step";
 import { JewelryPeopleCountStep } from "@/components/party-form/steps/jewelry-people-count-step";
+import { JewelryWhenWhereStep } from "@/components/party-form/steps/jewelry-when-where-step";
 import { JewelryDateTimeStep } from "@/components/party-form/steps/jewelry-date-time-step";
 import { JewelryContactStep } from "@/components/party-form/steps/jewelry-contact-step";
 import { WorkshopDetailsStep } from "@/components/party-form/steps/workshop-details-step";
@@ -52,7 +53,7 @@ const getFlowSteps = (eventType: string) => {
     case "workshop":
       return 7; // Welcome → EventType → Format → Type → Attendees → Schedule → Contact
     case "permanent-jewelry":
-      return 5; // Welcome → EventType → Pieces → People Count → Contact
+      return 6; // Welcome → EventType → Pieces → Vision & People Count → When & Where → Contact
     case "diy-party":
       return 5; // Welcome → EventType → Details → DateTime → Contact
     case "private-event":
@@ -393,13 +394,13 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry: Contact (final step)
+        // Permanent Jewelry: When & Where
         if (isJewelryFlow(eventType)) {
           return (
-            <ContactStep
+            <JewelryWhenWhereStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
             />
           );
@@ -413,6 +414,17 @@ export default function GetQuote() {
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Permanent Jewelry: Contact (final step)
+        if (isJewelryFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
