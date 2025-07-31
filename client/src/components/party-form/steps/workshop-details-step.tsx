@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Minus, Plus } from "lucide-react";
 
 interface WorkshopDetailsStepProps {
   formData: any;
@@ -15,20 +17,28 @@ interface WorkshopDetailsStepProps {
 export function WorkshopDetailsStep({ formData, updateFormData, onNext, onBack }: WorkshopDetailsStepProps) {
   const [workshopType, setWorkshopType] = useState(formData.workshopType || "");
   const [workshopDescription, setWorkshopDescription] = useState(formData.workshopDescription || "");
-  const [expectedAttendees, setExpectedAttendees] = useState(formData.expectedAttendees || "");
+  const [expectedAttendees, setExpectedAttendees] = useState(formData.expectedAttendees || 1);
   const [classFormat, setClassFormat] = useState(formData.classFormat || "");
 
   const handleNext = () => {
     updateFormData({ 
       workshopType,
       workshopDescription, 
-      expectedAttendees: parseInt(expectedAttendees) || 0,
+      expectedAttendees,
       classFormat
     });
     onNext();
   };
 
-  const totalAttendees = parseInt(expectedAttendees) || 0;
+  const incrementAttendees = () => {
+    setExpectedAttendees(Math.min(expectedAttendees + 1, 100));
+  };
+
+  const decrementAttendees = () => {
+    setExpectedAttendees(Math.max(expectedAttendees - 1, 1));
+  };
+
+  const totalAttendees = expectedAttendees;
   const isValid = workshopType && workshopDescription.trim() && expectedAttendees && classFormat;
 
   return (
@@ -87,15 +97,40 @@ export function WorkshopDetailsStep({ formData, updateFormData, onNext, onBack }
         </div>
 
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">Expected Attendees *</Label>
-          <Input
-            type="number"
-            value={expectedAttendees}
-            onChange={(e) => setExpectedAttendees(e.target.value)}
-            placeholder="Number of participants"
-            min="1"
-            className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300"
-          />
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">Expected Attendees *</Label>
+          <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={decrementAttendees}
+              disabled={expectedAttendees <= 1}
+              className="h-10 w-10 rounded-full"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              value={expectedAttendees}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setExpectedAttendees(Math.max(1, Math.min(100, value)));
+              }}
+              className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+              min="1"
+              max="100"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={incrementAttendees}
+              disabled={expectedAttendees >= 100}
+              className="h-10 w-10 rounded-full"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {totalAttendees > 0 && (
