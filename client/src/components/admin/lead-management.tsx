@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, Calendar, DollarSign, Eye, Edit, Send, MessageSquare, UserCheck } from "lucide-react";
+import { Mail, Phone, Calendar, DollarSign, Eye, Edit, Send, MessageSquare, UserCheck, LayoutGrid, Table, Save, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 interface Lead {
   id: number;
@@ -27,6 +27,28 @@ interface Lead {
   source: string;
   createdAt: string;
   lastContactedAt?: string;
+  // Enhanced fields from database
+  eventDescription?: string;
+  adultCount?: number;
+  childCount?: number;
+  attendeeCount?: number;
+  eventLocation?: string;
+  mobileAddress?: string;
+  startTime?: string;
+  endTime?: string;
+  dateFlexible?: boolean;
+  scheduleNotes?: string;
+  pricingDetails?: any;
+  specialRequirements?: string[];
+  workshopType?: string;
+  classFormat?: string;
+  jewelryPieces?: string[];
+  studioUsage?: string;
+  packageSelection?: string;
+  foodPreferences?: any;
+  childName?: string;
+  childAge?: number;
+  formData?: any;
 }
 
 interface EmailTemplate {
@@ -63,6 +85,12 @@ export default function LeadManagement() {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailContent, setEmailContent] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [invoiceMode, setInvoiceMode] = useState(false);
+  const [selectedInvoiceLead, setSelectedInvoiceLead] = useState<Lead | null>(null);
+  const [editingLead, setEditingLead] = useState<number | null>(null);
+  const [editingData, setEditingData] = useState<Partial<Lead>>({});
+  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
   const { toast } = useToast();
 
   // Fetch leads
@@ -188,12 +216,89 @@ export default function LeadManagement() {
     statusFilter === 'all' || lead.status === statusFilter
   );
 
+  const handleEditLead = (leadId: number) => {
+    const lead = leads.find(l => l.id === leadId);
+    if (lead) {
+      setEditingLead(leadId);
+      setEditingData(lead);
+    }
+  };
+
+  const handleSaveLead = async () => {
+    if (!editingLead || !editingData) return;
+    
+    try {
+      await updateLeadMutation.mutateAsync({
+        leadId: editingLead,
+        updates: editingData
+      });
+      setEditingLead(null);
+      setEditingData({});
+    } catch (error) {
+      console.error('Failed to save lead:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingLead(null);
+    setEditingData({});
+  };
+
+  const handleInvoiceMode = (lead: Lead) => {
+    setSelectedInvoiceLead(lead);
+    setCurrentLeadIndex(filteredLeads.findIndex(l => l.id === lead.id));
+    setInvoiceMode(true);
+  };
+
+  const handleNextLead = () => {
+    const nextIndex = (currentLeadIndex + 1) % filteredLeads.length;
+    setCurrentLeadIndex(nextIndex);
+    setSelectedInvoiceLead(filteredLeads[nextIndex]);
+  };
+
+  const handlePrevLead = () => {
+    const prevIndex = currentLeadIndex === 0 ? filteredLeads.length - 1 : currentLeadIndex - 1;
+    setCurrentLeadIndex(prevIndex);
+    setSelectedInvoiceLead(filteredLeads[prevIndex]);
+  };
+
+  if (invoiceMode && selectedInvoiceLead) {
+    return <InvoiceCreationInterface 
+      lead={selectedInvoiceLead}
+      onBack={() => setInvoiceMode(false)}
+      onNext={handleNextLead}
+      onPrev={handlePrevLead}
+      hasNext={currentLeadIndex < filteredLeads.length - 1}
+      hasPrev={currentLeadIndex > 0}
+    />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Lead Management</h2>
         <div className="flex items-center gap-4">
+          {/* View Mode Selector */}
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+              className="h-8"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className="h-8"
+            >
+              <Table className="w-4 h-4" />
+            </Button>
+          </div>
+          
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by status" />
@@ -265,243 +370,26 @@ export default function LeadManagement() {
         </Card>
       </div>
 
-      {/* Leads Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredLeads.map((lead: Lead) => (
-          <Card key={lead.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{lead.name}</CardTitle>
-                <div className="flex gap-2">
-                  <Badge className={getLeadScoreColor(lead.leadScore)}>
-                    {lead.leadScore}
-                  </Badge>
-                  <Badge className={getStatusColor(lead.status)}>
-                    {lead.status.replace('_', ' ')}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-500" />
-                  <span>{lead.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  <span>{lead.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>{lead.eventDate ? new Date(lead.eventDate).toLocaleDateString() : 'TBD'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-gray-500" />
-                  <span>${lead.estimatedCost ? (lead.estimatedCost / 100).toLocaleString() : 'TBD'}</span>
-                </div>
-              </div>
-              
-              <div className="text-sm text-gray-600">
-                <strong>Event:</strong> {lead.eventType} ({lead.guestCount} guests)
-              </div>
-              
-              {lead.notes && (
-                <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                  {lead.notes}
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setSelectedLead(lead)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Lead Details: {lead.name}</DialogTitle>
-                    </DialogHeader>
-                    
-                    <Tabs defaultValue="details" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="details">Details</TabsTrigger>
-                        <TabsTrigger value="email">Send Email</TabsTrigger>
-                        <TabsTrigger value="history">History</TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="details" className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Status</label>
-                            <Select
-                              value={lead.status}
-                              onValueChange={(value) => 
-                                updateLeadMutation.mutate({ 
-                                  leadId: lead.id, 
-                                  updates: { status: value } 
-                                })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="new">New</SelectItem>
-                                <SelectItem value="quote_requested">Quote Requested</SelectItem>
-                                <SelectItem value="quote_sent">Quote Sent</SelectItem>
-                                <SelectItem value="follow_up">Follow Up</SelectItem>
-                                <SelectItem value="converted">Converted</SelectItem>
-                                <SelectItem value="lost">Lost</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Lead Score</label>
-                            <Select
-                              value={lead.leadScore}
-                              onValueChange={(value) => 
-                                updateLeadMutation.mutate({ 
-                                  leadId: lead.id, 
-                                  updates: { leadScore: value } 
-                                })
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="hot">Hot</SelectItem>
-                                <SelectItem value="warm">Warm</SelectItem>
-                                <SelectItem value="cold">Cold</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Notes</label>
-                          <Textarea
-                            value={lead.notes || ''}
-                            onChange={(e) => 
-                              updateLeadMutation.mutate({ 
-                                leadId: lead.id, 
-                                updates: { notes: e.target.value } 
-                              })
-                            }
-                            placeholder="Add notes about this lead..."
-                            rows={4}
-                          />
-                        </div>
-
-                        {lead.status !== 'converted' && (
-                          <Button
-                            onClick={() => convertLeadMutation.mutate({ 
-                              leadId: lead.id, 
-                              customerId: 1 // This should be dynamic based on customer creation
-                            })}
-                            className="w-full"
-                          >
-                            <UserCheck className="w-4 h-4 mr-2" />
-                            Convert to Event
-                          </Button>
-                        )}
-                      </TabsContent>
-                      
-                      <TabsContent value="email" className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Email Template</label>
-                          <Select value={emailTemplate} onValueChange={handleTemplateSelect}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose a template..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {emailTemplates.map((template: EmailTemplate) => (
-                                <SelectItem key={template.id} value={template.id}>
-                                  {template.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Subject</label>
-                          <Input
-                            value={emailSubject}
-                            onChange={(e) => setEmailSubject(e.target.value)}
-                            placeholder="Email subject..."
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium mb-1">Message</label>
-                          <Textarea
-                            value={emailContent}
-                            onChange={(e) => setEmailContent(e.target.value)}
-                            placeholder="Email content..."
-                            rows={8}
-                          />
-                        </div>
-                        
-                        <Button 
-                          onClick={handleSendEmail}
-                          disabled={sendEmailMutation.isPending || !emailSubject || !emailContent}
-                          className="w-full"
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          {sendEmailMutation.isPending ? 'Sending...' : 'Send Email'}
-                        </Button>
-                      </TabsContent>
-                      
-                      <TabsContent value="history">
-                        <div className="text-center text-gray-500 py-8">
-                          Email history feature coming soon...
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </DialogContent>
-                </Dialog>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    updateLeadMutation.mutate({
-                      leadId: lead.id,
-                      updates: { status: 'quote_requested' }
-                    });
-                  }}
-                  disabled={lead.status === 'converted'}
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  Update
-                </Button>
-                
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => {
-                    window.location.href = `/admin-dashboard/invoice/create?leadId=${lead.id}`;
-                  }}
-                  disabled={lead.status === 'converted'}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  Create Invoice
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Content based on view mode */}
+      {viewMode === 'cards' ? (
+        <EnhancedLeadCards 
+          leads={filteredLeads}
+          editingLead={editingLead}
+          editingData={editingData}
+          onEdit={handleEditLead}
+          onSave={handleSaveLead}
+          onCancel={handleCancelEdit}
+          onInvoice={handleInvoiceMode}
+          onUpdateEditingData={setEditingData}
+          updateLeadMutation={updateLeadMutation}
+        />
+      ) : (
+        <LeadTable 
+          leads={filteredLeads}
+          onEdit={handleEditLead}
+          onInvoice={handleInvoiceMode}
+        />
+      )}
 
       {isLoading && (
         <div className="text-center py-8">
@@ -515,6 +403,679 @@ export default function LeadManagement() {
           <p className="text-gray-600">No leads found.</p>
         </div>
       )}
+    </div>
+  );
+}
+
+// Enhanced Lead Cards Component
+function EnhancedLeadCards({ 
+  leads, 
+  editingLead, 
+  editingData, 
+  onEdit, 
+  onSave, 
+  onCancel, 
+  onInvoice, 
+  onUpdateEditingData,
+  updateLeadMutation 
+}: {
+  leads: Lead[];
+  editingLead: number | null;
+  editingData: Partial<Lead>;
+  onEdit: (leadId: number) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onInvoice: (lead: Lead) => void;
+  onUpdateEditingData: (data: Partial<Lead>) => void;
+  updateLeadMutation: any;
+}) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {leads.map((lead: Lead) => {
+        const isEditing = editingLead === lead.id;
+        const currentData = isEditing ? editingData : lead;
+        
+        return (
+          <Card key={lead.id} className={`hover:shadow-md transition-all ${isEditing ? 'ring-2 ring-blue-500' : ''}`}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                {isEditing ? (
+                  <Input
+                    value={currentData.name || ''}
+                    onChange={(e) => onUpdateEditingData({ ...editingData, name: e.target.value })}
+                    className="text-lg font-semibold"
+                  />
+                ) : (
+                  <CardTitle className="text-lg">{lead.name}</CardTitle>
+                )}
+                <div className="flex gap-2">
+                  <Badge className={getLeadScoreColor(lead.leadScore)}>
+                    {lead.leadScore}
+                  </Badge>
+                  <Badge className={getStatusColor(lead.status)}>
+                    {lead.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Contact Information */}
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-gray-500" />
+                  {isEditing ? (
+                    <Input
+                      value={currentData.email || ''}
+                      onChange={(e) => onUpdateEditingData({ ...editingData, email: e.target.value })}
+                      className="text-sm"
+                    />
+                  ) : (
+                    <span>{lead.email}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  {isEditing ? (
+                    <Input
+                      value={currentData.phone || ''}
+                      onChange={(e) => onUpdateEditingData({ ...editingData, phone: e.target.value })}
+                      className="text-sm"
+                    />
+                  ) : (
+                    <span>{lead.phone}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <span>{lead.eventDate ? new Date(lead.eventDate).toLocaleDateString() : 'TBD'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-gray-500" />
+                  <span>${lead.estimatedCost ? (lead.estimatedCost / 100).toLocaleString() : 'TBD'}</span>
+                </div>
+              </div>
+              
+              {/* Event Details */}
+              <div className="text-sm text-gray-600 space-y-1">
+                <div><strong>Event:</strong> {lead.eventType}</div>
+                {lead.guestCount && <div><strong>Guests:</strong> {lead.guestCount}</div>}
+                {lead.adultCount && <div><strong>Adults:</strong> {lead.adultCount}</div>}
+                {lead.childCount && <div><strong>Children:</strong> {lead.childCount}</div>}
+                {lead.attendeeCount && <div><strong>Attendees:</strong> {lead.attendeeCount}</div>}
+                {lead.eventDescription && <div><strong>Description:</strong> {lead.eventDescription}</div>}
+                {lead.eventLocation && <div><strong>Location:</strong> {lead.eventLocation}</div>}
+                {lead.startTime && lead.endTime && (
+                  <div><strong>Time:</strong> {lead.startTime} - {lead.endTime}</div>
+                )}
+                {lead.workshopType && <div><strong>Workshop:</strong> {lead.workshopType}</div>}
+                {lead.jewelryPieces && lead.jewelryPieces.length > 0 && (
+                  <div><strong>Jewelry:</strong> {lead.jewelryPieces.join(', ')}</div>
+                )}
+                {lead.packageSelection && <div><strong>Package:</strong> {lead.packageSelection}</div>}
+                {lead.specialRequirements && lead.specialRequirements.length > 0 && (
+                  <div><strong>Special Needs:</strong> {lead.specialRequirements.join(', ')}</div>
+                )}
+              </div>
+              
+              {/* Notes */}
+              {(lead.notes || isEditing) && (
+                <div className="text-sm text-gray-600">
+                  {isEditing ? (
+                    <Textarea
+                      value={currentData.notes || ''}
+                      onChange={(e) => onUpdateEditingData({ ...editingData, notes: e.target.value })}
+                      placeholder="Add notes..."
+                      rows={3}
+                    />
+                  ) : (
+                    <div className="bg-gray-50 p-2 rounded">
+                      {lead.notes}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onCancel}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={onSave}
+                    >
+                      <Save className="w-4 h-4 mr-1" />
+                      Save
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => {
+                        onSave();
+                        setTimeout(() => onInvoice(lead), 100);
+                      }}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <DollarSign className="w-4 h-4 mr-1" />
+                      Save & Invoice
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(lead.id)}
+                      disabled={lead.status === 'converted'}
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Update
+                    </Button>
+                    
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => onInvoice(lead)}
+                      disabled={lead.status === 'converted'}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <DollarSign className="w-4 h-4 mr-1" />
+                      Invoice
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+// Lead Table Component
+function LeadTable({ leads, onEdit, onInvoice }: {
+  leads: Lead[];
+  onEdit: (leadId: number) => void;
+  onInvoice: (lead: Lead) => void;
+}) {
+  return (
+    <div className="bg-white rounded-lg border overflow-hidden">
+      <table className="w-full">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Name</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Event Type</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Date</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Guests</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Value</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Status</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {leads.map((lead) => (
+            <tr key={lead.id} className="hover:bg-gray-50">
+              <td className="px-4 py-3">
+                <div>
+                  <div className="font-medium text-gray-900">{lead.name}</div>
+                  <div className="text-sm text-gray-500">{lead.email}</div>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-900">{lead.eventType}</td>
+              <td className="px-4 py-3 text-sm text-gray-900">
+                {lead.eventDate ? new Date(lead.eventDate).toLocaleDateString() : 'TBD'}
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-900">
+                {lead.guestCount || lead.adultCount || lead.attendeeCount || '-'}
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-900">
+                ${lead.estimatedCost ? (lead.estimatedCost / 100).toLocaleString() : 'TBD'}
+              </td>
+              <td className="px-4 py-3">
+                <Badge className={getStatusColor(lead.status)}>
+                  {lead.status.replace('_', ' ')}
+                </Badge>
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEdit(lead.id)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => onInvoice(lead)}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Invoice Creation Interface - 3 Panel Layout
+function InvoiceCreationInterface({ 
+  lead, 
+  onBack, 
+  onNext, 
+  onPrev, 
+  hasNext, 
+  hasPrev 
+}: {
+  lead: Lead;
+  onBack: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  hasNext: boolean;
+  hasPrev: boolean;
+}) {
+  const [leadData, setLeadData] = useState(lead);
+  const [invoiceData, setInvoiceData] = useState({
+    clientName: lead.name,
+    clientEmail: lead.email,
+    clientPhone: lead.phone,
+    description: `${lead.eventType} for ${lead.name}`,
+    eventDate: lead.eventDate || '',
+    eventStartTime: lead.startTime || '10:00',
+    eventEndTime: lead.endTime || '12:00',
+    eventLocation: 'Host Hampton, Speonk NY',
+    depositAmount: 200,
+    taxRate: 8.75,
+    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    status: 'draft',
+    termsAndConditions: `Terms and Conditions:
+1. A $200 deposit is required to secure your booking
+2. Final payment is due 7 days before event date
+3. Cancellations made 14+ days before event: full refund minus processing fee
+4. Cancellations made 7-13 days before: 50% refund
+5. Cancellations made less than 7 days: no refund
+6. Setup begins 30 minutes before event start time
+7. Client is responsible for any damages to venue or equipment
+8. Additional fees may apply for cleanup if venue is left excessively messy
+9. Weather policy: Indoor events are not affected; outdoor events may be rescheduled`
+  });
+
+  const [invoiceItems, setInvoiceItems] = useState([
+    {
+      description: `${lead.eventType}${lead.guestCount ? ` (${lead.guestCount} guests)` : ''}`,
+      quantity: 1,
+      unitPrice: (lead.estimatedCost || 87500) / 100,
+      total: (lead.estimatedCost || 87500) / 100
+    }
+  ]);
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={onBack}>
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Back to Leads
+          </Button>
+          <h2 className="text-2xl font-bold text-gray-900">Create Invoice - {lead.name}</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrev}
+            disabled={!hasPrev}
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Prev Lead
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNext}
+            disabled={!hasNext}
+          >
+            Next Lead
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* 3-Panel Layout */}
+      <div className="grid grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+        
+        {/* Left Panel - Lead Information */}
+        <Card className="overflow-y-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
+              Lead Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <Input
+                  value={leadData.name}
+                  onChange={(e) => setLeadData({...leadData, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Event Type</label>
+                <Input
+                  value={leadData.eventType}
+                  onChange={(e) => setLeadData({...leadData, eventType: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <Input
+                  type="email"
+                  value={leadData.email}
+                  onChange={(e) => setLeadData({...leadData, email: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Phone</label>
+                <Input
+                  value={leadData.phone}
+                  onChange={(e) => setLeadData({...leadData, phone: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Description</label>
+              <Textarea
+                value={leadData.eventDescription || ''}
+                onChange={(e) => setLeadData({...leadData, eventDescription: e.target.value})}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Adults</label>
+                <Input
+                  type="number"
+                  value={leadData.adultCount || ''}
+                  onChange={(e) => setLeadData({...leadData, adultCount: parseInt(e.target.value) || 0})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Children</label>
+                <Input
+                  type="number"
+                  value={leadData.childCount || ''}
+                  onChange={(e) => setLeadData({...leadData, childCount: parseInt(e.target.value) || 0})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Total Guests</label>
+                <Input
+                  type="number"
+                  value={leadData.guestCount || ''}
+                  onChange={(e) => setLeadData({...leadData, guestCount: parseInt(e.target.value) || 0})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Notes</label>
+              <Textarea
+                value={leadData.notes || ''}
+                onChange={(e) => setLeadData({...leadData, notes: e.target.value})}
+                rows={4}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1">
+                <Save className="w-4 h-4 mr-2" />
+                Save Lead
+              </Button>
+              <Button variant="default" className="flex-1">
+                <ArrowRight className="w-4 h-4 mr-2" />
+                Push to Invoice
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Middle Panel - Invoice Editor */}
+        <Card className="overflow-y-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Invoice Editor
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Client Name</label>
+              <Input
+                value={invoiceData.clientName}
+                onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Event Date</label>
+                <Input
+                  type="date"
+                  value={invoiceData.eventDate}
+                  onChange={(e) => setInvoiceData({...invoiceData, eventDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Due Date</label>
+                <Input
+                  type="date"
+                  value={invoiceData.dueDate}
+                  onChange={(e) => setInvoiceData({...invoiceData, dueDate: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <Textarea
+                value={invoiceData.description}
+                onChange={(e) => setInvoiceData({...invoiceData, description: e.target.value})}
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Invoice Items</label>
+              <div className="space-y-2">
+                {invoiceItems.map((item, index) => (
+                  <div key={index} className="grid grid-cols-4 gap-2 p-2 border rounded">
+                    <Input
+                      placeholder="Description"
+                      value={item.description}
+                      onChange={(e) => {
+                        const newItems = [...invoiceItems];
+                        newItems[index].description = e.target.value;
+                        setInvoiceItems(newItems);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Qty"
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const newItems = [...invoiceItems];
+                        newItems[index].quantity = parseInt(e.target.value) || 1;
+                        newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
+                        setInvoiceItems(newItems);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Unit Price"
+                      value={item.unitPrice}
+                      onChange={(e) => {
+                        const newItems = [...invoiceItems];
+                        newItems[index].unitPrice = parseFloat(e.target.value) || 0;
+                        newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
+                        setInvoiceItems(newItems);
+                      }}
+                    />
+                    <div className="text-sm font-medium py-2">
+                      ${item.total.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Deposit</label>
+                <Input
+                  type="number"
+                  value={invoiceData.depositAmount}
+                  onChange={(e) => setInvoiceData({...invoiceData, depositAmount: parseFloat(e.target.value) || 0})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Tax Rate (%)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={invoiceData.taxRate}
+                  onChange={(e) => setInvoiceData({...invoiceData, taxRate: parseFloat(e.target.value) || 0})}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1">
+                Save Draft
+              </Button>
+              <Button variant="default" className="flex-1">
+                Create Invoice
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Right Panel - Invoice Preview */}
+        <Card className="overflow-y-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Invoice Preview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-white p-6 border rounded-lg">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">INVOICE</h1>
+                <p className="text-gray-600">Host Hampton</p>
+                <p className="text-sm text-gray-500">Speonk, NY</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Bill To:</h3>
+                  <p className="text-sm">{invoiceData.clientName}</p>
+                  <p className="text-sm text-gray-600">{leadData.email}</p>
+                  <p className="text-sm text-gray-600">{leadData.phone}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm"><span className="font-medium">Invoice Date:</span> {new Date().toLocaleDateString()}</p>
+                  <p className="text-sm"><span className="font-medium">Due Date:</span> {new Date(invoiceData.dueDate).toLocaleDateString()}</p>
+                  <p className="text-sm"><span className="font-medium">Event Date:</span> {new Date(invoiceData.eventDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">Event Details:</h3>
+                <p className="text-sm">{invoiceData.description}</p>
+                <p className="text-sm text-gray-600">{invoiceData.eventLocation}</p>
+              </div>
+
+              <div className="mb-6">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Description</th>
+                      <th className="text-center py-2">Qty</th>
+                      <th className="text-right py-2">Rate</th>
+                      <th className="text-right py-2">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceItems.map((item, index) => (
+                      <tr key={index} className="border-b">
+                        <td className="py-2">{item.description}</td>
+                        <td className="text-center py-2">{item.quantity}</td>
+                        <td className="text-right py-2">${item.unitPrice.toFixed(2)}</td>
+                        <td className="text-right py-2">${item.total.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="text-right mb-6">
+                <div className="space-y-1">
+                  <p className="text-sm">
+                    <span>Subtotal: </span>
+                    <span>${invoiceItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm">
+                    <span>Tax ({invoiceData.taxRate}%): </span>
+                    <span>${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * invoiceData.taxRate / 100).toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm border-t pt-1">
+                    <span className="font-semibold">Total: </span>
+                    <span className="font-semibold">
+                      ${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * (1 + invoiceData.taxRate / 100)).toFixed(2)}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    <span>Deposit Required: </span>
+                    <span>${invoiceData.depositAmount.toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm font-semibold">
+                    <span>Balance Due: </span>
+                    <span>
+                      ${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * (1 + invoiceData.taxRate / 100) - invoiceData.depositAmount).toFixed(2)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-xs text-gray-500 border-t pt-4">
+                <p className="whitespace-pre-line">{invoiceData.termsAndConditions}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
