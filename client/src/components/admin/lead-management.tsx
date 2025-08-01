@@ -689,78 +689,236 @@ function InvoiceCreationInterface({
   hasPrev: boolean;
 }) {
   const [leadData, setLeadData] = useState(lead);
+  const [locationType, setLocationType] = useState<'host-hampton' | 'mobile'>('host-hampton');
+  const [mobileAddress, setMobileAddress] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zip: ''
+  });
+  
+  // Calculate due date as day before event
+  const calculateDueDate = (eventDate: string) => {
+    if (!eventDate) return '';
+    const event = new Date(eventDate);
+    const due = new Date(event);
+    due.setDate(due.getDate() - 1);
+    return due.toISOString().split('T')[0];
+  };
+
   const [invoiceData, setInvoiceData] = useState({
     clientName: lead.name,
-    clientEmail: lead.email,
     clientPhone: lead.phone,
-    description: `${lead.eventType} for ${lead.name}`,
+    clientEmail: lead.email,
     eventDate: lead.eventDate || '',
+    eventDetails: `${lead.eventType} for ${lead.name}`,
     eventStartTime: lead.startTime || '10:00',
     eventEndTime: lead.endTime || '12:00',
-    eventLocation: 'Host Hampton, Speonk NY',
+    eventLocation: locationType === 'host-hampton' ? 'Host Hampton, Speonk NY' : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`,
     depositAmount: 200,
-    taxRate: 8.75,
-    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'draft',
-    termsAndConditions: `Terms and Conditions:
-1. A $200 deposit is required to secure your booking
-2. Final payment is due 7 days before event date
-3. Cancellations made 14+ days before event: full refund minus processing fee
-4. Cancellations made 7-13 days before: 50% refund
-5. Cancellations made less than 7 days: no refund
-6. Setup begins 30 minutes before event start time
-7. Client is responsible for any damages to venue or equipment
-8. Additional fees may apply for cleanup if venue is left excessively messy
-9. Weather policy: Indoor events are not affected; outdoor events may be rescheduled`
+    dueDate: calculateDueDate(lead.eventDate || ''),
+    status: 'draft'
   });
 
   const [invoiceItems, setInvoiceItems] = useState([
     {
+      id: Date.now(),
+      type: 'custom',
+      itemId: null,
       description: `${lead.eventType}${lead.guestCount ? ` (${lead.guestCount} guests)` : ''}`,
       quantity: 1,
       unitPrice: (lead.estimatedCost || 87500) / 100,
-      total: (lead.estimatedCost || 87500) / 100
+      total: (lead.estimatedCost || 87500) / 100,
+      isCustom: false,
+      customDescription: ''
     }
   ]);
 
+  // Fetch predefined items
+  const { data: partyThemes = [] } = useQuery({
+    queryKey: ["/api/party-themes"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/party-themes");
+      const data = await response.json();
+      return data.success ? data.themes : [];
+    }
+  });
+
+  const { data: addons = [] } = useQuery({
+    queryKey: ["/api/addons"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/addons");
+      const data = await response.json();
+      return data.success ? data.addons : [];
+    }
+  });
+
+  const { data: packages = [] } = useQuery({
+    queryKey: ["/api/packages"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/packages");
+      const data = await response.json();
+      return data.success ? data.packages : [];
+    }
+  });
+
+  // Combine all predefined items
+  const predefinedItems = [
+    { value: 'custom', label: 'Custom Item', price: 0, type: 'custom' },
+    ...partyThemes.map((theme: any) => ({ 
+      value: `theme-${theme.id}`, 
+      label: theme.name, 
+      price: theme.price / 100, 
+      type: 'theme' 
+    })),
+    ...addons.map((addon: any) => ({ 
+      value: `addon-${addon.id}`, 
+      label: addon.name, 
+      price: addon.price / 100, 
+      type: 'addon' 
+    })),
+    ...packages.map((pkg: any) => ({ 
+      value: `package-${pkg.id}`, 
+      label: pkg.name, 
+      price: pkg.basePrice / 100, 
+      type: 'package' 
+    }))
+  ];
+
+  // Create invoice mutation
+  const createInvoiceMutation = useMutation({
+    mutationFn: async (invoicePayload: any) => {
+      const response = await apiRequest("POST", "/api/invoices", invoicePayload);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invoice Created",
+        description: "Invoice has been created successfully.",
+      });
+      onBack();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Invoice Creation Failed",
+        description: error.message || "Failed to create invoice.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { toast } = useToast();
+
+  const addInvoiceItem = () => {
+    setInvoiceItems([...invoiceItems, {
+      id: Date.now(),
+      type: 'custom',
+      itemId: null,
+      description: '',
+      quantity: 1,
+      unitPrice: 0,
+      total: 0,
+      isCustom: true,
+      customDescription: ''
+    }]);
+  };
+
+  const removeInvoiceItem = (id: number) => {
+    setInvoiceItems(invoiceItems.filter(item => item.id !== id));
+  };
+
+  const updateInvoiceItem = (id: number, field: string, value: any) => {
+    setInvoiceItems(invoiceItems.map(item => {
+      if (item.id === id) {
+        const updated = { ...item, [field]: value };
+        
+        // Handle item selection
+        if (field === 'itemId') {
+          const selectedItem = predefinedItems.find(pi => pi.value === value);
+          if (selectedItem) {
+            updated.description = selectedItem.label;
+            updated.unitPrice = selectedItem.price;
+            updated.isCustom = selectedItem.value === 'custom';
+            updated.type = selectedItem.type;
+          }
+        }
+        
+        // Calculate total
+        if (field === 'quantity' || field === 'unitPrice') {
+          updated.total = updated.quantity * updated.unitPrice;
+        }
+        
+        return updated;
+      }
+      return item;
+    }));
+  };
+
+  const handleCreateInvoice = () => {
+    const subtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
+    const tax = subtotal * 0.0875; // 8.75%
+    const total = subtotal + tax;
+
+    const invoicePayload = {
+      eventId: null, // Will need to create event if needed
+      subtotal: Math.round(subtotal * 100), // Convert to cents
+      tax: Math.round(tax * 100),
+      total: Math.round(total * 100),
+      deposit: invoiceData.depositAmount * 100,
+      balanceDue: Math.round((total - invoiceData.depositAmount) * 100),
+      notes: `Invoice for ${invoiceData.eventDetails}`,
+      items: invoiceItems.map(item => ({
+        type: item.type,
+        name: item.isCustom ? item.customDescription : item.description,
+        quantity: item.quantity,
+        unitPrice: Math.round(item.unitPrice * 100),
+        total: Math.round(item.total * 100)
+      }))
+    };
+
+    createInvoiceMutation.mutate(invoicePayload);
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={onBack}>
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Back to Leads
-          </Button>
-          <h2 className="text-2xl font-bold text-gray-900">Create Invoice - {lead.name}</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPrev}
-            disabled={!hasPrev}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Prev Lead
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onNext}
-            disabled={!hasNext}
-          >
-            Next Lead
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+      <div className="bg-white border-b px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={onBack}>
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Back to Leads
+            </Button>
+            <h2 className="text-2xl font-bold text-gray-900">Create Invoice - {lead.name}</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onPrev}
+              disabled={!hasPrev}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Prev Lead
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onNext}
+              disabled={!hasNext}
+            >
+              Next Lead
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* 3-Panel Layout */}
-      <div className="grid grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+      {/* 3-Panel Layout - No height restrictions, natural expansion */}
+      <div className="grid grid-cols-3 gap-6 p-6">
         
         {/* Left Panel - Lead Information */}
-        <Card className="overflow-y-auto">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="w-5 h-5" />
@@ -853,7 +1011,19 @@ function InvoiceCreationInterface({
                 <Save className="w-4 h-4 mr-2" />
                 Save Lead
               </Button>
-              <Button variant="default" className="flex-1">
+              <Button 
+                variant="default" 
+                className="flex-1"
+                onClick={() => {
+                  setInvoiceData({
+                    ...invoiceData,
+                    clientName: leadData.name,
+                    clientPhone: leadData.phone,
+                    clientEmail: leadData.email,
+                    eventDetails: `${leadData.eventType} for ${leadData.name}`
+                  });
+                }}
+              >
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Push to Invoice
               </Button>
@@ -862,7 +1032,7 @@ function InvoiceCreationInterface({
         </Card>
 
         {/* Middle Panel - Invoice Editor */}
-        <Card className="overflow-y-auto">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Edit className="w-5 h-5" />
@@ -870,6 +1040,7 @@ function InvoiceCreationInterface({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* One field per row as requested */}
             <div>
               <label className="block text-sm font-medium mb-1">Client Name</label>
               <Input
@@ -878,111 +1049,209 @@ function InvoiceCreationInterface({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Event Date</label>
-                <Input
-                  type="date"
-                  value={invoiceData.eventDate}
-                  onChange={(e) => setInvoiceData({...invoiceData, eventDate: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Due Date</label>
-                <Input
-                  type="date"
-                  value={invoiceData.dueDate}
-                  onChange={(e) => setInvoiceData({...invoiceData, dueDate: e.target.value})}
-                />
-              </div>
-            </div>
-
             <div>
-              <label className="block text-sm font-medium mb-1">Description</label>
-              <Textarea
-                value={invoiceData.description}
-                onChange={(e) => setInvoiceData({...invoiceData, description: e.target.value})}
-                rows={3}
+              <label className="block text-sm font-medium mb-1">Phone</label>
+              <Input
+                value={invoiceData.clientPhone}
+                onChange={(e) => setInvoiceData({...invoiceData, clientPhone: e.target.value})}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Invoice Items</label>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <Input
+                type="email"
+                value={invoiceData.clientEmail}
+                onChange={(e) => setInvoiceData({...invoiceData, clientEmail: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Date</label>
+              <Input
+                type="date"
+                value={invoiceData.eventDate}
+                onChange={(e) => {
+                  const newEventDate = e.target.value;
+                  setInvoiceData({
+                    ...invoiceData, 
+                    eventDate: newEventDate,
+                    dueDate: calculateDueDate(newEventDate)
+                  });
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Details</label>
+              <Textarea
+                value={invoiceData.eventDetails}
+                onChange={(e) => setInvoiceData({...invoiceData, eventDetails: e.target.value})}
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Start Time</label>
+              <Input
+                type="time"
+                value={invoiceData.eventStartTime}
+                onChange={(e) => setInvoiceData({...invoiceData, eventStartTime: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event End Time</label>
+              <Input
+                type="time"
+                value={invoiceData.eventEndTime}
+                onChange={(e) => setInvoiceData({...invoiceData, eventEndTime: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Location</label>
               <div className="space-y-2">
-                {invoiceItems.map((item, index) => (
-                  <div key={index} className="grid grid-cols-4 gap-2 p-2 border rounded">
+                <Select value={locationType} onValueChange={(value: 'host-hampton' | 'mobile') => setLocationType(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="host-hampton">Host Hampton</SelectItem>
+                    <SelectItem value="mobile">Mobile (address fields appear)</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {locationType === 'mobile' && (
+                  <div className="grid grid-cols-2 gap-2">
                     <Input
-                      placeholder="Description"
-                      value={item.description}
-                      onChange={(e) => {
-                        const newItems = [...invoiceItems];
-                        newItems[index].description = e.target.value;
-                        setInvoiceItems(newItems);
-                      }}
+                      placeholder="Street Address"
+                      value={mobileAddress.street}
+                      onChange={(e) => setMobileAddress({...mobileAddress, street: e.target.value})}
                     />
                     <Input
-                      type="number"
-                      placeholder="Qty"
-                      value={item.quantity}
-                      onChange={(e) => {
-                        const newItems = [...invoiceItems];
-                        newItems[index].quantity = parseInt(e.target.value) || 1;
-                        newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
-                        setInvoiceItems(newItems);
-                      }}
+                      placeholder="City"
+                      value={mobileAddress.city}
+                      onChange={(e) => setMobileAddress({...mobileAddress, city: e.target.value})}
                     />
                     <Input
-                      type="number"
-                      placeholder="Unit Price"
-                      value={item.unitPrice}
-                      onChange={(e) => {
-                        const newItems = [...invoiceItems];
-                        newItems[index].unitPrice = parseFloat(e.target.value) || 0;
-                        newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
-                        setInvoiceItems(newItems);
-                      }}
+                      placeholder="State"
+                      value={mobileAddress.state}
+                      onChange={(e) => setMobileAddress({...mobileAddress, state: e.target.value})}
                     />
-                    <div className="text-sm font-medium py-2">
-                      ${item.total.toFixed(2)}
-                    </div>
+                    <Input
+                      placeholder="ZIP"
+                      value={mobileAddress.zip}
+                      onChange={(e) => setMobileAddress({...mobileAddress, zip: e.target.value})}
+                    />
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Deposit</label>
-                <Input
-                  type="number"
-                  value={invoiceData.depositAmount}
-                  onChange={(e) => setInvoiceData({...invoiceData, depositAmount: parseFloat(e.target.value) || 0})}
-                />
+            <div>
+              <label className="block text-sm font-medium mb-1">Invoice Items</label>
+              <div className="space-y-3">
+                {invoiceItems.map((item) => (
+                  <div key={item.id} className="border rounded-lg p-3 space-y-2">
+                    {/* Item dropdown on its own row */}
+                    <div className="flex gap-2">
+                      <Select
+                        value={item.itemId || ''}
+                        onValueChange={(value) => updateInvoiceItem(item.id, 'itemId', value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select item..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {predefinedItems.map((predefinedItem) => (
+                            <SelectItem key={predefinedItem.value} value={predefinedItem.value}>
+                              {predefinedItem.label} {predefinedItem.price > 0 && `($${predefinedItem.price})`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {invoiceItems.length > 1 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeInvoiceItem(item.id)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Custom description when "custom" is selected */}
+                    {item.isCustom && (
+                      <Input
+                        placeholder="Enter custom item description"
+                        value={item.customDescription}
+                        onChange={(e) => updateInvoiceItem(item.id, 'customDescription', e.target.value)}
+                      />
+                    )}
+                    
+                    {/* Qty * Price on next row */}
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Input
+                        type="number"
+                        placeholder="Qty"
+                        value={item.quantity}
+                        onChange={(e) => updateInvoiceItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      />
+                      <span className="text-center">×</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Price"
+                        value={item.unitPrice}
+                        onChange={(e) => updateInvoiceItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      />
+                    </div>
+                    
+                    <div className="text-right font-medium">
+                      Total: ${item.total.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  onClick={addInvoiceItem}
+                  className="w-full"
+                >
+                  Add Item
+                </Button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tax Rate (%)</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={invoiceData.taxRate}
-                  onChange={(e) => setInvoiceData({...invoiceData, taxRate: parseFloat(e.target.value) || 0})}
-                />
-              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Deposit Amount</label>
+              <Input
+                type="number"
+                value={invoiceData.depositAmount}
+                onChange={(e) => setInvoiceData({...invoiceData, depositAmount: parseFloat(e.target.value) || 0})}
+              />
             </div>
 
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1">
                 Save Draft
               </Button>
-              <Button variant="default" className="flex-1">
-                Create Invoice
+              <Button 
+                variant="default" 
+                className="flex-1"
+                onClick={handleCreateInvoice}
+                disabled={createInvoiceMutation.isPending}
+              >
+                {createInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Right Panel - Invoice Preview */}
-        <Card className="overflow-y-auto">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="w-5 h-5" />
@@ -1001,20 +1270,27 @@ function InvoiceCreationInterface({
                 <div>
                   <h3 className="font-semibold mb-2">Bill To:</h3>
                   <p className="text-sm">{invoiceData.clientName}</p>
-                  <p className="text-sm text-gray-600">{leadData.email}</p>
-                  <p className="text-sm text-gray-600">{leadData.phone}</p>
+                  <p className="text-sm text-gray-600">{invoiceData.clientEmail}</p>
+                  <p className="text-sm text-gray-600">{invoiceData.clientPhone}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm"><span className="font-medium">Invoice Date:</span> {new Date().toLocaleDateString()}</p>
-                  <p className="text-sm"><span className="font-medium">Due Date:</span> {new Date(invoiceData.dueDate).toLocaleDateString()}</p>
-                  <p className="text-sm"><span className="font-medium">Event Date:</span> {new Date(invoiceData.eventDate).toLocaleDateString()}</p>
+                  <p className="text-sm"><span className="font-medium">Due Date:</span> {invoiceData.dueDate ? new Date(invoiceData.dueDate).toLocaleDateString() : 'Day before event'}</p>
+                  <p className="text-sm"><span className="font-medium">Event Date:</span> {invoiceData.eventDate ? new Date(invoiceData.eventDate).toLocaleDateString() : 'TBD'}</p>
                 </div>
               </div>
 
               <div className="mb-6">
                 <h3 className="font-semibold mb-2">Event Details:</h3>
-                <p className="text-sm">{invoiceData.description}</p>
-                <p className="text-sm text-gray-600">{invoiceData.eventLocation}</p>
+                <p className="text-sm">{invoiceData.eventDetails}</p>
+                <p className="text-sm text-gray-600">
+                  {locationType === 'host-hampton' 
+                    ? 'Host Hampton, Speonk NY' 
+                    : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {invoiceData.eventStartTime} - {invoiceData.eventEndTime}
+                </p>
               </div>
 
               <div className="mb-6">
@@ -1028,9 +1304,11 @@ function InvoiceCreationInterface({
                     </tr>
                   </thead>
                   <tbody>
-                    {invoiceItems.map((item, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-2">{item.description}</td>
+                    {invoiceItems.map((item) => (
+                      <tr key={item.id} className="border-b">
+                        <td className="py-2">
+                          {item.isCustom ? item.customDescription : item.description}
+                        </td>
                         <td className="text-center py-2">{item.quantity}</td>
                         <td className="text-right py-2">${item.unitPrice.toFixed(2)}</td>
                         <td className="text-right py-2">${item.total.toFixed(2)}</td>
@@ -1047,13 +1325,13 @@ function InvoiceCreationInterface({
                     <span>${invoiceItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)}</span>
                   </p>
                   <p className="text-sm">
-                    <span>Tax ({invoiceData.taxRate}%): </span>
-                    <span>${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * invoiceData.taxRate / 100).toFixed(2)}</span>
+                    <span>Tax (8.75%): </span>
+                    <span>${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * 0.0875).toFixed(2)}</span>
                   </p>
                   <p className="text-sm border-t pt-1">
                     <span className="font-semibold">Total: </span>
                     <span className="font-semibold">
-                      ${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * (1 + invoiceData.taxRate / 100)).toFixed(2)}
+                      ${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * 1.0875).toFixed(2)}
                     </span>
                   </p>
                   <p className="text-sm">
@@ -1063,14 +1341,25 @@ function InvoiceCreationInterface({
                   <p className="text-sm font-semibold">
                     <span>Balance Due: </span>
                     <span>
-                      ${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * (1 + invoiceData.taxRate / 100) - invoiceData.depositAmount).toFixed(2)}
+                      ${((invoiceItems.reduce((sum, item) => sum + item.total, 0) * 1.0875) - invoiceData.depositAmount).toFixed(2)}
                     </span>
                   </p>
                 </div>
               </div>
 
               <div className="text-xs text-gray-500 border-t pt-4">
-                <p className="whitespace-pre-line">{invoiceData.termsAndConditions}</p>
+                <p className="whitespace-pre-line">
+                  Terms and Conditions:
+                  {'\n'}1. A ${invoiceData.depositAmount} deposit is required to secure your booking
+                  {'\n'}2. Final payment is due day before event date
+                  {'\n'}3. Cancellations made 14+ days before event: full refund minus processing fee
+                  {'\n'}4. Cancellations made 7-13 days before: 50% refund
+                  {'\n'}5. Cancellations made less than 7 days: no refund
+                  {'\n'}6. Setup begins 30 minutes before event start time
+                  {'\n'}7. Client is responsible for any damages to venue or equipment
+                  {'\n'}8. Additional fees may apply for cleanup if venue is left excessively messy
+                  {'\n'}9. Weather policy: Indoor events are not affected; outdoor events may be rescheduled
+                </p>
               </div>
             </div>
           </CardContent>
