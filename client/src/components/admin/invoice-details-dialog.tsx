@@ -157,7 +157,7 @@ export default function InvoiceDetailsDialog({
             <div className="animate-spin w-8 h-8 border-4 border-blue-300 border-t-transparent rounded-full" />
           </div>
         ) : invoice ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Invoice Status */}
             <div className="flex items-center justify-between">
               <Badge className={getStatusColor(invoice.status)}>
@@ -168,164 +168,161 @@ export default function InvoiceDetailsDialog({
               </div>
             </div>
 
-            {/* Financial Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-600">Total</span>
-                </div>
-                <div className="text-xl font-bold text-gray-900">
-                  {formatCurrency(invoice.total)}
-                </div>
-              </div>
+            {/* Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-600">Deposit</span>
-                </div>
-                <div className="text-xl font-bold text-green-600">
-                  {formatCurrency(invoice.depositAmount)}
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-600">Tax</span>
-                </div>
-                <div className="text-xl font-bold text-gray-900">
-                  {formatCurrency(invoice.taxAmount)}
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-600">Balance Due</span>
-                </div>
-                <div className={`text-xl font-bold ${invoice.balanceDue && invoice.balanceDue > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {formatCurrency(invoice.balanceDue)}
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Customer Information */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <User className="w-5 h-5 mr-2" />
-                Customer Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-600">Customer Name</Label>
-                  <div className="text-gray-900">{invoice.customerName || 'N/A'}</div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-600">Email</Label>
-                  <div className="text-gray-900">{invoice.customerEmail || 'N/A'}</div>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Event Information */}
-            {invoice.eventId && (
-              <>
+              {/* Left Column - Customer & Event Information */}
+              <div className="space-y-6">
+                {/* Customer Information */}
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Event Information
+                    <User className="w-5 h-5 mr-2" />
+                    Customer Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     <div>
-                      <Label className="text-sm font-medium text-gray-600">Event Type</Label>
-                      <div className="text-gray-900">{invoice.eventTypeName || 'N/A'}</div>
+                      <Label className="text-sm font-medium text-gray-600">Customer Name</Label>
+                      <div className="text-gray-900">{invoice.customerName || 'N/A'}</div>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600">Event Date</Label>
-                      <div className="text-gray-900">
-                        {invoice.eventDate ? new Date(invoice.eventDate).toLocaleDateString() : 'N/A'}
+                      <Label className="text-sm font-medium text-gray-600">Email</Label>
+                      <div className="text-gray-900">{invoice.customerEmail || 'N/A'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Event Information */}
+                {invoice.eventId && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Event Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Event Type</Label>
+                        <div className="text-gray-900">{invoice.eventTypeName || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Event Date</Label>
+                        <div className="text-gray-900">
+                          {invoice.eventDate ? new Date(invoice.eventDate).toLocaleDateString() : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column - Financial Summary & Invoice Details */}
+              <div className="space-y-6">
+                {/* Financial Summary */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2" />
+                    Financial Summary
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm font-medium text-gray-600">Total</div>
+                      <div className="text-lg font-bold text-gray-900">
+                        {formatCurrency(invoice.total)}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm font-medium text-gray-600">Deposit</div>
+                      <div className="text-lg font-bold text-green-600">
+                        {formatCurrency(invoice.depositAmount)}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm font-medium text-gray-600">Tax</div>
+                      <div className="text-lg font-bold text-gray-900">
+                        {formatCurrency(invoice.taxAmount)}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-sm font-medium text-gray-600">Balance Due</div>
+                      <div className={`text-lg font-bold ${invoice.balanceDue && invoice.balanceDue > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {formatCurrency(invoice.balanceDue)}
                       </div>
                     </div>
                   </div>
                 </div>
-                <Separator />
-              </>
-            )}
 
-            {/* Invoice Details */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <FileText className="w-5 h-5 mr-2" />
-                Invoice Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Invoice Details */}
                 <div>
-                  <Label htmlFor="dueDate">Due Date</Label>
-                  {isEditing ? (
-                    <Input
-                      id="dueDate"
-                      type="date"
-                      value={editedInvoice.dueDate ? new Date(editedInvoice.dueDate).toISOString().split('T')[0] : ''}
-                      onChange={(e) => setEditedInvoice({
-                        ...editedInvoice,
-                        dueDate: e.target.value
-                      })}
-                    />
-                  ) : (
-                    <div className="text-gray-900">
-                      {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Invoice Details
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="dueDate">Due Date</Label>
+                      {isEditing ? (
+                        <Input
+                          id="dueDate"
+                          type="date"
+                          value={editedInvoice.dueDate ? new Date(editedInvoice.dueDate).toISOString().split('T')[0] : ''}
+                          onChange={(e) => setEditedInvoice({
+                            ...editedInvoice,
+                            dueDate: e.target.value
+                          })}
+                        />
+                      ) : (
+                        <div className="text-gray-900">
+                          {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  {isEditing ? (
-                    <select
-                      id="status"
-                      value={editedInvoice.status || ''}
-                      onChange={(e) => setEditedInvoice({
-                        ...editedInvoice,
-                        status: e.target.value
-                      })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="pending">Pending</option>
-                      <option value="paid">Paid</option>
-                      <option value="overdue">Overdue</option>
-                    </select>
-                  ) : (
-                    <Badge className={getStatusColor(invoice.status)}>
-                      {invoice.status || 'Draft'}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              
-              <div className="mt-4">
-                <Label htmlFor="notes">Notes</Label>
-                {isEditing ? (
-                  <Textarea
-                    id="notes"
-                    value={editedInvoice.notes || ''}
-                    onChange={(e) => setEditedInvoice({
-                      ...editedInvoice,
-                      notes: e.target.value
-                    })}
-                    placeholder="Add any notes about this invoice..."
-                    rows={3}
-                  />
-                ) : (
-                  <div className="text-gray-900 mt-1">
-                    {invoice.notes || 'No notes'}
+                    <div>
+                      <Label htmlFor="status">Status</Label>
+                      {isEditing ? (
+                        <select
+                          id="status"
+                          value={editedInvoice.status || ''}
+                          onChange={(e) => setEditedInvoice({
+                            ...editedInvoice,
+                            status: e.target.value
+                          })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="draft">Draft</option>
+                          <option value="pending">Pending</option>
+                          <option value="paid">Paid</option>
+                          <option value="overdue">Overdue</option>
+                        </select>
+                      ) : (
+                        <Badge className={getStatusColor(invoice.status)}>
+                          {invoice.status || 'Draft'}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="notes">Notes</Label>
+                      {isEditing ? (
+                        <Textarea
+                          id="notes"
+                          value={editedInvoice.notes || ''}
+                          onChange={(e) => setEditedInvoice({
+                            ...editedInvoice,
+                            notes: e.target.value
+                          })}
+                          placeholder="Add any notes about this invoice..."
+                          rows={3}
+                        />
+                      ) : (
+                        <div className="text-gray-900 mt-1">
+                          {invoice.notes || 'No notes'}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
