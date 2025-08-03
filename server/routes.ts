@@ -514,26 +514,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("No items to create");
       }
 
-      // STRIPE INTEGRATION - Add to the MAIN route that actually gets executed
+      // STRIPE INTEGRATION - Create proper PaymentLink for invoices
       console.log("=== CHECKPOINT: About to start Stripe integration ===");
       console.log("STARTING STRIPE INTEGRATION - Invoice total:", invoiceData.total);
       try {
-        console.log("Creating Stripe PaymentIntent...");
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: invoiceData.total,
-          currency: "usd",
+        console.log("Creating Stripe PaymentLink...");
+        
+        // Create line items from invoice items
+        const stripeLineItems = items && items.length > 0 ? items.map((item: any) => ({
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: item.name,
+              description: `Quantity: ${item.quantity}`
+            },
+            unit_amount: item.unitPrice,
+          },
+          quantity: item.quantity
+        })) : [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: 'Event Service',
+                description: invoiceData.eventDetails || 'Event booking service'
+              },
+              unit_amount: invoiceData.total,
+            },
+            quantity: 1
+          }
+        ];
+
+        const paymentLink = await stripe.paymentLinks.create({
+          line_items: stripeLineItems,
           metadata: {
             invoiceId: created.id.toString(),
+            leadId: invoiceData.leadId?.toString() || '',
             type: 'invoice_payment'
-          }
+          },
+          payment_method_types: ['card'],
+          billing_address_collection: 'auto',
+          custom_fields: [
+            {
+              key: 'payment_type',
+              label: {
+                type: 'custom',
+                custom: 'Payment Type'
+              },
+              type: 'dropdown',
+              dropdown: {
+                options: [
+                  { label: `Deposit Payment ($${(invoiceData.deposit / 100).toFixed(2)})`, value: 'deposit' },
+                  { label: `Full Payment ($${(invoiceData.total / 100).toFixed(2)})`, value: 'full' }
+                ]
+              }
+            }
+          ]
         });
-        console.log("PaymentIntent created successfully:", paymentIntent.id);
+        console.log("PaymentLink created successfully:", paymentLink.id);
+        console.log("PaymentLink URL:", paymentLink.url);
 
         // Update invoice with Stripe information
         console.log("Updating invoice with Stripe data...");
         await storage.updateInvoice(created.id, {
-          stripePaymentLinkId: paymentIntent.id,
-          stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
+          stripePaymentLinkId: paymentLink.id,
+          stripeInvoiceUrl: paymentLink.url,
           status: 'sent'
         });
         console.log("Invoice updated with Stripe data");
