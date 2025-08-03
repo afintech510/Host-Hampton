@@ -443,15 +443,18 @@ function EnhancedLeadCards({
       details.push(<div key="attendees"><strong>Attendees:</strong> {lead.attendeeCount || (formData as any).attendeeCount || (formData as any).expectedAttendees}</div>);
     }
 
-    // Event type specific details
-    if (lead.eventType === 'birthday-party') {
+    // Event type specific details - handle both "birthday-party" and "kids-party" 
+    if (lead.eventType === 'birthday-party' || lead.eventType === 'kids-party' || (formData as any).eventType === 'birthday-party') {
       if ((formData as any).childName) details.push(<div key="child"><strong>Child:</strong> {(formData as any).childName}</div>);
       if ((formData as any).childAge) details.push(<div key="age"><strong>Age:</strong> {(formData as any).childAge}</div>);
       if ((formData as any).partyTheme) details.push(<div key="theme"><strong>Theme:</strong> {(formData as any).partyTheme}</div>);
       if ((formData as any).partyPackage) details.push(<div key="package"><strong>Package:</strong> {(formData as any).partyPackage}</div>);
       if ((formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {(formData as any).foodChoice}</div>);
       if ((formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {(formData as any).cupcakeFlavor}</div>);
-      if ((formData as any).specialNeeds && Array.isArray((formData as any).specialNeeds)) {
+      if ((formData as any).partyAddons && Array.isArray((formData as any).partyAddons) && (formData as any).partyAddons.length > 0) {
+        details.push(<div key="addons"><strong>Add-ons:</strong> {(formData as any).partyAddons.join(', ')}</div>);
+      }
+      if ((formData as any).specialNeeds && Array.isArray((formData as any).specialNeeds) && (formData as any).specialNeeds.length > 0) {
         details.push(<div key="special"><strong>Special Needs:</strong> {(formData as any).specialNeeds.join(', ')}</div>);
       }
     }
