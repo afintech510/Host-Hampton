@@ -444,27 +444,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Map lead form_data to event data
         const formData = lead.formData || {};
         
-        // Create an event from the lead data first
-        const eventData = {
-          eventTypeId: getEventTypeIdFromService(formData.serviceType || 'birthday-party'),
-          customerId: invoiceData.customerId,
-          leadId: leadId,
-          status: 'quoted',
-          eventDate: formData.partyDate ? new Date(formData.partyDate) : null,
-          startTime: formData.partyTime || null,
-          endTime: null,
-          location: formData.partyLocation || formData.eventLocation || null,
-          guestCount: parseInt(formData.guestCount) || 0,
-          notes: formData.partyNotes || formData.message || null,
-          estimatedCost: parseFloat(formData.totalEstimate) || 0
-        };
+        // Create or find customer first if missing
+        let customerId = invoiceData.customerId;
+        if (!customerId && lead.email) {
+          console.log("Creating customer from lead data...");
+          // Try to find existing customer by email first
+          const existingCustomer = await storage.getCustomerByEmail(lead.email);
+          if (existingCustomer) {
+            console.log("Found existing customer:", existingCustomer.id);
+            customerId = existingCustomer.id;
+          } else {
+            // Create new customer from lead data
+            const newCustomer = await storage.createCustomer({
+              name: lead.name,
+              email: lead.email,
+              phone: lead.phone || null
+            });
+            console.log("Created new customer:", newCustomer.id);
+            customerId = newCustomer.id;
+          }
+        }
         
-        console.log("Creating event with data:", eventData);
-        const createdEvent = await storage.createEvent(eventData);
-        console.log("Created event:", createdEvent);
+        // Create an event from the lead data if we have a customerId
+        if (customerId) {
+          const eventData = {
+            eventTypeId: getEventTypeIdFromService(formData.serviceType || 'birthday-party'),
+            customerId: customerId,
+            leadId: leadId,
+            status: 'quoted',
+            eventDate: formData.partyDate ? new Date(formData.partyDate) : null,
+            startTime: formData.partyTime || null,
+            endTime: null,
+            location: formData.partyLocation || formData.eventLocation || null,
+            guestCount: parseInt(formData.guestCount) || 0,
+            notes: formData.partyNotes || formData.message || null,
+            estimatedCost: parseFloat(formData.totalEstimate) || 0
+          };
+          
+          console.log("Creating event with data:", eventData);
+          const createdEvent = await storage.createEvent(eventData);
+          console.log("Created event:", createdEvent);
+          
+          // Now create the invoice with the event ID
+          invoiceData.eventId = createdEvent.id;
+          invoiceData.customerId = customerId;
+        }
         
-        // Now create the invoice with the event ID
-        invoiceData.eventId = createdEvent.id;
         invoiceData.leadId = leadId;
       }
       
