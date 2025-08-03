@@ -398,14 +398,106 @@ function EnhancedLeadCards({
   onUpdateEditingData: (data: Partial<Lead>) => void;
   updateLeadMutation: any;
 }) {
+  // Helper function to format time to AM/PM
+  const formatTimeToAMPM = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to render event-specific details based on formData
+  const renderEventDetails = (lead: Lead) => {
+    let formData = {};
+    try {
+      formData = lead.formData ? JSON.parse(lead.formData as string) : {};
+    } catch (e) {
+      formData = {};
+    }
+
+    const details = [];
+
+    // Common details
+    if (lead.eventType) details.push(<div key="event"><strong>Event:</strong> {lead.eventType}</div>);
+    if (lead.eventDescription || (formData as any).eventDescription) {
+      details.push(<div key="desc"><strong>Description:</strong> {lead.eventDescription || (formData as any).eventDescription}</div>);
+    }
+    if (lead.eventLocation || (formData as any).eventLocation) {
+      details.push(<div key="location"><strong>Location:</strong> {lead.eventLocation || (formData as any).eventLocation}</div>);
+    }
+
+    // Time details with AM/PM format
+    if (lead.startTime && lead.endTime) {
+      details.push(<div key="time"><strong>Time:</strong> {formatTimeToAMPM(lead.startTime)} - {formatTimeToAMPM(lead.endTime)}</div>);
+    } else if ((formData as any).startTime && (formData as any).endTime) {
+      details.push(<div key="time-form"><strong>Time:</strong> {formatTimeToAMPM((formData as any).startTime)} - {formatTimeToAMPM((formData as any).endTime)}</div>);
+    }
+
+    // Guest counts
+    if (lead.guestCount || (formData as any).guestCount) details.push(<div key="guests"><strong>Guests:</strong> {lead.guestCount || (formData as any).guestCount}</div>);
+    if (lead.adultCount || (formData as any).adultCount) details.push(<div key="adults"><strong>Adults:</strong> {lead.adultCount || (formData as any).adultCount}</div>);
+    if (lead.childCount || (formData as any).childCount) details.push(<div key="children"><strong>Children:</strong> {lead.childCount || (formData as any).childCount}</div>);
+    if (lead.attendeeCount || (formData as any).attendeeCount || (formData as any).expectedAttendees) {
+      details.push(<div key="attendees"><strong>Attendees:</strong> {lead.attendeeCount || (formData as any).attendeeCount || (formData as any).expectedAttendees}</div>);
+    }
+
+    // Event type specific details
+    if (lead.eventType === 'birthday-party') {
+      if ((formData as any).childName) details.push(<div key="child"><strong>Child:</strong> {(formData as any).childName}</div>);
+      if ((formData as any).childAge) details.push(<div key="age"><strong>Age:</strong> {(formData as any).childAge}</div>);
+      if ((formData as any).partyTheme) details.push(<div key="theme"><strong>Theme:</strong> {(formData as any).partyTheme}</div>);
+      if ((formData as any).partyPackage) details.push(<div key="package"><strong>Package:</strong> {(formData as any).partyPackage}</div>);
+      if ((formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {(formData as any).foodChoice}</div>);
+      if ((formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {(formData as any).cupcakeFlavor}</div>);
+      if ((formData as any).specialNeeds && Array.isArray((formData as any).specialNeeds)) {
+        details.push(<div key="special"><strong>Special Needs:</strong> {(formData as any).specialNeeds.join(', ')}</div>);
+      }
+    }
+
+    if (lead.eventType === 'workshop') {
+      if ((formData as any).workshopType) details.push(<div key="workshop-type"><strong>Workshop:</strong> {(formData as any).workshopType}</div>);
+      if ((formData as any).classFormat) details.push(<div key="format"><strong>Format:</strong> {(formData as any).classFormat}</div>);
+      if ((formData as any).scheduleNotes) details.push(<div key="schedule"><strong>Schedule:</strong> {(formData as any).scheduleNotes}</div>);
+    }
+
+    if (lead.eventType === 'permanent-jewelry') {
+      if ((formData as any).selectedJewelryPieces && Array.isArray((formData as any).selectedJewelryPieces)) {
+        details.push(<div key="jewelry"><strong>Jewelry:</strong> {(formData as any).selectedJewelryPieces.join(', ')}</div>);
+      }
+      if ((formData as any).jewelryPeopleCount) details.push(<div key="jewelry-people"><strong>People:</strong> {(formData as any).jewelryPeopleCount}</div>);
+    }
+
+    if (lead.eventType === 'studio-rental') {
+      if ((formData as any).studioUsage) details.push(<div key="usage"><strong>Usage:</strong> {(formData as any).studioUsage}</div>);
+      if ((formData as any).studioSubType) details.push(<div key="subtype"><strong>Type:</strong> {(formData as any).studioSubType}</div>);
+      if ((formData as any).studioTimeNotes) details.push(<div key="time-notes"><strong>Notes:</strong> {(formData as any).studioTimeNotes}</div>);
+    }
+
+    if (lead.eventType === 'trucker-hat' || lead.eventType === 'diy-party') {
+      if ((formData as any).rentalPricing) {
+        const pricing = (formData as any).rentalPricing;
+        if (pricing.basePrice) details.push(<div key="base-price"><strong>Base Price:</strong> ${(pricing.basePrice / 100).toFixed(2)}</div>);
+        if (pricing.hours) details.push(<div key="hours"><strong>Duration:</strong> {pricing.hours} hours</div>);
+      }
+    }
+
+    // Questions/Messages
+    if ((formData as any).questions) details.push(<div key="questions"><strong>Questions:</strong> {(formData as any).questions}</div>);
+    if ((formData as any).message) details.push(<div key="message"><strong>Message:</strong> {(formData as any).message}</div>);
+
+    return details;
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className={editingLead ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
       {leads.map((lead: Lead) => {
         const isEditing = editingLead === lead.id;
         const currentData = isEditing ? editingData : lead;
         
         return (
-          <Card key={lead.id} className={`hover:shadow-md transition-all ${isEditing ? 'ring-2 ring-blue-500' : ''}`}>
+          <Card key={lead.id} className={`hover:shadow-md transition-all ${isEditing ? 'ring-2 ring-blue-500 md:col-span-2 lg:col-span-3' : ''}`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 {isEditing ? (
@@ -420,9 +512,6 @@ function EnhancedLeadCards({
                 <div className="flex gap-2">
                   <Badge className={getLeadPriorityColor(lead.leadScore as any)}>
                     {lead.leadScore}
-                  </Badge>
-                  <Badge className={getStatusColor(lead.status as LeadStatus)}>
-                    {lead.status.replace('_', ' ')}
                   </Badge>
                 </div>
               </div>
@@ -466,24 +555,7 @@ function EnhancedLeadCards({
               
               {/* Event Details */}
               <div className="text-sm text-gray-600 space-y-1">
-                <div><strong>Event:</strong> {lead.eventType}</div>
-                {lead.guestCount && <div><strong>Guests:</strong> {lead.guestCount}</div>}
-                {lead.adultCount && <div><strong>Adults:</strong> {lead.adultCount}</div>}
-                {lead.childCount && <div><strong>Children:</strong> {lead.childCount}</div>}
-                {lead.attendeeCount && <div><strong>Attendees:</strong> {lead.attendeeCount}</div>}
-                {lead.eventDescription && <div><strong>Description:</strong> {lead.eventDescription}</div>}
-                {lead.eventLocation && <div><strong>Location:</strong> {lead.eventLocation}</div>}
-                {lead.startTime && lead.endTime && (
-                  <div><strong>Time:</strong> {lead.startTime} - {lead.endTime}</div>
-                )}
-                {lead.workshopType && <div><strong>Workshop:</strong> {lead.workshopType}</div>}
-                {lead.jewelryPieces && lead.jewelryPieces.length > 0 && (
-                  <div><strong>Jewelry:</strong> {lead.jewelryPieces.join(', ')}</div>
-                )}
-                {lead.packageSelection && <div><strong>Package:</strong> {lead.packageSelection}</div>}
-                {lead.specialRequirements && lead.specialRequirements.length > 0 && (
-                  <div><strong>Special Needs:</strong> {lead.specialRequirements.join(', ')}</div>
-                )}
+                {renderEventDetails(lead)}
               </div>
               
               {/* Notes */}
@@ -842,7 +914,7 @@ function InvoiceCreationInterface({
 
   const handleCreateInvoice = () => {
     // Use type-safe calculation
-    const calculation = calculateInvoiceTotal(invoiceItems);
+    const calculation = calculateInvoiceTotal(invoiceItems as InvoiceItem[]);
 
     const invoicePayload: InvoiceCreatePayload = {
       eventId: null, // Will need to create event if needed
@@ -915,14 +987,14 @@ function InvoiceCreationInterface({
               <div>
                 <label className="block text-sm font-medium mb-1">Name</label>
                 <Input
-                  value={leadData.name}
+                  value={leadData.name || ''}
                   onChange={(e) => setLeadData({...leadData, name: e.target.value})}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Event Type</label>
                 <Input
-                  value={leadData.eventType}
+                  value={leadData.eventType || ''}
                   onChange={(e) => setLeadData({...leadData, eventType: e.target.value})}
                 />
               </div>
@@ -933,14 +1005,14 @@ function InvoiceCreationInterface({
                 <label className="block text-sm font-medium mb-1">Email</label>
                 <Input
                   type="email"
-                  value={leadData.email}
+                  value={leadData.email || ''}
                   onChange={(e) => setLeadData({...leadData, email: e.target.value})}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Phone</label>
                 <Input
-                  value={leadData.phone}
+                  value={leadData.phone || ''}
                   onChange={(e) => setLeadData({...leadData, phone: e.target.value})}
                 />
               </div>
@@ -1029,7 +1101,7 @@ function InvoiceCreationInterface({
             <div>
               <label className="block text-sm font-medium mb-1">Client Name</label>
               <Input
-                value={invoiceData.clientName}
+                value={invoiceData.clientName || ''}
                 onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
               />
             </div>
@@ -1037,7 +1109,7 @@ function InvoiceCreationInterface({
             <div>
               <label className="block text-sm font-medium mb-1">Phone</label>
               <Input
-                value={invoiceData.clientPhone}
+                value={invoiceData.clientPhone || ''}
                 onChange={(e) => setInvoiceData({...invoiceData, clientPhone: e.target.value})}
               />
             </div>
@@ -1046,7 +1118,7 @@ function InvoiceCreationInterface({
               <label className="block text-sm font-medium mb-1">Email</label>
               <Input
                 type="email"
-                value={invoiceData.clientEmail}
+                value={invoiceData.clientEmail || ''}
                 onChange={(e) => setInvoiceData({...invoiceData, clientEmail: e.target.value})}
               />
             </div>
@@ -1080,7 +1152,7 @@ function InvoiceCreationInterface({
               <label className="block text-sm font-medium mb-1">Event Start Time</label>
               <Input
                 type="time"
-                value={invoiceData.eventStartTime}
+                value={invoiceData.eventStartTime || ''}
                 onChange={(e) => setInvoiceData({...invoiceData, eventStartTime: e.target.value})}
               />
             </div>

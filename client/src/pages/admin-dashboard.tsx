@@ -184,7 +184,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Overview</TabsTrigger>
             <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Events</TabsTrigger>
             <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Invoices</TabsTrigger>
-            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Inquiries</TabsTrigger>
+            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Leads</TabsTrigger>
             <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Staff</TabsTrigger>
           </TabsList>
 
