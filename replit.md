@@ -201,7 +201,7 @@ The application is specifically designed for Replit deployment with appropriate 
 - ✅ All service types properly mapped: birthday-party, studio-rental, trucker-hat, workshop, permanent-jewelry, diy-party, private-event
 
 **Phase 2 System Optimization (January 2025):**
-- ✅ Enhanced leads database with 18 new comprehensive fields for complete event data mapping
+- ✅ Enhanced leads database with 18+ comprehensive fields for complete event data mapping
 - ✅ Updated backend field extraction to map ALL form data from every event type:
   * Event details: description, adult/child counts, location, timing
   * Workshop specifics: type, format, attendee count  
@@ -220,6 +220,12 @@ The application is specifically designed for Replit deployment with appropriate 
   * shared/types/admin.ts - Admin dashboard and management types
   * shared/utils/invoice.ts - Type-safe invoice utility functions
   * shared/utils/lead.ts - Lead processing and analytics utilities
+- ✅ Added strategic missing fields to leads schema (January 2025):
+  * partyTheme: Birthday party theme selection for better filtering
+  * dateNotes: Notes when users select "not sure" for dates
+  * jewelryVision: Permanent jewelry event vision/description
+  * packageTotal: Calculated package totals in cents for accurate invoicing
+- ✅ Enhanced admin dashboard lead display to prioritize structured fields over JSON parsing
 - 🔄 Invoice management system with Stripe payments and email/SMS delivery
 - 🔄 Calendar conflict detection for studio bookings vs mobile services
 

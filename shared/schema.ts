@@ -258,6 +258,12 @@ export const leads = pgTable("leads", {
   packageSelection: text("package_selection"), // Selected package name/type
   foodPreferences: json("food_preferences"), // Food choices, cupcake flavors, etc.
   
+  // Strategic missing fields for enhanced invoice building and admin display
+  partyTheme: text("party_theme"), // Birthday party theme selection
+  dateNotes: text("date_notes"), // Notes when user selects "not sure" for dates
+  jewelryVision: text("jewelry_vision"), // Permanent jewelry event vision/description
+  packageTotal: integer("package_total"), // Calculated package total in cents
+  
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

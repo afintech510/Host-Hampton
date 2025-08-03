@@ -445,45 +445,56 @@ function EnhancedLeadCards({
 
     // Event type specific details - handle both "birthday-party" and "kids-party" 
     if (lead.eventType === 'birthday-party' || lead.eventType === 'kids-party' || (formData as any).eventType === 'birthday-party') {
-      if ((formData as any).childName) details.push(<div key="child"><strong>Child:</strong> {(formData as any).childName}</div>);
-      if ((formData as any).childAge) details.push(<div key="age"><strong>Age:</strong> {(formData as any).childAge}</div>);
-      if ((formData as any).partyTheme) details.push(<div key="theme"><strong>Theme:</strong> {(formData as any).partyTheme}</div>);
-      if ((formData as any).partyPackage) details.push(<div key="package"><strong>Package:</strong> {(formData as any).partyPackage}</div>);
-      if ((formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {(formData as any).foodChoice}</div>);
-      if ((formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {(formData as any).cupcakeFlavor}</div>);
-      if ((formData as any).partyAddons && Array.isArray((formData as any).partyAddons) && (formData as any).partyAddons.length > 0) {
+      if (lead.childName || (formData as any).childName) details.push(<div key="child"><strong>Child:</strong> {lead.childName || (formData as any).childName}</div>);
+      if (lead.childAge || (formData as any).childAge) details.push(<div key="age"><strong>Age:</strong> {lead.childAge || (formData as any).childAge}</div>);
+      if (lead.partyTheme || (formData as any).partyTheme) details.push(<div key="theme"><strong>Theme:</strong> {lead.partyTheme || (formData as any).partyTheme}</div>);
+      if (lead.packageSelection || (formData as any).partyPackage) details.push(<div key="package"><strong>Package:</strong> {lead.packageSelection || (formData as any).partyPackage}</div>);
+      if (lead.packageTotal) details.push(<div key="package-total"><strong>Package Total:</strong> ${(lead.packageTotal / 100).toFixed(2)}</div>);
+      if (lead.foodPreferences?.foodChoice || (formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {lead.foodPreferences?.foodChoice || (formData as any).foodChoice}</div>);
+      if (lead.foodPreferences?.cupcakeFlavor || (formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {lead.foodPreferences?.cupcakeFlavor || (formData as any).cupcakeFlavor}</div>);
+      if (lead.selectedAddons && Array.isArray(lead.selectedAddons) && lead.selectedAddons.length > 0) {
+        details.push(<div key="addons"><strong>Add-ons:</strong> {lead.selectedAddons.map((addon: any) => addon.name || addon).join(', ')}</div>);
+      } else if ((formData as any).partyAddons && Array.isArray((formData as any).partyAddons) && (formData as any).partyAddons.length > 0) {
         details.push(<div key="addons"><strong>Add-ons:</strong> {(formData as any).partyAddons.join(', ')}</div>);
       }
-      if ((formData as any).specialNeeds && Array.isArray((formData as any).specialNeeds) && (formData as any).specialNeeds.length > 0) {
+      if (lead.specialRequirements && Array.isArray(lead.specialRequirements) && lead.specialRequirements.length > 0) {
+        details.push(<div key="special"><strong>Special Needs:</strong> {lead.specialRequirements.join(', ')}</div>);
+      } else if ((formData as any).specialNeeds && Array.isArray((formData as any).specialNeeds) && (formData as any).specialNeeds.length > 0) {
         details.push(<div key="special"><strong>Special Needs:</strong> {(formData as any).specialNeeds.join(', ')}</div>);
       }
+      if (lead.dateNotes) details.push(<div key="date-notes"><strong>Date Notes:</strong> {lead.dateNotes}</div>);
     }
 
     if (lead.eventType === 'workshop') {
-      if ((formData as any).workshopType) details.push(<div key="workshop-type"><strong>Workshop:</strong> {(formData as any).workshopType}</div>);
-      if ((formData as any).classFormat) details.push(<div key="format"><strong>Format:</strong> {(formData as any).classFormat}</div>);
-      if ((formData as any).scheduleNotes) details.push(<div key="schedule"><strong>Schedule:</strong> {(formData as any).scheduleNotes}</div>);
+      if (lead.workshopType || (formData as any).workshopType) details.push(<div key="workshop-type"><strong>Workshop:</strong> {lead.workshopType || (formData as any).workshopType}</div>);
+      if (lead.classFormat || (formData as any).classFormat) details.push(<div key="format"><strong>Format:</strong> {lead.classFormat || (formData as any).classFormat}</div>);
+      if (lead.scheduleNotes || (formData as any).scheduleNotes) details.push(<div key="schedule"><strong>Schedule:</strong> {lead.scheduleNotes || (formData as any).scheduleNotes}</div>);
+      if ((formData as any).workshopDescription) details.push(<div key="workshop-desc"><strong>Description:</strong> {(formData as any).workshopDescription}</div>);
     }
 
     if (lead.eventType === 'permanent-jewelry') {
-      if ((formData as any).selectedJewelryPieces && Array.isArray((formData as any).selectedJewelryPieces)) {
+      if (lead.jewelryPieces && Array.isArray(lead.jewelryPieces)) {
+        details.push(<div key="jewelry"><strong>Jewelry:</strong> {lead.jewelryPieces.join(', ')}</div>);
+      } else if ((formData as any).selectedJewelryPieces && Array.isArray((formData as any).selectedJewelryPieces)) {
         details.push(<div key="jewelry"><strong>Jewelry:</strong> {(formData as any).selectedJewelryPieces.join(', ')}</div>);
       }
-      if ((formData as any).jewelryPeopleCount) details.push(<div key="jewelry-people"><strong>People:</strong> {(formData as any).jewelryPeopleCount}</div>);
+      if (lead.attendeeCount || (formData as any).jewelryPeopleCount) details.push(<div key="jewelry-people"><strong>People:</strong> {lead.attendeeCount || (formData as any).jewelryPeopleCount}</div>);
+      if (lead.jewelryVision || (formData as any).jewelryVision) details.push(<div key="jewelry-vision"><strong>Vision:</strong> {lead.jewelryVision || (formData as any).jewelryVision}</div>);
     }
 
     if (lead.eventType === 'studio-rental') {
-      if ((formData as any).studioUsage) details.push(<div key="usage"><strong>Usage:</strong> {(formData as any).studioUsage}</div>);
+      if (lead.studioUsage || (formData as any).studioUsage) details.push(<div key="usage"><strong>Usage:</strong> {lead.studioUsage || (formData as any).studioUsage}</div>);
       if ((formData as any).studioSubType) details.push(<div key="subtype"><strong>Type:</strong> {(formData as any).studioSubType}</div>);
-      if ((formData as any).studioTimeNotes) details.push(<div key="time-notes"><strong>Notes:</strong> {(formData as any).studioTimeNotes}</div>);
+      if (lead.scheduleNotes || (formData as any).studioTimeNotes) details.push(<div key="time-notes"><strong>Notes:</strong> {lead.scheduleNotes || (formData as any).studioTimeNotes}</div>);
     }
 
     if (lead.eventType === 'trucker-hat' || lead.eventType === 'diy-party') {
-      if ((formData as any).rentalPricing) {
-        const pricing = (formData as any).rentalPricing;
+      if (lead.pricingDetails || (formData as any).rentalPricing) {
+        const pricing = lead.pricingDetails || (formData as any).rentalPricing;
         if (pricing.basePrice) details.push(<div key="base-price"><strong>Base Price:</strong> ${(pricing.basePrice / 100).toFixed(2)}</div>);
         if (pricing.hours) details.push(<div key="hours"><strong>Duration:</strong> {pricing.hours} hours</div>);
       }
+      if (lead.scheduleNotes || (formData as any).unsureDetails) details.push(<div key="date-uncertainty"><strong>Date Notes:</strong> {lead.scheduleNotes || (formData as any).unsureDetails}</div>);
     }
 
     // Questions/Messages

@@ -546,6 +546,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cupcakeFlavor: quoteData.cupcakeFlavor || null
         },
         
+        // Strategic field mapping for enhanced invoice building
+        partyTheme: quoteData.partyTheme || null,
+        dateNotes: quoteData.dateNotes || null,
+        jewelryVision: quoteData.jewelryVision || null,
+        packageTotal: quoteData.packageTotal ? parseInt(quoteData.packageTotal) * 100 : null,
+        
         // Standard lead tracking fields
         selectedAddons: quoteData.partyAddons || [],
         estimatedCost: quoteData.totalEstimate ? parseInt(quoteData.totalEstimate) * 100 : null, // Convert to cents
