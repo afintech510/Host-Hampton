@@ -233,6 +233,8 @@ export default function InvoiceCreationDialog({
     },
     onSuccess: (data) => {
       console.log("Invoice creation response:", data);
+      console.log("Invoice object:", data.invoice);
+      console.log("Stripe URL:", data.invoice?.stripeInvoiceUrl);
       setCreatedInvoice(data.invoice);
       toast({
         title: mode === 'edit' ? "Invoice Updated" : "Invoice Created",
@@ -323,6 +325,8 @@ export default function InvoiceCreationDialog({
       }))
     };
 
+    console.log("Sending invoice payload:", invoicePayload);
+    console.log("Invoice items:", invoicePayload.items);
     createInvoiceMutation.mutate(invoicePayload);
   };
 

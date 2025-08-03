@@ -1220,6 +1220,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create Stripe payment link
+      console.log("Items for Stripe:", items);
+      console.log("Items length:", items?.length);
       try {
         if (items && items.length > 0) {
           const stripeLineItems = items.map((item: any) => ({
