@@ -16,7 +16,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2023-10-16",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1228,74 +1228,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("No items to create for invoice");
       }
       
-      // Create Stripe payment link
-      console.log("=== STRIPE PROCESSING START ===");
-      console.log("Items for Stripe:", items);
-      console.log("Items length:", items?.length);
-      console.log("Stripe secret available:", !!process.env.STRIPE_SECRET_KEY);
+      // Create Stripe payment link (using working pattern from shop checkout)
       try {
         if (items && items.length > 0) {
-          console.log("Creating Stripe payment link...");
-          const stripeLineItems = items.map((item: any) => ({
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: item.name,
-                description: `Quantity: ${item.quantity}`
-              },
-              unit_amount: item.unitPrice, // Already in cents
-            },
-            quantity: item.quantity
-          }));
-
-          const paymentLink = await stripe.paymentLinks.create({
-            line_items: stripeLineItems,
+          // Use PaymentIntent approach like the working shop checkout
+          const paymentIntent = await stripe.paymentIntents.create({
+            amount: invoiceData.total, // total already in cents
+            currency: "usd",
             metadata: {
               invoiceId: created.id.toString(),
               leadId: invoiceData.leadId?.toString() || '',
               type: 'invoice_payment'
-            },
-            payment_method_types: ['card'],
-            billing_address_collection: 'auto',
-            custom_fields: [
-              {
-                key: 'payment_type',
-                label: {
-                  type: 'custom',
-                  custom: 'Payment Type'
-                },
-                type: 'dropdown',
-                dropdown: {
-                  options: [
-                    { label: `Deposit Payment ($${(invoiceData.deposit / 100).toFixed(2)})`, value: 'deposit' },
-                    { label: `Full Payment ($${(invoiceData.total / 100).toFixed(2)})`, value: 'full' }
-                  ]
-                }
-              }
-            ]
+            }
           });
 
           // Update invoice with Stripe information
-          const updatedInvoice = await storage.updateInvoice(created.id, {
-            stripePaymentLinkId: paymentLink.id,
-            stripeInvoiceUrl: paymentLink.url,
+          await storage.updateInvoice(created.id, {
+            stripePaymentLinkId: paymentIntent.id,
+            stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
             status: 'sent'
           });
 
-          // Get the complete invoice with items
+          // Get the complete updated invoice
           const completeInvoice = await storage.getInvoiceById(created.id);
-          console.log("Complete invoice with Stripe data:", completeInvoice);
           
           res.status(201).json({ 
             success: true, 
             invoice: completeInvoice
           });
         } else {
-          console.log("No items provided, skipping Stripe integration");
           res.status(201).json({ success: true, invoice: created });
         }
       } catch (stripeError: any) {
+        console.error('=== STRIPE ERROR ===');
         console.error('Stripe payment link creation failed:', stripeError);
+        console.error('Error details:', stripeError.message);
+        console.error('Full error:', JSON.stringify(stripeError, null, 2));
         // Return invoice without Stripe integration
         res.status(201).json({ 
           success: true, 
