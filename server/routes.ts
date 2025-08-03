@@ -1234,45 +1234,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("NO ITEMS TO CREATE - ITEMS:", items);
       }
       
-      // Try to create Stripe payment link if items exist
-      let finalInvoice = created;
-      let hasStripeIntegration = false;
+      // ALWAYS try to create Stripe payment link (remove conditional)
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: invoiceData.total,
+          currency: "usd",
+          metadata: {
+            invoiceId: created.id.toString(),
+            type: 'invoice_payment'
+          }
+        });
 
-      if (items && Array.isArray(items) && items.length > 0) {
-        try {
-          // Create PaymentIntent using the exact pattern from working shop checkout
-          const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(invoiceData.total), // Ensure integer
-            currency: "usd",
-            metadata: {
-              invoiceId: created.id.toString(),
-              clientName: invoiceData.clientName || '',
-              type: 'invoice_payment'
-            }
-          });
+        // Update invoice with Stripe information
+        await storage.updateInvoice(created.id, {
+          stripePaymentLinkId: paymentIntent.id,
+          stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
+          status: 'sent'
+        });
 
-          // Update the invoice with Stripe data
-          await storage.updateInvoice(created.id, {
-            stripePaymentLinkId: paymentIntent.id,
-            stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
-            status: 'sent'
-          });
-
-          hasStripeIntegration = true;
-          finalInvoice = await storage.getInvoiceById(created.id);
-        } catch (error: any) {
-          // Stripe failed, but continue with invoice creation
-          console.error("Stripe integration failed:", error.message);
-          console.error("Full error details:", error);
-          console.error("Stack trace:", error.stack);
-        }
+        // Get updated invoice and return
+        const updatedInvoice = await storage.getInvoiceById(created.id);
+        res.status(201).json({ 
+          success: true, 
+          invoice: updatedInvoice,
+          stripeSuccess: true
+        });
+      } catch (stripeError: any) {
+        res.status(201).json({ 
+          success: true, 
+          invoice: created,
+          stripeError: stripeError.message
+        });
       }
-
-      res.status(201).json({ 
-        success: true, 
-        invoice: finalInvoice,
-        stripeIntegration: hasStripeIntegration
-      });
     } catch (error: any) {
       console.error("Error creating invoice:", error);
       if (error instanceof z.ZodError) {
@@ -1285,16 +1278,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test Stripe connectivity
   app.post("/api/test-stripe", async (req, res) => {
     try {
-      console.log("Testing Stripe connectivity...");
       const paymentIntent = await stripe.paymentIntents.create({
         amount: 1000, // $10.00
         currency: "usd",
         metadata: { test: "true" }
       });
-      console.log("Stripe test successful:", paymentIntent.id);
-      res.json({ success: true, paymentIntentId: paymentIntent.id });
+      res.json({ 
+        success: true, 
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret,
+        checkoutUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`
+      });
     } catch (error: any) {
-      console.error("Stripe test failed:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // Add Stripe payment link to existing invoice
+  app.post("/api/invoices/:id/add-stripe", async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await storage.getInvoiceById(invoiceId);
+      
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: invoice.total,
+        currency: "usd",
+        metadata: {
+          invoiceId: invoice.id.toString(),
+          type: 'invoice_payment'
+        }
+      });
+
+      await storage.updateInvoice(invoice.id, {
+        stripePaymentLinkId: paymentIntent.id,
+        stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
+        status: 'sent'
+      });
+
+      const updatedInvoice = await storage.getInvoiceById(invoice.id);
+      res.json({ success: true, invoice: updatedInvoice });
+    } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
   });
