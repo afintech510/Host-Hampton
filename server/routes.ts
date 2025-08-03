@@ -1164,13 +1164,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/invoices", async (req, res) => {
+    // Force console output to appear
+    process.stdout.write("=== INVOICE CREATION START ===\n");
+    process.stdout.write(`Request body: ${JSON.stringify(req.body, null, 2)}\n`);
+    
     try {
-      console.log("=== INVOICE CREATION START ===");
-      console.log("Creating invoice with data:", req.body);
-      console.log("Items extracted:", req.body.items);
-      console.log("Items count:", req.body.items?.length);
-      
       const { leadId, items, ...invoiceData } = req.body;
+      process.stdout.write(`Extracted items: ${JSON.stringify(items)}\n`);
+      process.stdout.write(`Items array length: ${items?.length}\n`);
       
       // If we have a leadId, get the lead data to create an event first
       if (leadId) {
@@ -1209,74 +1210,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invoiceData.leadId = leadId;
       }
       
+      console.log("About to parse invoice data...");
       const invoice = insertInvoiceSchema.parse(invoiceData);
-      console.log("Parsed invoice data:", invoice);
+      console.log("Successfully parsed invoice data");
+      
+      console.log("About to create invoice...");
       const created = await storage.createInvoice(invoice);
-      console.log("Created invoice:", created);
+      console.log("Successfully created invoice with ID:", created.id);
       
       // Create invoice items if provided
+      console.log("Checking items for creation...");
       if (items && items.length > 0) {
-        console.log("Creating invoice items:", items.length);
+        console.log("CREATING INVOICE ITEMS - COUNT:", items.length);
         for (const item of items) {
+          console.log("Creating item:", item);
           await storage.createInvoiceItem({
             ...item,
             invoiceId: created.id
           });
         }
-        console.log("Invoice items created successfully");
+        console.log("ALL INVOICE ITEMS CREATED SUCCESSFULLY");
       } else {
-        console.log("No items to create for invoice");
+        console.log("NO ITEMS TO CREATE - ITEMS:", items);
       }
       
-      // Create Stripe payment link (using working pattern from shop checkout)
-      try {
-        if (items && items.length > 0) {
-          // Use PaymentIntent approach like the working shop checkout
+      // Try to create Stripe payment link if items exist
+      let finalInvoice = created;
+      let hasStripeIntegration = false;
+
+      if (items && Array.isArray(items) && items.length > 0) {
+        try {
+          // Create PaymentIntent using the exact pattern from working shop checkout
           const paymentIntent = await stripe.paymentIntents.create({
-            amount: invoiceData.total, // total already in cents
+            amount: Math.round(invoiceData.total), // Ensure integer
             currency: "usd",
             metadata: {
               invoiceId: created.id.toString(),
-              leadId: invoiceData.leadId?.toString() || '',
+              clientName: invoiceData.clientName || '',
               type: 'invoice_payment'
             }
           });
 
-          // Update invoice with Stripe information
+          // Update the invoice with Stripe data
           await storage.updateInvoice(created.id, {
             stripePaymentLinkId: paymentIntent.id,
             stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
             status: 'sent'
           });
 
-          // Get the complete updated invoice
-          const completeInvoice = await storage.getInvoiceById(created.id);
-          
-          res.status(201).json({ 
-            success: true, 
-            invoice: completeInvoice
-          });
-        } else {
-          res.status(201).json({ success: true, invoice: created });
+          hasStripeIntegration = true;
+          finalInvoice = await storage.getInvoiceById(created.id);
+        } catch (error: any) {
+          // Stripe failed, but continue with invoice creation
+          console.error("Stripe integration failed:", error.message);
+          console.error("Full error details:", error);
+          console.error("Stack trace:", error.stack);
         }
-      } catch (stripeError: any) {
-        console.error('=== STRIPE ERROR ===');
-        console.error('Stripe payment link creation failed:', stripeError);
-        console.error('Error details:', stripeError.message);
-        console.error('Full error:', JSON.stringify(stripeError, null, 2));
-        // Return invoice without Stripe integration
-        res.status(201).json({ 
-          success: true, 
-          invoice: created,
-          warning: 'Invoice created but Stripe payment link failed: ' + stripeError.message
-        });
       }
+
+      res.status(201).json({ 
+        success: true, 
+        invoice: finalInvoice,
+        stripeIntegration: hasStripeIntegration
+      });
     } catch (error: any) {
       console.error("Error creating invoice:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ success: false, message: "Failed to create invoice" });
+    }
+  });
+
+  // Test Stripe connectivity
+  app.post("/api/test-stripe", async (req, res) => {
+    try {
+      console.log("Testing Stripe connectivity...");
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: 1000, // $10.00
+        currency: "usd",
+        metadata: { test: "true" }
+      });
+      console.log("Stripe test successful:", paymentIntent.id);
+      res.json({ success: true, paymentIntentId: paymentIntent.id });
+    } catch (error: any) {
+      console.error("Stripe test failed:", error);
+      res.status(500).json({ success: false, error: error.message });
     }
   });
 
