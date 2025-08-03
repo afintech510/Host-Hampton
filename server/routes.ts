@@ -1072,12 +1072,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/invoices/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const updated = await storage.updateInvoice(id, req.body);
-      if (!updated) {
+      const { items, ...updateData } = req.body;
+      
+      // Get current invoice
+      const currentInvoice = await storage.getInvoiceById(id);
+      if (!currentInvoice) {
         return res.status(404).json({ success: false, message: "Invoice not found" });
       }
-      res.json({ success: true, invoice: updated });
+      
+      // Update invoice
+      const updated = await storage.updateInvoice(id, updateData);
+      
+      // Update items if provided
+      if (items && items.length > 0) {
+        // Delete existing items and create new ones
+        await storage.deleteInvoiceItems(id);
+        for (const item of items) {
+          await storage.createInvoiceItem({
+            ...item,
+            invoiceId: id
+          });
+        }
+        
+        // Update Stripe payment link if invoice has one and items changed
+        try {
+          if (currentInvoice.stripePaymentLinkId) {
+            // Deactivate old payment link
+            await stripe.paymentLinks.update(currentInvoice.stripePaymentLinkId, {
+              active: false
+            });
+
+            // Create new payment link
+            const stripeLineItems = items.map((item: any) => ({
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: item.name,
+                  description: `Quantity: ${item.quantity}`
+                },
+                unit_amount: item.unitPrice,
+              },
+              quantity: item.quantity
+            }));
+
+            const paymentLink = await stripe.paymentLinks.create({
+              line_items: stripeLineItems,
+              metadata: {
+                invoiceId: id.toString(),
+                leadId: updated.leadId?.toString() || '',
+                type: 'invoice_payment'
+              },
+              payment_method_types: ['card'],
+              billing_address_collection: 'auto',
+              custom_fields: [
+                {
+                  key: 'payment_type',
+                  label: {
+                    type: 'text',
+                    text: 'Payment Type'
+                  },
+                  type: 'dropdown',
+                  dropdown: {
+                    options: [
+                      { label: `Deposit Payment ($${(updateData.deposit / 100).toFixed(2)})`, value: 'deposit' },
+                      { label: `Full Payment ($${(updateData.total / 100).toFixed(2)})`, value: 'full' }
+                    ]
+                  }
+                }
+              ]
+            });
+
+            // Update with new Stripe info
+            await storage.updateInvoice(id, {
+              stripePaymentLinkId: paymentLink.id,
+              stripeInvoiceUrl: paymentLink.url
+            });
+          }
+        } catch (stripeError: any) {
+          console.error('Stripe payment link update failed:', stripeError);
+          // Continue without Stripe update
+        }
+      }
+      
+      // Get the complete updated invoice
+      const completeInvoice = await storage.getInvoiceById(id);
+      res.json({ success: true, invoice: completeInvoice });
     } catch (error) {
+      console.error("Error updating invoice:", error);
       res.status(500).json({ success: false, message: "Failed to update invoice" });
     }
   });
@@ -1086,7 +1167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Creating invoice with data:", req.body);
       
-      const { leadId, ...invoiceData } = req.body;
+      const { leadId, items, ...invoiceData } = req.body;
       
       // If we have a leadId, get the lead data to create an event first
       if (leadId) {
@@ -1122,11 +1203,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Now create the invoice with the event ID
         invoiceData.eventId = createdEvent.id;
+        invoiceData.leadId = leadId;
       }
       
       const invoice = insertInvoiceSchema.parse(invoiceData);
       const created = await storage.createInvoice(invoice);
-      res.status(201).json({ success: true, invoice: created });
+      
+      // Create invoice items if provided
+      if (items && items.length > 0) {
+        for (const item of items) {
+          await storage.createInvoiceItem({
+            ...item,
+            invoiceId: created.id
+          });
+        }
+      }
+      
+      // Create Stripe payment link
+      try {
+        if (items && items.length > 0) {
+          const stripeLineItems = items.map((item: any) => ({
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: item.name,
+                description: `Quantity: ${item.quantity}`
+              },
+              unit_amount: item.unitPrice, // Already in cents
+            },
+            quantity: item.quantity
+          }));
+
+          const paymentLink = await stripe.paymentLinks.create({
+            line_items: stripeLineItems,
+            metadata: {
+              invoiceId: created.id.toString(),
+              leadId: invoiceData.leadId?.toString() || '',
+              type: 'invoice_payment'
+            },
+            payment_method_types: ['card'],
+            billing_address_collection: 'auto',
+            custom_fields: [
+              {
+                key: 'payment_type',
+                label: {
+                  type: 'text',
+                  text: 'Payment Type'
+                },
+                type: 'dropdown',
+                dropdown: {
+                  options: [
+                    { label: `Deposit Payment ($${(invoiceData.deposit / 100).toFixed(2)})`, value: 'deposit' },
+                    { label: `Full Payment ($${(invoiceData.total / 100).toFixed(2)})`, value: 'full' }
+                  ]
+                }
+              }
+            ]
+          });
+
+          // Update invoice with Stripe information
+          const updatedInvoice = await storage.updateInvoice(created.id, {
+            stripePaymentLinkId: paymentLink.id,
+            stripeInvoiceUrl: paymentLink.url,
+            status: 'sent'
+          });
+
+          // Get the complete invoice with items
+          const completeInvoice = await storage.getInvoiceById(created.id);
+          
+          res.status(201).json({ 
+            success: true, 
+            invoice: completeInvoice
+          });
+        } else {
+          res.status(201).json({ success: true, invoice: created });
+        }
+      } catch (stripeError: any) {
+        console.error('Stripe payment link creation failed:', stripeError);
+        // Return invoice without Stripe integration
+        res.status(201).json({ 
+          success: true, 
+          invoice: created,
+          warning: 'Invoice created but Stripe payment link failed: ' + stripeError.message
+        });
+      }
     } catch (error: any) {
       console.error("Error creating invoice:", error);
       if (error instanceof z.ZodError) {

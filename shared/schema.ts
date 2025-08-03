@@ -101,14 +101,37 @@ export const events = pgTable("events", {
 export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id"), // Made nullable for lead-to-invoice workflow
+  leadId: integer("lead_id"), // Link back to the original lead
+  
+  // Client Information
+  clientName: text("client_name"),
+  clientEmail: text("client_email"),
+  clientPhone: text("client_phone"),
+  
+  // Event Information
+  eventDate: timestamp("event_date"),
+  eventDetails: text("event_details"),
+  eventLocation: text("event_location"),
+  
+  // Financial Information
   subtotal: integer("subtotal").notNull(), // In cents
   tax: integer("tax").notNull(), // In cents
   total: integer("total").notNull(), // In cents
   deposit: integer("deposit").notNull(), // In cents
   balanceDue: integer("balance_due").notNull(), // In cents
   ccFee: integer("cc_fee").default(0).notNull(), // In cents
+  
+  // Stripe Integration
+  stripeInvoiceId: text("stripe_invoice_id"), // Stripe invoice ID
+  stripePaymentLinkId: text("stripe_payment_link_id"), // Stripe payment link ID
+  stripeInvoiceUrl: text("stripe_invoice_url"), // URL for payment page
+  depositPaid: boolean("deposit_paid").default(false).notNull(), // Track deposit payment
+  
+  // Status and Metadata
+  status: text("status").default("draft").notNull(), // draft, sent, viewed, paid, overdue
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const invoiceItems = pgTable("invoice_items", {

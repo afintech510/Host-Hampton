@@ -805,6 +805,15 @@ export class MemStorage implements IStorage {
     };
   }
 
+  async deleteInvoiceItems(invoiceId: number): Promise<void> {
+    // Remove all items for this invoice
+    const itemsToDelete = Array.from(this.invoiceItems.entries())
+      .filter(([_, item]) => item.invoiceId === invoiceId)
+      .map(([id, _]) => id);
+    
+    itemsToDelete.forEach(id => this.invoiceItems.delete(id));
+  }
+
   async processInvoicePayment(invoiceId: number, paymentData: any): Promise<any | null> {
     const invoice = this.invoices.get(invoiceId);
     if (!invoice) return null;

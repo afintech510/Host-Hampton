@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Edit, Eye, X } from "lucide-react";
+import { Edit, Eye, X, Copy, Mail, Phone, ExternalLink, Check } from "lucide-react";
 
 // Import Lead type from schema
 import type { Lead } from "@/../../shared/schema";
@@ -44,6 +44,8 @@ export default function InvoiceCreationDialog({
   onSuccess
 }: InvoiceCreationDialogProps) {
   const { toast } = useToast();
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [createdInvoice, setCreatedInvoice] = useState<any>(null);
 
   // Helper function to format time to AM/PM
   const formatTimeToAMPM = (time24: string) => {
@@ -229,14 +231,14 @@ export default function InvoiceCreationDialog({
       const response = await apiRequest(method, url, invoicePayload);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setCreatedInvoice(data.invoice);
       toast({
         title: mode === 'edit' ? "Invoice Updated" : "Invoice Created",
-        description: `Invoice has been ${mode === 'edit' ? 'updated' : 'created'} successfully.`,
+        description: `Invoice has been ${mode === 'edit' ? 'updated' : 'created'} successfully.${data.invoice?.stripeInvoiceUrl ? ' Payment link generated!' : ''}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
-      onSuccess?.();
-      onClose();
+      // Don't close dialog immediately - show the Stripe link and actions
     },
     onError: (error: any) => {
       toast({
@@ -296,8 +298,15 @@ export default function InvoiceCreationDialog({
   const handleCreateInvoice = () => {
     const calculation = calculateInvoiceTotal(invoiceItems as InvoiceItem[]);
 
-    const invoicePayload: InvoiceCreatePayload = {
+    const invoicePayload: any = {
       eventId: null,
+      leadId: lead?.id || null,
+      clientName: invoiceData.clientName,
+      clientEmail: invoiceData.clientEmail,
+      clientPhone: invoiceData.clientPhone,
+      eventDate: invoiceData.eventDate ? new Date(invoiceData.eventDate).toISOString() : null,
+      eventDetails: invoiceData.eventDetails,
+      eventLocation: locationType === 'host-hampton' ? 'Host Hampton, Speonk NY' : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`,
       subtotal: toCents(calculation.subtotal),
       tax: toCents(calculation.tax),
       total: toCents(calculation.total),
@@ -314,6 +323,42 @@ export default function InvoiceCreationDialog({
     };
 
     createInvoiceMutation.mutate(invoicePayload);
+  };
+
+  const copyPaymentLink = async () => {
+    if (createdInvoice?.stripeInvoiceUrl) {
+      try {
+        await navigator.clipboard.writeText(createdInvoice.stripeInvoiceUrl);
+        setCopiedLink(true);
+        toast({
+          title: "Link Copied!",
+          description: "Payment link copied to clipboard",
+        });
+        setTimeout(() => setCopiedLink(false), 2000);
+      } catch (err) {
+        toast({
+          title: "Copy Failed",
+          description: "Could not copy link to clipboard",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const sendInvoiceEmail = () => {
+    // TODO: Implement email sending functionality
+    toast({
+      title: "Email Feature",
+      description: "Email invoice functionality will be implemented next",
+    });
+  };
+
+  const sendInvoiceSMS = () => {
+    // TODO: Implement SMS sending functionality
+    toast({
+      title: "SMS Feature", 
+      description: "SMS invoice functionality will be implemented next",
+    });
   };
 
   return (
@@ -658,9 +703,91 @@ export default function InvoiceCreationDialog({
                     {'\n'}9. Weather policy: Indoor events are not affected; outdoor events may be rescheduled
                   </p>
                 </div>
+
+                {/* Stripe Payment Link Section */}
+                {createdInvoice?.stripeInvoiceUrl && (
+                  <div className="border-t pt-4 mt-4">
+                    <h4 className="font-semibold mb-2 text-green-600">✓ Payment Link Generated</h4>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ExternalLink className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium">Customer Payment Link:</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={createdInvoice.stripeInvoiceUrl}
+                          readOnly
+                          className="text-xs bg-white"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={copyPaymentLink}
+                          className="shrink-0"
+                        >
+                          {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(createdInvoice.stripeInvoiceUrl, '_blank')}
+                          className="shrink-0"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2">
+                        Send this link to your customer to collect deposit or full payment
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center border-t pt-4">
+          <div className="flex gap-2">
+            {createdInvoice && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={sendInvoiceEmail}
+                  disabled={!invoiceData.clientEmail}
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email Invoice
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={sendInvoiceSMS}
+                  disabled={!invoiceData.clientPhone}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  SMS Invoice
+                </Button>
+              </>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              {createdInvoice ? 'Close' : 'Cancel'}
+            </Button>
+            {!createdInvoice && (
+              <Button 
+                onClick={handleCreateInvoice}
+                disabled={createInvoiceMutation.isPending}
+              >
+                {createInvoiceMutation.isPending 
+                  ? (mode === 'edit' ? 'Saving...' : 'Creating...') 
+                  : (mode === 'edit' ? 'Save Invoice' : 'Create Invoice')
+                }
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
