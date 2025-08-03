@@ -217,7 +217,7 @@ export default function LeadManagement() {
   );
 
   const handleEditLead = (leadId: number) => {
-    const lead = leads.find(l => l.id === leadId);
+    const lead = leads.find((l: Lead) => l.id === leadId);
     if (lead) {
       setEditingLead(leadId);
       setEditingData(lead);
@@ -246,7 +246,7 @@ export default function LeadManagement() {
 
   const handleInvoiceMode = (lead: Lead) => {
     setSelectedInvoiceLead(lead);
-    setCurrentLeadIndex(filteredLeads.findIndex(l => l.id === lead.id));
+    setCurrentLeadIndex(filteredLeads.findIndex((l: Lead) => l.id === lead.id));
     setInvoiceMode(true);
   };
 
@@ -706,31 +706,47 @@ function InvoiceCreationInterface({
     return due.toISOString().split('T')[0];
   };
 
+  // Format date for HTML input (handle both Date objects and strings)
+  const formatDateForInput = (date: string | Date | null) => {
+    if (!date) return '';
+    if (typeof date === 'string') {
+      // If it's already a string, try to parse and format it
+      const parsed = new Date(date);
+      if (isNaN(parsed.getTime())) return '';
+      return parsed.toISOString().split('T')[0];
+    }
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    return '';
+  };
+
   const [invoiceData, setInvoiceData] = useState({
     clientName: lead.name,
     clientPhone: lead.phone,
     clientEmail: lead.email,
-    eventDate: lead.eventDate || '',
+    eventDate: formatDateForInput(lead.eventDate),
     eventDetails: `${lead.eventType} for ${lead.name}`,
     eventStartTime: lead.startTime || '10:00',
     eventEndTime: lead.endTime || '12:00',
     eventLocation: locationType === 'host-hampton' ? 'Host Hampton, Speonk NY' : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`,
     depositAmount: 200,
-    dueDate: calculateDueDate(lead.eventDate || ''),
+    dueDate: calculateDueDate(formatDateForInput(lead.eventDate)),
     status: 'draft'
   });
 
+  // Start with editable basic invoice item, not locked to quote price
   const [invoiceItems, setInvoiceItems] = useState([
     {
       id: Date.now(),
       type: 'custom',
-      itemId: null,
+      itemId: 'custom',
       description: `${lead.eventType}${lead.guestCount ? ` (${lead.guestCount} guests)` : ''}`,
       quantity: 1,
-      unitPrice: (lead.estimatedCost || 87500) / 100,
-      total: (lead.estimatedCost || 87500) / 100,
-      isCustom: false,
-      customDescription: ''
+      unitPrice: 875, // Start with base price, not locked quote
+      total: 875,
+      isCustom: true,
+      customDescription: `${lead.eventType}${lead.guestCount ? ` (${lead.guestCount} guests)` : ''}`
     }
   ]);
 
@@ -813,7 +829,7 @@ function InvoiceCreationInterface({
     setInvoiceItems([...invoiceItems, {
       id: Date.now(),
       type: 'custom',
-      itemId: null,
+      itemId: 'custom',
       description: '',
       quantity: 1,
       unitPrice: 0,
@@ -840,6 +856,7 @@ function InvoiceCreationInterface({
             updated.unitPrice = selectedItem.price;
             updated.isCustom = selectedItem.value === 'custom';
             updated.type = selectedItem.type;
+            updated.itemId = selectedItem.value;
           }
         }
         
@@ -1157,7 +1174,7 @@ function InvoiceCreationInterface({
                     {/* Item dropdown on its own row */}
                     <div className="flex gap-2">
                       <Select
-                        value={item.itemId || ''}
+                        value={item.itemId}
                         onValueChange={(value) => updateInvoiceItem(item.id, 'itemId', value)}
                       >
                         <SelectTrigger className="flex-1">

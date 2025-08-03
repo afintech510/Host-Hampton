@@ -100,7 +100,7 @@ export const events = pgTable("events", {
 
 export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
-  eventId: integer("event_id").notNull(),
+  eventId: integer("event_id"), // Made nullable for lead-to-invoice workflow
   subtotal: integer("subtotal").notNull(), // In cents
   tax: integer("tax").notNull(), // In cents
   total: integer("total").notNull(), // In cents
