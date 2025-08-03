@@ -450,8 +450,8 @@ function EnhancedLeadCards({
       if (lead.partyTheme || (formData as any).partyTheme) details.push(<div key="theme"><strong>Theme:</strong> {lead.partyTheme || (formData as any).partyTheme}</div>);
       if (lead.packageSelection || (formData as any).partyPackage) details.push(<div key="package"><strong>Package:</strong> {lead.packageSelection || (formData as any).partyPackage}</div>);
       if (lead.packageTotal) details.push(<div key="package-total"><strong>Package Total:</strong> ${(lead.packageTotal / 100).toFixed(2)}</div>);
-      if ((lead.foodPreferences as any)?.foodChoice || (formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {(lead.foodPreferences as any)?.foodChoice || (formData as any).foodChoice}</div>);
-      if ((lead.foodPreferences as any)?.cupcakeFlavor || (formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {(lead.foodPreferences as any)?.cupcakeFlavor || (formData as any).cupcakeFlavor}</div>);
+      if (lead.foodPreferences?.foodChoice || (formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {lead.foodPreferences?.foodChoice || (formData as any).foodChoice}</div>);
+      if (lead.foodPreferences?.cupcakeFlavor || (formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {lead.foodPreferences?.cupcakeFlavor || (formData as any).cupcakeFlavor}</div>);
       if (lead.selectedAddons && Array.isArray(lead.selectedAddons) && lead.selectedAddons.length > 0) {
         details.push(<div key="addons"><strong>Add-ons:</strong> {lead.selectedAddons.map((addon: any) => addon.name || addon).join(', ')}</div>);
       } else if ((formData as any).partyAddons && Array.isArray((formData as any).partyAddons) && (formData as any).partyAddons.length > 0) {
