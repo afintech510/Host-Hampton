@@ -22,6 +22,7 @@ import Quote from "@/pages/quote-new";
 import InvoiceCreate from "@/pages/admin/invoice-create";
 import InvoiceView from "@/pages/invoice-view";
 import InvoicePayment from "@/pages/invoice-payment";
+import CustomerInvoice from "./pages/customer-invoice";
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/admin-dashboard/invoice/create" component={InvoiceCreate} />
       <Route path="/invoice/:invoiceId" component={InvoiceView} />
       <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
+      <Route path="/customer-invoice/:invoiceId" component={CustomerInvoice} />
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
       <Route path="/cart" component={Cart} />

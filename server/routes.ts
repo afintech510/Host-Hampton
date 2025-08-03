@@ -424,6 +424,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single invoice by ID (for customer view)
+  app.get("/api/invoices/:id", async (req, res) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      const invoice = await storage.getInvoiceById(invoiceId);
+      if (!invoice) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Invoice not found" 
+        });
+      }
+      res.json({ success: true, invoice });
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch invoice" 
+      });
+    }
+  });
+
   app.post("/api/invoices", async (req, res) => {
     console.log("=== INVOICE ROUTE START ===");
     console.log("Request body received:", JSON.stringify(req.body, null, 2));
@@ -605,6 +626,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ success: false, message: "Failed to create invoice" });
+    }
+  });
+
+  // Payment Intent for customer invoice payments
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, invoiceId, paymentType } = req.body;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        metadata: {
+          invoiceId: invoiceId?.toString() || '',
+          paymentType: paymentType || 'deposit'
+        }
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
     }
   });
 

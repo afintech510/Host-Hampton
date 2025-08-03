@@ -745,6 +745,47 @@ export default function InvoiceCreationDialog({
                         Send this link to your customer to collect deposit or full payment
                       </p>
                     </div>
+                    
+                    {/* Customer Invoice View Link */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Eye className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium">Customer Invoice View:</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={`${window.location.origin}/customer-invoice/${createdInvoice.id}`}
+                          readOnly
+                          className="text-xs bg-white"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const customerInvoiceUrl = `${window.location.origin}/customer-invoice/${createdInvoice.id}`;
+                            navigator.clipboard.writeText(customerInvoiceUrl);
+                            toast({
+                              title: "Link Copied",
+                              description: "Customer invoice link copied to clipboard",
+                            });
+                          }}
+                          className="shrink-0"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(`/customer-invoice/${createdInvoice.id}`, '_blank')}
+                          className="shrink-0"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2">
+                        Customer-facing invoice page with embedded payment module (defaults to $200 deposit)
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
