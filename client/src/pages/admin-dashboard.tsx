@@ -181,11 +181,11 @@ export default function AdminDashboard() {
       <div className="w-full px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-5 bg-slate-100">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-300 data-[state=active]:text-black">Overview</TabsTrigger>
-            <TabsTrigger value="events" className="data-[state=active]:bg-blue-300 data-[state=active]:text-black">Events</TabsTrigger>
-            <TabsTrigger value="invoices" className="data-[state=active]:bg-blue-300 data-[state=active]:text-black">Invoices</TabsTrigger>
-            <TabsTrigger value="leads" className="data-[state=active]:bg-blue-300 data-[state=active]:text-black">Inquiries</TabsTrigger>
-            <TabsTrigger value="staff" className="data-[state=active]:bg-blue-300 data-[state=active]:text-black">Staff</TabsTrigger>
+            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Overview</TabsTrigger>
+            <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Events</TabsTrigger>
+            <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Invoices</TabsTrigger>
+            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Inquiries</TabsTrigger>
+            <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Staff</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
