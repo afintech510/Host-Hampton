@@ -16,7 +16,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-07-30.basil",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1234,7 +1234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("NO ITEMS TO CREATE - ITEMS:", items);
       }
       
-      // ALWAYS try to create Stripe payment link (remove conditional)
+      // Create Stripe payment link using the EXACT working pattern
       try {
         const paymentIntent = await stripe.paymentIntents.create({
           amount: invoiceData.total,
@@ -1298,12 +1298,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/invoices/:id/add-stripe", async (req, res) => {
     try {
       const invoiceId = parseInt(req.params.id);
+      console.log("Adding Stripe to invoice:", invoiceId);
+      
       const invoice = await storage.getInvoiceById(invoiceId);
+      console.log("Retrieved invoice:", invoice ? "Found" : "Not found");
       
       if (!invoice) {
         return res.status(404).json({ success: false, message: "Invoice not found" });
       }
 
+      console.log("Creating Stripe PaymentIntent for amount:", invoice.total);
       const paymentIntent = await stripe.paymentIntents.create({
         amount: invoice.total,
         currency: "usd",
@@ -1313,16 +1317,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      await storage.updateInvoice(invoice.id, {
+      console.log("PaymentIntent created:", paymentIntent.id);
+      
+      const updateData = {
         stripePaymentLinkId: paymentIntent.id,
         stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
         status: 'sent'
-      });
+      };
+      console.log("Updating invoice with:", updateData);
+
+      await storage.updateInvoice(invoice.id, updateData);
+      console.log("Invoice updated successfully");
 
       const updatedInvoice = await storage.getInvoiceById(invoice.id);
+      console.log("Retrieved updated invoice");
+      
       res.json({ success: true, invoice: updatedInvoice });
     } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
+      console.error("Stripe add error:", error);
+      res.status(500).json({ success: false, error: error.message, stack: error.stack });
     }
   });
 

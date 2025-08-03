@@ -1132,11 +1132,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateInvoice(id: number, updates: any): Promise<Invoice | undefined> {
-    const [updated] = await db.update(invoices).set({
-      ...updates,
-      updatedAt: new Date()
-    }).where(eq(invoices.id, id)).returning();
-    return updated || undefined;
+    console.log("updateInvoice called with id:", id, "updates:", updates);
+    try {
+      const [updated] = await db.update(invoices).set({
+        ...updates,
+        updatedAt: new Date()
+      }).where(eq(invoices.id, id)).returning();
+      console.log("Update result:", updated ? "Success" : "No result");
+      return updated || undefined;
+    } catch (error: any) {
+      console.error("updateInvoice error:", error.message);
+      throw error;
+    }
   }
 
   async createEventStatusHistory(history: InsertEventStatusHistory): Promise<EventStatusHistory> {
@@ -1408,38 +1415,8 @@ export class DatabaseStorage implements IStorage {
   // Enhanced invoice and lead methods
   async getInvoiceById(id: number): Promise<any | null> {
     const [invoice] = await db
-      .select({
-        id: invoices.id,
-        invoiceNumber: invoices.invoiceNumber,
-        leadId: invoices.leadId,
-        customerId: invoices.customerId,
-        description: invoices.description,
-        eventDate: invoices.eventDate,
-        eventStartTime: invoices.eventStartTime,
-        eventEndTime: invoices.eventEndTime,
-        eventLocation: invoices.eventLocation,
-        subtotal: invoices.subtotal,
-        taxAmount: invoices.taxAmount,
-        totalAmount: invoices.totalAmount,
-        depositAmount: invoices.depositAmount,
-        balanceDue: invoices.balanceDue,
-        depositPercentage: invoices.depositPercentage,
-        taxRate: invoices.taxRate,
-        status: invoices.status,
-        dueDate: invoices.dueDate,
-        termsAndConditions: invoices.termsAndConditions,
-        stripePaymentLinkId: invoices.stripePaymentLinkId,
-        stripeInvoiceUrl: invoices.stripeInvoiceUrl,
-        depositPaid: invoices.depositPaid,
-        clientName: invoices.clientName,
-        clientEmail: invoices.clientEmail,
-        clientPhone: invoices.clientPhone,
-        customerName: customers.name,
-        customerEmail: customers.email,
-        customerPhone: customers.phone
-      })
+      .select()
       .from(invoices)
-      .leftJoin(customers, eq(invoices.customerId, customers.id))
       .where(eq(invoices.id, id));
 
     if (!invoice) return null;
@@ -1452,11 +1429,6 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...invoice,
-      customer: {
-        name: invoice.customerName,
-        email: invoice.customerEmail,
-        phone: invoice.customerPhone
-      },
       items
     };
   }
