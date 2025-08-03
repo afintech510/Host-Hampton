@@ -47,7 +47,7 @@ import allieImage from "@assets/image_1752579343744.png";
 const getFlowSteps = (eventType: string) => {
   switch (eventType) {
     case "birthday-party":
-      return 8; // Welcome → EventType → Theme → Package → Addons → PartyDetails → Food → Contact
+      return 9; // Welcome → EventType → Theme → Package → Addons → Date/Time → PartyDetails → Food → Contact
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
@@ -373,10 +373,10 @@ export default function GetQuote() {
         }
         break;
       case 6:
-        // Kids Themed Party: Child Details
+        // Kids Themed Party: Date/Time Selection
         if (isKidsPartyFlow(eventType)) {
           return (
-            <ChildDetailsStep
+            <DateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -410,10 +410,10 @@ export default function GetQuote() {
         // Workshop/Class: No step 6 needed (flow ends at step 5)
         break;
       case 7:
-        // Kids Themed Party: Food & Special Needs
+        // Kids Themed Party: Child Details
         if (isKidsPartyFlow(eventType)) {
           return (
-            <FoodStep
+            <ChildDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -435,6 +435,19 @@ export default function GetQuote() {
         // Workshop/Class: No step 7 needed (flow ends at step 5)
         break;
       case 8:
+        // Kids Themed Party: Food & Special Needs
+        if (isKidsPartyFlow(eventType)) {
+          return (
+            <FoodStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        break;
+      case 9:
         // Kids Themed Party: Contact (final step)
         if (isKidsPartyFlow(eventType)) {
           return (
