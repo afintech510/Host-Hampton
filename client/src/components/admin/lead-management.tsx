@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone, Calendar, DollarSign, Eye, Edit, Send, MessageSquare, UserCheck, LayoutGrid, Table, Save, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import InvoiceCreationDialog from "./invoice-creation-dialog";
 
 // Import Lead type from schema
 import type { Lead } from "@/../../shared/schema";
@@ -232,14 +233,57 @@ export default function LeadManagement() {
   };
 
   if (invoiceMode && selectedInvoiceLead) {
-    return <InvoiceCreationInterface 
-      lead={selectedInvoiceLead}
-      onBack={() => setInvoiceMode(false)}
-      onNext={handleNextLead}
-      onPrev={handlePrevLead}
-      hasNext={currentLeadIndex < filteredLeads.length - 1}
-      hasPrev={currentLeadIndex > 0}
-    />;
+    return (
+      <div className="space-y-6">
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setInvoiceMode(false)}
+            >
+              <ArrowRight className="w-4 h-4 rotate-180 mr-2" />
+              Back to Leads
+            </Button>
+            <h2 className="text-xl font-semibold">Create Invoice - {selectedInvoiceLead.name}</h2>
+          </div>
+
+          {/* Lead Navigation */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrevLead}
+              disabled={currentLeadIndex <= 0}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous Lead
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextLead}
+              disabled={currentLeadIndex >= filteredLeads.length - 1}
+            >
+              Next Lead
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Invoice Creation Dialog */}
+        <InvoiceCreationDialog
+          isOpen={true}
+          onClose={() => setInvoiceMode(false)}
+          lead={selectedInvoiceLead}
+          mode="create"
+          onSuccess={() => {
+            // Refresh the data and go back to leads
+            setInvoiceMode(false);
+          }}
+        />
+      </div>
+    );
   }
 
   return (
@@ -450,8 +494,8 @@ function EnhancedLeadCards({
       if (lead.partyTheme || (formData as any).partyTheme) details.push(<div key="theme"><strong>Theme:</strong> {lead.partyTheme || (formData as any).partyTheme}</div>);
       if (lead.packageSelection || (formData as any).partyPackage) details.push(<div key="package"><strong>Package:</strong> {lead.packageSelection || (formData as any).partyPackage}</div>);
       if (lead.packageTotal) details.push(<div key="package-total"><strong>Package Total:</strong> ${(lead.packageTotal / 100).toFixed(2)}</div>);
-      if (lead.foodPreferences?.foodChoice || (formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {lead.foodPreferences?.foodChoice || (formData as any).foodChoice}</div>);
-      if (lead.foodPreferences?.cupcakeFlavor || (formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {lead.foodPreferences?.cupcakeFlavor || (formData as any).cupcakeFlavor}</div>);
+      if ((lead.foodPreferences as any)?.foodChoice || (formData as any).foodChoice) details.push(<div key="food"><strong>Food:</strong> {(lead.foodPreferences as any)?.foodChoice || (formData as any).foodChoice}</div>);
+      if ((lead.foodPreferences as any)?.cupcakeFlavor || (formData as any).cupcakeFlavor) details.push(<div key="cupcake"><strong>Cupcake:</strong> {(lead.foodPreferences as any)?.cupcakeFlavor || (formData as any).cupcakeFlavor}</div>);
       if (lead.selectedAddons && Array.isArray(lead.selectedAddons) && lead.selectedAddons.length > 0) {
         details.push(<div key="addons"><strong>Add-ons:</strong> {lead.selectedAddons.map((addon: any) => addon.name || addon).join(', ')}</div>);
       } else if ((formData as any).partyAddons && Array.isArray((formData as any).partyAddons) && (formData as any).partyAddons.length > 0) {
@@ -727,7 +771,7 @@ function LeadTable({ leads, onEdit, onInvoice }: {
   );
 }
 
-// Invoice Creation Interface - 3 Panel Layout
+// Invoice Creation Interface - Uses Reusable Dialog
 function InvoiceCreationInterface({ 
   lead, 
   onBack, 
@@ -743,6 +787,71 @@ function InvoiceCreationInterface({
   hasNext: boolean;
   hasPrev: boolean;
 }) {
+  // Helper function to format time to AM/PM
+  const formatTimeToAMPM = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to extract comprehensive event details from form data
+  const extractEventDetails = (lead: Lead) => {
+    let formData = {};
+    try {
+      formData = lead.formData ? JSON.parse(lead.formData as string) : {};
+    } catch (e) {
+      formData = {};
+    }
+
+    const details = [];
+    
+    // Basic event info
+    if (lead.eventType) details.push(`Event Type: ${lead.eventType}`);
+    if (lead.eventDescription || (formData as any).eventDescription) {
+      details.push(`Description: ${lead.eventDescription || (formData as any).eventDescription}`);
+    }
+
+    // Birthday party specific details
+    if (lead.eventType === 'birthday-party' || (formData as any).eventType === 'birthday-party') {
+      if (lead.childName || (formData as any).childName) details.push(`Child Name: ${lead.childName || (formData as any).childName}`);
+      if (lead.childAge || (formData as any).childAge) details.push(`Child Age: ${lead.childAge || (formData as any).childAge}`);
+      if (lead.partyTheme || (formData as any).partyTheme) details.push(`Party Theme: ${lead.partyTheme || (formData as any).partyTheme}`);
+      if (lead.packageSelection || (formData as any).partyPackage) details.push(`Party Package: ${lead.packageSelection || (formData as any).partyPackage}`);
+      
+      // Handle add-ons
+      if (lead.selectedAddons && Array.isArray(lead.selectedAddons) && lead.selectedAddons.length > 0) {
+        details.push(`Party Add-ons: ${lead.selectedAddons.map((addon: any) => addon.name || addon).join(', ')}`);
+      } else if ((formData as any).partyAddons && Array.isArray((formData as any).partyAddons) && (formData as any).partyAddons.length > 0) {
+        details.push(`Party Add-ons: ${(formData as any).partyAddons.join(', ')}`);
+      }
+      
+      // Food preferences  
+      if ((lead.foodPreferences as any)?.foodChoice || (formData as any).foodChoice) {
+        details.push(`Food Choice: ${(lead.foodPreferences as any)?.foodChoice || (formData as any).foodChoice}`);
+      }
+      if ((lead.foodPreferences as any)?.cupcakeFlavor || (formData as any).cupcakeFlavor) {
+        details.push(`Cupcake Flavor: ${(lead.foodPreferences as any)?.cupcakeFlavor || (formData as any).cupcakeFlavor}`);
+      }
+      
+      // Special needs
+      if (lead.specialRequirements && Array.isArray(lead.specialRequirements) && lead.specialRequirements.length > 0) {
+        details.push(`Special Needs: ${lead.specialRequirements.join(', ')}`);
+      } else if ((formData as any).specialNeeds && Array.isArray((formData as any).specialNeeds) && (formData as any).specialNeeds.length > 0) {
+        details.push(`Special Needs: ${(formData as any).specialNeeds.join(', ')}`);
+      }
+    }
+
+    // Guest count info
+    if (lead.guestCount || (formData as any).guestCount) details.push(`Guest Count: ${lead.guestCount || (formData as any).guestCount}`);
+    if (lead.adultCount || (formData as any).adultCount) details.push(`Adult Count: ${lead.adultCount || (formData as any).adultCount}`);
+    if (lead.childCount || (formData as any).childCount) details.push(`Child Count: ${lead.childCount || (formData as any).childCount}`);
+
+    return details.join('\n');
+  };
+
   const [leadData, setLeadData] = useState(lead);
   const [locationType, setLocationType] = useState<'host-hampton' | 'mobile'>('host-hampton');
   const [mobileAddress, setMobileAddress] = useState({
@@ -781,7 +890,7 @@ function InvoiceCreationInterface({
     clientPhone: lead.phone,
     clientEmail: lead.email,
     eventDate: formatDateForInput(lead.eventDate),
-    eventDetails: `${lead.eventType} for ${lead.name}`,
+    eventDetails: extractEventDetails(lead),
     eventStartTime: lead.startTime || '10:00',
     eventEndTime: lead.endTime || '12:00',
     eventLocation: locationType === 'host-hampton' ? 'Host Hampton, Speonk NY' : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`,
@@ -1246,7 +1355,7 @@ function InvoiceCreationInterface({
                     : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {invoiceData.eventStartTime} - {invoiceData.eventEndTime}
+                  {formatTimeToAMPM(invoiceData.eventStartTime)} - {formatTimeToAMPM(invoiceData.eventEndTime)}
                 </p>
               </div>
 
