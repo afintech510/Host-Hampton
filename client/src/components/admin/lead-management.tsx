@@ -12,72 +12,41 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone, Calendar, DollarSign, Eye, Edit, Send, MessageSquare, UserCheck, LayoutGrid, Table, Save, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
-interface Lead {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  eventType: string;
-  eventDate: string;
-  guestCount: number;
-  status: string;
-  leadScore: string;
-  notes: string;
-  estimatedCost: number;
-  source: string;
-  createdAt: string;
-  lastContactedAt?: string;
-  // Enhanced fields from database
-  eventDescription?: string;
-  adultCount?: number;
-  childCount?: number;
-  attendeeCount?: number;
-  eventLocation?: string;
-  mobileAddress?: string;
-  startTime?: string;
-  endTime?: string;
-  dateFlexible?: boolean;
-  scheduleNotes?: string;
-  pricingDetails?: any;
-  specialRequirements?: string[];
-  workshopType?: string;
-  classFormat?: string;
-  jewelryPieces?: string[];
-  studioUsage?: string;
-  packageSelection?: string;
-  foodPreferences?: any;
-  childName?: string;
-  childAge?: number;
-  formData?: any;
-}
+// Import Lead type from schema
+import type { Lead } from "@/../../shared/schema";
 
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  variables: string[];
-}
+// Import types from our new type-safe interfaces
+import { 
+  InvoiceItem, 
+  InvoiceFormData, 
+  LocationType, 
+  MobileAddress, 
+  PredefinedItem,
+  InvoiceCreatePayload,
+  toCents,
+  formatCurrency,
+  calculateInvoiceTotal
+} from "@/../../shared/types/invoice";
+import { 
+  LeadStatus, 
+  LeadFilters,
+  calculateLeadAge,
+  formatLeadEventDate,
+  getLeadPriorityColor,
+  getStatusColor
+} from "@/../../shared/types/lead";
+import { 
+  populateInvoiceFromLead,
+  createInitialInvoiceItems,
+  validateInvoiceItems,
+  createPredefinedItems
+} from "@/../../shared/utils/invoice";
+import type { 
+  EmailTemplate,
+  DashboardStats 
+} from "@/../../shared/types/admin";
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'new': return 'bg-blue-100 text-blue-800';
-    case 'quote_requested': return 'bg-yellow-100 text-yellow-800';
-    case 'quote_sent': return 'bg-orange-100 text-orange-800';
-    case 'follow_up': return 'bg-purple-100 text-purple-800';
-    case 'converted': return 'bg-green-100 text-green-800';
-    case 'lost': return 'bg-red-100 text-red-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getLeadScoreColor = (score: string) => {
-  switch (score) {
-    case 'hot': return 'bg-red-100 text-red-800';
-    case 'warm': return 'bg-yellow-100 text-yellow-800';
-    case 'cold': return 'bg-blue-100 text-blue-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
+// Remove duplicate interfaces and helper functions - now using imported types
 
 export default function LeadManagement() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -449,10 +418,10 @@ function EnhancedLeadCards({
                   <CardTitle className="text-lg">{lead.name}</CardTitle>
                 )}
                 <div className="flex gap-2">
-                  <Badge className={getLeadScoreColor(lead.leadScore)}>
+                  <Badge className={getLeadPriorityColor(lead.leadScore as any)}>
                     {lead.leadScore}
                   </Badge>
-                  <Badge className={getStatusColor(lead.status)}>
+                  <Badge className={getStatusColor(lead.status as LeadStatus)}>
                     {lead.status.replace('_', ' ')}
                   </Badge>
                 </div>
@@ -641,7 +610,7 @@ function LeadTable({ leads, onEdit, onInvoice }: {
                 ${lead.estimatedCost ? (lead.estimatedCost / 100).toLocaleString() : 'TBD'}
               </td>
               <td className="px-4 py-3">
-                <Badge className={getStatusColor(lead.status)}>
+                <Badge className={getStatusColor(lead.status as LeadStatus)}>
                   {lead.status.replace('_', ' ')}
                 </Badge>
               </td>
@@ -803,7 +772,7 @@ function InvoiceCreationInterface({
 
   // Create invoice mutation
   const createInvoiceMutation = useMutation({
-    mutationFn: async (invoicePayload: any) => {
+    mutationFn: async (invoicePayload: InvoiceCreatePayload) => {
       const response = await apiRequest("POST", "/api/invoices", invoicePayload);
       return response.json();
     },
@@ -872,24 +841,23 @@ function InvoiceCreationInterface({
   };
 
   const handleCreateInvoice = () => {
-    const subtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
-    const tax = subtotal * 0.0875; // 8.75%
-    const total = subtotal + tax;
+    // Use type-safe calculation
+    const calculation = calculateInvoiceTotal(invoiceItems);
 
-    const invoicePayload = {
+    const invoicePayload: InvoiceCreatePayload = {
       eventId: null, // Will need to create event if needed
-      subtotal: Math.round(subtotal * 100), // Convert to cents
-      tax: Math.round(tax * 100),
-      total: Math.round(total * 100),
-      deposit: invoiceData.depositAmount * 100,
-      balanceDue: Math.round((total - invoiceData.depositAmount) * 100),
+      subtotal: toCents(calculation.subtotal),
+      tax: toCents(calculation.tax),
+      total: toCents(calculation.total),
+      deposit: toCents(invoiceData.depositAmount),
+      balanceDue: toCents(calculation.balanceDue),
       notes: `Invoice for ${invoiceData.eventDetails}`,
       items: invoiceItems.map(item => ({
         type: item.type,
         name: item.isCustom ? item.customDescription : item.description,
         quantity: item.quantity,
-        unitPrice: Math.round(item.unitPrice * 100),
-        total: Math.round(item.total * 100)
+        unitPrice: toCents(item.unitPrice),
+        total: toCents(item.total)
       }))
     };
 
