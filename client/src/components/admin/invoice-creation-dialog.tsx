@@ -304,7 +304,7 @@ export default function InvoiceCreationDialog({
       clientName: invoiceData.clientName,
       clientEmail: invoiceData.clientEmail,
       clientPhone: invoiceData.clientPhone,
-      eventDate: invoiceData.eventDate ? new Date(invoiceData.eventDate).toISOString() : null,
+      eventDate: invoiceData.eventDate ? new Date(invoiceData.eventDate) : null,
       eventDetails: invoiceData.eventDetails,
       eventLocation: locationType === 'host-hampton' ? 'Host Hampton, Speonk NY' : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`,
       subtotal: toCents(calculation.subtotal),

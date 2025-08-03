@@ -16,7 +16,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-06-30.basil",
+  apiVersion: "2024-12-18.acacia",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1119,7 +1119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               line_items: stripeLineItems,
               metadata: {
                 invoiceId: id.toString(),
-                leadId: updated.leadId?.toString() || '',
+                leadId: (updated?.leadId ?? currentInvoice.leadId)?.toString() || '',
                 type: 'invoice_payment'
               },
               payment_method_types: ['card'],
@@ -1128,8 +1128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 {
                   key: 'payment_type',
                   label: {
-                    type: 'text',
-                    text: 'Payment Type'
+                    type: 'custom',
+                    custom: 'Payment Type'
                   },
                   type: 'dropdown',
                   dropdown: {
@@ -1247,8 +1247,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               {
                 key: 'payment_type',
                 label: {
-                  type: 'text',
-                  text: 'Payment Type'
+                  type: 'custom',
+                  custom: 'Payment Type'
                 },
                 type: 'dropdown',
                 dropdown: {

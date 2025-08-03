@@ -51,6 +51,7 @@ export interface IStorage {
   getInvoiceByEventId(eventId: number): Promise<Invoice | undefined>;
   createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem>;
   getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]>;
+  deleteInvoiceItems(invoiceId: number): Promise<void>;
   
   // Enhanced methods for new functionality
   createCommunication(communication: any): Promise<any>;
@@ -1010,6 +1011,10 @@ export class DatabaseStorage implements IStorage {
 
   async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
     return await db.select().from(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
+  }
+
+  async deleteInvoiceItems(invoiceId: number): Promise<void> {
+    await db.delete(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
   }
 
   // Enhanced methods for comprehensive business management
