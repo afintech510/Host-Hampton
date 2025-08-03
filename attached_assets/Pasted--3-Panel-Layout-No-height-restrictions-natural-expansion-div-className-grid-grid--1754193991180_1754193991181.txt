@@ -1,0 +1,452 @@
+ {/* 3-Panel Layout - No height restrictions, natural expansion */}
+      <div className="grid grid-cols-3 gap-6 p-6">
+        
+        {/* Left Panel - Lead Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
+              Lead Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <Input
+                  value={leadData.name || ''}
+                  onChange={(e) => setLeadData({...leadData, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Event Type</label>
+                <Input
+                  value={leadData.eventType || ''}
+                  onChange={(e) => setLeadData({...leadData, eventType: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <Input
+                  type="email"
+                  value={leadData.email || ''}
+                  onChange={(e) => setLeadData({...leadData, email: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Phone</label>
+                <Input
+                  value={leadData.phone || ''}
+                  onChange={(e) => setLeadData({...leadData, phone: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Description</label>
+              <Textarea
+                value={leadData.eventDescription || ''}
+                onChange={(e) => setLeadData({...leadData, eventDescription: e.target.value})}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Adults</label>
+                <Input
+                  type="number"
+                  value={leadData.adultCount || ''}
+                  onChange={(e) => setLeadData({...leadData, adultCount: parseInt(e.target.value) || 0})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Children</label>
+                <Input
+                  type="number"
+                  value={leadData.childCount || ''}
+                  onChange={(e) => setLeadData({...leadData, childCount: parseInt(e.target.value) || 0})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Total Guests</label>
+                <Input
+                  type="number"
+                  value={leadData.guestCount || ''}
+                  onChange={(e) => setLeadData({...leadData, guestCount: parseInt(e.target.value) || 0})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Notes</label>
+              <Textarea
+                value={leadData.notes || ''}
+                onChange={(e) => setLeadData({...leadData, notes: e.target.value})}
+                rows={4}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1">
+                <Save className="w-4 h-4 mr-2" />
+                Save Lead
+              </Button>
+              <Button 
+                variant="default" 
+                className="flex-1"
+                onClick={() => {
+                  setInvoiceData({
+                    ...invoiceData,
+                    clientName: leadData.name,
+                    clientPhone: leadData.phone,
+                    clientEmail: leadData.email,
+                    eventDetails: `${leadData.eventType} for ${leadData.name}`
+                  });
+                }}
+              >
+                <ArrowRight className="w-4 h-4 mr-2" />
+                Push to Invoice
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Middle Panel - Invoice Editor */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Invoice Editor
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* One field per row as requested */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Client Name</label>
+              <Input
+                value={invoiceData.clientName || ''}
+                onChange={(e) => setInvoiceData({...invoiceData, clientName: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Phone</label>
+              <Input
+                value={invoiceData.clientPhone || ''}
+                onChange={(e) => setInvoiceData({...invoiceData, clientPhone: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <Input
+                type="email"
+                value={invoiceData.clientEmail || ''}
+                onChange={(e) => setInvoiceData({...invoiceData, clientEmail: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Date</label>
+              <Input
+                type="date"
+                value={invoiceData.eventDate}
+                onChange={(e) => {
+                  const newEventDate = e.target.value;
+                  setInvoiceData({
+                    ...invoiceData, 
+                    eventDate: newEventDate,
+                    dueDate: calculateDueDate(newEventDate)
+                  });
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Details</label>
+              <Textarea
+                value={invoiceData.eventDetails}
+                onChange={(e) => setInvoiceData({...invoiceData, eventDetails: e.target.value})}
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event Start Time</label>
+              <Input
+                type="time"
+                value={invoiceData.eventStartTime || ''}
+                onChange={(e) => setInvoiceData({...invoiceData, eventStartTime: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Event End Time</label>
+              <Input
+                type="time"
+                value={invoiceData.eventEndTime}
+                onChange={(e) => setInvoiceData({...invoiceData, eventEndTime: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Location</label>
+              <div className="space-y-2">
+                <Select value={locationType} onValueChange={(value: 'host-hampton' | 'mobile') => setLocationType(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="host-hampton">Host Hampton</SelectItem>
+                    <SelectItem value="mobile">Mobile (address fields appear)</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {locationType === 'mobile' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      placeholder="Street Address"
+                      value={mobileAddress.street}
+                      onChange={(e) => setMobileAddress({...mobileAddress, street: e.target.value})}
+                    />
+                    <Input
+                      placeholder="City"
+                      value={mobileAddress.city}
+                      onChange={(e) => setMobileAddress({...mobileAddress, city: e.target.value})}
+                    />
+                    <Input
+                      placeholder="State"
+                      value={mobileAddress.state}
+                      onChange={(e) => setMobileAddress({...mobileAddress, state: e.target.value})}
+                    />
+                    <Input
+                      placeholder="ZIP"
+                      value={mobileAddress.zip}
+                      onChange={(e) => setMobileAddress({...mobileAddress, zip: e.target.value})}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Invoice Items</label>
+              <div className="space-y-3">
+                {invoiceItems.map((item) => (
+                  <div key={item.id} className="border rounded-lg p-3 space-y-2">
+                    {/* Item dropdown on its own row */}
+                    <div className="flex gap-2">
+                      <Select
+                        value={item.itemId}
+                        onValueChange={(value) => updateInvoiceItem(item.id, 'itemId', value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select item..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {predefinedItems.map((predefinedItem) => (
+                            <SelectItem key={predefinedItem.value} value={predefinedItem.value}>
+                              {predefinedItem.label} {predefinedItem.price > 0 && `($${predefinedItem.price})`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {invoiceItems.length > 1 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeInvoiceItem(item.id)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Custom description when "custom" is selected */}
+                    {item.isCustom && (
+                      <Input
+                        placeholder="Enter custom item description"
+                        value={item.customDescription}
+                        onChange={(e) => updateInvoiceItem(item.id, 'customDescription', e.target.value)}
+                      />
+                    )}
+                    
+                    {/* Qty * Price on next row */}
+                    <div className="grid grid-cols-3 gap-2 items-center">
+                      <Input
+                        type="number"
+                        placeholder="Qty"
+                        value={item.quantity}
+                        onChange={(e) => updateInvoiceItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      />
+                      <span className="text-center">×</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Price"
+                        value={item.unitPrice}
+                        onChange={(e) => updateInvoiceItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      />
+                    </div>
+                    
+                    <div className="text-right font-medium">
+                      Total: ${item.total.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  onClick={addInvoiceItem}
+                  className="w-full"
+                >
+                  Add Item
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Deposit Amount</label>
+              <Input
+                type="number"
+                value={invoiceData.depositAmount}
+                onChange={(e) => setInvoiceData({...invoiceData, depositAmount: parseFloat(e.target.value) || 0})}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1">
+                Save Draft
+              </Button>
+              <Button 
+                variant="default" 
+                className="flex-1"
+                onClick={handleCreateInvoice}
+                disabled={createInvoiceMutation.isPending}
+              >
+                {createInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Right Panel - Invoice Preview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Invoice Preview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-white p-6 border rounded-lg">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">INVOICE</h1>
+                <p className="text-gray-600">Host Hampton</p>
+                <p className="text-sm text-gray-500">Speonk, NY</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Bill To:</h3>
+                  <p className="text-sm">{invoiceData.clientName}</p>
+                  <p className="text-sm text-gray-600">{invoiceData.clientEmail}</p>
+                  <p className="text-sm text-gray-600">{invoiceData.clientPhone}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm"><span className="font-medium">Invoice Date:</span> {new Date().toLocaleDateString()}</p>
+                  <p className="text-sm"><span className="font-medium">Due Date:</span> {invoiceData.dueDate ? new Date(invoiceData.dueDate).toLocaleDateString() : 'Day before event'}</p>
+                  <p className="text-sm"><span className="font-medium">Event Date:</span> {invoiceData.eventDate ? new Date(invoiceData.eventDate).toLocaleDateString() : 'TBD'}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">Event Details:</h3>
+                <p className="text-sm">{invoiceData.eventDetails}</p>
+                <p className="text-sm text-gray-600">
+                  {locationType === 'host-hampton' 
+                    ? 'Host Hampton, Speonk NY' 
+                    : `${mobileAddress.street}, ${mobileAddress.city}, ${mobileAddress.state} ${mobileAddress.zip}`}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {invoiceData.eventStartTime} - {invoiceData.eventEndTime}
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Description</th>
+                      <th className="text-center py-2">Qty</th>
+                      <th className="text-right py-2">Rate</th>
+                      <th className="text-right py-2">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceItems.map((item) => (
+                      <tr key={item.id} className="border-b">
+                        <td className="py-2">
+                          {item.isCustom ? item.customDescription : item.description}
+                        </td>
+                        <td className="text-center py-2">{item.quantity}</td>
+                        <td className="text-right py-2">${item.unitPrice.toFixed(2)}</td>
+                        <td className="text-right py-2">${item.total.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="text-right mb-6">
+                <div className="space-y-1">
+                  <p className="text-sm">
+                    <span>Subtotal: </span>
+                    <span>${invoiceItems.reduce((sum, item) => sum + item.total, 0).toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm">
+                    <span>Tax (8.75%): </span>
+                    <span>${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * 0.0875).toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm border-t pt-1">
+                    <span className="font-semibold">Total: </span>
+                    <span className="font-semibold">
+                      ${(invoiceItems.reduce((sum, item) => sum + item.total, 0) * 1.0875).toFixed(2)}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    <span>Deposit Required: </span>
+                    <span>${invoiceData.depositAmount.toFixed(2)}</span>
+                  </p>
+                  <p className="text-sm font-semibold">
+                    <span>Balance Due: </span>
+                    <span>
+                      ${((invoiceItems.reduce((sum, item) => sum + item.total, 0) * 1.0875) - invoiceData.depositAmount).toFixed(2)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-xs text-gray-500 border-t pt-4">
+                <p className="whitespace-pre-line">
+                  Terms and Conditions:
+                  {'\n'}1. A ${invoiceData.depositAmount} deposit is required to secure your booking
+                  {'\n'}2. Final payment is due day before event date
+                  {'\n'}3. Cancellations made 14+ days before event: full refund minus processing fee
+                  {'\n'}4. Cancellations made 7-13 days before: 50% refund
+                  {'\n'}5. Cancellations made less than 7 days: no refund
+                  {'\n'}6. Setup begins 30 minutes before event start time
+                  {'\n'}7. Client is responsible for any damages to venue or equipment
+                  {'\n'}8. Additional fees may apply for cleanup if venue is left excessively messy
+                  {'\n'}9. Weather policy: Indoor events are not affected; outdoor events may be rescheduled
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
