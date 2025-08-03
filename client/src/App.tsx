@@ -38,7 +38,7 @@ function Router() {
       <Route path="/admin-dashboard/invoice/create" component={InvoiceCreate} />
       <Route path="/invoice/:invoiceId" component={InvoiceView} />
       <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
-      <Route path="/customer-invoice/:invoiceId" component={CustomerInvoice} />
+      <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
       <Route path="/cart" component={Cart} />

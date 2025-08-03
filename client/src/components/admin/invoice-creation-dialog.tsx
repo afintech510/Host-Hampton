@@ -754,7 +754,7 @@ export default function InvoiceCreationDialog({
                       </div>
                       <div className="flex items-center gap-2">
                         <Input
-                          value={`${window.location.origin}/customer-invoice/${createdInvoice.id}`}
+                          value={`${window.location.origin}/docs/inv/${createdInvoice.id}`}
                           readOnly
                           className="text-xs bg-white"
                         />
@@ -762,7 +762,7 @@ export default function InvoiceCreationDialog({
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            const customerInvoiceUrl = `${window.location.origin}/customer-invoice/${createdInvoice.id}`;
+                            const customerInvoiceUrl = `${window.location.origin}/docs/inv/${createdInvoice.id}`;
                             navigator.clipboard.writeText(customerInvoiceUrl);
                             toast({
                               title: "Link Copied",
@@ -776,7 +776,7 @@ export default function InvoiceCreationDialog({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.open(`/customer-invoice/${createdInvoice.id}`, '_blank')}
+                          onClick={() => window.open(`/docs/inv/${createdInvoice.id}`, '_blank')}
                           className="shrink-0"
                         >
                           <ExternalLink className="w-4 h-4" />

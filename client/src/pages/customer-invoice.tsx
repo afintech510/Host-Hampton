@@ -77,7 +77,7 @@ function PaymentForm({ invoice }: { invoice: Invoice }) {
         elements,
         clientSecret,
         confirmParams: {
-          return_url: `${window.location.origin}/customer-invoice/${invoice.id}?payment=success`,
+          return_url: `${window.location.origin}/docs/inv/${invoice.id}?payment=success`,
         },
       });
 
@@ -174,7 +174,7 @@ function PaymentForm({ invoice }: { invoice: Invoice }) {
 }
 
 export default function CustomerInvoice() {
-  const [, params] = useRoute("/customer-invoice/:invoiceId");
+  const [, params] = useRoute("/docs/inv/:invoiceId");
   const invoiceId = params?.invoiceId;
   const { toast } = useToast();
 
