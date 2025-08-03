@@ -232,6 +232,7 @@ export default function InvoiceCreationDialog({
       return response.json();
     },
     onSuccess: (data) => {
+      console.log("Invoice creation response:", data);
       setCreatedInvoice(data.invoice);
       toast({
         title: mode === 'edit' ? "Invoice Updated" : "Invoice Created",
@@ -768,6 +769,27 @@ export default function InvoiceCreationDialog({
                   <Phone className="w-4 h-4 mr-2" />
                   SMS Invoice
                 </Button>
+                
+                {/* Stripe Payment Link */}
+                {createdInvoice.stripeInvoiceUrl && (
+                  <div className="flex items-center gap-2 ml-4 px-3 py-1 bg-green-50 border border-green-200 rounded">
+                    <ExternalLink className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-700">Payment Link:</span>
+                    <Input
+                      value={createdInvoice.stripeInvoiceUrl}
+                      readOnly
+                      className="w-64 text-xs bg-white border-green-300"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={copyPaymentLink}
+                      className="shrink-0 border-green-300 text-green-700 hover:bg-green-100"
+                    >
+                      {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </div>
