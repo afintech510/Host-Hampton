@@ -1428,6 +1428,12 @@ export class DatabaseStorage implements IStorage {
         status: invoices.status,
         dueDate: invoices.dueDate,
         termsAndConditions: invoices.termsAndConditions,
+        stripePaymentLinkId: invoices.stripePaymentLinkId,
+        stripeInvoiceUrl: invoices.stripeInvoiceUrl,
+        depositPaid: invoices.depositPaid,
+        clientName: invoices.clientName,
+        clientEmail: invoices.clientEmail,
+        clientPhone: invoices.clientPhone,
         customerName: customers.name,
         customerEmail: customers.email,
         customerPhone: customers.phone
