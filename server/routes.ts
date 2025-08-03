@@ -425,16 +425,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/invoices", async (req, res) => {
+    console.log("=== INVOICE ROUTE START ===");
+    console.log("Request body received:", JSON.stringify(req.body, null, 2));
     try {
-      const invoiceData = req.body;
-      const invoice = await storage.createInvoice(invoiceData);
-      res.json({ success: true, invoice });
-    } catch (error) {
+      const { leadId, items, ...invoiceData } = req.body;
+      console.log("Destructured data:", { leadId, itemsCount: items?.length, invoiceData });
+      
+      // If we have a leadId, get the lead data to create an event first
+      if (leadId) {
+        const lead = await storage.getLeadById(leadId);
+        if (!lead) {
+          return res.status(404).json({ success: false, message: "Lead not found" });
+        }
+        
+        console.log("Lead data:", lead);
+        console.log("Lead form_data:", lead.formData);
+        
+        // Map lead form_data to event data
+        const formData = lead.formData || {};
+        
+        // Create an event from the lead data first
+        const eventData = {
+          eventTypeId: getEventTypeIdFromService(formData.serviceType || 'birthday-party'),
+          customerId: invoiceData.customerId,
+          leadId: leadId,
+          status: 'quoted',
+          eventDate: formData.partyDate ? new Date(formData.partyDate) : null,
+          startTime: formData.partyTime || null,
+          endTime: null,
+          location: formData.partyLocation || formData.eventLocation || null,
+          guestCount: parseInt(formData.guestCount) || 0,
+          notes: formData.partyNotes || formData.message || null,
+          estimatedCost: parseFloat(formData.totalEstimate) || 0
+        };
+        
+        console.log("Creating event with data:", eventData);
+        const createdEvent = await storage.createEvent(eventData);
+        console.log("Created event:", createdEvent);
+        
+        // Now create the invoice with the event ID
+        invoiceData.eventId = createdEvent.id;
+        invoiceData.leadId = leadId;
+      }
+      
+      console.log("Parsing invoice data...");
+      const invoice = insertInvoiceSchema.parse(invoiceData);
+      console.log("Creating invoice...");
+      const created = await storage.createInvoice(invoice);
+      console.log("Invoice created with ID:", created.id);
+      
+      // Create invoice items if provided
+      console.log("Processing invoice items...");
+      if (items && items.length > 0) {
+        console.log("Creating", items.length, "invoice items");
+        for (const item of items) {
+          await storage.createInvoiceItem({
+            ...item,
+            invoiceId: created.id
+          });
+        }
+        console.log("All invoice items created");
+      } else {
+        console.log("No items to create");
+      }
+
+      // STRIPE INTEGRATION - Add to the MAIN route that actually gets executed
+      console.log("=== CHECKPOINT: About to start Stripe integration ===");
+      console.log("STARTING STRIPE INTEGRATION - Invoice total:", invoiceData.total);
+      try {
+        console.log("Creating Stripe PaymentIntent...");
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: invoiceData.total,
+          currency: "usd",
+          metadata: {
+            invoiceId: created.id.toString(),
+            type: 'invoice_payment'
+          }
+        });
+        console.log("PaymentIntent created successfully:", paymentIntent.id);
+
+        // Update invoice with Stripe information
+        console.log("Updating invoice with Stripe data...");
+        await storage.updateInvoice(created.id, {
+          stripePaymentLinkId: paymentIntent.id,
+          stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
+          status: 'sent'
+        });
+        console.log("Invoice updated with Stripe data");
+
+        // Get updated invoice and return
+        const updatedInvoice = await storage.getInvoiceById(created.id);
+        console.log("STRIPE INTEGRATION SUCCESSFUL - Returning updated invoice");
+        res.status(201).json({ 
+          success: true, 
+          invoice: updatedInvoice,
+          stripeSuccess: true
+        });
+      } catch (stripeError: any) {
+        console.error("STRIPE INTEGRATION FAILED:", stripeError.message);
+        res.status(201).json({ 
+          success: true, 
+          invoice: created,
+          stripeError: stripeError.message
+        });
+      }
+    } catch (error: any) {
       console.error("Error creating invoice:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to create invoice" 
-      });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ success: false, message: "Failed to create invoice" });
     }
   });
 
@@ -1163,117 +1263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/invoices", async (req, res) => {
-    // Force console output to appear
-    process.stdout.write("=== INVOICE CREATION START ===\n");
-    process.stdout.write(`Request body: ${JSON.stringify(req.body, null, 2)}\n`);
-    
-    try {
-      const { leadId, items, ...invoiceData } = req.body;
-      process.stdout.write(`Extracted items: ${JSON.stringify(items)}\n`);
-      process.stdout.write(`Items array length: ${items?.length}\n`);
-      
-      // If we have a leadId, get the lead data to create an event first
-      if (leadId) {
-        const lead = await storage.getLeadById(leadId);
-        if (!lead) {
-          return res.status(404).json({ success: false, message: "Lead not found" });
-        }
-        
-        console.log("Lead data:", lead);
-        console.log("Lead form_data:", lead.formData);
-        
-        // Map lead form_data to event data
-        const formData = lead.formData || {};
-        
-        // Create an event from the lead data first
-        const eventData = {
-          eventTypeId: getEventTypeIdFromService(formData.serviceType || 'birthday-party'),
-          customerId: invoiceData.customerId,
-          leadId: leadId,
-          status: 'quoted',
-          eventDate: formData.partyDate ? new Date(formData.partyDate) : null,
-          startTime: formData.partyTime || null,
-          endTime: null,
-          location: formData.partyLocation || formData.eventLocation || null,
-          guestCount: parseInt(formData.guestCount) || 0,
-          notes: formData.partyNotes || formData.message || null,
-          estimatedCost: parseFloat(formData.totalEstimate) || 0
-        };
-        
-        console.log("Creating event with data:", eventData);
-        const createdEvent = await storage.createEvent(eventData);
-        console.log("Created event:", createdEvent);
-        
-        // Now create the invoice with the event ID
-        invoiceData.eventId = createdEvent.id;
-        invoiceData.leadId = leadId;
-      }
-      
-      console.log("About to parse invoice data...");
-      const invoice = insertInvoiceSchema.parse(invoiceData);
-      console.log("Successfully parsed invoice data");
-      
-      console.log("About to create invoice...");
-      const created = await storage.createInvoice(invoice);
-      console.log("Successfully created invoice with ID:", created.id);
-      
-      // Create invoice items if provided
-      console.log("Checking items for creation...");
-      if (items && items.length > 0) {
-        console.log("CREATING INVOICE ITEMS - COUNT:", items.length);
-        for (const item of items) {
-          console.log("Creating item:", item);
-          await storage.createInvoiceItem({
-            ...item,
-            invoiceId: created.id
-          });
-        }
-        console.log("ALL INVOICE ITEMS CREATED SUCCESSFULLY");
-      } else {
-        console.log("NO ITEMS TO CREATE - ITEMS:", items);
-      }
-      
-      // Create Stripe payment link using the EXACT working pattern
-      try {
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: invoiceData.total,
-          currency: "usd",
-          metadata: {
-            invoiceId: created.id.toString(),
-            type: 'invoice_payment'
-          }
-        });
 
-        // Update invoice with Stripe information
-        await storage.updateInvoice(created.id, {
-          stripePaymentLinkId: paymentIntent.id,
-          stripeInvoiceUrl: `https://checkout.stripe.com/pay/${paymentIntent.client_secret}`,
-          status: 'sent'
-        });
-
-        // Get updated invoice and return
-        const updatedInvoice = await storage.getInvoiceById(created.id);
-        res.status(201).json({ 
-          success: true, 
-          invoice: updatedInvoice,
-          stripeSuccess: true
-        });
-      } catch (stripeError: any) {
-        res.status(201).json({ 
-          success: true, 
-          invoice: created,
-          stripeError: stripeError.message
-        });
-      }
-    } catch (error: any) {
-      console.error("Error creating invoice:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
-      }
-      res.status(500).json({ success: false, message: "Failed to create invoice" });
-    }
-  });
 
   // Test Stripe connectivity
   app.post("/api/test-stripe", async (req, res) => {
