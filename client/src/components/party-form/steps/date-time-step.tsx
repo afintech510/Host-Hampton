@@ -3,6 +3,7 @@ import { UnifiedButton } from "@/components/ui/unified-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 
 interface DateTimeStepProps {
   formData: any;
@@ -20,31 +21,31 @@ export function DateTimeStep({
   const [partyDate, setPartyDate] = useState(formData.partyDate || "");
   const [partyTime, setPartyTime] = useState(formData.partyTime || "");
   const [isUnsure, setIsUnsure] = useState(formData.isUnsure || false);
+  const [dateNotes, setDateNotes] = useState(formData.dateNotes || "");
 
   const handleNext = () => {
     if (isUnsure) {
-      updateFormData({ partyDate: "", partyTime: "", isUnsure: true });
+      updateFormData({ partyDate: "", partyTime: "", isUnsure: true, dateNotes });
     } else {
-      updateFormData({ partyDate, partyTime, isUnsure: false });
+      updateFormData({ partyDate, partyTime, isUnsure: false, dateNotes: "" });
     }
     onNext();
   };
 
   const handleUnsureToggle = () => {
     if (!isUnsure) {
-      // If clicking to select "unsure", advance immediately
+      // If clicking to select "unsure", just toggle - don't advance
       setIsUnsure(true);
       setPartyDate("");
       setPartyTime("");
-      updateFormData({ partyDate: "", partyTime: "", isUnsure: true });
-      onNext();
     } else {
       // If clicking to unselect "unsure", just toggle back
       setIsUnsure(false);
+      setDateNotes("");
     }
   };
 
-  const isValid = isUnsure || (partyDate && partyTime);
+  const isValid = (isUnsure && dateNotes.trim().length > 0) || (partyDate && partyTime);
 
   return (
     <div className="text-center">
@@ -80,7 +81,7 @@ export function DateTimeStep({
             {isUnsure && <div className="w-2 h-2 rounded-full bg-white" />}
           </div>
           <Label className="text-lg cursor-pointer flex-1 text-gray-600">
-            📅 I'm unsure, exploring options
+            📅 Not sure
           </Label>
         </div>
 
@@ -142,6 +143,21 @@ export function DateTimeStep({
               </RadioGroup>
             </div>
           </>
+        )}
+
+        {/* Notes Field - Shown when unsure */}
+        {isUnsure && (
+          <div>
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">
+              Tell us more about your timing preferences
+            </Label>
+            <Textarea
+              value={dateNotes}
+              onChange={(e) => setDateNotes(e.target.value)}
+              placeholder="Let us know what dates or times work best for you, or any scheduling preferences you have..."
+              className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral min-h-[120px]"
+            />
+          </div>
         )}
 
         <UnifiedButton
