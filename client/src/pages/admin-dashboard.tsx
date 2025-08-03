@@ -9,6 +9,7 @@ import LeadManagement from "@/components/admin/lead-management";
 import EventCalendar from "@/components/admin/event-calendar";
 import EventDetailsDialog from "@/components/admin/event-details-dialog";
 import InvoiceDetailsDialog from "@/components/admin/invoice-details-dialog";
+import InvoiceCreationDialog from "@/components/admin/invoice-creation-dialog";
 import NewEventPanel from "@/components/admin/new-event-dialog";
 import { 
   Calendar, 
@@ -82,6 +83,8 @@ export default function AdminDashboard() {
   const [eventDialogMode, setEventDialogMode] = useState<"view" | "edit">("view");
   const [invoiceDialogMode, setInvoiceDialogMode] = useState<"view" | "edit">("view");
   const [showNewEventPanel, setShowNewEventPanel] = useState(false);
+  const [showInvoiceCreationDialog, setShowInvoiceCreationDialog] = useState(false);
+  const [invoiceEditData, setInvoiceEditData] = useState<any>(null);
 
   // Fetch dashboard data
   const { data: events = [], isLoading: eventsLoading } = useQuery({
@@ -431,7 +434,12 @@ export default function AdminDashboard() {
           <TabsContent value="invoices" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Invoice Management</h2>
-              <Button>
+              <Button
+                onClick={() => {
+                  setInvoiceEditData(null);
+                  setShowInvoiceCreationDialog(true);
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 New Invoice
               </Button>
@@ -513,8 +521,8 @@ export default function AdminDashboard() {
                                   variant="ghost" 
                                   size="sm"
                                   onClick={() => {
-                                    setSelectedInvoiceId(invoice.id);
-                                    setInvoiceDialogMode("edit");
+                                    setInvoiceEditData(invoice);
+                                    setShowInvoiceCreationDialog(true);
                                   }}
                                 >
                                   <Edit className="w-4 h-4" />
@@ -607,6 +615,22 @@ export default function AdminDashboard() {
           isOpen={!!selectedInvoiceId}
           onClose={() => setSelectedInvoiceId(null)}
           mode={invoiceDialogMode}
+        />
+
+        {/* Invoice Creation Dialog */}
+        <InvoiceCreationDialog
+          isOpen={showInvoiceCreationDialog}
+          onClose={() => {
+            setShowInvoiceCreationDialog(false);
+            setInvoiceEditData(null);
+          }}
+          mode={invoiceEditData ? 'edit' : 'create'}
+          invoiceId={invoiceEditData?.id || null}
+          lead={null}
+          onSuccess={() => {
+            setShowInvoiceCreationDialog(false);
+            setInvoiceEditData(null);
+          }}
         />
 
 
