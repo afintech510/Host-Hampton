@@ -1165,7 +1165,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/invoices", async (req, res) => {
     try {
+      console.log("=== INVOICE CREATION START ===");
       console.log("Creating invoice with data:", req.body);
+      console.log("Items extracted:", req.body.items);
+      console.log("Items count:", req.body.items?.length);
       
       const { leadId, items, ...invoiceData } = req.body;
       
@@ -1226,10 +1229,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create Stripe payment link
+      console.log("=== STRIPE PROCESSING START ===");
       console.log("Items for Stripe:", items);
       console.log("Items length:", items?.length);
+      console.log("Stripe secret available:", !!process.env.STRIPE_SECRET_KEY);
       try {
         if (items && items.length > 0) {
+          console.log("Creating Stripe payment link...");
           const stripeLineItems = items.map((item: any) => ({
             price_data: {
               currency: 'usd',
@@ -1285,6 +1291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             invoice: completeInvoice
           });
         } else {
+          console.log("No items provided, skipping Stripe integration");
           res.status(201).json({ success: true, invoice: created });
         }
       } catch (stripeError: any) {
