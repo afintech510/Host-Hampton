@@ -1207,16 +1207,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const invoice = insertInvoiceSchema.parse(invoiceData);
+      console.log("Parsed invoice data:", invoice);
       const created = await storage.createInvoice(invoice);
+      console.log("Created invoice:", created);
       
       // Create invoice items if provided
       if (items && items.length > 0) {
+        console.log("Creating invoice items:", items.length);
         for (const item of items) {
           await storage.createInvoiceItem({
             ...item,
             invoiceId: created.id
           });
         }
+        console.log("Invoice items created successfully");
+      } else {
+        console.log("No items to create for invoice");
       }
       
       // Create Stripe payment link
@@ -1272,6 +1278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Get the complete invoice with items
           const completeInvoice = await storage.getInvoiceById(created.id);
+          console.log("Complete invoice with Stripe data:", completeInvoice);
           
           res.status(201).json({ 
             success: true, 
