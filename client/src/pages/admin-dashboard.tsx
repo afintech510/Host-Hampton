@@ -444,13 +444,10 @@ export default function AdminDashboard() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Invoice #
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Customer
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Event
+                          Event Type
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Total Amount
@@ -459,7 +456,7 @@ export default function AdminDashboard() {
                           Balance Due
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
+                          Event Date
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
@@ -469,31 +466,25 @@ export default function AdminDashboard() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {invoicesLoading ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-4 text-center">
+                          <td colSpan={6} className="px-6 py-4 text-center">
                             <div className="animate-spin w-6 h-6 border-4 border-blue-300 border-t-transparent rounded-full mx-auto" />
                           </td>
                         </tr>
                       ) : invoices.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                          <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                             No invoices found
                           </td>
                         </tr>
                       ) : (
                         invoices.map((invoice: any) => (
                           <tr key={invoice.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              #{invoice.id.toString().padStart(4, '0')}
-                            </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{invoice.customerName || 'Unknown Customer'}</div>
+                              <div className="text-sm text-gray-900">{invoice.clientName || invoice.customerName || 'Unknown Customer'}</div>
                               <div className="text-sm text-gray-500">{invoice.customerEmail || ''}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">{invoice.eventTypeName || 'Event'}</div>
-                              <div className="text-sm text-gray-500">
-                                {invoice.eventDate ? new Date(invoice.eventDate).toLocaleDateString() : ''}
-                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                               ${(invoice.total ? invoice.total / 100 : 0).toFixed(2)}
@@ -504,7 +495,7 @@ export default function AdminDashboard() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString() : 'N/A'}
+                              {invoice.eventDate ? new Date(invoice.eventDate).toLocaleDateString() : 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
