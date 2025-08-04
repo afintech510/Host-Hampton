@@ -18,7 +18,11 @@ export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsS
 
   const { data: addonsData, isLoading } = useQuery({
     queryKey: ["/api/addons"],
-    select: (data: any) => data.addons as Addon[]
+    queryFn: async () => {
+      const response = await fetch("/api/addons");
+      const data = await response.json();
+      return data.success ? data.addons : [];
+    }
   });
 
   const handleAddonChange = (addonValue: string, checked: boolean) => {
