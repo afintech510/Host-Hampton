@@ -278,11 +278,11 @@ export class MemStorage implements IStorage {
   }
 
   async getCustomer(id: number): Promise<Customer | undefined> {
-    return undefined;
+    return this.customers.get(id);
   }
 
   async getCustomerByEmail(email: string): Promise<Customer | undefined> {
-    for (const [, customer] of this.customers) {
+    for (const customer of this.customers.values()) {
       if (customer.email === email) {
         return customer;
       }
@@ -326,7 +326,12 @@ export class MemStorage implements IStorage {
 
   async createPartyTheme(insertTheme: InsertPartyTheme): Promise<PartyTheme> {
     const id = this.currentThemeId++;
-    const theme: PartyTheme = { ...insertTheme, id };
+    const theme: PartyTheme = { 
+      ...insertTheme, 
+      id,
+      description: insertTheme.description || null,
+      active: insertTheme.active !== undefined ? insertTheme.active : true
+    };
     this.partyThemes.set(id, theme);
     return theme;
   }
@@ -339,7 +344,8 @@ export class MemStorage implements IStorage {
       status: insertEvent.status || "pending",
       guestCount: insertEvent.guestCount || 0,
       notes: insertEvent.notes || null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.events.set(id, event);
     return event;
@@ -451,14 +457,7 @@ export class MemStorage implements IStorage {
     return invoices.find(invoice => invoice.id === id);
   }
 
-  async updateInvoice(id: number, updates: any): Promise<Invoice | undefined> {
-    const invoice = this.invoices.get(id);
-    if (invoice) {
-      Object.assign(invoice, updates);
-      return invoice;
-    }
-    return undefined;
-  }
+
 
   async getInvoiceByEventId(eventId: number): Promise<Invoice | undefined> {
     return undefined;
@@ -658,11 +657,7 @@ export class MemStorage implements IStorage {
   
   // Customer authentication methods (in-memory placeholder)
 
-  
-  async getCustomerEvents(customerId: number): Promise<any[]> {
-    // In memory placeholder
-    return [];
-  }
+
 
   // E-commerce methods for MemStorage (placeholder implementations)
   async getProducts(): Promise<Product[]> {
@@ -779,9 +774,7 @@ export class MemStorage implements IStorage {
     return null;
   }
 
-  async getCustomerEvents(customerId: number): Promise<any[]> {
-    return [];
-  }
+
 
   // Enhanced invoice and lead methods
   async getInvoiceById(id: number): Promise<any | null> {
@@ -1122,14 +1115,7 @@ export class DatabaseStorage implements IStorage {
     return { lead: updatedLead, event, customer };
   }
 
-  // Event status tracking methods
-  async updateEvent(id: number, updates: any): Promise<Event | undefined> {
-    const [updated] = await db.update(events).set({
-      ...updates,
-      updatedAt: new Date()
-    }).where(eq(events.id, id)).returning();
-    return updated || undefined;
-  }
+
 
   async updateInvoice(id: number, updates: any): Promise<Invoice | undefined> {
     console.log("updateInvoice called with id:", id, "updates:", updates);
@@ -1377,61 +1363,9 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
 
-  // Customer authentication methods
-  async createVerificationCode(email: string, code: string): Promise<void> {
-    // In a real implementation, you'd store this in a verification_codes table
-    // For now, we'll use a simple approach and rely on email delivery
-    console.log(`Verification code for ${email}: ${code}`);
-  }
 
-  async verifyCode(email: string, code: string): Promise<{ customerId: number } | null> {
-    // In a real implementation, you'd check against stored verification codes
-    // For demo purposes, we'll accept a simple pattern
-    if (code.length === 6) {
-      const customer = await this.getCustomerByEmail(email);
-      return customer ? { customerId: customer.id } : null;
-    }
-    return null;
-  }
 
-  async getCustomerEvents(customerId: number): Promise<any[]> {
-    // Get events for this customer with related data
-    return await db
-      .select({
-        id: events.id,
-        eventDate: events.eventDate,
-        startTime: events.startTime,
-        endTime: events.endTime,
-        status: events.status,
-        eventTypeName: eventTypes.name,
-        notes: events.notes
-      })
-      .from(events)
-      .leftJoin(eventTypes, eq(events.eventTypeId, eventTypes.id))
-      .where(eq(events.customerId, customerId))
-      .orderBy(events.eventDate);
-  }
 
-  // Enhanced invoice and lead methods
-  async getInvoiceById(id: number): Promise<any | null> {
-    const [invoice] = await db
-      .select()
-      .from(invoices)
-      .where(eq(invoices.id, id));
-
-    if (!invoice) return null;
-
-    // Get invoice items
-    const items = await db
-      .select()
-      .from(invoiceItems)
-      .where(eq(invoiceItems.invoiceId, id));
-
-    return {
-      ...invoice,
-      items
-    };
-  }
 
   async processInvoicePayment(invoiceId: number, paymentData: any): Promise<any | null> {
     const invoice = await this.getInvoice(invoiceId);
