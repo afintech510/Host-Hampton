@@ -71,7 +71,7 @@ export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsS
               />
               <Label htmlFor={addon.id.toString()} className="flex-1 flex items-center cursor-pointer">
                 <div className="flex items-center">
-                  <span className="text-xl mr-3">🎉</span>
+                  <span className="text-xl mr-3">{addon.icon || '🎉'}</span>
                   <span className="text-lg">{addon.name}</span>
                 </div>
               </Label>

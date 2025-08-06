@@ -60,6 +60,7 @@ export const addons = pgTable("addons", {
   price: integer("price").notNull(), // Price in cents
   perGuest: boolean("per_guest").default(false).notNull(),
   imageUrl: text("image_url"),
+  icon: text("icon"), // Emoji or icon representation
   active: boolean("active").default(true).notNull(),
 });
 
