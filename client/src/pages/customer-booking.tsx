@@ -600,9 +600,26 @@ export default function CustomerBooking() {
                   </div>
                 )}
                 {booking?.selectedAddons && booking.selectedAddons.length > 0 && (
-                  <div className="flex justify-between">
-                    <span>Selected Add-ons</span>
-                    <span>{formatPrice(addonTotal)}</span>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-gray-700">Selected Add-ons:</div>
+                    {booking.selectedAddons.map((addonName: string) => {
+                      const addon = allAddons?.find((a: any) => a.name === addonName);
+                      if (!addon) return null;
+                      const itemPrice = addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price;
+                      return (
+                        <div key={addonName} className="flex justify-between text-sm pl-4">
+                          <span>
+                            {addon.icon} {addon.name}
+                            {addon.perGuest && ` (${booking.guestCount || 0} guests)`}
+                          </span>
+                          <span>{formatPrice(itemPrice)}</span>
+                        </div>
+                      );
+                    })}
+                    <div className="flex justify-between font-medium border-t pt-1">
+                      <span>Add-ons Subtotal:</span>
+                      <span>{formatPrice(addonTotal)}</span>
+                    </div>
                   </div>
                 )}
                 <div className="flex justify-between">
