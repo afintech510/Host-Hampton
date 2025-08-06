@@ -1144,6 +1144,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Packages
+  // Stripe deposit payment endpoint for quote bookings
+  app.post("/api/create-deposit-payment", async (req, res) => {
+    try {
+      const { leadId, amount, bookingData } = req.body;
+      
+      if (!leadId || !amount) {
+        return res.status(400).json({
+          success: false,
+          error: "Lead ID and amount are required"
+        });
+      }
+
+      // Create a payment link for the deposit
+      const paymentLink = await stripe.paymentLinks.create({
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Party Booking Deposit',
+              description: `Deposit for ${bookingData?.partyTheme || 'party'} booking`,
+            },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          leadId: leadId.toString(),
+          type: 'deposit'
+        },
+        after_completion: {
+          type: 'redirect',
+          redirect: {
+            url: `${process.env.DOMAIN || 'http://localhost:5000'}/payment-success?leadId=${leadId}`
+          }
+        }
+      });
+
+      res.json({
+        success: true,
+        paymentUrl: paymentLink.url
+      });
+    } catch (error) {
+      console.error("Error creating deposit payment:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to create payment link"
+      });
+    }
+  });
+
   app.get("/api/packages", async (req, res) => {
     try {
       const { eventTypeId } = req.query;
