@@ -21,7 +21,13 @@ export function AddonsStep({ formData, updateFormData, onNext, onBack }: AddonsS
     queryFn: async () => {
       const response = await fetch("/api/addons");
       const data = await response.json();
-      return data.success ? data.addons : [];
+      if (data.success) {
+        // Filter for activity add-ons only, excluding "Extra Child Guest"
+        return data.addons.filter((addon: any) => 
+          addon.category === 'activity' && addon.name !== 'Extra Child Guest'
+        );
+      }
+      return [];
     }
   });
 

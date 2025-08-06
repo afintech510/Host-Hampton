@@ -23,6 +23,7 @@ import InvoiceCreate from "@/pages/admin/invoice-create";
 import InvoiceView from "@/pages/invoice-view";
 import InvoicePayment from "@/pages/invoice-payment";
 import CustomerInvoice from "./pages/customer-invoice";
+import CustomerBooking from "./pages/customer-booking";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/invoice/:invoiceId" component={InvoiceView} />
       <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
       <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
+      <Route path="/customer-booking/:leadId" component={CustomerBooking} />
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
       <Route path="/cart" component={Cart} />

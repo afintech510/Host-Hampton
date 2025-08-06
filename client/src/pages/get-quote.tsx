@@ -10,6 +10,7 @@ import { EventDetailsStep } from "@/components/party-form/steps/event-details-st
 import { CustomDateTimeStep } from "@/components/party-form/steps/custom-date-time-step";
 import { CustomAddonsStep } from "@/components/party-form/steps/custom-addons-step";
 import { CustomContactStep } from "@/components/party-form/steps/custom-contact-step";
+import { ExtrasStep } from "@/components/party-form/steps/extras-step";
 import { CustomInvoiceStep } from "@/components/party-form/steps/custom-invoice-step";
 import { JewelryPiecesStep } from "@/components/party-form/steps/jewelry-pieces-step";
 import { JewelryPeopleCountStep } from "@/components/party-form/steps/jewelry-people-count-step";
@@ -47,7 +48,7 @@ import allieImage from "@assets/image_1752579343744.png";
 const getFlowSteps = (eventType: string) => {
   switch (eventType) {
     case "birthday-party":
-      return 9; // Welcome → EventType → Theme → Package → Addons → Date/Time → PartyDetails → Food → Contact
+      return 10; // Welcome → EventType → Theme → Package → Addons → Extras → Date/Time → PartyDetails → Food → Contact
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
@@ -96,14 +97,18 @@ export default function GetQuote() {
     onSuccess: (data) => {
       toast({
         title: "Quote Request Submitted! 🎉",
-        description: "We'll contact you within 24 hours with your personalized quote and pricing details.",
+        description: "Review your booking details and secure your reservation.",
       });
       
       // Clear form data after successful submission
       clearFormData();
       
-      // Redirect to home after successful submission
-      setLocation("/themed-parties");
+      // Redirect to customer booking page with lead ID
+      if (data.leadId) {
+        setLocation(`/customer-booking/${data.leadId}`);
+      } else {
+        setLocation("/themed-parties");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -373,6 +378,19 @@ export default function GetQuote() {
         }
         break;
       case 6:
+        // Kids Themed Party: Extras Selection (Decor, Food, Drinks)
+        if (isKidsPartyFlow(eventType)) {
+          return (
+            <ExtrasStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        break;
+      case 7:
         // Kids Themed Party: Date/Time Selection
         if (isKidsPartyFlow(eventType)) {
           return (
@@ -406,10 +424,8 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: No step 6 needed (flow ends at step 5)
-        // Workshop/Class: No step 6 needed (flow ends at step 5)
         break;
-      case 7:
+      case 8:
         // Kids Themed Party: Child Details
         if (isKidsPartyFlow(eventType)) {
           return (
@@ -421,20 +437,8 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Contact (final step)
-        if (isTruckerHatFlow(eventType)) {
-          return (
-            <ContactStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
-              onBack={handlePreviousStep}
-            />
-          );
-        }
-        // Workshop/Class: No step 7 needed (flow ends at step 5)
         break;
-      case 8:
+      case 9:
         // Kids Themed Party: Food & Special Needs
         if (isKidsPartyFlow(eventType)) {
           return (
@@ -447,7 +451,7 @@ export default function GetQuote() {
           );
         }
         break;
-      case 9:
+      case 10:
         // Kids Themed Party: Contact (final step)
         if (isKidsPartyFlow(eventType)) {
           return (
