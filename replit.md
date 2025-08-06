@@ -61,3 +61,14 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - TypeScript
 - ESLint and Prettier
 - PostCSS with Tailwind CSS and Autoprefixer
+
+## Recent Updates (August 2025)
+
+**Real Business Data Integration:**
+- ✅ Added icon field to addons table with appropriate emoji representations
+- ✅ Replaced generic add-ons with authentic Host Hampton business data from current website
+- ✅ Integrated 26 real add-ons with accurate pricing: Photo Booth ($150), Candy Wall ($200), Balloon services, Beauty services, Food options, Entertainment packages
+- ✅ Properly configured per-guest vs fixed pricing for different add-on types
+- ✅ Enhanced /get-quote kids party flow with real business offerings and custom icons
+- ✅ Added category field to addons table with 5 categories: food, drink, activity, decor, extra
+- ✅ Categorized all add-ons for better organization and future filtering options

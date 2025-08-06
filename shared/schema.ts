@@ -61,6 +61,7 @@ export const addons = pgTable("addons", {
   perGuest: boolean("per_guest").default(false).notNull(),
   imageUrl: text("image_url"),
   icon: text("icon"), // Emoji or icon representation
+  category: text("category"), // "food", "drink", "activity", "decor", "extra"
   active: boolean("active").default(true).notNull(),
 });
 
