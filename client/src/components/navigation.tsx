@@ -78,7 +78,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
               </Button>
             </Link>
             
-            <Link href="/shop-events">
+            <Link href="/upcoming-events">
               <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
                 Upcoming Events
               </Button>
