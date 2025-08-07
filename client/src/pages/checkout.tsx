@@ -26,6 +26,10 @@ const checkoutFormSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
   customerEmail: z.string().email("Please enter a valid email address"),
   customerPhone: z.string().min(10, "Please enter a valid phone number"),
+  billingAddress: z.string().min(5, "Please enter a valid address"),
+  billingCity: z.string().min(2, "Please enter a valid city"),
+  billingState: z.string().min(2, "Please enter a valid state"),
+  billingZip: z.string().min(5, "Please enter a valid ZIP code"),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutFormSchema>;
@@ -58,6 +62,10 @@ function CheckoutForm({
         customerName: orderData.customerName,
         customerEmail: orderData.customerEmail,
         customerPhone: orderData.customerPhone,
+        billingAddress: orderData.billingAddress,
+        billingCity: orderData.billingCity,
+        billingState: orderData.billingState,
+        billingZip: orderData.billingZip,
         totalAmount: orderData.totalAmount,
         status: "pending"
       });
@@ -73,6 +81,20 @@ function CheckoutForm({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/checkout/success?orderId=${order.id}`,
+          payment_method_data: {
+            billing_details: {
+              name: orderData.customerName,
+              email: orderData.customerEmail,
+              phone: orderData.customerPhone,
+              address: {
+                line1: orderData.billingAddress,
+                city: orderData.billingCity,
+                state: orderData.billingState,
+                postal_code: orderData.billingZip,
+                country: 'US',
+              },
+            },
+          },
         },
       });
 
@@ -117,7 +139,21 @@ function CheckoutForm({
         <h3 className="text-lg font-semibold">Payment Information</h3>
         <PaymentElement 
           options={{
-            layout: "tabs"
+            layout: "tabs",
+            defaultValues: {
+              billingDetails: {
+                name: orderData.customerName,
+                email: orderData.customerEmail,
+                phone: orderData.customerPhone,
+                address: {
+                  line1: orderData.billingAddress,
+                  city: orderData.billingCity,
+                  state: orderData.billingState,
+                  postal_code: orderData.billingZip,
+                  country: 'US',
+                },
+              },
+            },
           }}
         />
       </div>
@@ -235,6 +271,10 @@ export default function Checkout() {
         customerName: data.customerName,
         customerEmail: data.customerEmail,
         customerPhone: data.customerPhone,
+        billingAddress: data.billingAddress,
+        billingCity: data.billingCity,
+        billingState: data.billingState,
+        billingZip: data.billingZip,
       });
 
       if (!response.ok) {
@@ -433,6 +473,64 @@ export default function Checkout() {
                           )}
                         />
 
+                        <FormField
+                          control={form.control}
+                          name="billingAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Address *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123 Main Street" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="billingCity"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="New York" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="billingState"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="NY" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="billingZip"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>ZIP Code *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="10001" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <UnifiedButton
                           type="submit"
                           disabled={isLoadingPayment}
@@ -452,24 +550,89 @@ export default function Checkout() {
                   </CardContent>
                 </Card>
               ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Complete Payment</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                      <CheckoutForm 
-                        clientSecret={clientSecret}
-                        orderData={{
-                          ...form.getValues(),
-                          totalAmount,
-                          sessionId
-                        }}
-                        onSuccess={handlePaymentSuccess}
-                      />
-                    </Elements>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  {/* Billing Information Review */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Billing Information</CardTitle>
+                      <p className="text-sm text-gray-600">Review your billing details</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-medium text-gray-700">Name:</span>
+                              <span className="ml-2">{form.getValues('customerName')}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Email:</span>
+                              <span className="ml-2">{form.getValues('customerEmail')}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Phone:</span>
+                              <span className="ml-2">{form.getValues('customerPhone')}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-medium text-gray-700">Address:</span>
+                              <span className="ml-2">{form.getValues('billingAddress')}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">City:</span>
+                              <span className="ml-2">{form.getValues('billingCity')}, {form.getValues('billingState')} {form.getValues('billingZip')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setClientSecret('')}
+                          className="text-sm"
+                        >
+                          Edit Billing Information
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Payment Form */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Lock className="w-5 h-5 mr-2" />
+                        Complete Payment
+                      </CardTitle>
+                      <p className="text-sm text-gray-600">Your payment information is secure and encrypted</p>
+                    </CardHeader>
+                    <CardContent>
+                      <Elements stripe={stripePromise} options={{ 
+                        clientSecret,
+                        appearance: {
+                          theme: 'stripe',
+                          variables: {
+                            colorPrimary: '#667eea',
+                          }
+                        }
+                      }}>
+                        <CheckoutForm 
+                          clientSecret={clientSecret}
+                          orderData={{
+                            ...form.getValues(),
+                            totalAmount,
+                            sessionId
+                          }}
+                          onSuccess={handlePaymentSuccess}
+                        />
+                      </Elements>
+                    </CardContent>
+                  </Card>
+                </div>
               )}
             </div>
           </div>

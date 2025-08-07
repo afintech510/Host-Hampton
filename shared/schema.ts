@@ -692,6 +692,10 @@ export const orders = pgTable("orders", {
   customerEmail: text("customer_email").notNull(),
   customerName: text("customer_name"),
   customerPhone: text("customer_phone"),
+  billingAddress: text("billing_address"),
+  billingCity: text("billing_city"),
+  billingState: text("billing_state"),
+  billingZip: text("billing_zip"),
   totalAmount: integer("total_amount").notNull(), // Amount in cents
   status: text("status").default("pending"),
   stripePaymentIntentId: text("stripe_payment_intent_id"),
