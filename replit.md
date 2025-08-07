@@ -91,3 +91,13 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - ✅ Streamlined checkout success page with automatic order status processing
 - ✅ Enhanced email template engine with JavaScript template literal evaluation
 - ✅ Dynamic order item rendering with proper product details and session information
+
+**Event Management System Revamp (August 2025):**
+- ✅ Complete Event Management tab redesign with unified public/private event display
+- ✅ Session-based event entries for all multi-session products
+- ✅ Monday-first calendar view with enhanced weekly display (400px tall columns)
+- ✅ Real-time attendee count calculation and revenue tracking
+- ✅ Status filtering (defaults to confirmed) with event type categorization
+- ✅ Enhanced event modals with attendee management and quote editing
+- ✅ Added "Not Miss Rachel" product with $30/$20 sibling pricing structure
+- ✅ Created individual events for all product sessions: Kids Summer Classes (6 sessions), Open Soft Play (Tuesday 10am-12pm), Advanced Beginner Mahjong (4 September sessions 6-8pm), plus single events for Sourdough, Spirit Medium, and Not Miss Rachel
