@@ -558,34 +558,31 @@ export default function Checkout() {
                       <p className="text-sm text-gray-600">Review your billing details</p>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="space-y-2">
-                            <div>
-                              <span className="font-medium text-gray-700">Name:</span>
-                              <span className="ml-2">{form.getValues('customerName')}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-700">Email:</span>
-                              <span className="ml-2">{form.getValues('customerEmail')}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-700">Phone:</span>
-                              <span className="ml-2">{form.getValues('customerPhone')}</span>
-                            </div>
+                      <div className="space-y-3 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <span className="font-medium text-gray-700">Name:</span>
+                            <span className="ml-2">{form.getValues('customerName')}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Phone:</span>
+                            <span className="ml-2">{form.getValues('customerPhone')}</span>
                           </div>
                         </div>
+                        
                         <div>
-                          <div className="space-y-2">
-                            <div>
-                              <span className="font-medium text-gray-700">Address:</span>
-                              <span className="ml-2">{form.getValues('billingAddress')}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-700">City:</span>
-                              <span className="ml-2">{form.getValues('billingCity')}, {form.getValues('billingState')} {form.getValues('billingZip')}</span>
-                            </div>
-                          </div>
+                          <span className="font-medium text-gray-700">Email:</span>
+                          <span className="ml-2">{form.getValues('customerEmail')}</span>
+                        </div>
+                        
+                        <div>
+                          <span className="font-medium text-gray-700">Address:</span>
+                          <span className="ml-2">{form.getValues('billingAddress')}</span>
+                        </div>
+                        
+                        <div>
+                          <span className="font-medium text-gray-700">City:</span>
+                          <span className="ml-2">{form.getValues('billingCity')}, {form.getValues('billingState')} {form.getValues('billingZip')}</span>
                         </div>
                       </div>
                       <div className="mt-4 pt-4 border-t">
