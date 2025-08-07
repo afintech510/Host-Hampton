@@ -134,7 +134,11 @@ export default function TruckerHatReservation() {
         timeSlot: timeSlot,
         startTime: startTime || '',
         endTime: endTime || '',
-        notes: booking.notes || formData.questions || ''
+        notes: booking.notes || formData.questions || '',
+        hatTheme: formData.hatTheme || '',
+        hasCustomPatches: formData.hasCustomPatches || false,
+        customPatchQuantity: formData.customPatchQuantity || 0,
+        patchDescription: formData.patchDescription || ''
       });
       
       // Pre-fill billing data from booking
@@ -252,27 +256,18 @@ export default function TruckerHatReservation() {
     basePrice = hatCount * 2500; // $25 per hat
     pricingDescription = `Studio Appointment (${hatCount} hats × $25)`;
   } else {
-    // Mobile service: $875 minimum for 25 hats, scales down to $25/hat at 200+ hats
+    // Mobile service: $35 per hat with 25 hat minimum
     const minHats = 25;
-    const minPrice = 87500; // $875
     hatCount = Math.max(minHats, totalPeople);
-    
-    if (hatCount >= 200) {
-      basePrice = hatCount * 2500; // $25 per hat at 200+
-      pricingDescription = `Mobile Service (${hatCount} hats × $25)`;
-    } else if (hatCount >= minHats) {
-      // Scale between $875 for 25 hats and $25/hat at 200 hats
-      const pricePerHat = Math.max(2500, minPrice / hatCount);
-      basePrice = hatCount * pricePerHat;
-      pricingDescription = `Mobile Service (${hatCount} hats × $${(pricePerHat/100).toFixed(0)})`;
-    } else {
-      basePrice = minPrice;
-      pricingDescription = `Mobile Service (25 hat minimum)`;
-    }
+    basePrice = hatCount * 3500; // $35 per hat
+    pricingDescription = `Mobile Service (${hatCount} hats × $35)`;
   }
 
-  // Custom patches: starting at $4 each (estimate 1 patch per person)
-  const customPatchPrice = totalPeople * 400; // $4 per patch
+  // Custom patches: $5 each, only if selected
+  const formData = booking?.formData || {};
+  const hasCustomPatches = formData.hasCustomPatches || editData.hasCustomPatches || false;
+  const customPatchQuantity = formData.customPatchQuantity || editData.customPatchQuantity || 0;
+  const customPatchPrice = hasCustomPatches ? customPatchQuantity * 500 : 0; // $5 per patch
   
   const subtotal = basePrice + customPatchPrice;
   const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
@@ -435,6 +430,87 @@ export default function TruckerHatReservation() {
                 </div>
               </div>
 
+              {/* Hat Theme/Design */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Hat Theme & Colors</Label>
+                {isEditing ? (
+                  <Textarea
+                    value={editData.hatTheme}
+                    onChange={(e) => setEditData({...editData, hatTheme: e.target.value})}
+                    placeholder="e.g., Marvel Comic theme with white and red hats..."
+                    className="mt-2 min-h-[80px]"
+                  />
+                ) : (
+                  <p className="text-gray-600 mt-1">
+                    {editData.hatTheme || formData.hatTheme || '—'}
+                  </p>
+                )}
+              </div>
+
+              {/* Custom Patches */}
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Custom Patches</Label>
+                {isEditing ? (
+                  <div className="space-y-3 mt-2">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        id="hasCustomPatches"
+                        checked={editData.hasCustomPatches || false}
+                        onChange={(e) => setEditData({
+                          ...editData, 
+                          hasCustomPatches: e.target.checked,
+                          customPatchQuantity: e.target.checked ? (editData.customPatchQuantity || 1) : 0
+                        })}
+                        className="w-4 h-4 text-purple-600"
+                      />
+                      <Label htmlFor="hasCustomPatches" className="text-sm">
+                        Add Custom Patches (+$5 each)
+                      </Label>
+                    </div>
+                    {editData.hasCustomPatches && (
+                      <div className="pl-6 space-y-2">
+                        <div>
+                          <Label htmlFor="patchQuantity" className="text-sm">Quantity</Label>
+                          <Input
+                            id="patchQuantity"
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={editData.customPatchQuantity || 1}
+                            onChange={(e) => setEditData({...editData, customPatchQuantity: parseInt(e.target.value) || 1})}
+                            className="w-32"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="patchDescription" className="text-sm">Patch Description</Label>
+                          <Textarea
+                            id="patchDescription"
+                            value={editData.patchDescription || ''}
+                            onChange={(e) => setEditData({...editData, patchDescription: e.target.value})}
+                            placeholder="Describe your custom patch design..."
+                            className="min-h-[60px]"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-gray-600 mt-1">
+                    {hasCustomPatches ? (
+                      <div>
+                        <p>✓ {customPatchQuantity} custom patches (+${(customPatchQuantity * 5).toLocaleString()})</p>
+                        {editData.patchDescription && (
+                          <p className="text-sm text-gray-500 mt-1">{editData.patchDescription}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p>No custom patches</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Questions / Requests */}
               <div>
                 <Label htmlFor="notes">Questions / Requests</Label>
@@ -564,10 +640,12 @@ export default function TruckerHatReservation() {
                   <span>{pricingDescription}</span>
                   <span>{formatPrice(basePrice)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Custom Design / Logo Patches ({totalPeople} × $4)</span>
-                  <span>{formatPrice(customPatchPrice)}</span>
-                </div>
+                {hasCustomPatches && customPatchQuantity > 0 && (
+                  <div className="flex justify-between">
+                    <span>Custom Patches ({customPatchQuantity} × $5)</span>
+                    <span>{formatPrice(customPatchPrice)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>{formatPrice(subtotal)}</span>
@@ -596,9 +674,9 @@ export default function TruckerHatReservation() {
                 <h4 className="font-semibold text-orange-900 mb-2">Pricing Information</h4>
                 <div className="text-sm text-orange-800 space-y-1">
                   <p>• Studio appointment: 5 hat minimum at $25 each</p>
-                  <p>• Mobile service: $875 minimum for 25 hats</p>
-                  <p>• Mobile pricing scales down to $25/hat at 200+ hats</p>
-                  <p>• Custom patches start at $4 each</p>
+                  <p>• Mobile service: 25 hat minimum at $35 each</p>
+                  <p>• Custom patches are $5 each (optional)</p>
+                  <p>• Booking fee is $20 and non-refundable</p>
                 </div>
               </div>
 

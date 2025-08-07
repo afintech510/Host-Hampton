@@ -12,6 +12,7 @@ import { CustomAddonsStep } from "@/components/party-form/steps/custom-addons-st
 import { CustomContactStep } from "@/components/party-form/steps/custom-contact-step";
 import { ExtrasStep } from "@/components/party-form/steps/extras-step";
 import { CustomInvoiceStep } from "@/components/party-form/steps/custom-invoice-step";
+import { HatDesignStep } from "@/components/party-form/steps/hat-design-step";
 import { JewelryPiecesStep } from "@/components/party-form/steps/jewelry-pieces-step";
 import { JewelryPeopleCountStep } from "@/components/party-form/steps/jewelry-people-count-step";
 import { JewelryWhenWhereStep } from "@/components/party-form/steps/jewelry-when-where-step";
@@ -52,7 +53,7 @@ const getFlowSteps = (eventType: string) => {
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
-      return 5; // Welcome → EventType → Event Details → Date/Time Range → Contact
+      return 6; // Welcome → EventType → Event Details → Design Your Hats → Date/Time Range → Contact
     case "workshop":
       return 5; // Welcome → EventType → Workshop Details → Schedule → Contact
     case "permanent-jewelry":
@@ -105,7 +106,7 @@ export default function GetQuote() {
       
       // Redirect to appropriate reservation page based on event type
       if (data.leadId) {
-        if (isTruckerHatFlow(formData.eventType)) {
+        if (formData.eventType && isTruckerHatFlow(formData.eventType)) {
           setLocation(`/trucker-hat-reservation/${data.leadId}`);
         } else {
           setLocation(`/customer-booking/${data.leadId}`);
@@ -219,7 +220,7 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Attendees Count
+        // Trucker Hat Bar: Event Details (Attendee Count & Location)
         if (isTruckerHatFlow(eventType)) {
           return (
             <EventDetailsStep
@@ -295,14 +296,14 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Date & Time Range (like Studio Rental)
+        // Trucker Hat Bar: Design Your Hats
         if (isTruckerHatFlow(eventType)) {
           return (
-            <StudioDateTimeStep
+            <HatDesignStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
-              onBack={handlePreviousStep}
+              onPrev={handlePreviousStep}
             />
           );
         }
@@ -353,13 +354,13 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Contact (final step)
+        // Trucker Hat Bar: Date & Time Range
         if (isTruckerHatFlow(eventType)) {
           return (
-            <ContactStep
+            <StudioDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
             />
           );
@@ -399,9 +400,16 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: No step 6 (flow ends at step 5)
+        // Trucker Hat Bar: Contact (final step)
         if (isTruckerHatFlow(eventType)) {
-          return null;
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
+              onBack={handlePreviousStep}
+            />
+          );
         }
         break;
       case 7:
