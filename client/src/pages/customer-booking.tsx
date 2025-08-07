@@ -376,74 +376,120 @@ export default function CustomerBooking() {
                     </Select>
                   </div>
 
-                  {/* Add-ons Selection */}
+                  {/* Add-ons Selection by Category */}
                   <div>
                     <Label>Selected Add-ons</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto">
-                      {allAddons?.filter((addon: any) => addon.name !== 'Extra Child Guest').map((addon: any) => (
-                        <div key={addon.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`addon-${addon.id}`}
-                            checked={editData.selectedAddons?.includes(addon.name) || false}
-                            onCheckedChange={(checked) => {
-                              const current = editData.selectedAddons || [];
-                              if (checked) {
-                                setEditData({...editData, selectedAddons: [...current, addon.name]});
-                              } else {
-                                setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
-                              }
-                            }}
-                          />
-                          <Label htmlFor={`addon-${addon.id}`} className="text-sm">
-                            {addon.icon} {addon.name} (${(addon.price / 100).toFixed(0)})
-                          </Label>
-                        </div>
+                    <div className="mt-2 space-y-4">
+                      {['food', 'drink', 'activity', 'decor', 'extra'].map((category) => {
+                        const categoryAddons = allAddons?.filter((addon: any) => 
+                          addon.category === category && addon.name !== 'Extra Child Guest'
+                        );
+                        if (!categoryAddons || categoryAddons.length === 0) return null;
+                        
+                        return (
+                          <div key={category}>
+                            <h5 className="text-sm font-medium text-gray-700 mb-2 capitalize">{category}</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {categoryAddons.map((addon: any) => (
+                                <Button
+                                  key={addon.id}
+                                  type="button"
+                                  variant={editData.selectedAddons?.includes(addon.name) ? "default" : "outline"}
+                                  size="sm"
+                                  className="h-8 text-xs"
+                                  onClick={() => {
+                                    const current = editData.selectedAddons || [];
+                                    if (current.includes(addon.name)) {
+                                      setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                    } else {
+                                      setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                    }
+                                  }}
+                                >
+                                  {addon.icon} {addon.name} (${(addon.price / 100).toFixed(0)})
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Food Choice */}
+                  <div>
+                    <Label>Food Choice</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {['pizza', 'bagels', 'none'].map((option) => (
+                        <Button
+                          key={option}
+                          type="button"
+                          variant={editData.foodPreferences?.foodChoice === option ? "default" : "outline"}
+                          size="sm"
+                          className="h-8 text-xs capitalize"
+                          onClick={() => setEditData({
+                            ...editData, 
+                            foodPreferences: {...editData.foodPreferences, foodChoice: option}
+                          })}
+                        >
+                          {option === 'none' ? 'No Food' : option}
+                        </Button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Food Preferences */}
-                  <div>
-                    <Label htmlFor="foodChoice">Food Choice</Label>
-                    <Select 
-                      value={editData.foodPreferences?.foodChoice || ''} 
-                      onValueChange={(value) => setEditData({
-                        ...editData, 
-                        foodPreferences: {...editData.foodPreferences, foodChoice: value}
-                      })}
-                    >
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select food option" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pizza">Pizza</SelectItem>
-                        <SelectItem value="bagels">Bagels</SelectItem>
-                        <SelectItem value="sandwiches">Sandwiches</SelectItem>
-                        <SelectItem value="none">No food</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
                   {/* Cupcake Flavor */}
                   <div>
-                    <Label htmlFor="cupcakeFlavor">Cupcake Flavor</Label>
-                    <Select 
-                      value={editData.foodPreferences?.cupcakeFlavor || ''} 
-                      onValueChange={(value) => setEditData({
-                        ...editData, 
-                        foodPreferences: {...editData.foodPreferences, cupcakeFlavor: value}
-                      })}
-                    >
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select cupcake flavor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="vanilla">Vanilla</SelectItem>
-                        <SelectItem value="chocolate">Chocolate</SelectItem>
-                        <SelectItem value="strawberry">Strawberry</SelectItem>
-                        <SelectItem value="funfetti">Funfetti</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>Cupcake Flavor</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {['chocolate', 'vanilla', 'none'].map((flavor) => (
+                        <Button
+                          key={flavor}
+                          type="button"
+                          variant={editData.foodPreferences?.cupcakeFlavor === flavor ? "default" : "outline"}
+                          size="sm"
+                          className="h-8 text-xs capitalize"
+                          onClick={() => setEditData({
+                            ...editData, 
+                            foodPreferences: {...editData.foodPreferences, cupcakeFlavor: flavor}
+                          })}
+                        >
+                          {flavor === 'none' ? 'No Cupcakes' : flavor}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Special Requirements */}
+                  <div>
+                    <Label>Special Requirements</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {['Gluten Free', 'Dairy Free', 'Nut Allergy'].map((requirement) => (
+                        <Button
+                          key={requirement}
+                          type="button"
+                          variant={editData.specialRequirements?.includes(requirement) ? "default" : "outline"}
+                          size="sm"
+                          className="h-8 text-xs"
+                          onClick={() => {
+                            const current = editData.specialRequirements || [];
+                            if (current.includes(requirement)) {
+                              setEditData({
+                                ...editData, 
+                                specialRequirements: current.filter((req: string) => req !== requirement)
+                              });
+                            } else {
+                              setEditData({
+                                ...editData, 
+                                specialRequirements: [...current, requirement]
+                              });
+                            }
+                          }}
+                        >
+                          {requirement}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
 
                   <Separator />
