@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, ShoppingCart, X } from "lucide-react";
+import { Calendar, MapPin, Users, ShoppingCart, X, Sparkles } from "lucide-react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -47,6 +47,7 @@ export default function UpcomingEvents() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [selectedEvent, setSelectedEvent] = useState<Product | null>(null);
+  const [loadingCart, setLoadingCart] = useState<number | null>(null);
 
   // Fetch products (events)
   const { data: products = [], isLoading: productsLoading } = useQuery<
@@ -66,6 +67,7 @@ export default function UpcomingEvents() {
 
   // Add to cart
   const handleAddToCart = async (product: Product) => {
+    setLoadingCart(product.id);
     try {
       // Get or create session
       let sessionId = localStorage.getItem("shop_session_id");
@@ -94,10 +96,11 @@ export default function UpcomingEvents() {
         description: `${product.name} added to your cart successfully!`,
       });
 
-      // Redirect to cart after short delay
+      // Redirect to cart and scroll to top
       setTimeout(() => {
         setLocation("/cart");
-      }, 1500);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 1000);
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast({
@@ -105,6 +108,8 @@ export default function UpcomingEvents() {
         description: "Failed to add event to cart. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoadingCart(null);
     }
   };
 
@@ -215,16 +220,25 @@ export default function UpcomingEvents() {
                             </div>
                             <UnifiedButton
                               onClick={() => handleAddToCart(event)}
-                              disabled={(event.availableTickets || 0) === 0}
+                              disabled={(event.availableTickets || 0) === 0 || loadingCart === event.id}
                               className={`${
                                 (event.availableTickets || 0) === 0 
                                   ? 'bg-gray-400 cursor-not-allowed' 
                                   : 'bg-purple-600 hover:bg-purple-700'
-                              }`}
+                              } ${loadingCart === event.id ? 'bg-purple-700' : ''}`}
                               size="lg"
                             >
-                              <ShoppingCart className="w-4 h-4 mr-2" />
-                              {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                              {loadingCart === event.id ? (
+                                <>
+                                  <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                                  <span className="animate-pulse">Adding...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                                </>
+                              )}
                             </UnifiedButton>
                           </div>
                         </div>
@@ -310,16 +324,25 @@ export default function UpcomingEvents() {
                     {/* Add to Cart Button */}
                     <UnifiedButton
                       onClick={() => handleAddToCart(event)}
-                      disabled={event.availableTickets === 0}
-                      className={`w-full mt-4 ${
+                      disabled={(event.availableTickets || 0) === 0 || loadingCart === event.id}
+                      className={`w-full mt-4 relative ${
                         (event.availableTickets || 0) === 0 
                           ? 'bg-gray-400 cursor-not-allowed' 
                           : 'bg-purple-600 hover:bg-purple-700'
-                      }`}
+                      } ${loadingCart === event.id ? 'bg-purple-700' : ''}`}
                       size="lg"
                     >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                      {loadingCart === event.id ? (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                          <span className="animate-pulse">Adding...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                        </>
+                      )}
                     </UnifiedButton>
                   </div>
                 </CardContent>
