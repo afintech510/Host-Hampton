@@ -1939,6 +1939,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Product sessions
+  app.get("/api/products/:id/sessions", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const sessions = await storage.getProductSessions(productId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching product sessions:", error);
+      res.status(500).json({ message: "Failed to fetch product sessions" });
+    }
+  });
+
+  app.get("/api/product-sessions", async (req, res) => {
+    try {
+      const sessions = await storage.getAllProductSessions();
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching all product sessions:", error);
+      res.status(500).json({ message: "Failed to fetch product sessions" });
+    }
+  });
+
   // Cart management
   app.get("/api/cart/:sessionId", async (req, res) => {
     try {

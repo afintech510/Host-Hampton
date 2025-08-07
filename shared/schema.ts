@@ -655,9 +655,24 @@ export const products = pgTable("products", {
   location: text("location"),
   maxTickets: integer("max_tickets"),
   availableTickets: integer("available_tickets"),
+  hasMultipleSessions: boolean("has_multiple_sessions").default(false), // True if event has multiple date/time options
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event sessions for products with multiple date/time options
+export const productSessions = pgTable("product_sessions", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  sessionName: text("session_name"), // e.g., "Canvas Bag Painting", "Tuesday Morning Session"
+  sessionDate: timestamp("session_date").notNull(),
+  sessionTime: text("session_time"), // e.g., "5:00 AM", "Morning"
+  maxTickets: integer("max_tickets"),
+  availableTickets: integer("available_tickets"),
+  priceOverride: integer("price_override"), // Override product price for this session if needed
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Shopping Cart
@@ -665,6 +680,7 @@ export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
   sessionId: text("session_id").notNull(),
   productId: integer("product_id").references(() => products.id),
+  productSessionId: integer("product_session_id").references(() => productSessions.id), // For events with multiple sessions
   quantity: integer("quantity").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -696,6 +712,8 @@ export const orderItems = pgTable("order_items", {
 // E-commerce types
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
+export type ProductSession = typeof productSessions.$inferSelect;
+export type InsertProductSession = typeof productSessions.$inferInsert;
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;
 export type Order = typeof orders.$inferSelect;
@@ -708,6 +726,11 @@ export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertProductSessionSchema = createInsertSchema(productSessions).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertCartItemSchema = createInsertSchema(cartItems).omit({

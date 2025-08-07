@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, ShoppingCart, X, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Users, ShoppingCart, X, Sparkles, Clock } from "lucide-react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import type { Product } from "@shared/schema";
+import type { Product, ProductSession } from "@shared/schema";
 import Navigation from "@/components/navigation";
 
 // Helper function to format prices
@@ -63,7 +64,9 @@ export default function UpcomingEvents() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [selectedEvent, setSelectedEvent] = useState<Product | null>(null);
+  const [selectedSession, setSelectedSession] = useState<ProductSession | null>(null);
   const [loadingCart, setLoadingCart] = useState<number | null>(null);
+  const [sessionSelectionProduct, setSessionSelectionProduct] = useState<Product | null>(null);
 
   // Fetch products (events)
   const { data: products = [], isLoading: productsLoading } = useQuery<
@@ -74,15 +77,36 @@ export default function UpcomingEvents() {
 
   // Filter for active events only
   const upcomingEvents = products.filter(product => 
-    product.isActive && 
-    product.eventDate && 
-    new Date(product.eventDate) > new Date()
-  ).sort((a, b) => 
-    new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime()
-  );
+    product.isActive && (
+      // Include events with specific dates
+      (product.eventDate && new Date(product.eventDate) > new Date()) ||
+      // Include events with multiple sessions
+      product.hasMultipleSessions
+    )
+  ).sort((a, b) => {
+    // Sort events with dates first, then events with multiple sessions
+    if (a.eventDate && b.eventDate) {
+      return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
+    }
+    if (a.eventDate && !b.eventDate) return -1;
+    if (!a.eventDate && b.eventDate) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  // Fetch sessions for a specific product
+  const { data: productSessions = [] } = useQuery<ProductSession[]>({
+    queryKey: ["/api/products", sessionSelectionProduct?.id, "sessions"],
+    enabled: !!sessionSelectionProduct?.hasMultipleSessions,
+  });
 
   // Add to cart
-  const handleAddToCart = async (product: Product) => {
+  const handleAddToCart = async (product: Product, session?: ProductSession) => {
+    // If product has multiple sessions but no session is selected, show session selector
+    if (product.hasMultipleSessions && !session) {
+      setSessionSelectionProduct(product);
+      return;
+    }
+
     setLoadingCart(product.id);
     try {
       // Get or create session
@@ -98,6 +122,7 @@ export default function UpcomingEvents() {
         body: JSON.stringify({
           sessionId,
           productId: product.id,
+          productSessionId: session?.id || null,
           quantity: 1,
         }),
       });
@@ -358,6 +383,14 @@ export default function UpcomingEvents() {
                       </div>
                     )}
 
+                    {/* Multiple Sessions Badge */}
+                    {event.hasMultipleSessions && (
+                      <div className="flex items-center gap-2 text-purple-600">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm font-medium">Multiple sessions available</span>
+                      </div>
+                    )}
+
                     {/* Location */}
                     {event.location && (
                       <div className="flex items-center gap-2 text-gray-600">
@@ -402,6 +435,45 @@ export default function UpcomingEvents() {
             ))}
           </div>
         )}
+
+        {/* Session Selection Dialog */}
+        <Dialog open={!!sessionSelectionProduct} onOpenChange={(open) => !open && setSessionSelectionProduct(null)}>
+          <DialogContent className="max-w-md">
+            <DialogTitle>Select Session</DialogTitle>
+            <DialogDescription>
+              Choose which session you'd like to attend for {sessionSelectionProduct?.name}
+            </DialogDescription>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {productSessions.map((session) => (
+                <Button
+                  key={session.id}
+                  variant="outline"
+                  className="w-full p-4 h-auto flex flex-col items-start gap-2 text-left hover:bg-purple-50"
+                  onClick={() => {
+                    if (sessionSelectionProduct) {
+                      handleAddToCart(sessionSelectionProduct, session);
+                      setSessionSelectionProduct(null);
+                    }
+                  }}
+                >
+                  <div className="font-medium">{session.sessionName}</div>
+                  <div className="text-sm text-gray-600 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {formatDate(new Date(session.sessionDate))}
+                  </div>
+                  <div className="text-sm text-gray-600 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {session.sessionTime}
+                  </div>
+                  <div className="text-sm text-gray-600 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    {session.availableTickets} spots available
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Call to Action */}
         <div className="text-center mt-16 bg-white rounded-2xl p-8 shadow-lg">
