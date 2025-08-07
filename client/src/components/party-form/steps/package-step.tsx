@@ -103,7 +103,7 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
                       Complete party package with decorations, activities, and setup
                     </p>
                     <p className="text-xs text-gray-500 mt-2">
-                      Up to 11 guests (including birthday child), $35 per additional guest
+                      Up to 11 guests (including birthday child), <span className="pricing-font">$35</span> per additional guest
                     </p>
                   </div>
                 </Label>
@@ -125,7 +125,7 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">Make it Shine</h3>
-                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">+$25/guest</Badge>
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 pricing-font">+$25/guest</Badge>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
                         Base package + premium touches and enhanced activities
@@ -151,7 +151,7 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">Party Envy</h3>
-                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">+$50/guest</Badge>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800 pricing-font">+$50/guest</Badge>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
                         Ultimate premium package with all the bells and whistles

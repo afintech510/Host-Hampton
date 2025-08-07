@@ -154,7 +154,7 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
                 <p className="font-medium">{pricing.description}</p>
                 <p className="text-sm text-gray-600">{pricing.details}</p>
               </div>
-              <p className="font-medium">${pricing.basePrice}.00</p>
+              <p className="font-medium pricing-font">${pricing.basePrice}.00</p>
             </div>
             
             {selectedAddons.length > 0 && (
@@ -165,26 +165,26 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
                   return (
                     <div key={addonId} className="flex justify-between text-sm">
                       <p className="text-gray-600">{addon.name}</p>
-                      <p className="text-gray-600">${addon.price}.00</p>
+                      <p className="text-gray-600 pricing-font">${addon.price}.00</p>
                     </div>
                   );
                 })}
                 <div className="flex justify-between font-medium pt-2 border-t border-gray-200">
                   <p>Subtotal</p>
-                  <p>${subtotal}.00</p>
+                  <p className="pricing-font">${subtotal}.00</p>
                 </div>
               </>
             )}
             
             <div className="flex justify-between text-sm">
               <p className="text-gray-600">Tax (8%)</p>
-              <p className="text-gray-600">${tax}.00</p>
+              <p className="text-gray-600 pricing-font">${tax}.00</p>
             </div>
             
             {pricing.hasRentalPricing && (securityDeposit || 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <p className="text-gray-600">Security Deposit</p>
-                <p className="text-gray-600">${securityDeposit || 0}.00</p>
+                <p className="text-gray-600 pricing-font">${securityDeposit || 0}.00</p>
               </div>
             )}
             
@@ -192,7 +192,7 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
             
             <div className="flex justify-between text-lg font-bold">
               <p>Total</p>
-              <p>${total}.00</p>
+              <p className="pricing-font">${total}.00</p>
             </div>
             
             <div className="bg-pink-50 p-4 rounded-xl">
@@ -210,7 +210,7 @@ export function CustomInvoiceStep({ formData, onBack, onSubmit, isSubmitting }: 
                     </>
                   )}
                 </div>
-                <p className="text-xl font-bold text-pink-800">${deposit}.00</p>
+                <p className="text-xl font-bold text-pink-800 pricing-font">${deposit}.00</p>
               </div>
             </div>
           </div>

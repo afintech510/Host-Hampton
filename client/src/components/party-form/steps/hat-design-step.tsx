@@ -86,7 +86,7 @@ export function HatDesignStep({
               onCheckedChange={handleCustomPatchesToggle}
             />
             <Label htmlFor="customPatches" className="text-sm font-medium">
-              Add Custom Patches (+$5 each)
+              Add Custom Patches (<span className="pricing-font">+$5</span> each)
             </Label>
           </div>
 
@@ -106,7 +106,7 @@ export function HatDesignStep({
                   className="mt-2 w-32"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Total patch cost: ${((formData.customPatchQuantity || 1) * 5).toLocaleString()}
+                  Total patch cost: <span className="pricing-font">${((formData.customPatchQuantity || 1) * 5).toLocaleString()}</span>
                 </p>
               </div>
 
