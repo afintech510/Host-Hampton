@@ -391,9 +391,14 @@ export async function sendTemplateEmail(
   let subject = template.subject;
   
   for (const [key, value] of Object.entries(templateData)) {
-    const regex = new RegExp(`{{${key}}}`, 'g');
-    html = html.replace(regex, String(value));
-    subject = subject.replace(regex, String(value));
+    // Handle both {{variable}} and ${variable} syntax
+    const regexCurly = new RegExp(`{{${key}}}`, 'g');
+    const regexDollar = new RegExp(`\\$\\{${key}\\}`, 'g');
+    
+    html = html.replace(regexCurly, String(value));
+    html = html.replace(regexDollar, String(value));
+    subject = subject.replace(regexCurly, String(value));
+    subject = subject.replace(regexDollar, String(value));
   }
 
   return sendEmail({
