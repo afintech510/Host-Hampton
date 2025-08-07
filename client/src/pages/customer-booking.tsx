@@ -702,7 +702,7 @@ export default function CustomerBooking() {
                         <div key={addonName} className="flex justify-between text-sm pl-4">
                           <span>
                             {addon.icon} {addon.name}
-                            {addon.perGuest && ` (${booking.guestCount || 0} guests)`}
+                            {addon.perGuest && ` (${formatPrice(addon.price)} pp)`}
                           </span>
                           <span>{formatPrice(itemPrice)}</span>
                         </div>
