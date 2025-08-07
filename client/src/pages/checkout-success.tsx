@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, ArrowRight, Mail } from "lucide-react";
 import { Link, useSearch } from "wouter";
 import Navigation from "@/components/navigation";
 import { UnifiedButton } from "@/components/ui/unified-button";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function CheckoutSuccess() {
   const search = useSearch();
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [hasUpdatedStatus, setHasUpdatedStatus] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const params = new URLSearchParams(search);
@@ -23,6 +26,27 @@ export default function CheckoutSuccess() {
     queryKey: ['/api/orders', orderId],
     enabled: !!orderId,
   });
+
+  // Mutation to update order status
+  const updateOrderStatus = useMutation({
+    mutationFn: async (orderId: string) => {
+      return apiRequest("PATCH", `/api/orders/${orderId}`, {
+        status: "completed"
+      });
+    },
+    onSuccess: () => {
+      // Invalidate the order query to refetch updated data
+      queryClient.invalidateQueries({ queryKey: ['/api/orders', orderId] });
+      setHasUpdatedStatus(true);
+    }
+  });
+
+  // Update order status to completed when we have an order and it's still pending
+  useEffect(() => {
+    if (order && orderId && order.status === "pending" && !hasUpdatedStatus && !updateOrderStatus.isPending) {
+      updateOrderStatus.mutate(orderId);
+    }
+  }, [order, orderId, hasUpdatedStatus, updateOrderStatus]);
 
   return (
     <div className="min-h-screen bg-gray-50">

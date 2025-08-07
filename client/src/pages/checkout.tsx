@@ -109,17 +109,9 @@ function CheckoutForm({
           description: error.message,
           variant: "destructive",
         });
-      } else {
-        // Payment succeeded, update order status and clear cart
-        await apiRequest("PATCH", `/api/orders/${order.id}`, {
-          status: "completed"
-        });
-        
-        // Clear the cart after successful payment
-        localStorage.removeItem('shop_session_id');
-        
-        onSuccess();
       }
+      // Note: If payment succeeds, Stripe will redirect to success page
+      // The order status will be updated to "completed" on the success page
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
