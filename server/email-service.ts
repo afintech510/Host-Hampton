@@ -331,7 +331,10 @@ export async function sendEmail(params: EmailParams): Promise<{ success: boolean
 
     const msg: any = {
       to: params.to,
-      from: params.from || 'hosthampton295@gmail.com', // Use gmail address
+      from: {
+        email: params.from || 'hosthampton295@gmail.com',
+        name: 'Host Hampton'
+      },
       subject: params.subject,
     };
 
@@ -355,9 +358,16 @@ export async function sendEmail(params: EmailParams): Promise<{ success: boolean
     };
   } catch (error: any) {
     console.error('SendGrid email error:', error);
+    
+    // Log more detailed error information
+    if (error.response) {
+      console.error('SendGrid response status:', error.response.status);
+      console.error('SendGrid response body:', error.response.body);
+    }
+    
     return {
       success: false,
-      error: error.message || 'Failed to send email'
+      error: error.response?.body?.errors?.[0]?.message || error.message || 'Failed to send email'
     };
   }
 }
