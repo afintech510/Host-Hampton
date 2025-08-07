@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import LeadManagement from "@/components/admin/lead-management";
 import QuotesManagement from "@/components/admin/quotes-management";
+import GalleryManagement from "@/pages/admin/gallery-management";
 import EventCalendar from "@/components/admin/event-calendar";
 import EventDetailsDialog from "@/components/admin/event-details-dialog";
 import InvoiceDetailsDialog from "@/components/admin/invoice-details-dialog";
@@ -24,7 +25,8 @@ import {
   Eye,
   Edit,
   Trash2,
-  Plus
+  Plus,
+  ImageIcon
 } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
 
@@ -184,12 +186,13 @@ export default function AdminDashboard() {
 
       <div className="w-full px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 bg-slate-100">
+          <TabsList className="grid w-full grid-cols-7 bg-slate-100">
             <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Overview</TabsTrigger>
             <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Events</TabsTrigger>
             <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Invoices</TabsTrigger>
             <TabsTrigger value="quotes" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Quotes</TabsTrigger>
             <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Leads</TabsTrigger>
+            <TabsTrigger value="gallery" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Gallery</TabsTrigger>
             <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Staff</TabsTrigger>
           </TabsList>
 
@@ -549,6 +552,11 @@ export default function AdminDashboard() {
           {/* Leads/Inquiries Tab */}
           <TabsContent value="leads" className="space-y-6">
             <LeadManagement />
+          </TabsContent>
+
+          {/* Gallery Tab */}
+          <TabsContent value="gallery" className="space-y-6">
+            <GalleryManagement />
           </TabsContent>
 
           {/* Staff Tab */}

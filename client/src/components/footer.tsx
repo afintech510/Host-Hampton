@@ -21,9 +21,10 @@ export default function Footer() {
   ];
 
   const legalLinks = [
-    { name: "Terms & Conditions", href: "/terms" },
-    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms & Conditions", href: "/terms-and-conditions" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
     { name: "Cancellation Policy", href: "/cancellation-policy" },
+    { name: "Communications Agreement", href: "/communications-agreement" },
     { name: "FAQ", href: "/faq" },
   ];
 

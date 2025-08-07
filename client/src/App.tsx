@@ -31,6 +31,12 @@ import MyStudioRental from "./pages/my-studio-rental";
 import MyPermanentJewelry from "./pages/my-permanent-jewelry";
 import TermsAndConditions from "./pages/terms-and-conditions";
 import CommunicationsAgreement from "./pages/communications-agreement";
+import PrivacyPolicy from "./pages/privacy-policy";
+import CancellationPolicy from "./pages/cancellation-policy";
+import FAQ from "./pages/faq";
+import Reviews from "./pages/reviews";
+import Gallery from "./pages/gallery";
+import GalleryManagement from "./pages/admin/gallery-management";
 import About from "./pages/about";
 import Contact from "./pages/contact";
 import Footer from "@/components/footer";
@@ -62,6 +68,12 @@ function Router() {
           <Route path="/my-permanent-jewelry/:id?" component={MyPermanentJewelry} />
           <Route path="/terms-and-conditions" component={TermsAndConditions} />
           <Route path="/communications-agreement" component={CommunicationsAgreement} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/cancellation-policy" component={CancellationPolicy} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/reviews" component={Reviews} />
+          <Route path="/gallery" component={Gallery} />
+          <Route path="/admin/gallery" component={GalleryManagement} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
           <Route path="/payment" component={Payment} />
