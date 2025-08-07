@@ -8,7 +8,9 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, ShoppingCart, X } from "lucide-react";
 import { UnifiedButton } from "@/components/ui/unified-button";
@@ -164,25 +166,28 @@ export default function UpcomingEvents() {
                 className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white h-fit"
               >
                 {/* Large Event Image */}
-                <div className="relative h-80 md:h-96 overflow-hidden cursor-pointer">
+                <div className="relative h-96 md:h-[28rem] lg:h-[32rem] overflow-hidden cursor-pointer">
                   <Dialog>
                     <DialogTrigger asChild>
                       <img
                         src={event.imageUrl || "/placeholder-event.jpg"}
                         alt={event.name}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        className="w-full h-full object-contain transition-transform duration-300 hover:scale-105 bg-gray-50"
                         onError={(e) => {
                           e.currentTarget.src = "/placeholder-event.jpg";
                         }}
                         onClick={() => setSelectedEvent(event)}
                       />
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl w-full h-[90vh] p-0 overflow-hidden">
-                      <div className="relative w-full h-full">
+                    <DialogContent className="max-w-5xl w-full h-[95vh] p-0 overflow-hidden border-0">
+                      <VisuallyHidden>
+                        <DialogTitle>{event.name} - Event Details</DialogTitle>
+                      </VisuallyHidden>
+                      <div className="relative w-full h-full bg-black">
                         <img
                           src={event.imageUrl || "/placeholder-event.jpg"}
                           alt={event.name}
-                          className="w-full h-full object-contain bg-black"
+                          className="w-full h-full object-contain"
                           onError={(e) => {
                             e.currentTarget.src = "/placeholder-event.jpg";
                           }}
