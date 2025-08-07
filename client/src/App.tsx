@@ -11,6 +11,7 @@ import PartyDesigner from "@/pages/party-designer";
 import AdminDashboard from "@/pages/admin-dashboard";
 import Payment from "@/pages/payment";
 import ShopEvents from "@/pages/shop-events";
+import UpcomingEvents from "@/pages/upcoming-events";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import CheckoutSuccess from "@/pages/checkout-success";
@@ -78,6 +79,7 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/payment" component={Payment} />
           <Route path="/shop-events" component={ShopEvents} />
+          <Route path="/upcoming-events" component={UpcomingEvents} />
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/checkout/success" component={CheckoutSuccess} />
