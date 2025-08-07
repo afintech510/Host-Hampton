@@ -213,28 +213,21 @@ export default function Cart() {
                             {product.description}
                           </p>
                           <div className="flex items-center gap-4">
-                            <div className="text-lg font-bold text-primary">
-                              {product.hasSiblingDiscount && product.siblingPrice && item.quantity > 1 ? (
-                                <div className="flex flex-col">
-                                  <div className="text-base">
-                                    1 × {formatPrice(product.price)} + {item.quantity - 1} × {formatPrice(product.siblingPrice)}
-                                  </div>
-                                  <div className="text-lg font-bold">
-                                    = {formatPrice(calculateItemTotal(product, item.quantity))}
-                                  </div>
-                                </div>
-                              ) : (
-                                <span>
-                                  {item.quantity > 1 && `${item.quantity} × `}{formatPrice(product.price)}
-                                  {item.quantity > 1 && ` = ${formatPrice(product.price * item.quantity)}`}
+                            <div className="text-lg font-bold text-black">
+                              {formatPrice(product.price)} per ticket
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {product.hasSiblingDiscount && product.siblingPrice && (
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                  Sibling Discount
+                                </span>
+                              )}
+                              {product.category && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+                                  {product.category}
                                 </span>
                               )}
                             </div>
-                            {product.category && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
-                                {product.category}
-                              </span>
-                            )}
                           </div>
                         </div>
 
