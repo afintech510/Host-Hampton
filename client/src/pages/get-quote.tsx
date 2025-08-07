@@ -45,6 +45,16 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import allieImage from "@assets/image_1752579343744.png";
 
+// Utility function to generate random booking IDs
+const generateBookingId = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 // New flow structure based on requirements - using actual event type IDs from EventTypeStep
 const getFlowSteps = (eventType: string) => {
   switch (eventType) {
@@ -104,12 +114,15 @@ export default function GetQuote() {
       // Clear form data after successful submission
       clearFormData();
       
-      // Redirect to appropriate reservation page based on event type
+      // Redirect to appropriate reservation page based on event type with random ID
       if (data.leadId) {
+        const randomId = generateBookingId();
         if (formData.eventType && isTruckerHatFlow(formData.eventType)) {
-          setLocation(`/trucker-hat-reservation/${data.leadId}`);
+          setLocation(`/my-trucker-hat/${randomId}?leadId=${data.leadId}`);
+        } else if (formData.eventType && isStudioRentalFlow(formData.eventType)) {
+          setLocation(`/my-studio-rental/${randomId}?leadId=${data.leadId}`);
         } else {
-          setLocation(`/customer-booking/${data.leadId}`);
+          setLocation(`/my-theme-party/${randomId}?leadId=${data.leadId}`);
         }
       } else {
         setLocation("/themed-parties");

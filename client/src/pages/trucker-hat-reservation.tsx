@@ -22,8 +22,14 @@ function getOrdinalSuffix(num: number): string {
   return suffixes[mod >= 11 && mod <= 13 ? 0 : num % 10] || suffixes[0];
 }
 
-export default function TruckerHatReservation() {
-  const { leadId } = useParams<{ leadId: string }>();
+interface TruckerHatReservationProps {
+  leadId?: string | null;
+}
+
+export default function TruckerHatReservation({ leadId }: TruckerHatReservationProps = {}) {
+  // Also support legacy URL param approach for backward compatibility
+  const { leadId: urlLeadId } = useParams<{ leadId: string }>();
+  const effectiveLeadId = leadId || urlLeadId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -43,20 +49,20 @@ export default function TruckerHatReservation() {
 
   // Fetch lead/booking data
   const { data: booking, isLoading } = useQuery({
-    queryKey: ["/api/leads", leadId],
+    queryKey: ["/api/leads", effectiveLeadId],
     queryFn: async () => {
-      const response = await fetch(`/api/leads/${leadId}`);
+      const response = await fetch(`/api/leads/${effectiveLeadId}`);
       const data = await response.json();
       return data.success ? data.lead : null;
     },
-    enabled: !!leadId
+    enabled: !!effectiveLeadId
   });
 
   // Stripe deposit payment mutation
   const depositMutation = useMutation({
     mutationFn: async (bookingData: any) => {
       const response = await apiRequest("POST", "/api/create-deposit-payment", {
-        leadId: parseInt(leadId!),
+        leadId: parseInt(effectiveLeadId!),
         amount: 2000, // $20 booking fee
         bookingData
       });
@@ -80,11 +86,11 @@ export default function TruckerHatReservation() {
   // Update booking mutation
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
-      const response = await apiRequest("PATCH", `/api/leads/${leadId}`, updates);
+      const response = await apiRequest("PATCH", `/api/leads/${effectiveLeadId}`, updates);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads", leadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/leads", effectiveLeadId] });
       setIsEditing(false);
       toast({
         title: "Reservation Updated",

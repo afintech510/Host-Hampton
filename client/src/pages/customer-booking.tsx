@@ -22,8 +22,14 @@ function getOrdinalSuffix(num: number): string {
   return suffixes[mod >= 11 && mod <= 13 ? 0 : num % 10] || suffixes[0];
 }
 
-export default function CustomerBooking() {
-  const { leadId } = useParams<{ leadId: string }>();
+interface CustomerBookingProps {
+  leadId?: string | null;
+}
+
+export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
+  // Also support legacy URL param approach for backward compatibility
+  const { leadId: urlLeadId } = useParams<{ leadId: string }>();
+  const effectiveLeadId = leadId || urlLeadId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -43,13 +49,13 @@ export default function CustomerBooking() {
 
   // Fetch lead/booking data
   const { data: booking, isLoading } = useQuery({
-    queryKey: ["/api/leads", leadId],
+    queryKey: ["/api/leads", effectiveLeadId],
     queryFn: async () => {
-      const response = await fetch(`/api/leads/${leadId}`);
+      const response = await fetch(`/api/leads/${effectiveLeadId}`);
       const data = await response.json();
       return data.success ? data.lead : null;
     },
-    enabled: !!leadId
+    enabled: !!effectiveLeadId
   });
 
   // Fetch all available add-ons for editing
@@ -86,7 +92,7 @@ export default function CustomerBooking() {
   const depositMutation = useMutation({
     mutationFn: async (bookingData: any) => {
       const response = await apiRequest("POST", "/api/create-deposit-payment", {
-        leadId: parseInt(leadId!),
+        leadId: parseInt(effectiveLeadId!),
         amount: 20000, // $200 deposit
         bookingData
       });

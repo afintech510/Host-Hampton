@@ -25,6 +25,9 @@ import InvoicePayment from "@/pages/invoice-payment";
 import CustomerInvoice from "./pages/customer-invoice";
 import CustomerBooking from "./pages/customer-booking";
 import TruckerHatReservation from "./pages/trucker-hat-reservation";
+import MyThemeParty from "./pages/my-theme-party";
+import MyTruckerHat from "./pages/my-trucker-hat";
+import MyStudioRental from "./pages/my-studio-rental";
 import TermsAndConditions from "./pages/terms-and-conditions";
 import CommunicationsAgreement from "./pages/communications-agreement";
 
@@ -43,8 +46,13 @@ function Router() {
       <Route path="/invoice/:invoiceId" component={InvoiceView} />
       <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
       <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
-      <Route path="/customer-booking/:leadId" component={CustomerBooking} />
-      <Route path="/trucker-hat-reservation/:leadId" component={TruckerHatReservation} />
+      {/* Legacy routes - using wrapper for backward compatibility */}
+      <Route path="/customer-booking/:leadId" component={() => <CustomerBooking />} />
+      <Route path="/trucker-hat-reservation/:leadId" component={() => <TruckerHatReservation />} />
+      {/* New secure booking routes */}
+      <Route path="/my-theme-party/:id?" component={MyThemeParty} />
+      <Route path="/my-trucker-hat/:id?" component={MyTruckerHat} />
+      <Route path="/my-studio-rental/:id?" component={MyStudioRental} />
       <Route path="/terms-and-conditions" component={TermsAndConditions} />
       <Route path="/communications-agreement" component={CommunicationsAgreement} />
       <Route path="/payment" component={Payment} />
