@@ -350,7 +350,6 @@ export default function CustomerBooking() {
                                   onClick={() => {
                                     const updatedAddons = booking.selectedAddons.filter((name: string) => name !== addonName);
                                     updateMutation.mutate({
-                                      ...booking,
                                       selectedAddons: updatedAddons
                                     });
                                   }}

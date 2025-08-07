@@ -956,6 +956,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leadId = parseInt(req.params.id);
       const rawUpdates = req.body;
       
+      // Debug logging
+      console.log("=== LEAD UPDATE DEBUG ===");
+      console.log("Lead ID:", leadId);
+      console.log("Raw updates received:", JSON.stringify(rawUpdates, null, 2));
+      
       // Preprocess date fields in updates to handle empty strings and invalid dates
       const processedUpdates = {
         ...rawUpdates,
@@ -979,6 +984,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         convertedAt: rawUpdates.convertedAt === undefined ? undefined : 
                     (rawUpdates.convertedAt && rawUpdates.convertedAt !== "" ? new Date(rawUpdates.convertedAt) : null),
       };
+      
+      console.log("Processed updates:", JSON.stringify(processedUpdates, null, 2));
+      console.log("=== END DEBUG ===");
       
       const updatedLead = await storage.updateLead(leadId, processedUpdates);
       
