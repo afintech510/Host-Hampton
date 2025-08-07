@@ -56,7 +56,10 @@ export default function EventCalendar() {
 
   const getCurrentWeekDays = () => {
     const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    // Start week on Monday (1) instead of Sunday (0)
+    const dayOfWeek = currentDate.getDay();
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday, go back 6 days; otherwise go back (dayOfWeek - 1)
+    startOfWeek.setDate(currentDate.getDate() - daysFromMonday);
     
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -179,10 +182,20 @@ function WeekView({ days, getEventsForDate, getStatusColor }: {
   getEventsForDate: (date: Date) => Event[];
   getStatusColor: (status: string) => string;
 }) {
+  const formatTime = (time: string) => {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const hour24 = parseInt(hours);
+    const ampm = hour24 >= 12 ? "PM" : "AM";
+    const hour12 = hour24 % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   return (
     <div className="grid grid-cols-7 gap-4">
-      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName) => (
-        <div key={dayName} className="font-medium text-center text-gray-500 pb-2">
+      {/* Updated header to start with Monday */}
+      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName) => (
+        <div key={dayName} className="font-medium text-center text-gray-500 pb-3">
           {dayName}
         </div>
       ))}
@@ -192,20 +205,45 @@ function WeekView({ days, getEventsForDate, getStatusColor }: {
         const isToday = day.toDateString() === new Date().toDateString();
         
         return (
-          <div key={index} className="min-h-[200px] border rounded-lg p-2">
-            <div className={`text-center font-medium mb-2 ${isToday ? 'text-blue-600' : ''}`}>
+          <div key={index} className="min-h-[400px] border rounded-lg p-3 bg-gray-50">
+            <div className={`text-center font-semibold mb-3 text-lg ${isToday ? 'text-blue-600 bg-blue-50 rounded-md py-1' : ''}`}>
               {day.getDate()}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {dayEvents.map((event: Event) => (
                 <div
                   key={event.id}
-                  className="text-xs p-1 rounded bg-blue-100 text-blue-800 truncate"
-                  title={`Event #${event.id} - ${event.startTime}`}
+                  className={`text-xs p-2 rounded-md border-l-4 bg-white shadow-sm ${getStatusColor(event.status)} hover:shadow-md transition-shadow cursor-pointer`}
+                  title={`Event #${event.id} - ${event.guestCount} guests`}
                 >
-                  {event.startTime} - Event #{event.id}
+                  <div className="font-medium text-gray-900">
+                    Event #{event.id}
+                  </div>
+                  <div className="text-gray-600 mt-1">
+                    {formatTime(event.startTime)}
+                    {event.endTime && ` - ${formatTime(event.endTime)}`}
+                  </div>
+                  <div className="text-gray-500 mt-1 flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full bg-blue-400"></span>
+                    {event.guestCount} guests
+                  </div>
+                  {event.customerName && (
+                    <div className="text-gray-600 mt-1 truncate">
+                      {event.customerName}
+                    </div>
+                  )}
+                  <div className="mt-1">
+                    <Badge className={`text-xs ${getStatusColor(event.status)}`}>
+                      {event.status}
+                    </Badge>
+                  </div>
                 </div>
               ))}
+              {dayEvents.length === 0 && (
+                <div className="text-gray-400 text-center py-8 text-sm">
+                  No events
+                </div>
+              )}
             </div>
           </div>
         );
@@ -222,7 +260,8 @@ function MonthView({ days, currentMonth, getEventsForDate, getStatusColor }: {
 }) {
   return (
     <div className="grid grid-cols-7 gap-1">
-      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName) => (
+      {/* Updated header to start with Monday */}
+      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName) => (
         <div key={dayName} className="font-medium text-center text-gray-500 p-2">
           {dayName}
         </div>
@@ -236,28 +275,29 @@ function MonthView({ days, currentMonth, getEventsForDate, getStatusColor }: {
         return (
           <div 
             key={index} 
-            className={`min-h-[100px] border p-1 ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}`}
+            className={`min-h-[120px] border p-2 ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}`}
           >
             <div 
-              className={`text-sm font-medium ${
-                isToday ? 'text-blue-600' : isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+              className={`text-sm font-medium mb-1 ${
+                isToday ? 'text-blue-600 bg-blue-100 rounded px-1' : isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
               }`}
             >
               {day.getDate()}
             </div>
-            <div className="space-y-1 mt-1">
-              {dayEvents.slice(0, 2).map((event: Event) => (
+            <div className="space-y-1">
+              {dayEvents.slice(0, 3).map((event: Event) => (
                 <div
                   key={event.id}
-                  className={`text-xs p-1 rounded truncate ${getStatusColor(event.status)}`}
-                  title={`Event #${event.id} - ${event.startTime}`}
+                  className={`text-xs p-1 rounded truncate cursor-pointer hover:shadow-sm ${getStatusColor(event.status)}`}
+                  title={`Event #${event.id} - ${event.guestCount} guests - ${event.startTime}`}
                 >
-                  #{event.id}
+                  <div className="font-medium">#{event.id}</div>
+                  <div className="text-gray-600">{event.guestCount}g</div>
                 </div>
               ))}
-              {dayEvents.length > 2 && (
-                <div className="text-xs text-gray-500">
-                  +{dayEvents.length - 2} more
+              {dayEvents.length > 3 && (
+                <div className="text-xs text-gray-500 font-medium">
+                  +{dayEvents.length - 3} more
                 </div>
               )}
             </div>

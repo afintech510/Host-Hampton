@@ -86,6 +86,7 @@ export interface IStorage {
   
   // Product sessions
   getProductSessions(productId: number): Promise<ProductSession[]>;
+  getProductSession(sessionId: number): Promise<ProductSession | undefined>;
   getAllProductSessions(): Promise<ProductSession[]>;
   createProductSession(session: InsertProductSession): Promise<ProductSession>;
   
@@ -1519,6 +1520,15 @@ export class DatabaseStorage implements IStorage {
       .orderBy(productSessions.sessionDate);
     
     return sessions;
+  }
+
+  async getProductSession(sessionId: number): Promise<ProductSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(productSessions)
+      .where(eq(productSessions.id, sessionId));
+    
+    return session;
   }
 
   async getAllProductSessions(): Promise<ProductSession[]> {
