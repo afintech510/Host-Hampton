@@ -25,6 +25,7 @@ import InvoicePayment from "@/pages/invoice-payment";
 import CustomerInvoice from "./pages/customer-invoice";
 import CustomerBooking from "./pages/customer-booking";
 import TermsAndConditions from "./pages/terms-and-conditions";
+import CommunicationsAgreement from "./pages/communications-agreement";
 
 function Router() {
   return (
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
       <Route path="/customer-booking/:leadId" component={CustomerBooking} />
       <Route path="/terms-and-conditions" component={TermsAndConditions} />
+      <Route path="/communications-agreement" component={CommunicationsAgreement} />
       <Route path="/payment" component={Payment} />
       <Route path="/shop-events" component={ShopEvents} />
       <Route path="/cart" component={Cart} />

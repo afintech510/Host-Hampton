@@ -37,7 +37,8 @@ export default function CustomerBooking() {
     zipCode: '',
     phone: '',
     email: '',
-    agreeToTerms: false
+    agreeToTerms: false,
+    agreeToCommunications: false
   });
 
   // Fetch lead/booking data
@@ -153,7 +154,8 @@ export default function CustomerBooking() {
         zipCode: '',
         phone: booking.phone || '',
         email: booking.email || '',
-        agreeToTerms: false
+        agreeToTerms: false,
+        agreeToCommunications: false
       });
     }
   }, [booking]);
@@ -162,7 +164,56 @@ export default function CustomerBooking() {
     updateMutation.mutate(editData);
   };
 
+  // Validation function to check required fields
+  const validateRequiredFields = () => {
+    const missingFields: string[] = [];
+    
+    // Check billing details
+    if (!billingData.firstName.trim()) missingFields.push('firstName');
+    if (!billingData.lastName.trim()) missingFields.push('lastName');
+    if (!billingData.address.trim()) missingFields.push('address');
+    if (!billingData.city.trim()) missingFields.push('city');
+    if (!billingData.state.trim()) missingFields.push('state');
+    if (!billingData.zipCode.trim()) missingFields.push('zipCode');
+    if (!billingData.phone.trim()) missingFields.push('phone');
+    if (!billingData.email.trim()) missingFields.push('email');
+    
+    // Check agreements
+    if (!billingData.agreeToTerms) missingFields.push('agreeToTerms');
+    if (!billingData.agreeToCommunications) missingFields.push('agreeToCommunications');
+    
+    return missingFields;
+  };
+
+  // Function to scroll to first missing field
+  const scrollToMissingField = (fieldId: string) => {
+    const element = document.getElementById(fieldId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      element.focus();
+    }
+  };
+
   const handleDepositPayment = () => {
+    const missingFields = validateRequiredFields();
+    
+    if (missingFields.length > 0) {
+      // Show error message
+      toast({
+        title: "Missing Required Information",
+        description: "Please complete all required fields before proceeding with payment.",
+        variant: "destructive",
+      });
+      
+      // Scroll to first missing field
+      scrollToMissingField(missingFields[0]);
+      return;
+    }
+    
+    // All validation passed, proceed with payment
     depositMutation.mutate(booking);
   };
 
@@ -359,6 +410,40 @@ export default function CustomerBooking() {
                               </Badge>
                             );
                           })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Food Choice Display */}
+                    {booking.foodPreferences?.foodChoice && (
+                      <div className="mt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Food Choice</h5>
+                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                          🍕 {booking.foodPreferences.foodChoice === 'none' ? 'No Food' : booking.foodPreferences.foodChoice.charAt(0).toUpperCase() + booking.foodPreferences.foodChoice.slice(1)}
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Cupcake Flavor Display */}
+                    {booking.foodPreferences?.cupcakeFlavor && (
+                      <div className="mt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Cupcake Flavor</h5>
+                        <Badge variant="outline" className="text-xs bg-pink-50 text-pink-700 border-pink-200">
+                          🧁 {booking.foodPreferences.cupcakeFlavor === 'none' ? 'No Cupcakes' : booking.foodPreferences.cupcakeFlavor.charAt(0).toUpperCase() + booking.foodPreferences.cupcakeFlavor.slice(1)}
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Special Requirements Display */}
+                    {booking.specialRequirements && booking.specialRequirements.length > 0 && (
+                      <div className="mt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Special Requirements</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {booking.specialRequirements.map((requirement: string, index: number) => (
+                            <Badge key={index} variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                              ⚠️ {requirement}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -654,18 +739,38 @@ export default function CustomerBooking() {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2 mt-4">
-                  <Checkbox
-                    id="terms"
-                    checked={billingData.agreeToTerms}
-                    onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: checked as boolean})}
-                  />
-                  <Label htmlFor="terms" className="text-sm">
-                    I agree to the{" "}
-                    <a href="/terms-and-conditions" target="_blank" className="text-purple-600 hover:underline">
-                      Terms and Conditions
-                    </a>
-                  </Label>
+                {/* Required Agreements */}
+                <div className="space-y-3 mt-4">
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="agreeToTerms"
+                      checked={billingData.agreeToTerms}
+                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: checked as boolean})}
+                    />
+                    <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
+                      I agree to the{" "}
+                      <a href="/terms-and-conditions" target="_blank" className="text-purple-600 hover:underline">
+                        Terms and Conditions
+                      </a>{" "}
+                      <span className="text-red-500">*</span>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="agreeToCommunications"
+                      checked={billingData.agreeToCommunications}
+                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
+                    />
+                    <Label htmlFor="agreeToCommunications" className="text-sm leading-relaxed">
+                      I agree to the{" "}
+                      <a href="/communications-agreement" target="_blank" className="text-purple-600 hover:underline">
+                        Communications Agreement
+                      </a>{" "}
+                      (email, phone, and text notifications for event reminders, updates, and marketing communications){" "}
+                      <span className="text-red-500">*</span>
+                    </Label>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -746,15 +851,13 @@ export default function CustomerBooking() {
                 <Button 
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   onClick={handleDepositPayment}
-                  disabled={depositMutation.isPending || !billingData.agreeToTerms}
+                  disabled={depositMutation.isPending}
                 >
                   {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(depositAmount)} Deposit`}
                 </Button>
-                {!billingData.agreeToTerms && (
-                  <p className="text-sm text-red-600 text-center mt-2">
-                    Please complete billing details and accept terms to continue
-                  </p>
-                )}
+                <p className="text-xs text-gray-600 text-center mt-2">
+                  * All billing details and agreements are required to proceed
+                </p>
               </div>
 
               <div className="text-xs text-gray-500 text-center">
