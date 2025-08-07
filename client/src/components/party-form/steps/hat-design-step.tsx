@@ -56,9 +56,6 @@ export function HatDesignStep({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="hatTheme" className="text-sm font-medium">
-              Hat Theme/Color Preferences
-            </Label>
             <Textarea
               id="hatTheme"
               placeholder="e.g., Marvel Comic theme with white and red hats, or Navy blue with gold accents..."
