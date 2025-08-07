@@ -4,8 +4,13 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, ShoppingCart } from "lucide-react";
+import { Calendar, MapPin, Users, ShoppingCart, X } from "lucide-react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -38,6 +43,7 @@ export default function UpcomingEvents() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const [selectedEvent, setSelectedEvent] = useState<Product | null>(null);
 
   // Fetch products (events)
   const { data: products = [], isLoading: productsLoading } = useQuery<
@@ -155,21 +161,70 @@ export default function UpcomingEvents() {
             {upcomingEvents.map((event) => (
               <Card 
                 key={event.id} 
-                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white"
+                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white h-fit"
               >
                 {/* Large Event Image */}
-                <div className="relative h-64 md:h-72 overflow-hidden">
-                  <img
-                    src={event.imageUrl || "/placeholder-event.jpg"}
-                    alt={event.name}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    onError={(e) => {
-                      e.currentTarget.src = "/placeholder-event.jpg";
-                    }}
-                  />
+                <div className="relative h-80 md:h-96 overflow-hidden cursor-pointer">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <img
+                        src={event.imageUrl || "/placeholder-event.jpg"}
+                        alt={event.name}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder-event.jpg";
+                        }}
+                        onClick={() => setSelectedEvent(event)}
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl w-full h-[90vh] p-0 overflow-hidden">
+                      <div className="relative w-full h-full">
+                        <img
+                          src={event.imageUrl || "/placeholder-event.jpg"}
+                          alt={event.name}
+                          className="w-full h-full object-contain bg-black"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder-event.jpg";
+                          }}
+                        />
+                        {/* Overlay Add to Cart Button */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                          <div className="flex items-center justify-between text-white">
+                            <div>
+                              <h3 className="text-xl font-bold mb-1">{event.name}</h3>
+                              <div className="flex items-center gap-4 text-sm">
+                                {event.eventDate && (
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-4 h-4" />
+                                    <span>{formatDate(new Date(event.eventDate))}</span>
+                                  </div>
+                                )}
+                                <span className="pricing-font text-lg font-bold">
+                                  {formatPrice(event.price)}
+                                </span>
+                              </div>
+                            </div>
+                            <UnifiedButton
+                              onClick={() => handleAddToCart(event)}
+                              disabled={(event.availableTickets || 0) === 0}
+                              className={`${
+                                (event.availableTickets || 0) === 0 
+                                  ? 'bg-gray-400 cursor-not-allowed' 
+                                  : 'bg-purple-600 hover:bg-purple-700'
+                              }`}
+                              size="lg"
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                            </UnifiedButton>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   
                   {/* Category Badge */}
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-4 left-4 pointer-events-none">
                     <Badge 
                       variant="secondary"
                       className="bg-white/90 text-gray-800 font-medium"
@@ -179,7 +234,7 @@ export default function UpcomingEvents() {
                   </div>
 
                   {/* Price Badge */}
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-4 right-4 pointer-events-none">
                     <Badge 
                       variant="default"
                       className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
@@ -190,7 +245,7 @@ export default function UpcomingEvents() {
 
                   {/* Availability Indicator */}
                   {event.availableTickets !== undefined && event.maxTickets !== undefined && (
-                    <div className="absolute bottom-4 left-4">
+                    <div className="absolute bottom-4 left-4 pointer-events-none">
                       <Badge 
                         variant={event.availableTickets > 5 ? "default" : "destructive"}
                         className="bg-black/70 text-white"
