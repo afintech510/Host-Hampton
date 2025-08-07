@@ -88,6 +88,7 @@ export interface IStorage {
   getCartItems(sessionId: string): Promise<CartItem[]>;
   addToCart(cartItem: InsertCartItem): Promise<CartItem>;
   updateCartItem(id: number, quantity: number): Promise<CartItem | undefined>;
+  updateCartItemByProduct(sessionId: string, productId: number, quantity: number): Promise<CartItem | undefined>;
   removeFromCart(id: number): Promise<boolean>;
   clearCart(sessionId: string): Promise<void>;
   
@@ -750,6 +751,10 @@ export class MemStorage implements IStorage {
     throw new Error("Not implemented in MemStorage");
   }
 
+  async updateCartItemByProduct(sessionId: string, productId: number, quantity: number): Promise<CartItem | undefined> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
   async removeFromCart(id: number): Promise<boolean> {
     throw new Error("Not implemented in MemStorage");
   }
@@ -1353,6 +1358,20 @@ export class DatabaseStorage implements IStorage {
       .update(cartItems)
       .set({ quantity })
       .where(eq(cartItems.id, id))
+      .returning();
+    return updatedItem;
+  }
+
+  async updateCartItemByProduct(sessionId: string, productId: number, quantity: number): Promise<CartItem | undefined> {
+    const [updatedItem] = await db
+      .update(cartItems)
+      .set({ quantity })
+      .where(
+        and(
+          eq(cartItems.sessionId, sessionId),
+          eq(cartItems.productId, productId)
+        )
+      )
       .returning();
     return updatedItem;
   }

@@ -44,12 +44,16 @@ export default function Cart() {
         productId,
         quantity,
       });
+      if (!response.ok) {
+        throw new Error('Failed to update cart item');
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart", sessionId] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Cart update error:', error);
       toast({
         title: "Error",
         description: "Failed to update cart item",
@@ -235,6 +239,7 @@ export default function Cart() {
                                 quantity: Math.max(1, parseInt(e.target.value) || 1)
                               })}
                               className="w-16 text-center"
+                              style={{ textAlign: 'center' }}
                               disabled={updateQuantityMutation.isPending}
                             />
                             

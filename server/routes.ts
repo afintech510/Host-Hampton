@@ -1968,10 +1968,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update cart item quantity by cart item ID
   app.put("/api/cart/:id", async (req, res) => {
     try {
       const { quantity } = req.body;
       const cartItem = await storage.updateCartItem(parseInt(req.params.id), quantity);
+      if (!cartItem) {
+        return res.status(404).json({ message: "Cart item not found" });
+      }
+      res.json(cartItem);
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      res.status(500).json({ message: "Failed to update cart item" });
+    }
+  });
+
+  // Update cart item quantity by session and product ID (PATCH method)
+  app.patch("/api/cart", async (req, res) => {
+    try {
+      const { sessionId, productId, quantity } = req.body;
+      if (!sessionId || !productId || quantity === undefined) {
+        return res.status(400).json({ message: "Missing required fields: sessionId, productId, quantity" });
+      }
+      
+      const cartItem = await storage.updateCartItemByProduct(sessionId, productId, quantity);
       if (!cartItem) {
         return res.status(404).json({ message: "Cart item not found" });
       }
