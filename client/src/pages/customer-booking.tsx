@@ -328,8 +328,10 @@ export default function CustomerBooking() {
 
                     {/* Package Pill */}
                     <div className="mb-3">
-                      <Badge variant="outline" className="mr-2">
-                        📦 Package: {booking.packageSelection || 'Base Birthday Party'}
+                      <Badge variant="outline" className="mr-2 bg-white">
+                        {booking.packageSelection === 'Make it Shine Add-On' ? '✨ Make it Shine ⭐' :
+                         booking.packageSelection === 'Party Envy Add-On' ? '👑 Party Envy 💎' :
+                         '🎉 Base Birthday Party'}
                       </Badge>
                     </div>
 
@@ -341,8 +343,20 @@ export default function CustomerBooking() {
                           {booking.selectedAddons.map((addonName: string, index: number) => {
                             const addon = allAddons?.find((a: any) => a.name === addonName);
                             return (
-                              <Badge key={index} variant="outline" className="text-xs">
+                              <Badge key={index} variant="outline" className="text-xs bg-white relative group cursor-pointer">
                                 {addon?.icon || '🎉'} {addonName}
+                                <button 
+                                  className="ml-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    const updatedAddons = booking.selectedAddons.filter((name: string) => name !== addonName);
+                                    updateMutation.mutate({
+                                      ...booking,
+                                      selectedAddons: updatedAddons
+                                    });
+                                  }}
+                                >
+                                  ×
+                                </button>
                               </Badge>
                             );
                           })}
@@ -542,7 +556,7 @@ export default function CustomerBooking() {
                   />
                 ) : (
                   <p className="text-gray-600 mt-1">
-                    {booking.notes || booking.formData?.questions || 'None specified'}
+                    {booking.notes || booking.formData?.questions || '—'}
                   </p>
                 )}
               </div>
