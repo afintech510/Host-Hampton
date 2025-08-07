@@ -121,6 +121,8 @@ export default function GetQuote() {
           setLocation(`/my-trucker-hat/${randomId}?leadId=${data.leadId}`);
         } else if (formData.eventType && isStudioRentalFlow(formData.eventType)) {
           setLocation(`/my-studio-rental/${randomId}?leadId=${data.leadId}`);
+        } else if (formData.eventType && isJewelryFlow(formData.eventType)) {
+          setLocation(`/my-permanent-jewelry/${randomId}?leadId=${data.leadId}`);
         } else {
           setLocation(`/my-theme-party/${randomId}?leadId=${data.leadId}`);
         }

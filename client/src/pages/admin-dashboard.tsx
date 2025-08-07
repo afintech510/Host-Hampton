@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import LeadManagement from "@/components/admin/lead-management";
+import QuotesManagement from "@/components/admin/quotes-management";
 import EventCalendar from "@/components/admin/event-calendar";
 import EventDetailsDialog from "@/components/admin/event-details-dialog";
 import InvoiceDetailsDialog from "@/components/admin/invoice-details-dialog";
@@ -183,10 +184,11 @@ export default function AdminDashboard() {
 
       <div className="w-full px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 bg-slate-100">
+          <TabsList className="grid w-full grid-cols-6 bg-slate-100">
             <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Overview</TabsTrigger>
             <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Events</TabsTrigger>
             <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Invoices</TabsTrigger>
+            <TabsTrigger value="quotes" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Quotes</TabsTrigger>
             <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Leads</TabsTrigger>
             <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Staff</TabsTrigger>
           </TabsList>
@@ -537,6 +539,11 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Quotes Tab */}
+          <TabsContent value="quotes" className="space-y-6">
+            <QuotesManagement />
           </TabsContent>
 
           {/* Leads/Inquiries Tab */}

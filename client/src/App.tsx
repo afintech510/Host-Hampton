@@ -28,6 +28,7 @@ import TruckerHatReservation from "./pages/trucker-hat-reservation";
 import MyThemeParty from "./pages/my-theme-party";
 import MyTruckerHat from "./pages/my-trucker-hat";
 import MyStudioRental from "./pages/my-studio-rental";
+import MyPermanentJewelry from "./pages/my-permanent-jewelry";
 import TermsAndConditions from "./pages/terms-and-conditions";
 import CommunicationsAgreement from "./pages/communications-agreement";
 
@@ -53,6 +54,7 @@ function Router() {
       <Route path="/my-theme-party/:id?" component={MyThemeParty} />
       <Route path="/my-trucker-hat/:id?" component={MyTruckerHat} />
       <Route path="/my-studio-rental/:id?" component={MyStudioRental} />
+      <Route path="/my-permanent-jewelry/:id?" component={MyPermanentJewelry} />
       <Route path="/terms-and-conditions" component={TermsAndConditions} />
       <Route path="/communications-agreement" component={CommunicationsAgreement} />
       <Route path="/payment" component={Payment} />
