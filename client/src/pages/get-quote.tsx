@@ -52,7 +52,7 @@ const getFlowSteps = (eventType: string) => {
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
-      return 7; // Welcome → EventType → Attendees → Age Range → Theme → DateTime → Contact
+      return 5; // Welcome → EventType → Event Details → Date/Time Range → Contact
     case "workshop":
       return 5; // Welcome → EventType → Workshop Details → Schedule → Contact
     case "permanent-jewelry":
@@ -291,10 +291,10 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Age Range & Location
+        // Trucker Hat Bar: Date & Time Range (like Studio Rental)
         if (isTruckerHatFlow(eventType)) {
           return (
-            <EventDetailsStep
+            <StudioDateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -349,13 +349,13 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Theme Selection
+        // Trucker Hat Bar: Contact (final step)
         if (isTruckerHatFlow(eventType)) {
           return (
-            <ThemeStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -395,16 +395,9 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Date/Time
+        // Trucker Hat Bar: No step 6 (flow ends at step 5)
         if (isTruckerHatFlow(eventType)) {
-          return (
-            <DateTimeStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleNextStep}
-              onBack={handlePreviousStep}
-            />
-          );
+          return null;
         }
         break;
       case 7:
@@ -419,16 +412,9 @@ export default function GetQuote() {
             />
           );
         }
-        // Trucker Hat Bar: Contact (final step)
+        // Trucker Hat Bar: No step 7 (flow ends at step 5)
         if (isTruckerHatFlow(eventType)) {
-          return (
-            <ContactStep
-              formData={formData}
-              updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
-              onBack={handlePreviousStep}
-            />
-          );
+          return null;
         }
         // Studio Rental: Contact (final step)
         if (isStudioRentalFlow(eventType)) {
