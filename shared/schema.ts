@@ -708,6 +708,7 @@ export const orderItems = pgTable("order_items", {
   id: serial("id").primaryKey(),
   orderId: integer("order_id").references(() => orders.id),
   productId: integer("product_id").references(() => products.id),
+  productSessionId: integer("product_session_id").references(() => productSessions.id), // For events with multiple sessions
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(), // Price in cents at time of purchase
   createdAt: timestamp("created_at").defaultNow(),

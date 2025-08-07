@@ -2100,6 +2100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.createOrderItem({
                 orderId: order.id,
                 productId: cartItem.productId,
+                productSessionId: cartItem.productSessionId || null, // Include session info
                 quantity: cartItem.quantity,
                 price: product.price // Store price at time of purchase
               });

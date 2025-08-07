@@ -168,7 +168,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
                       \${item.product?.imageUrl ? \`
                         <div style="flex-shrink: 0;">
                           <a href="https://hosthampton.com/upcoming-events" style="text-decoration: none;">
-                            <img src="https://hosthampton.com\${item.product.imageUrl}" 
+                            <img src="\${item.product.imageUrl.startsWith('http') ? item.product.imageUrl : 'https://hosthampton.com' + item.product.imageUrl}" 
                                  alt="\${item.product.name}" 
                                  style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(255,255,255,0.5);">
                           </a>
@@ -304,7 +304,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
                     <!-- Product Image -->
                     \${item.product?.imageUrl ? \`
                       <div style="flex-shrink: 0;">
-                        <img src="https://hosthampton.com\${item.product.imageUrl}" 
+                        <img src="\${item.product.imageUrl.startsWith('http') ? item.product.imageUrl : 'https://hosthampton.com' + item.product.imageUrl}" 
                              alt="\${item.product.name}" 
                              style="width: 60px; height: 60px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0;">
                       </div>
