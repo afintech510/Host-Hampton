@@ -104,7 +104,10 @@ export default function Footer() {
               {navigationLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <span className="text-gray-600 hover:text-mauve-rose transition-colors duration-200 cursor-pointer text-sm">
+                    <span 
+                      className="text-gray-600 hover:text-mauve-rose transition-colors duration-200 cursor-pointer text-sm"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    >
                       {link.name}
                     </span>
                   </Link>
@@ -120,7 +123,10 @@ export default function Footer() {
               {serviceLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <span className="text-gray-600 hover:text-mauve-rose transition-colors duration-200 cursor-pointer text-sm">
+                    <span 
+                      className="text-gray-600 hover:text-mauve-rose transition-colors duration-200 cursor-pointer text-sm"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    >
                       {link.name}
                     </span>
                   </Link>
@@ -136,7 +142,10 @@ export default function Footer() {
               {legalLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <span className="text-gray-600 hover:text-mauve-rose transition-colors duration-200 cursor-pointer text-sm">
+                    <span 
+                      className="text-gray-600 hover:text-mauve-rose transition-colors duration-200 cursor-pointer text-sm"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    >
                       {link.name}
                     </span>
                   </Link>
@@ -155,17 +164,26 @@ export default function Footer() {
           {/* Quick Links */}
           <div className="flex space-x-6 text-sm">
             <Link href="/get-quote">
-              <span className="text-mauve-rose hover:text-dusty-blue font-medium cursor-pointer transition-colors duration-200">
+              <span 
+                className="text-mauve-rose hover:text-dusty-blue font-medium cursor-pointer transition-colors duration-200"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
                 Get Instant Quote
               </span>
             </Link>
             <Link href="/contact">
-              <span className="text-mauve-rose hover:text-dusty-blue font-medium cursor-pointer transition-colors duration-200">
+              <span 
+                className="text-mauve-rose hover:text-dusty-blue font-medium cursor-pointer transition-colors duration-200"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
                 Contact Us
               </span>
             </Link>
             <Link href="/shop-events">
-              <span className="text-mauve-rose hover:text-dusty-blue font-medium cursor-pointer transition-colors duration-200">
+              <span 
+                className="text-mauve-rose hover:text-dusty-blue font-medium cursor-pointer transition-colors duration-200"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
                 Upcoming Events
               </span>
             </Link>

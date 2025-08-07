@@ -296,11 +296,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   Party Details
-                  {isLocked && (
-                    <Badge variant="destructive" className="text-xs">
-                      🔒 Quote Locked
-                    </Badge>
-                  )}
                 </div>
                 {!isLocked && (
                   <Button
