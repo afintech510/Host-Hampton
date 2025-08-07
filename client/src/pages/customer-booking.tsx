@@ -252,7 +252,10 @@ export default function CustomerBooking() {
   const baseGuestCount = 10;
   const basePackagePrice = booking?.packageTotal || 0;
   const extraGuests = Math.max(0, (booking?.guestCount || 0) - baseGuestCount);
-  const extraGuestPrice = extraGuests * 2500; // $25 per extra guest
+  
+  // Get Extra Child Guest addon price from database ($35 each)
+  const extraChildGuestAddon = allAddons?.find((addon: any) => addon.name === 'Extra Child Guest');
+  const extraGuestPrice = extraGuests * (extraChildGuestAddon?.price || 3500); // Default to $35 if not found
   
   // Calculate add-on total
   const addonTotal = booking?.selectedAddons?.reduce((total: number, addonName: string) => {
@@ -760,7 +763,7 @@ export default function CustomerBooking() {
                 </div>
                 {extraGuests > 0 && (
                   <div className="flex justify-between">
-                    <span>Extra Guests ({extraGuests} × $25)</span>
+                    <span>Extra Guests ({extraGuests} × $35)</span>
                     <span>{formatPrice(extraGuestPrice)}</span>
                   </div>
                 )}
