@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTrigger,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
@@ -179,15 +180,18 @@ export default function UpcomingEvents() {
                         onClick={() => setSelectedEvent(event)}
                       />
                     </DialogTrigger>
-                    <DialogContent className="max-w-5xl w-full h-[95vh] p-0 overflow-hidden border-0">
+                    <DialogContent className="max-w-[90vw] max-h-[95vh] w-auto h-auto p-0 overflow-hidden border-0">
                       <VisuallyHidden>
                         <DialogTitle>{event.name} - Event Details</DialogTitle>
+                        <DialogDescription>
+                          Full size view of {event.name} event poster
+                        </DialogDescription>
                       </VisuallyHidden>
-                      <div className="relative w-full h-full bg-black">
+                      <div className="relative w-full h-[90vh] bg-black flex items-center justify-center">
                         <img
                           src={event.imageUrl || "/placeholder-event.jpg"}
                           alt={event.name}
-                          className="w-full h-full object-contain"
+                          className="max-w-full max-h-full object-contain"
                           onError={(e) => {
                             e.currentTarget.src = "/placeholder-event.jpg";
                           }}
