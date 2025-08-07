@@ -739,39 +739,7 @@ export default function CustomerBooking() {
                   </div>
                 </div>
                 
-                {/* Required Agreements */}
-                <div className="space-y-3 mt-4">
-                  <div className="flex items-start space-x-2">
-                    <Checkbox
-                      id="agreeToTerms"
-                      checked={billingData.agreeToTerms}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: checked as boolean})}
-                    />
-                    <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
-                      I agree to the{" "}
-                      <a href="/terms-and-conditions" target="_blank" className="text-purple-600 hover:underline">
-                        Terms and Conditions
-                      </a>{" "}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <Checkbox
-                      id="agreeToCommunications"
-                      checked={billingData.agreeToCommunications}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
-                    />
-                    <Label htmlFor="agreeToCommunications" className="text-sm leading-relaxed">
-                      I agree to the{" "}
-                      <a href="/communications-agreement" target="_blank" className="text-purple-600 hover:underline">
-                        Communications Agreement
-                      </a>{" "}
-                      (email, phone, and text notifications for event reminders, updates, and marketing communications){" "}
-                      <span className="text-red-500">*</span>
-                    </Label>
-                  </div>
-                </div>
+
               </div>
             </CardContent>
           </Card>
@@ -839,6 +807,40 @@ export default function CustomerBooking() {
                 <div className="flex justify-between text-gray-600">
                   <span>Remaining Balance</span>
                   <span>{formatPrice(remainingBalance)}</span>
+                </div>
+              </div>
+
+              {/* Required Agreements */}
+              <div className="space-y-3 mb-4">
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="agreeToTerms"
+                    checked={billingData.agreeToTerms}
+                    onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: checked as boolean})}
+                  />
+                  <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
+                    I agree to the{" "}
+                    <a href="/terms-and-conditions" target="_blank" className="text-purple-600 hover:underline">
+                      Terms and Conditions
+                    </a>{" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                </div>
+                
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="agreeToCommunications"
+                    checked={billingData.agreeToCommunications}
+                    onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
+                  />
+                  <Label htmlFor="agreeToCommunications" className="text-sm leading-relaxed">
+                    I agree to the{" "}
+                    <a href="/communications-agreement" target="_blank" className="text-purple-600 hover:underline">
+                      Communications Agreement
+                    </a>{" "}
+                    (email, phone, and text notifications for event reminders, updates, and marketing communications){" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
                 </div>
               </div>
 
