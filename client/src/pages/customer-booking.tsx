@@ -310,30 +310,47 @@ export default function CustomerBooking() {
                 </div>
               </div>
 
-              {/* Party Theme & Package */}
-              <Separator />
-              <div>
-                <h4 className="font-semibold mb-2">Party Package</h4>
-                <Badge variant="secondary" className="mb-2">
-                  {booking.partyTheme || 'Custom Theme'}
-                </Badge>
-                <p className="text-sm text-gray-600">
-                  Package: {booking.packageSelection || 'Standard'}
-                </p>
-              </div>
+              {/* Party Package - Display Only */}
+              {!isEditing && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold mb-3">Party Package</h4>
+                    
+                    {/* Theme Pill */}
+                    <div className="mb-3">
+                      {allThemes?.find((theme: any) => theme.name === booking.partyTheme) && (
+                        <Badge variant="secondary" className="mr-2">
+                          {allThemes.find((theme: any) => theme.name === booking.partyTheme)?.icon} {booking.partyTheme}
+                        </Badge>
+                      )}
+                    </div>
 
-              {/* Selected Add-ons */}
-              {booking.selectedAddons && booking.selectedAddons.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-2">Selected Add-ons</h4>
-                  <div className="space-y-1">
-                    {booking.selectedAddons.map((addon: string, index: number) => (
-                      <Badge key={index} variant="outline" className="mr-1 mb-1">
-                        {addon}
+                    {/* Package Pill */}
+                    <div className="mb-3">
+                      <Badge variant="outline" className="mr-2">
+                        📦 Package: {booking.packageSelection || 'Base Birthday Party'}
                       </Badge>
-                    ))}
+                    </div>
+
+                    {/* Selected Add-ons Pills */}
+                    {booking.selectedAddons && booking.selectedAddons.length > 0 && (
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Selected Add-ons</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {booking.selectedAddons.map((addonName: string, index: number) => {
+                            const addon = allAddons?.find((a: any) => a.name === addonName);
+                            return (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {addon?.icon || '🎉'} {addonName}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                </>
               )}
 
               {/* Enhanced Editing Options */}
@@ -361,19 +378,35 @@ export default function CustomerBooking() {
 
                   {/* Package Selection */}
                   <div>
-                    <Label htmlFor="package">Party Package</Label>
-                    <Select value={editData.packageSelection} onValueChange={(value) => setEditData({...editData, packageSelection: value})}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select package" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {allPackages?.map((pkg: any) => (
-                          <SelectItem key={pkg.id} value={pkg.name}>
-                            {pkg.name} - ${(pkg.price / 100).toFixed(0)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>Party Package</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {allPackages?.map((pkg: any) => {
+                        // Calculate display price based on package type
+                        let displayPrice = '';
+                        if (pkg.name === 'Base Birthday Party') {
+                          displayPrice = '$875';
+                        } else if (pkg.name === 'Make it Shine Add-On') {
+                          displayPrice = '+$25/person';
+                        } else if (pkg.name === 'Party Envy Add-On') {
+                          displayPrice = '+$50/person';
+                        } else {
+                          displayPrice = `$${(pkg.basePrice / 100).toFixed(0)}`;
+                        }
+                        
+                        return (
+                          <Button
+                            key={pkg.id}
+                            type="button"
+                            variant={editData.packageSelection === pkg.name ? "default" : "outline"}
+                            size="sm"
+                            className="h-8 text-xs"
+                            onClick={() => setEditData({...editData, packageSelection: pkg.name})}
+                          >
+                            📦 {pkg.name} ({displayPrice})
+                          </Button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Add-ons Selection by Category */}
