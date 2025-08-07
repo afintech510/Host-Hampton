@@ -31,43 +31,53 @@ import MyStudioRental from "./pages/my-studio-rental";
 import MyPermanentJewelry from "./pages/my-permanent-jewelry";
 import TermsAndConditions from "./pages/terms-and-conditions";
 import CommunicationsAgreement from "./pages/communications-agreement";
+import About from "./pages/about";
+import Contact from "./pages/contact";
+import Footer from "@/components/footer";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={ThemedParties} />
-      <Route path="/book-event" component={BookEvent} />
-      <Route path="/get-quote" component={GetQuote} />
-      <Route path="/quote" component={Quote} />
-      <Route path="/themed-parties" component={ThemedParties} />
-      <Route path="/party-designer" component={PartyDesigner} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin-dashboard" component={AdminDashboard} />
-      <Route path="/admin-dashboard/invoice/create" component={InvoiceCreate} />
-      <Route path="/invoice/:invoiceId" component={InvoiceView} />
-      <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
-      <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
-      {/* Legacy routes - using wrapper for backward compatibility */}
-      <Route path="/customer-booking/:leadId" component={() => <CustomerBooking />} />
-      <Route path="/trucker-hat-reservation/:leadId" component={() => <TruckerHatReservation />} />
-      {/* New secure booking routes */}
-      <Route path="/my-theme-party/:id?" component={MyThemeParty} />
-      <Route path="/my-trucker-hat/:id?" component={MyTruckerHat} />
-      <Route path="/my-studio-rental/:id?" component={MyStudioRental} />
-      <Route path="/my-permanent-jewelry/:id?" component={MyPermanentJewelry} />
-      <Route path="/terms-and-conditions" component={TermsAndConditions} />
-      <Route path="/communications-agreement" component={CommunicationsAgreement} />
-      <Route path="/payment" component={Payment} />
-      <Route path="/shop-events" component={ShopEvents} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Checkout} />
-      <Route path="/checkout/success" component={CheckoutSuccess} />
-      <Route path="/party-room-rental" component={PartyRoomRental} />
-      <Route path="/trucker-hat-bar" component={TruckHatBar} />
-      <Route path="/permanent-jewelry" component={PermanentJewelry} />
-      <Route path="/my-events" component={MyEvents} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <Switch>
+          <Route path="/" component={ThemedParties} />
+          <Route path="/book-event" component={BookEvent} />
+          <Route path="/get-quote" component={GetQuote} />
+          <Route path="/quote" component={Quote} />
+          <Route path="/themed-parties" component={ThemedParties} />
+          <Route path="/party-designer" component={PartyDesigner} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin-dashboard" component={AdminDashboard} />
+          <Route path="/admin-dashboard/invoice/create" component={InvoiceCreate} />
+          <Route path="/invoice/:invoiceId" component={InvoiceView} />
+          <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
+          <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
+          {/* Legacy routes - using wrapper for backward compatibility */}
+          <Route path="/customer-booking/:leadId" component={() => <CustomerBooking />} />
+          <Route path="/trucker-hat-reservation/:leadId" component={() => <TruckerHatReservation />} />
+          {/* New secure booking routes */}
+          <Route path="/my-theme-party/:id?" component={MyThemeParty} />
+          <Route path="/my-trucker-hat/:id?" component={MyTruckerHat} />
+          <Route path="/my-studio-rental/:id?" component={MyStudioRental} />
+          <Route path="/my-permanent-jewelry/:id?" component={MyPermanentJewelry} />
+          <Route path="/terms-and-conditions" component={TermsAndConditions} />
+          <Route path="/communications-agreement" component={CommunicationsAgreement} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/payment" component={Payment} />
+          <Route path="/shop-events" component={ShopEvents} />
+          <Route path="/cart" component={Cart} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/checkout/success" component={CheckoutSuccess} />
+          <Route path="/party-room-rental" component={PartyRoomRental} />
+          <Route path="/trucker-hat-bar" component={TruckHatBar} />
+          <Route path="/permanent-jewelry" component={PermanentJewelry} />
+          <Route path="/my-events" component={MyEvents} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
+      <Footer />
+    </div>
   );
 }
 

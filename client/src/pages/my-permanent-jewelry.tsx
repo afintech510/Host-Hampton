@@ -1,6 +1,5 @@
-import { useParams } from "wouter";
 import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { generateBookingId, isValidBookingId } from "@/lib/id-generator";
 import PermanentJewelryReservationPage from "./permanent-jewelry-reservation";
 
