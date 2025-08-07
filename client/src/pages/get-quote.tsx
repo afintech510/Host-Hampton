@@ -123,12 +123,16 @@ export default function GetQuote() {
     const totalSteps = getFlowSteps(formData.eventType || "birthday-party");
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top when moving to next step
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePreviousStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top when moving to previous step
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -164,6 +168,8 @@ export default function GetQuote() {
     resetForm();
     setCurrentStep(1);
     setShowResetConfirm(false);
+    // Scroll to top when resetting the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleResetCancel = () => {
