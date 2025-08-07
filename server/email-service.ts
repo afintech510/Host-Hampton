@@ -163,27 +163,51 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
                 <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); position: relative; overflow: hidden;">
                   <div style="position: absolute; top: -50%; right: -50%; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: rotate(45deg);"></div>
                   <div style="position: relative; z-index: 1;">
-                    <h4 style="color: #2d3748; margin: 0 0 10px; font-size: 18px; font-weight: bold;">\${item.product?.name || 'Event Experience'}</h4>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                      <span style="background: rgba(255,255,255,0.8); padding: 5px 12px; border-radius: 20px; font-size: 14px; color: #4a5568;">
-                        Qty: \${item.quantity} | $\${(item.price / 100).toFixed(2)} each
-                      </span>
-                      <span style="background: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 14px;">
-                        $\${((item.price * item.quantity) / 100).toFixed(2)}
-                      </span>
+                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                      <!-- Product Image -->
+                      \${item.product?.imageUrl ? \`
+                        <div style="flex-shrink: 0;">
+                          <a href="https://hosthampton.com/upcoming-events" style="text-decoration: none;">
+                            <img src="https://hosthampton.com\${item.product.imageUrl}" 
+                                 alt="\${item.product.name}" 
+                                 style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(255,255,255,0.5);">
+                          </a>
+                        </div>
+                      \` : ''}
+                      
+                      <!-- Product Details -->
+                      <div style="flex: 1;">
+                        <h4 style="color: #2d3748; margin: 0 0 10px; font-size: 18px; font-weight: bold;">
+                          <a href="https://hosthampton.com/upcoming-events" style="color: #2d3748; text-decoration: none;">
+                            \${item.product?.name || 'Event Experience'}
+                          </a>
+                        </h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                          <span style="background: rgba(255,255,255,0.8); padding: 5px 12px; border-radius: 20px; font-size: 14px; color: #4a5568;">
+                            Qty: \${item.quantity} | $\${(item.price / 100).toFixed(2)} each
+                          </span>
+                          <span style="background: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                            $\${((item.price * item.quantity) / 100).toFixed(2)}
+                          </span>
+                        </div>
+                        
+                        <!-- Session Details for Session-based Products -->
+                        \${item.sessionInfo ? \`
+                          <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); padding: 12px; border-radius: 8px; margin-top: 10px;">
+                            <p style="margin: 0; color: #4c51bf; font-weight: bold; font-size: 14px;">📅 Session Details</p>
+                            <p style="margin: 5px 0 0; color: #553c9a; font-size: 14px;">\${item.sessionInfo}</p>
+                          </div>
+                        \` : ''}
+                        
+                        <!-- Event Date for Single Date Products -->
+                        \${item.product?.eventDate && !item.sessionInfo ? \`
+                          <div style="background: rgba(72, 187, 120, 0.1); border: 1px solid rgba(72, 187, 120, 0.3); padding: 12px; border-radius: 8px; margin-top: 10px;">
+                            <p style="margin: 0; color: #2f855a; font-weight: bold; font-size: 14px;">📅 Event Date</p>
+                            <p style="margin: 5px 0 0; color: #276749; font-size: 14px;">\${new Date(item.product.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                          </div>
+                        \` : ''}
+                      </div>
                     </div>
-                    \${item.sessionInfo ? \`
-                      <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); padding: 12px; border-radius: 8px; margin-top: 10px;">
-                        <p style="margin: 0; color: #4c51bf; font-weight: bold; font-size: 14px;">📅 Session Details</p>
-                        <p style="margin: 5px 0 0; color: #553c9a; font-size: 14px;">\${item.sessionInfo}</p>
-                      </div>
-                    \` : ''}
-                    \${item.product?.eventDate && !item.sessionInfo ? \`
-                      <div style="background: rgba(72, 187, 120, 0.1); border: 1px solid rgba(72, 187, 120, 0.3); padding: 12px; border-radius: 8px; margin-top: 10px;">
-                        <p style="margin: 0; color: #2f855a; font-weight: bold; font-size: 14px;">📅 Event Date</p>
-                        <p style="margin: 5px 0 0; color: #276749; font-size: 14px;">\${new Date(item.product.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      </div>
-                    \` : ''}
                   </div>
                 </div>
               \`).join('')}
@@ -276,17 +300,29 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
               <h3 style="color: #2d3748; margin: 0 0 20px; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">🎯 Items Purchased</h3>
               \${orderItems.map(item => \`
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; background: #f7fafc;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <!-- Product Image -->
+                    \${item.product?.imageUrl ? \`
+                      <div style="flex-shrink: 0;">
+                        <img src="https://hosthampton.com\${item.product.imageUrl}" 
+                             alt="\${item.product.name}" 
+                             style="width: 60px; height: 60px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0;">
+                      </div>
+                    \` : ''}
+                    
+                    <!-- Product Details -->
                     <div style="flex: 1;">
                       <h4 style="color: #2d3748; margin: 0 0 8px; font-size: 16px; font-weight: bold;">\${item.product?.name || 'Event Experience'}</h4>
-                      <p style="color: #4a5568; margin: 0; font-size: 14px;">Quantity: \${item.quantity} × $\${(item.price / 100).toFixed(2)}</p>
+                      <p style="color: #4a5568; margin: 0 0 8px; font-size: 14px;">Quantity: \${item.quantity} × $\${(item.price / 100).toFixed(2)}</p>
                       \${item.sessionInfo ? \`
-                        <div style="background: #edf2f7; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                        <div style="background: #edf2f7; padding: 8px; border-radius: 4px;">
                           <p style="margin: 0; color: #2d3748; font-size: 13px;"><strong>📅 Session:</strong> \${item.sessionInfo}</p>
                         </div>
                       \` : ''}
                     </div>
-                    <div style="text-align: right;">
+                    
+                    <!-- Price -->
+                    <div style="text-align: right; flex-shrink: 0;">
                       <span style="background: #48bb78; color: white; padding: 5px 10px; border-radius: 6px; font-weight: bold; font-size: 14px;">
                         $\${((item.price * item.quantity) / 100).toFixed(2)}
                       </span>
