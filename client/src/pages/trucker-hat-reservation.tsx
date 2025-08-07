@@ -102,15 +102,39 @@ export default function TruckerHatReservation() {
 
   useEffect(() => {
     if (booking) {
+      // Extract date and time from Trucker Hat form data
+      const formData = booking.formData || {};
+      const eventDate = formData.studioPreferredDate || booking.eventDate;
+      const startTime = formData.studioStartTime || booking.startTime;
+      const endTime = formData.studioEndTime || booking.endTime;
+      
+      // Format time slot for display
+      let timeSlot = '';
+      if (startTime && endTime) {
+        // Convert 24hr format to 12hr format for display
+        const formatTime = (time: string) => {
+          const [hour, minute] = time.split(':');
+          const h = parseInt(hour);
+          const ampm = h >= 12 ? 'pm' : 'am';
+          const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+          return `${displayHour}${minute !== '00' ? `:${minute}` : ''}${ampm}`;
+        };
+        timeSlot = `${formatTime(startTime)}-${formatTime(endTime)}`;
+      } else if (booking.timeSlot) {
+        timeSlot = booking.timeSlot;
+      }
+
       setEditData({
         eventDescription: booking.eventDescription || '',
-        adultCount: booking.adultCount || 0,
-        childCount: booking.childCount || 0,
+        adultCount: booking.adultCount || formData.adultCount || 0,
+        childCount: booking.childCount || formData.childCount || 0,
         eventLocation: booking.eventLocation || 'studio',
         mobileAddress: booking.mobileAddress || '',
-        eventDate: booking.eventDate ? booking.eventDate.split('T')[0] : '',
-        timeSlot: booking.timeSlot || '',
-        notes: booking.notes || ''
+        eventDate: eventDate ? eventDate.split('T')[0] : '',
+        timeSlot: timeSlot,
+        startTime: startTime || '',
+        endTime: endTime || '',
+        notes: booking.notes || formData.questions || ''
       });
       
       // Pre-fill billing data from booking
@@ -215,8 +239,8 @@ export default function TruckerHatReservation() {
   const bookingFeeAmount = 2000; // $20
   
   // Calculate Trucker Hat pricing based on requirements
-  const totalPeople = (booking?.adultCount || 0) + (booking?.childCount || 0);
-  const isStudioLocation = booking?.eventLocation === 'studio';
+  const totalPeople = (editData.adultCount || 0) + (editData.childCount || 0);
+  const isStudioLocation = (editData.eventLocation || booking?.eventLocation) === 'studio';
   
   let basePrice = 0;
   let hatCount = 0;
@@ -341,7 +365,7 @@ export default function TruckerHatReservation() {
                     </div>
                   ) : (
                     <p className="text-gray-600">
-                      {booking.adultCount} adults, {booking.childCount} children
+                      {editData.adultCount || 0} adults, {editData.childCount || 0} children
                     </p>
                   )}
                 </div>
@@ -372,7 +396,7 @@ export default function TruckerHatReservation() {
                     </div>
                   ) : (
                     <p className="text-gray-600">
-                      {booking.eventDate ? new Date(booking.eventDate).toLocaleDateString() : 'TBD'} • {booking.timeSlot || 'TBD'}
+                      {editData.eventDate ? new Date(editData.eventDate).toLocaleDateString() : 'TBD'} • {editData.timeSlot || 'TBD'}
                     </p>
                   )}
                 </div>
