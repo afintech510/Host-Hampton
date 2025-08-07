@@ -12,7 +12,7 @@ import {
   type Order, type InsertOrder, type OrderItem, type InsertOrderItem
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, asc, gte, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -1344,14 +1344,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
-    // Check if item already exists in cart
+    // Check if item already exists in cart (must match sessionId, productId, AND productSessionId)
     const existingItems = await db
       .select()
       .from(cartItems)
       .where(
         and(
           eq(cartItems.sessionId, cartItem.sessionId),
-          eq(cartItems.productId, cartItem.productId!)
+          eq(cartItems.productId, cartItem.productId!),
+          cartItem.productSessionId 
+            ? eq(cartItems.productSessionId, cartItem.productSessionId)
+            : isNull(cartItems.productSessionId)
         )
       );
 
