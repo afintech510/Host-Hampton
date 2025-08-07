@@ -129,7 +129,7 @@ export class CommunicationService {
 
     return this.sendEmail({
       to: customerEmail,
-      from: 'events@hosthampton.com',
+      from: 'hosthampton295@gmail.com',
       subject,
       html,
       customerId,
@@ -158,7 +158,7 @@ export class CommunicationService {
 
     return this.sendEmail({
       to: customerEmail,
-      from: 'billing@hosthampton.com',
+      from: 'hosthampton295@gmail.com',
       subject,
       html,
       customerId,
@@ -188,7 +188,7 @@ export class CommunicationService {
 
     return this.sendEmail({
       to: customerEmail,
-      from: 'events@hosthampton.com',
+      from: 'hosthampton295@gmail.com',
       subject,
       html,
       customerId,

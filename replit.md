@@ -72,3 +72,9 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - ✅ Enhanced /get-quote kids party flow with real business offerings and custom icons
 - ✅ Added category field to addons table with 5 categories: food, drink, activity, decor, extra
 - ✅ Categorized all add-ons for better organization and future filtering options
+
+**Contact Information Update (January 2025):**
+- ✅ Updated phone number site-wide to 631-998-9325
+- ✅ Updated email address site-wide to hosthampton295@gmail.com
+- ✅ Updated contact information across all components, pages, email templates, and server files
+- ✅ Replaced old phone numbers (757, 555, 400-8080) and email addresses (info@hosthampton.com, hello@hosthampton.com, events@hosthampton.com)

@@ -593,8 +593,8 @@ export default function GetQuote() {
             </div>
             <p className="text-gray-700 mb-4">
               Need help with your party planning? I'm here to assist! Feel free to call or text me directly at{" "}
-              <a href="tel:631-400-8080" className="text-coral font-medium">
-                631-400-8080
+              <a href="tel:631-998-9325" className="text-coral font-medium">
+                631-998-9325
               </a>{" "}
               for immediate assistance.
             </p>
@@ -607,7 +607,7 @@ export default function GetQuote() {
                 Close
               </Button>
               <Button asChild className="flex-1">
-                <a href="tel:631-400-8080">Call Now</a>
+                <a href="tel:631-998-9325">Call Now</a>
               </Button>
             </div>
           </div>

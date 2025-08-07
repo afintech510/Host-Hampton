@@ -102,8 +102,8 @@ export default function CommunicationsAgreement() {
                   To modify your communication preferences or ask questions about this agreement:
                 </p>
                 <ul className="list-none pl-0 mt-2 space-y-1">
-                  <li><strong>Email:</strong> info@hosthampton.com</li>
-                  <li><strong>Phone:</strong> (631) 555-PARTY</li>
+                  <li><strong>Email:</strong> hosthampton295@gmail.com</li>
+                  <li><strong>Phone:</strong> 631-998-9325</li>
                   <li><strong>Address:</strong> Host Hampton Studio, Speonk, NY</li>
                 </ul>
               </section>

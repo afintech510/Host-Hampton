@@ -123,7 +123,7 @@ export default function Contact() {
                   <Mail className="h-5 w-5 text-mauve-rose" />
                   <div>
                     <p className="font-medium">Email</p>
-                    <p className="text-gray-600">hello@hosthampton.com</p>
+                    <p className="text-gray-600">hosthampton295@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

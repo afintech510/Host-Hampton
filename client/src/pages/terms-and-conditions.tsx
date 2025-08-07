@@ -89,8 +89,8 @@ export default function TermsAndConditions() {
               <section>
                 <h3 className="text-lg font-semibold mb-3">7. Contact Information</h3>
                 <div className="space-y-2 text-gray-700">
-                  <p>• Phone: 631-400-8080</p>
-                  <p>• Email: info@hosthampton.com</p>
+                  <p>• Phone: 631-998-9325</p>
+                  <p>• Email: hosthampton295@gmail.com</p>
                   <p>• Address: Host Hampton Studio, Speonk, NY</p>
                   <p>• For questions or concerns, please contact us directly</p>
                 </div>

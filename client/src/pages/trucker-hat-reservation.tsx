@@ -741,7 +741,7 @@ export default function TruckerHatReservation({ leadId }: TruckerHatReservationP
               <div className="text-xs text-gray-500 text-center">
                 <p>• Booking fee is non-refundable</p>
                 <p>• You can modify reservation details after booking</p>
-                <p>• Need help? Contact us at info@hosthampton.com</p>
+                <p>• Need help? Contact us at hosthampton295@gmail.com</p>
               </div>
             </CardContent>
           </Card>

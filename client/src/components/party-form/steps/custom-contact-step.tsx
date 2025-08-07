@@ -72,7 +72,7 @@ export function CustomContactStep({ formData, updateFormData, onNext, onBack }: 
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="(555) 123-4567"
+            placeholder="631-998-9325"
             className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-pink-300"
           />
         </div>

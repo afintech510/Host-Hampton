@@ -45,7 +45,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
         </ul>
         <p>We'll be in touch within 24 hours with a personalized quote and availability confirmation.</p>
         <p>In the meantime, feel free to browse our gallery at <a href="https://hosthampton.com">hosthampton.com</a></p>
-        <p>Best regards,<br>The Host Hampton Team<br>events@hosthampton.com</p>
+        <p>Best regards,<br>The Host Hampton Team<br>hosthampton295@gmail.com</p>
       </div>
     `,
     variables: ['customerName', 'eventType', 'eventDate', 'eventTime', 'guestCount']
@@ -66,7 +66,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
           <p><strong>Deposit Required:</strong> $\{{depositAmount}}</p>
         </div>
         <p>This quote is valid for 7 days. To secure your date, we require a 50% deposit.</p>
-        <p>Ready to book? Reply to this email or call us at (757) 123-4567.</p>
+        <p>Ready to book? Reply to this email or call us at 631-998-9325.</p>
         <p>Best regards,<br>The Host Hampton Team</p>
       </div>
     `,
@@ -93,7 +93,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
           <li>Balance payment is due 48 hours before your event</li>
           <li>Our team will arrive 30 minutes early for setup</li>
         </ul>
-        <p>Questions? Contact us anytime at events@hosthampton.com</p>
+        <p>Questions? Contact us anytime at hosthampton295@gmail.com</p>
         <p>Best regards,<br>The Host Hampton Team</p>
       </div>
     `,
@@ -116,7 +116,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
           <li>👥 Experienced team handles every detail</li>
         </ul>
         <p>Would you like to schedule a quick call to discuss your vision? I'm available {{availabilityDays}}.</p>
-        <p>Best regards,<br>{{senderName}}<br>Host Hampton Events<br>events@hosthampton.com</p>
+        <p>Best regards,<br>{{senderName}}<br>Host Hampton Events<br>hosthampton295@gmail.com</p>
       </div>
     `,
     variables: ['customerName', 'eventType', 'eventDate', 'availabilityDays', 'senderName']
@@ -151,7 +151,7 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
           <li>Our team will contact you to confirm final arrangements</li>
           <li>Arrive 15 minutes early on your event day</li>
         </ul>
-        <p>Questions? Contact us at events@hosthampton.com or call (757) 123-4567</p>
+        <p>Questions? Contact us at hosthampton295@gmail.com or call 631-998-9325</p>
         <p>Best regards,<br>The Host Hampton Team</p>
       </div>
     `,
@@ -170,7 +170,7 @@ export async function sendEmail(params: EmailParams): Promise<{ success: boolean
 
     const msg: any = {
       to: params.to,
-      from: params.from || 'events@hosthampton.com', // Default from address
+      from: params.from || 'hosthampton295@gmail.com', // Default from address
       subject: params.subject,
     };
 
@@ -227,7 +227,7 @@ export async function sendTemplateEmail(
 
   return sendEmail({
     to,
-    from: from || 'events@hosthampton.com',
+    from: from || 'hosthampton295@gmail.com',
     subject,
     html
   });

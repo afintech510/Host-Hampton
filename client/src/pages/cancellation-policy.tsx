@@ -154,8 +154,8 @@ export default function CancellationPolicy() {
               
               <div className="bg-dusty-blue/10 border border-dusty-blue/20 rounded-lg p-4">
                 <div className="space-y-2 text-gray-700">
-                  <p><strong>Phone:</strong> (555) 123-PARTY</p>
-                  <p><strong>Email:</strong> hello@hosthampton.com</p>
+                  <p><strong>Phone:</strong> 631-998-9325</p>
+                  <p><strong>Email:</strong> hosthampton295@gmail.com</p>
                   <p><strong>Hours:</strong> Monday-Saturday 9AM-6PM</p>
                 </div>
               </div>

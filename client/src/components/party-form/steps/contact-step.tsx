@@ -111,7 +111,7 @@ export function ContactStep({ formData, updateFormData, onNext, onBack }: Contac
           <Label className="text-sm font-medium text-gray-700 mb-2 block">Phone Number</Label>
           <Input
             type="tel"
-            placeholder="(555) 123-4567"
+            placeholder="631-998-9325"
             value={parentPhone}
             onChange={(e) => setParentPhone(e.target.value)}
             className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
