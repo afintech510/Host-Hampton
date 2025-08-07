@@ -3,12 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Plus, Minus, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingCart, ArrowLeft, Calendar, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import Navigation from "@/components/navigation";
 import { UnifiedButton } from "@/components/ui/unified-button";
-import type { CartItem, Product } from "@shared/schema";
+import type { CartItem, Product, ProductSession } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 
@@ -37,11 +38,13 @@ export default function Cart() {
     queryKey: ["/api/products"],
   });
 
+  const { data: allSessions = [] } = useQuery<ProductSession[]>({
+    queryKey: ["/api/product-sessions"],
+  });
+
   const updateQuantityMutation = useMutation({
-    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
-      const response = await apiRequest("PATCH", "/api/cart", {
-        sessionId,
-        productId,
+    mutationFn: async ({ cartItemId, quantity }: { cartItemId: number; quantity: number }) => {
+      const response = await apiRequest("PATCH", `/api/cart/${cartItemId}`, {
         quantity,
       });
       if (!response.ok) {
@@ -112,17 +115,19 @@ export default function Cart() {
   };
 
   // Calculate item total with sibling discount pricing
-  const calculateItemTotal = (product: Product, quantity: number) => {
+  const calculateItemTotal = (product: Product, quantity: number, priceOverride?: number | null) => {
+    const basePrice = priceOverride || product.price;
     if (product.hasSiblingDiscount && product.siblingPrice && quantity > 1) {
       // First ticket at full price, additional tickets at sibling price
-      return product.price + (quantity - 1) * product.siblingPrice;
+      return basePrice + (quantity - 1) * product.siblingPrice;
     }
-    return product.price * quantity;
+    return basePrice * quantity;
   };
 
   const subtotal = cartItems.reduce((sum, item) => {
     const product = products.find(p => p.id === item.productId);
-    return sum + (product ? calculateItemTotal(product, item.quantity) : 0);
+    const session = item.productSessionId ? allSessions.find(s => s.id === item.productSessionId) : null;
+    return sum + (product ? calculateItemTotal(product, item.quantity, session?.priceOverride) : 0);
   }, 0);
 
   const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
@@ -189,6 +194,7 @@ export default function Cart() {
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => {
                 const product = products.find(p => p.id === item.productId);
+                const session = item.productSessionId ? allSessions.find(s => s.id === item.productSessionId) : null;
                 if (!product) return null;
 
                 return (
@@ -209,12 +215,23 @@ export default function Cart() {
                           <h3 className="font-semibold text-lg text-gray-900 mb-1">
                             {product.name}
                           </h3>
+                          
+                          {/* Session Badge */}
+                          {session && (
+                            <div className="mb-2">
+                              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                {session.sessionName} - {new Date(session.sessionDate).toLocaleDateString()} at {session.sessionTime}
+                              </Badge>
+                            </div>
+                          )}
+                          
                           <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                             {product.description}
                           </p>
                           <div className="flex items-center gap-4">
                             <div className="text-lg font-bold text-black">
-                              {formatPrice(product.price)} per ticket
+                              {formatPrice(session?.priceOverride || product.price)} per ticket
                             </div>
                             <div className="flex items-center gap-2">
                               {product.hasSiblingDiscount && product.siblingPrice && (
@@ -238,7 +255,7 @@ export default function Cart() {
                               variant="outline"
                               size="sm"
                               onClick={() => updateQuantityMutation.mutate({
-                                productId: product.id,
+                                cartItemId: item.id,
                                 quantity: Math.max(1, item.quantity - 1)
                               })}
                               disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
@@ -251,7 +268,7 @@ export default function Cart() {
                               min="1"
                               value={item.quantity}
                               onChange={(e) => updateQuantityMutation.mutate({
-                                productId: product.id,
+                                cartItemId: item.id,
                                 quantity: Math.max(1, parseInt(e.target.value) || 1)
                               })}
                               className="w-16 text-center quantity-input"
@@ -263,7 +280,7 @@ export default function Cart() {
                               variant="outline"
                               size="sm"
                               onClick={() => updateQuantityMutation.mutate({
-                                productId: product.id,
+                                cartItemId: item.id,
                                 quantity: item.quantity + 1
                               })}
                               disabled={updateQuantityMutation.isPending}
@@ -313,15 +330,21 @@ export default function Cart() {
                   <div className="space-y-2">
                     {cartItems.map((item) => {
                       const product = products.find(p => p.id === item.productId);
+                      const session = item.productSessionId ? allSessions.find(s => s.id === item.productSessionId) : null;
                       if (!product) return null;
                       
                       return (
                         <div key={item.id} className="flex justify-between text-sm">
-                          <span className="text-gray-600">
-                            {product.name} × {item.quantity}
-                          </span>
+                          <div className="text-gray-600">
+                            <div>{product.name} × {item.quantity}</div>
+                            {session && (
+                              <div className="text-xs text-purple-600 mt-1">
+                                {session.sessionName} - {new Date(session.sessionDate).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
                           <span className="font-medium">
-                            {formatPrice(calculateItemTotal(product, item.quantity))}
+                            {formatPrice(calculateItemTotal(product, item.quantity, session?.priceOverride))}
                           </span>
                         </div>
                       );

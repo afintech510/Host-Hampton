@@ -2024,6 +2024,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update specific cart item by ID (PATCH method)
+  app.patch("/api/cart/:id", async (req, res) => {
+    try {
+      const cartItemId = parseInt(req.params.id);
+      const { quantity } = req.body;
+      
+      if (!cartItemId || quantity === undefined) {
+        return res.status(400).json({ message: "Missing required fields: cartItemId, quantity" });
+      }
+      
+      const cartItem = await storage.updateCartItem(cartItemId, quantity);
+      if (!cartItem) {
+        return res.status(404).json({ message: "Cart item not found" });
+      }
+      res.json(cartItem);
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      res.status(500).json({ message: "Failed to update cart item" });
+    }
+  });
+
   app.delete("/api/cart/:id", async (req, res) => {
     try {
       // Check if the ID is a session ID (string) vs cart item ID (number)
