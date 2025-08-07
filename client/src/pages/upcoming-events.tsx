@@ -136,12 +136,6 @@ export default function UpcomingEvents() {
         title: "Added to Cart",
         description: `${product.name} added to your cart successfully!`,
       });
-
-      // Redirect to cart and scroll to top
-      setTimeout(() => {
-        setLocation("/cart");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 1000);
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast({
