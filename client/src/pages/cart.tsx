@@ -238,7 +238,7 @@ export default function Cart() {
                                 productId: product.id,
                                 quantity: Math.max(1, parseInt(e.target.value) || 1)
                               })}
-                              className="w-16 text-center"
+                              className="w-16 text-center quantity-input"
                               style={{ textAlign: 'center' }}
                               disabled={updateQuantityMutation.isPending}
                             />

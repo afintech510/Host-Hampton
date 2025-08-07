@@ -228,3 +228,14 @@ h3, h4, h5, p, body {
 .step-transition {
   transition: all 0.3s ease-out;
 }
+
+/* Hide number input spinners for quantity inputs */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantity-input[type="number"] {
+  -moz-appearance: textfield;
+}
