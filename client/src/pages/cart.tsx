@@ -219,7 +219,7 @@ export default function Cart() {
                             <div className="flex items-center gap-2">
                               {product.hasSiblingDiscount && product.siblingPrice && (
                                 <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                                  Sibling Discount
+                                  {formatPrice(product.price - product.siblingPrice)} sibling discount
                                 </span>
                               )}
                               {product.category && (
