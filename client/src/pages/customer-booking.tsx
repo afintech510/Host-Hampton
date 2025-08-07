@@ -727,7 +727,7 @@ export default function CustomerBooking() {
                       placeholder="Phone number"
                     />
                   </div>
-                  <div>
+                  <div className="col-span-2">
                     <Label htmlFor="email">Email *</Label>
                     <Input
                       id="email"
