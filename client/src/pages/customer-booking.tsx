@@ -371,7 +371,7 @@ export default function CustomerBooking() {
                     {/* Theme Pill */}
                     <div className="mb-3">
                       {allThemes?.find((theme: any) => theme.name === booking.partyTheme) && (
-                        <Badge variant="secondary" className="mr-2">
+                        <Badge variant="outline" className="mr-2 bg-white">
                           {allThemes.find((theme: any) => theme.name === booking.partyTheme)?.icon} {booking.partyTheme}
                         </Badge>
                       )}
