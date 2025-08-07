@@ -52,7 +52,7 @@ const getFlowSteps = (eventType: string) => {
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
-      return 5; // Welcome → EventType → Event Details (head count) → Date/Time → Contact
+      return 7; // Welcome → EventType → Attendees → Age Range → Theme → DateTime → Contact
     case "workshop":
       return 5; // Welcome → EventType → Workshop Details → Schedule → Contact
     case "permanent-jewelry":
@@ -291,10 +291,10 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Date/Time  
+        // Trucker Hat Bar: Age Range & Location
         if (isTruckerHatFlow(eventType)) {
           return (
-            <CustomDateTimeStep
+            <EventDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -349,13 +349,13 @@ export default function GetQuote() {
           );
         }
 
-        // Trucker Hat Bar: Contact (final step)
+        // Trucker Hat Bar: Theme Selection
         if (isTruckerHatFlow(eventType)) {
           return (
-            <ContactStep
+            <ThemeStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
             />
           );
@@ -395,6 +395,17 @@ export default function GetQuote() {
             />
           );
         }
+        // Trucker Hat Bar: Date/Time
+        if (isTruckerHatFlow(eventType)) {
+          return (
+            <DateTimeStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         break;
       case 7:
         // Kids Themed Party: Date/Time Selection
@@ -404,6 +415,17 @@ export default function GetQuote() {
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Trucker Hat Bar: Contact (final step)
+        if (isTruckerHatFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
