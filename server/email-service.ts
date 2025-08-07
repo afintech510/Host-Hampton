@@ -390,15 +390,27 @@ export async function sendTemplateEmail(
   let html = template.html;
   let subject = template.subject;
   
+  // Create a safe template evaluation function
+  const evaluateTemplate = (templateString: string, data: any): string => {
+    try {
+      // Create a function that has access to the template data
+      const func = new Function(...Object.keys(data), `return \`${templateString}\`;`);
+      return func(...Object.values(data));
+    } catch (error) {
+      console.error('Template evaluation error:', error);
+      return templateString; // Return original if evaluation fails
+    }
+  };
+  
+  // Evaluate the template with the provided data
+  html = evaluateTemplate(html, templateData);
+  subject = evaluateTemplate(subject, templateData);
+  
+  // Also handle simple {{variable}} replacements as fallback
   for (const [key, value] of Object.entries(templateData)) {
-    // Handle both {{variable}} and ${variable} syntax
     const regexCurly = new RegExp(`{{${key}}}`, 'g');
-    const regexDollar = new RegExp(`\\$\\{${key}\\}`, 'g');
-    
     html = html.replace(regexCurly, String(value));
-    html = html.replace(regexDollar, String(value));
     subject = subject.replace(regexCurly, String(value));
-    subject = subject.replace(regexDollar, String(value));
   }
 
   return sendEmail({
