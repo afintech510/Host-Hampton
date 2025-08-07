@@ -313,6 +313,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Lock/unlock quote endpoints
+  app.post("/api/leads/:id/lock", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { lockedBy } = req.body;
+      
+      if (!lockedBy) {
+        return res.status(400).json({
+          success: false,
+          message: "lockedBy is required"
+        });
+      }
+
+      const leadId = parseInt(id);
+      if (isNaN(leadId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid lead ID"
+        });
+      }
+
+      // Check if lead exists and is not already locked
+      const existingLead = await storage.getLeadById(leadId);
+      if (!existingLead) {
+        return res.status(404).json({
+          success: false,
+          message: "Lead not found"
+        });
+      }
+
+      if (existingLead.isLocked) {
+        return res.status(400).json({
+          success: false,
+          message: `Quote is already locked by ${existingLead.lockedBy}`
+        });
+      }
+
+      // Lock the quote
+      const updatedLead = await storage.updateLead(leadId, {
+        isLocked: true,
+        lockedBy,
+        lockedAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        message: "Quote locked successfully",
+        lead: updatedLead
+      });
+    } catch (error) {
+      console.error("Error locking quote:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to lock quote"
+      });
+    }
+  });
+
+  app.post("/api/leads/:id/unlock", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { unlockedBy } = req.body;
+
+      const leadId = parseInt(id);
+      if (isNaN(leadId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid lead ID"
+        });
+      }
+
+      // Check if lead exists and is locked
+      const existingLead = await storage.getLeadById(leadId);
+      if (!existingLead) {
+        return res.status(404).json({
+          success: false,
+          message: "Lead not found"
+        });
+      }
+
+      if (!existingLead.isLocked) {
+        return res.status(400).json({
+          success: false,
+          message: "Quote is not locked"
+        });
+      }
+
+      // Unlock the quote
+      const updatedLead = await storage.updateLead(leadId, {
+        isLocked: false,
+        lockedBy: null,
+        lockedAt: null
+      });
+
+      res.json({
+        success: true,
+        message: "Quote unlocked successfully",
+        lead: updatedLead
+      });
+    } catch (error) {
+      console.error("Error unlocking quote:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to unlock quote"
+      });
+    }
+  });
+
   // Create a new review
   app.post("/api/reviews", async (req, res) => {
     try {

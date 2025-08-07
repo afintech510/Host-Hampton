@@ -20,7 +20,9 @@ import {
   Filter,
   ArrowUpDown,
   ExternalLink,
-  FileText
+  FileText,
+  Lock,
+  Unlock
 } from "lucide-react";
 import { format } from "date-fns";
 import { generateBookingId } from "@/lib/id-generator";
@@ -37,6 +39,9 @@ interface Quote {
   status: string;
   createdAt: string;
   formData?: any;
+  isLocked?: boolean;
+  lockedBy?: string;
+  lockedAt?: string;
 }
 
 export default function QuotesManagement() {
@@ -56,6 +61,62 @@ export default function QuotesManagement() {
       const response = await apiRequest("GET", "/api/leads");
       const data = await response.json();
       return data.success ? data.leads : [];
+    }
+  });
+
+  // Lock quote mutation
+  const lockQuoteMutation = useMutation({
+    mutationFn: async ({ quoteId, lockedBy }: { quoteId: number; lockedBy: string }) => {
+      const response = await apiRequest("POST", `/api/leads/${quoteId}/lock`, {
+        lockedBy
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
+      toast({
+        title: "Quote Locked",
+        description: `Quote has been locked for editing.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Lock Failed",
+        description: error.message || "Failed to lock quote",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Unlock quote mutation
+  const unlockQuoteMutation = useMutation({
+    mutationFn: async ({ quoteId, unlockedBy }: { quoteId: number; unlockedBy: string }) => {
+      const response = await apiRequest("POST", `/api/leads/${quoteId}/unlock`, {
+        unlockedBy
+      });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/leads"] });
+      toast({
+        title: "Quote Unlocked",
+        description: `Quote has been unlocked and is available for editing.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Unlock Failed",
+        description: error.message || "Failed to unlock quote",
+        variant: "destructive",
+      });
     }
   });
 
@@ -181,6 +242,16 @@ export default function QuotesManagement() {
     }
   };
 
+  const handleLockQuote = (quote: Quote) => {
+    const currentUser = "Admin"; // In a real app, this would come from auth context
+    lockQuoteMutation.mutate({ quoteId: quote.id, lockedBy: currentUser });
+  };
+
+  const handleUnlockQuote = (quote: Quote) => {
+    const currentUser = "Admin"; // In a real app, this would come from auth context
+    unlockQuoteMutation.mutate({ quoteId: quote.id, unlockedBy: currentUser });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -299,6 +370,12 @@ export default function QuotesManagement() {
                         <Badge className={getStatusBadgeColor(quote.status)}>
                           {quote.status}
                         </Badge>
+                        {quote.isLocked && (
+                          <Badge className="bg-red-100 text-red-800 flex items-center gap-1">
+                            <Lock className="h-3 w-3" />
+                            Locked
+                          </Badge>
+                        )}
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600">
@@ -332,9 +409,42 @@ export default function QuotesManagement() {
                           <span className="font-medium">Theme:</span> {quote.partyTheme}
                         </div>
                       )}
+                      
+                      {quote.isLocked && (
+                        <div className="mt-2 text-sm text-red-600">
+                          <Lock className="h-3 w-3 inline mr-1" />
+                          <span className="font-medium">Locked by {quote.lockedBy}</span>
+                          {quote.lockedAt && (
+                            <span className="text-gray-500"> on {format(new Date(quote.lockedAt), 'MMM d, h:mm a')}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 ml-4">
+                      {/* Lock/Unlock Button */}
+                      {quote.isLocked ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnlockQuote(quote)}
+                          disabled={unlockQuoteMutation.isPending}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Unlock className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleLockQuote(quote)}
+                          disabled={lockQuoteMutation.isPending}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <Lock className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
                       <Button
                         variant="outline" 
                         size="sm"
@@ -350,6 +460,8 @@ export default function QuotesManagement() {
                         variant="outline"
                         size="sm" 
                         onClick={() => openQuoteUrl(quote)}
+                        disabled={quote.isLocked}
+                        title={quote.isLocked ? `Quote is locked by ${quote.lockedBy}` : "Open booking page"}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -412,6 +524,27 @@ export default function QuotesManagement() {
                     {format(new Date(selectedQuote.createdAt), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
+                <div>
+                  <label className="text-sm font-medium">Lock Status</label>
+                  {selectedQuote.isLocked ? (
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-red-100 text-red-800 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Locked by {selectedQuote.lockedBy}
+                      </Badge>
+                      {selectedQuote.lockedAt && (
+                        <span className="text-xs text-gray-500">
+                          {format(new Date(selectedQuote.lockedAt), 'MMM d, h:mm a')}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                      <Unlock className="h-3 w-3" />
+                      Available
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               {selectedQuote.formData && (
@@ -426,16 +559,42 @@ export default function QuotesManagement() {
               )}
 
               <div className="flex justify-between pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => copyQuoteUrl(selectedQuote)}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Booking URL
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => copyQuoteUrl(selectedQuote)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Booking URL
+                  </Button>
+                  
+                  {selectedQuote.isLocked ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleUnlockQuote(selectedQuote)}
+                      disabled={unlockQuoteMutation.isPending}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Unlock className="h-4 w-4 mr-2" />
+                      Unlock Quote
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleLockQuote(selectedQuote)}
+                      disabled={lockQuoteMutation.isPending}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <Lock className="h-4 w-4 mr-2" />
+                      Lock Quote
+                    </Button>
+                  )}
+                </div>
                 
                 <Button
                   onClick={() => openQuoteUrl(selectedQuote)}
+                  disabled={selectedQuote.isLocked}
+                  title={selectedQuote.isLocked ? `Quote is locked by ${selectedQuote.lockedBy}` : "Open booking page"}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Booking Page

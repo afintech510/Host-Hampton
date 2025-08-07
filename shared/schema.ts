@@ -289,6 +289,11 @@ export const leads = pgTable("leads", {
   jewelryVision: text("jewelry_vision"), // Permanent jewelry event vision/description
   packageTotal: integer("package_total"), // Calculated package total in cents
   
+  // Quote locking functionality
+  isLocked: boolean("is_locked").default(false).notNull(), // Whether quote is locked for editing
+  lockedBy: text("locked_by"), // Username/ID of person who locked the quote
+  lockedAt: timestamp("locked_at"), // When the quote was locked
+  
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
