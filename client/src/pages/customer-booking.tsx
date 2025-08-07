@@ -516,7 +516,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                             className="h-8 text-xs"
                             onClick={() => setEditData({...editData, packageSelection: pkg.name})}
                           >
-                            📦 {pkg.name} ({displayPrice})
+                            📦 {pkg.name} (<span className="pricing-font">{displayPrice}</span>)
                           </Button>
                         );
                       })}
@@ -553,7 +553,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                                     }
                                   }}
                                 >
-                                  {addon.icon} {addon.name} (${(addon.price / 100).toFixed(0)})
+                                  {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
                                 </Button>
                               ))}
                             </div>
@@ -772,12 +772,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Base Party Package ({baseGuestCount} guests)</span>
-                  <span>{formatPrice(basePackagePrice)}</span>
+                  <span className="pricing-font">{formatPrice(basePackagePrice)}</span>
                 </div>
                 {extraGuests > 0 && (
                   <div className="flex justify-between">
-                    <span>Extra Guests ({extraGuests} × $35)</span>
-                    <span>{formatPrice(extraGuestPrice)}</span>
+                    <span>Extra Guests ({extraGuests} × <span className="pricing-font">$35</span>)</span>
+                    <span className="pricing-font">{formatPrice(extraGuestPrice)}</span>
                   </div>
                 )}
                 {booking?.selectedAddons && booking.selectedAddons.length > 0 && (
@@ -791,38 +791,38 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                         <div key={addonName} className="flex justify-between text-sm pl-4">
                           <span>
                             {addon.icon} {addon.name}
-                            {addon.perGuest && ` (${formatPrice(addon.price)} pp)`}
+                            {addon.perGuest && ` (`}<span className="pricing-font">{addon.perGuest && `${formatPrice(addon.price)}`}</span>{addon.perGuest && ` pp)`}
                           </span>
-                          <span>{formatPrice(itemPrice)}</span>
+                          <span className="pricing-font">{formatPrice(itemPrice)}</span>
                         </div>
                       );
                     })}
                     <div className="flex justify-between font-medium border-t pt-1">
                       <span>Add-ons Subtotal:</span>
-                      <span>{formatPrice(addonTotal)}</span>
+                      <span className="pricing-font">{formatPrice(addonTotal)}</span>
                     </div>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>{formatPrice(booking?.estimatedCost || 0)}</span>
+                  <span className="pricing-font">{formatPrice(booking?.estimatedCost || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Sales Tax (8.75%)</span>
-                  <span>{formatPrice(salesTax)}</span>
+                  <span className="pricing-font">{formatPrice(salesTax)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total Amount</span>
-                  <span>{formatPrice(totalWithTax)}</span>
+                  <span className="pricing-font">{formatPrice(totalWithTax)}</span>
                 </div>
                 <div className="flex justify-between text-orange-600">
                   <span>Deposit Required</span>
-                  <span>{formatPrice(depositAmount)}</span>
+                  <span className="pricing-font">{formatPrice(depositAmount)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Remaining Balance</span>
-                  <span>{formatPrice(remainingBalance)}</span>
+                  <span className="pricing-font">{formatPrice(remainingBalance)}</span>
                 </div>
               </div>
 
@@ -863,7 +863,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               <div className="bg-purple-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-purple-900 mb-2">Secure Your Reservation</h4>
                 <p className="text-sm text-purple-700 mb-4">
-                  Pay a {formatPrice(depositAmount)} deposit to lock in your party date. 
+                  Pay a <span className="pricing-font">{formatPrice(depositAmount)}</span> deposit to lock in your party date. 
                   The remaining balance will be due on the day of your event.
                 </p>
                 <Button 
@@ -871,7 +871,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                   onClick={handleDepositPayment}
                   disabled={depositMutation.isPending}
                 >
-                  {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(depositAmount)} Deposit`}
+                  {depositMutation.isPending ? 'Processing...' : <>Pay <span className="pricing-font">{formatPrice(depositAmount)}</span> Deposit</>}
                 </Button>
                 <p className="text-xs text-gray-600 text-center mt-2">
                   * All billing details and agreements are required to proceed
