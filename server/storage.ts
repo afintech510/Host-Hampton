@@ -197,7 +197,10 @@ export class MemStorage implements IStorage {
       const id = this.currentAddonId++;
       this.addons.set(id, { 
         ...addon, 
-        id
+        id,
+        description: addon.description || null,
+        icon: null,
+        category: null
       });
     });
   }
@@ -282,12 +285,17 @@ export class MemStorage implements IStorage {
   }
 
   async getCustomerByEmail(email: string): Promise<Customer | undefined> {
-    for (const customer of this.customers.values()) {
+    for (const customer of Array.from(this.customers.values())) {
       if (customer.email === email) {
         return customer;
       }
     }
     return undefined;
+  }
+
+  async getCustomerEvents(customerId: number): Promise<any[]> {
+    const events = await this.getEvents();
+    return events.filter(event => event.customerId === customerId);
   }
 
   async getPackages(): Promise<Package[]> {
@@ -312,9 +320,11 @@ export class MemStorage implements IStorage {
       ...insertAddon, 
       id,
       description: insertAddon.description || null,
+      icon: insertAddon.icon || null,
       imageUrl: insertAddon.imageUrl || null,
       active: insertAddon.active !== undefined ? insertAddon.active : true,
-      perGuest: insertAddon.perGuest !== undefined ? insertAddon.perGuest : false
+      perGuest: insertAddon.perGuest !== undefined ? insertAddon.perGuest : false,
+      category: insertAddon.category || null
     };
     this.addons.set(id, addon);
     return addon;
@@ -341,6 +351,8 @@ export class MemStorage implements IStorage {
     const event: Event = {
       ...insertEvent,
       id,
+      leadId: insertEvent.leadId || null,
+      eventDate: insertEvent.eventDate || null,
       status: insertEvent.status || "pending",
       guestCount: insertEvent.guestCount || 0,
       notes: insertEvent.notes || null,
@@ -406,9 +418,13 @@ export class MemStorage implements IStorage {
     const invoice: Invoice = {
       ...insertInvoice,
       id,
+      leadId: insertInvoice.leadId || null,
+      status: insertInvoice.status || "draft",
       notes: insertInvoice.notes || null,
       ccFee: insertInvoice.ccFee || 0,
-      createdAt: new Date()
+      depositPaid: insertInvoice.depositPaid || false,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.invoices.set(id, invoice);
     return invoice;
@@ -455,6 +471,15 @@ export class MemStorage implements IStorage {
   async getInvoice(id: number): Promise<Invoice | undefined> {
     const invoices = await this.getInvoices();
     return invoices.find(invoice => invoice.id === id);
+  }
+
+  async updateInvoice(id: number, updates: any): Promise<Invoice | undefined> {
+    const invoice = this.invoices.get(id);
+    if (invoice) {
+      Object.assign(invoice, updates);
+      return invoice;
+    }
+    return undefined;
   }
 
 
@@ -781,8 +806,11 @@ export class MemStorage implements IStorage {
     const invoice = this.invoices.get(id);
     if (!invoice) return null;
     
-    // Get customer details
-    const customer = this.customers.get(invoice.customerId || 0);
+    // Get customer details by checking if we have clientEmail or via event
+    let customer = null;
+    if (invoice.clientEmail) {
+      customer = await this.getCustomerByEmail(invoice.clientEmail);
+    }
     
     // Get invoice items
     const items = Array.from(this.invoiceItems.values())
@@ -955,6 +983,14 @@ export class DatabaseStorage implements IStorage {
   async getEvent(id: number): Promise<Event | undefined> {
     const [event] = await db.select().from(events).where(eq(events.id, id));
     return event || undefined;
+  }
+
+  async updateEvent(id: number, updates: any): Promise<Event | undefined> {
+    const [updated] = await db.update(events).set({
+      ...updates,
+      updatedAt: new Date()
+    }).where(eq(events.id, id)).returning();
+    return updated || undefined;
   }
 
   async updateEventStatus(id: number, status: string, changedBy: string = "system", notes?: string): Promise<Event | undefined> {
@@ -1363,7 +1399,36 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
 
-
+  async getInvoiceById(id: number): Promise<any | null> {
+    const [invoice] = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.id, id));
+    
+    if (!invoice) return null;
+    
+    // Get invoice items
+    const items = await db
+      .select()
+      .from(invoiceItems)
+      .where(eq(invoiceItems.invoiceId, id));
+    
+    // Get customer details if we have clientEmail
+    let customer = null;
+    if (invoice.clientEmail) {
+      customer = await this.getCustomerByEmail(invoice.clientEmail);
+    }
+    
+    return {
+      ...invoice,
+      customer: customer ? {
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone
+      } : null,
+      items
+    };
+  }
 
 
 
