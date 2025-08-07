@@ -442,7 +442,7 @@ export default function CustomerBooking() {
                                   type="button"
                                   variant={editData.selectedAddons?.includes(addon.name) ? "default" : "outline"}
                                   size="sm"
-                                  className="h-8 text-xs"
+                                  className="h-8 text-xs hover:font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                                   onClick={() => {
                                     const current = editData.selectedAddons || [];
                                     if (current.includes(addon.name)) {
@@ -472,7 +472,7 @@ export default function CustomerBooking() {
                           type="button"
                           variant={editData.foodPreferences?.foodChoice === option ? "default" : "outline"}
                           size="sm"
-                          className="h-8 text-xs capitalize"
+                          className="h-8 text-xs capitalize hover:font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                           onClick={() => setEditData({
                             ...editData, 
                             foodPreferences: {...editData.foodPreferences, foodChoice: option}
@@ -494,7 +494,7 @@ export default function CustomerBooking() {
                           type="button"
                           variant={editData.foodPreferences?.cupcakeFlavor === flavor ? "default" : "outline"}
                           size="sm"
-                          className="h-8 text-xs capitalize"
+                          className="h-8 text-xs capitalize hover:font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                           onClick={() => setEditData({
                             ...editData, 
                             foodPreferences: {...editData.foodPreferences, cupcakeFlavor: flavor}
