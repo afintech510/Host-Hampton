@@ -58,6 +58,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
     enabled: !!effectiveLeadId
   });
 
+  // Check if quote is locked
+  const isLocked = booking?.locked || booking?.lockedAt;
+
   // Fetch all available add-ons for editing
   const { data: allAddons } = useQuery({
     queryKey: ["/api/addons"],
@@ -291,15 +294,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                Party Details
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  {isEditing ? 'Cancel' : 'Edit'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  Party Details
+                  {isLocked && (
+                    <Badge variant="destructive" className="text-xs">
+                      🔒 Quote Locked
+                    </Badge>
+                  )}
+                </div>
+                {!isLocked && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    {isEditing ? 'Cancel' : 'Edit'}
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -317,7 +329,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                 <Calendar className="w-5 h-5 text-purple-600" />
                 <div>
                   <p className="font-medium">Date & Time</p>
-                  {isEditing ? (
+                  {(isEditing && !isLocked) ? (
                     <div className="space-y-2 mt-2">
                       <Input
                         type="date"
@@ -348,7 +360,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                 <Users className="w-5 h-5 text-purple-600" />
                 <div>
                   <p className="font-medium">Guest Count</p>
-                  {isEditing ? (
+                  {(isEditing && !isLocked) ? (
                     <Input
                       type="number"
                       min="1"
@@ -461,7 +473,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               )}
 
               {/* Enhanced Editing Options */}
-              {isEditing && (
+              {isEditing && !isLocked && (
                 <div className="space-y-4">
                   <Separator />
                   <h4 className="font-semibold text-gray-800">Party Theme & Package</h4>
@@ -639,7 +651,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               {/* Questions / Requests */}
               <div>
                 <Label htmlFor="notes">Questions / Requests</Label>
-                {isEditing ? (
+                {(isEditing && !isLocked) ? (
                   <Textarea
                     id="notes"
                     value={editData.notes}
@@ -654,7 +666,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                 )}
               </div>
 
-              {isEditing && (
+              {isEditing && !isLocked && (
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleSaveChanges} disabled={updateMutation.isPending}>
                     {updateMutation.isPending ? 'Saving...' : 'Save Changes'}

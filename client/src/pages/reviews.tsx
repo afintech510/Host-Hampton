@@ -80,7 +80,7 @@ export default function Reviews() {
     }
   };
 
-  const eventTypes = [...new Set(reviews.map(r => r.eventType))];
+  const eventTypes = Array.from(new Set(reviews.map(r => r.eventType)));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-ivory to-soft-blush-pink">
@@ -183,8 +183,8 @@ export default function Reviews() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mauve-rose"
                 >
                   <option value="all">All Events</option>
-                  {eventTypes.map(type => (
-                    <option key={type} value={type}>
+                  {eventTypes.map((type, index) => (
+                    <option key={`${type}-${index}`} value={type}>
                       {getEventTypeIcon(type)} {getEventTypeName(type)}
                     </option>
                   ))}
@@ -225,7 +225,7 @@ export default function Reviews() {
                         <div className="flex items-center gap-2">
                           <div className="flex">{renderStars(review.rating)}</div>
                           <span className="text-sm text-gray-500">
-                            {format(new Date(review.createdAt), 'MMM d, yyyy')}
+                            {review.createdAt ? format(new Date(review.createdAt), 'MMM d, yyyy') : 'Date unknown'}
                           </span>
                         </div>
                       </div>
