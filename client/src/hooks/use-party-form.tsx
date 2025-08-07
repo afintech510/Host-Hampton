@@ -112,11 +112,15 @@ export function usePartyForm() {
   // Lead update mutation for form progress tracking
   const updateLeadMutation = useMutation({
     mutationFn: async ({ leadId, updates }: { leadId: number; updates: any }) => {
-      // Fix date conversion issues - ensure dates are properly formatted
+      // Don't convert dates to ISO strings - let the backend handle date processing
       const processedUpdates = { ...updates };
-      if (processedUpdates.eventDate && typeof processedUpdates.eventDate === 'string') {
-        processedUpdates.eventDate = new Date(processedUpdates.eventDate).toISOString();
-      }
+      
+      // Remove any undefined values that might cause issues
+      Object.keys(processedUpdates).forEach(key => {
+        if (processedUpdates[key] === undefined) {
+          delete processedUpdates[key];
+        }
+      });
       
       const response = await apiRequest("PATCH", `/api/leads/${leadId}`, processedUpdates);
       return response.json();
