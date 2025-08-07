@@ -103,9 +103,13 @@ export default function GetQuote() {
       // Clear form data after successful submission
       clearFormData();
       
-      // Redirect to customer booking page with lead ID
+      // Redirect to appropriate reservation page based on event type
       if (data.leadId) {
-        setLocation(`/customer-booking/${data.leadId}`);
+        if (isTruckerHatFlow(formData.eventType)) {
+          setLocation(`/trucker-hat-reservation/${data.leadId}`);
+        } else {
+          setLocation(`/customer-booking/${data.leadId}`);
+        }
       } else {
         setLocation("/themed-parties");
       }

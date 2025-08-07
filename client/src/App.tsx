@@ -24,6 +24,7 @@ import InvoiceView from "@/pages/invoice-view";
 import InvoicePayment from "@/pages/invoice-payment";
 import CustomerInvoice from "./pages/customer-invoice";
 import CustomerBooking from "./pages/customer-booking";
+import TruckerHatReservation from "./pages/trucker-hat-reservation";
 import TermsAndConditions from "./pages/terms-and-conditions";
 import CommunicationsAgreement from "./pages/communications-agreement";
 
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/invoice/:invoiceId/pay" component={InvoicePayment} />
       <Route path="/docs/inv/:invoiceId" component={CustomerInvoice} />
       <Route path="/customer-booking/:leadId" component={CustomerBooking} />
+      <Route path="/trucker-hat-reservation/:leadId" component={TruckerHatReservation} />
       <Route path="/terms-and-conditions" component={TermsAndConditions} />
       <Route path="/communications-agreement" component={CommunicationsAgreement} />
       <Route path="/payment" component={Payment} />
