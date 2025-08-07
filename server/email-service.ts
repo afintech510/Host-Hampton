@@ -124,36 +124,108 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
   order_confirmation: {
     id: 'order_confirmation',
     name: 'Order Confirmation',
-    subject: 'Order Confirmation - Thank you for your purchase!',
+    subject: '🎉 Order Confirmed - Your Host Hampton Experience Awaits!',
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Thank you for your order, \${customerName}!</h2>
-        <p>Your order has been confirmed and we're excited to see you at your event.</p>
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3>Order Details</h3>
-          <p><strong>Order ID:</strong> #\${orderId}</p>
-          <p><strong>Order Date:</strong> \${orderDate}</p>
-          <p><strong>Total Amount:</strong> $\${totalAmount}</p>
-        </div>
-        <div style="margin: 20px 0;">
-          <h3>Items Ordered</h3>
-          \${orderItems.map(item => \`
-          <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
-            <p><strong>\${item.product?.name || 'Unknown Product'}</strong></p>
-            <p>Quantity: \${item.quantity} | Price: $\${(item.price / 100).toFixed(2)}</p>
-            \${item.product?.eventDate ? \`<p>Event Date: \${new Date(item.product.eventDate).toLocaleDateString()}</p>\` : ''}
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Order Confirmation - Host Hampton</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+            <div style="background-color: white; display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px;">
+              <h1 style="margin: 0; color: #667eea; font-size: 24px; font-weight: bold;">HOST HAMPTON</h1>
+            </div>
+            <h2 style="color: white; margin: 0; font-size: 28px; font-weight: 300;">Order Confirmed!</h2>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Thank you \${customerName}, your magical experience is booked! ✨</p>
           </div>
-          \`).join('')}
+          
+          <!-- Order Summary -->
+          <div style="padding: 30px;">
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+              <h3 style="color: white; margin: 0 0 15px; font-size: 20px;">Order Summary</h3>
+              <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px);">
+                <p style="color: white; margin: 5px 0; font-size: 16px;"><strong>Order ID:</strong> #\${orderId}</p>
+                <p style="color: white; margin: 5px 0; font-size: 16px;"><strong>Order Date:</strong> \${orderDate}</p>
+                <p style="color: white; margin: 5px 0; font-size: 18px; font-weight: bold;"><strong>Total Paid:</strong> $\${totalAmount}</p>
+              </div>
+            </div>
+            
+            <!-- Items Ordered -->
+            <div style="margin-bottom: 30px;">
+              <h3 style="color: #2d3748; margin: 0 0 20px; font-size: 22px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Your Events & Experiences</h3>
+              \${orderItems.map(item => \`
+                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); position: relative; overflow: hidden;">
+                  <div style="position: absolute; top: -50%; right: -50%; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: rotate(45deg);"></div>
+                  <div style="position: relative; z-index: 1;">
+                    <h4 style="color: #2d3748; margin: 0 0 10px; font-size: 18px; font-weight: bold;">\${item.product?.name || 'Event Experience'}</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                      <span style="background: rgba(255,255,255,0.8); padding: 5px 12px; border-radius: 20px; font-size: 14px; color: #4a5568;">
+                        Qty: \${item.quantity} | $\${(item.price / 100).toFixed(2)} each
+                      </span>
+                      <span style="background: #48bb78; color: white; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                        $\${((item.price * item.quantity) / 100).toFixed(2)}
+                      </span>
+                    </div>
+                    \${item.sessionInfo ? \`
+                      <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); padding: 12px; border-radius: 8px; margin-top: 10px;">
+                        <p style="margin: 0; color: #4c51bf; font-weight: bold; font-size: 14px;">📅 Session Details</p>
+                        <p style="margin: 5px 0 0; color: #553c9a; font-size: 14px;">\${item.sessionInfo}</p>
+                      </div>
+                    \` : ''}
+                    \${item.product?.eventDate && !item.sessionInfo ? \`
+                      <div style="background: rgba(72, 187, 120, 0.1); border: 1px solid rgba(72, 187, 120, 0.3); padding: 12px; border-radius: 8px; margin-top: 10px;">
+                        <p style="margin: 0; color: #2f855a; font-weight: bold; font-size: 14px;">📅 Event Date</p>
+                        <p style="margin: 5px 0 0; color: #276749; font-size: 14px;">\${new Date(item.product.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    \` : ''}
+                  </div>
+                </div>
+              \`).join('')}
+            </div>
+            
+            <!-- What's Next -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+              <h3 style="color: white; margin: 0 0 15px; font-size: 20px;">🚀 What Happens Next?</h3>
+              <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <ul style="color: white; margin: 0; padding-left: 20px; line-height: 1.6;">
+                  <li style="margin-bottom: 8px;">📧 You'll receive event details and instructions 1 week before your scheduled date</li>
+                  <li style="margin-bottom: 8px;">📞 Our team will contact you to confirm final arrangements and answer any questions</li>
+                  <li style="margin-bottom: 8px;">⏰ Please arrive 15 minutes early on your event day for check-in</li>
+                  <li style="margin-bottom: 8px;">🎉 Get ready for an amazing, unforgettable experience!</li>
+                </ul>
+              </div>
+            </div>
+            
+            <!-- Contact Info -->
+            <div style="text-align: center; padding: 20px; background: #f7fafc; border-radius: 12px;">
+              <h3 style="color: #2d3748; margin: 0 0 15px; font-size: 18px;">Need Help? We're Here for You!</h3>
+              <p style="color: #4a5568; margin: 0 0 10px; font-size: 16px;">
+                📧 <a href="mailto:hosthampton295@gmail.com" style="color: #667eea; text-decoration: none;">hosthampton295@gmail.com</a>
+              </p>
+              <p style="color: #4a5568; margin: 0 0 15px; font-size: 16px;">
+                📞 <a href="tel:631-998-9325" style="color: #667eea; text-decoration: none;">631-998-9325</a>
+              </p>
+              <p style="color: #718096; margin: 0; font-size: 14px; font-style: italic;">
+                Follow us on social media for event inspiration and behind-the-scenes content!
+              </p>
+            </div>
+            
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #2d3748; padding: 25px; text-align: center;">
+            <p style="color: #cbd5e0; margin: 0 0 10px; font-size: 16px; font-weight: bold;">Thank you for choosing Host Hampton!</p>
+            <p style="color: #a0aec0; margin: 0; font-size: 14px;">Creating magical moments, one event at a time ✨</p>
+          </div>
         </div>
-        <p><strong>What's Next:</strong></p>
-        <ul>
-          <li>You'll receive event details and instructions 1 week before your scheduled date</li>
-          <li>Our team will contact you to confirm final arrangements</li>
-          <li>Arrive 15 minutes early on your event day</li>
-        </ul>
-        <p>Questions? Contact us at hosthampton295@gmail.com or call 631-998-9325</p>
-        <p>Best regards,<br>The Host Hampton Team</p>
-      </div>
+      </body>
+      </html>
     `,
     variables: ['customerName', 'orderId', 'orderDate', 'totalAmount', 'orderItems']
   }

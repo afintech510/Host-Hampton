@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CreditCard, Lock, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import Navigation from "@/components/navigation";
 import { UnifiedButton } from "@/components/ui/unified-button";
-import type { CartItem, Product } from "@shared/schema";
+import type { CartItem, Product, ProductSession } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
@@ -199,6 +200,11 @@ export default function Checkout() {
     queryKey: ['/api/products'],
   });
 
+  // Get product sessions
+  const { data: allSessions = [] } = useQuery<ProductSession[]>({
+    queryKey: ['/api/product-sessions'],
+  });
+
   // Calculate totals with tax and credit card fee
   const subtotal = cartItems.reduce((sum, item) => {
     const product = products.find(p => p.id === item.productId);
@@ -317,13 +323,23 @@ export default function Checkout() {
                 <CardContent className="space-y-4">
                   {cartItems.map((item) => {
                     const product = products.find(p => p.id === item.productId);
+                    const session = item.productSessionId 
+                      ? allSessions.find(s => s.id === item.productSessionId)
+                      : null;
                     if (!product) return null;
                     return (
-                      <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                      <div key={item.id} className="flex justify-between items-start py-3 border-b border-gray-100 last:border-0">
                         <div className="flex-1">
                           <h4 className="font-medium">{product.name}</h4>
                           <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                          {product.eventDate && (
+                          {session && (
+                            <div className="mt-2">
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                                {session.sessionName} • {new Date(session.sessionDate).toLocaleDateString()} • {session.sessionTime}
+                              </Badge>
+                            </div>
+                          )}
+                          {product.eventDate && !session && (
                             <p className="text-sm text-gray-600">
                               Date: {new Date(product.eventDate).toLocaleDateString()}
                             </p>

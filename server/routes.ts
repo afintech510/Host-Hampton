@@ -2159,9 +2159,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const orderItemsWithProducts = await Promise.all(
             orderItems.map(async (item) => {
               const product = await storage.getProduct(item.productId!);
+              let sessionInfo = null;
+              
+              // Get session info if this item has a productSessionId
+              if (item.productSessionId) {
+                try {
+                  const session = await storage.getProductSession(item.productSessionId);
+                  if (session) {
+                    sessionInfo = `${session.sessionName} • ${new Date(session.sessionDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} • ${session.sessionTime}`;
+                  }
+                } catch (sessionError) {
+                  console.error("Error fetching session info:", sessionError);
+                }
+              }
+              
               return {
                 ...item,
-                product
+                product,
+                sessionInfo
               };
             })
           );
