@@ -646,7 +646,9 @@ export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  price: integer("price").notNull(), // Price in cents
+  price: integer("price").notNull(), // Price in cents (first ticket price)
+  siblingPrice: integer("sibling_price"), // Price in cents for additional siblings (null if no sibling discount)
+  hasSiblingDiscount: boolean("has_sibling_discount").default(false),
   imageUrl: text("image_url"),
   category: text("category"),
   eventDate: timestamp("event_date"),

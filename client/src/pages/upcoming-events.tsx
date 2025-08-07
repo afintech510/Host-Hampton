@@ -25,6 +25,22 @@ const formatPrice = (priceInCents: number) => {
   return `$${(priceInCents / 100).toFixed(2)}`;
 };
 
+// Helper function to format pricing display with sibling discounts
+const formatPricing = (product: Product) => {
+  if (product.hasSiblingDiscount && product.siblingPrice) {
+    return {
+      primary: `$${(product.price / 100).toFixed(2)}`,
+      secondary: `$${(product.siblingPrice / 100).toFixed(2)} siblings`,
+      label: "1st ticket"
+    };
+  }
+  return {
+    primary: `$${(product.price / 100).toFixed(2)}`,
+    secondary: null,
+    label: null
+  };
+};
+
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -213,9 +229,22 @@ export default function UpcomingEvents() {
                                     <span>{formatDate(new Date(event.eventDate))}</span>
                                   </div>
                                 )}
-                                <span className="pricing-font text-lg font-bold">
-                                  {formatPrice(event.price)}
-                                </span>
+                                <div className="pricing-font text-lg font-bold">
+                                  {(() => {
+                                    const pricing = formatPricing(event);
+                                    return (
+                                      <div className="flex flex-col items-end">
+                                        <div className="flex items-center gap-1">
+                                          <span>{pricing.primary}</span>
+                                          {pricing.label && <span className="text-xs opacity-75">({pricing.label})</span>}
+                                        </div>
+                                        {pricing.secondary && (
+                                          <div className="text-sm opacity-75">{pricing.secondary}</div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
                               </div>
                             </div>
                             <UnifiedButton
@@ -258,12 +287,35 @@ export default function UpcomingEvents() {
 
                   {/* Price Badge */}
                   <div className="absolute top-4 right-4 pointer-events-none">
-                    <Badge 
-                      variant="default"
-                      className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
-                    >
-                      {formatPrice(event.price)}
-                    </Badge>
+                    {(() => {
+                      const pricing = formatPricing(event);
+                      if (pricing.secondary) {
+                        return (
+                          <div className="flex flex-col gap-1 items-end">
+                            <Badge 
+                              variant="default"
+                              className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
+                            >
+                              {pricing.primary}
+                            </Badge>
+                            <Badge 
+                              variant="secondary"
+                              className="bg-purple-100 text-purple-700 font-medium text-sm px-2 py-0.5 pricing-font"
+                            >
+                              {pricing.secondary}
+                            </Badge>
+                          </div>
+                        );
+                      }
+                      return (
+                        <Badge 
+                          variant="default"
+                          className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
+                        >
+                          {pricing.primary}
+                        </Badge>
+                      );
+                    })()}
                   </div>
 
                   {/* Availability Indicator */}

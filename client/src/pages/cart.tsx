@@ -111,9 +111,18 @@ export default function Cart() {
     }).format(cents / 100);
   };
 
+  // Calculate item total with sibling discount pricing
+  const calculateItemTotal = (product: Product, quantity: number) => {
+    if (product.hasSiblingDiscount && product.siblingPrice && quantity > 1) {
+      // First ticket at full price, additional tickets at sibling price
+      return product.price + (quantity - 1) * product.siblingPrice;
+    }
+    return product.price * quantity;
+  };
+
   const subtotal = cartItems.reduce((sum, item) => {
     const product = products.find(p => p.id === item.productId);
-    return sum + (product ? product.price * item.quantity : 0);
+    return sum + (product ? calculateItemTotal(product, item.quantity) : 0);
   }, 0);
 
   const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
@@ -204,9 +213,23 @@ export default function Cart() {
                             {product.description}
                           </p>
                           <div className="flex items-center gap-4">
-                            <span className="text-lg font-bold text-primary">
-                              {formatPrice(product.price)}
-                            </span>
+                            <div className="text-lg font-bold text-primary">
+                              {product.hasSiblingDiscount && product.siblingPrice && item.quantity > 1 ? (
+                                <div className="flex flex-col">
+                                  <div className="text-base">
+                                    1 × {formatPrice(product.price)} + {item.quantity - 1} × {formatPrice(product.siblingPrice)}
+                                  </div>
+                                  <div className="text-lg font-bold">
+                                    = {formatPrice(calculateItemTotal(product, item.quantity))}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span>
+                                  {item.quantity > 1 && `${item.quantity} × `}{formatPrice(product.price)}
+                                  {item.quantity > 1 && ` = ${formatPrice(product.price * item.quantity)}`}
+                                </span>
+                              )}
+                            </div>
                             {product.category && (
                               <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
                                 {product.category}
@@ -305,7 +328,7 @@ export default function Cart() {
                             {product.name} × {item.quantity}
                           </span>
                           <span className="font-medium">
-                            {formatPrice(product.price * item.quantity)}
+                            {formatPrice(calculateItemTotal(product, item.quantity))}
                           </span>
                         </div>
                       );
