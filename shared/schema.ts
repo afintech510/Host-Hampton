@@ -75,23 +75,6 @@ export const partyThemes = pgTable("party_themes", {
   active: boolean("active").default(true).notNull(),
 });
 
-export const upcomingEvents = pgTable("upcoming_events", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  price: integer("price").notNull(), // Price in cents
-  eventDate: timestamp("event_date").notNull(),
-  startTime: text("start_time"), // "10:00 AM"
-  endTime: text("end_time"), // "12:00 PM"
-  location: text("location"),
-  imageUrl: text("image_url").notNull(),
-  category: text("category"), // "children", "adult", "workshop", etc.
-  spotsAvailable: integer("spots_available"),
-  maxSpots: integer("max_spots"),
-  active: boolean("active").default(true).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   leadId: integer("lead_id"), // Reference to original lead if converted
@@ -471,11 +454,6 @@ export const insertAddonSchema = createInsertSchema(addons).omit({
 
 export const insertPartyThemeSchema = createInsertSchema(partyThemes).omit({
   id: true,
-});
-
-export const insertUpcomingEventSchema = createInsertSchema(upcomingEvents).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const insertEventSchema = createInsertSchema(events).omit({
