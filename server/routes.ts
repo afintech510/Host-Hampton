@@ -2181,7 +2181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             })
           );
           
-          // Send order confirmation email
+          // Send order confirmation email to customer
           const emailResult = await sendTemplateEmail(
             "order_confirmation",
             updatedOrder.customerEmail,
@@ -2198,6 +2198,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Order confirmation email sent to ${updatedOrder.customerEmail}`);
           } else {
             console.error("Failed to send order confirmation email:", emailResult.error);
+          }
+
+          // Send business notification email
+          try {
+            const businessEmailResult = await sendTemplateEmail(
+              "business_order_notification",
+              "hosthampton295@gmail.com",
+              {
+                orderId: updatedOrder.id,
+                customerName: updatedOrder.customerName || "Unknown Customer",
+                customerEmail: updatedOrder.customerEmail,
+                customerPhone: updatedOrder.customerPhone || "Not provided",
+                orderDate: new Date(updatedOrder.createdAt!).toLocaleDateString(),
+                totalAmount: (updatedOrder.totalAmount / 100).toFixed(2),
+                orderItems: orderItemsWithProducts
+              }
+            );
+            
+            if (businessEmailResult.success) {
+              console.log("Business notification email sent successfully");
+            } else {
+              console.error("Failed to send business notification email:", businessEmailResult.error);
+            }
+          } catch (businessEmailError) {
+            console.error("Error sending business notification email:", businessEmailError);
           }
         } catch (emailError) {
           console.error("Error sending order confirmation email:", emailError);

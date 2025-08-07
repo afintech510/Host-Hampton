@@ -228,6 +228,95 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
       </html>
     `,
     variables: ['customerName', 'orderId', 'orderDate', 'totalAmount', 'orderItems']
+  },
+  business_order_notification: {
+    id: 'business_order_notification',
+    name: 'New Order Notification (Business)',
+    subject: '🛍️ New Order Alert - Host Hampton Order #${orderId}',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Order - Host Hampton</title>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%); padding: 30px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">🛍️ NEW ORDER RECEIVED</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Order #\${orderId} requires your attention</p>
+          </div>
+          
+          <!-- Customer Info -->
+          <div style="padding: 30px;">
+            <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+              <h3 style="color: white; margin: 0 0 15px; font-size: 18px;">👤 Customer Details</h3>
+              <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                <p style="color: white; margin: 5px 0; font-size: 16px;"><strong>Name:</strong> \${customerName}</p>
+                <p style="color: white; margin: 5px 0; font-size: 16px;"><strong>Email:</strong> \${customerEmail}</p>
+                <p style="color: white; margin: 5px 0; font-size: 16px;"><strong>Phone:</strong> \${customerPhone}</p>
+                <p style="color: white; margin: 5px 0; font-size: 16px;"><strong>Order Date:</strong> \${orderDate}</p>
+              </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+              <h3 style="color: white; margin: 0 0 15px; font-size: 18px;">📊 Order Summary</h3>
+              <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                <p style="color: white; margin: 5px 0; font-size: 18px; font-weight: bold;">Total Revenue: $\${totalAmount}</p>
+                <p style="color: white; margin: 5px 0; font-size: 14px;">Payment Status: Completed ✅</p>
+              </div>
+            </div>
+            
+            <!-- Items Ordered -->
+            <div style="margin-bottom: 25px;">
+              <h3 style="color: #2d3748; margin: 0 0 20px; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">🎯 Items Purchased</h3>
+              \${orderItems.map(item => \`
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; background: #f7fafc;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                      <h4 style="color: #2d3748; margin: 0 0 8px; font-size: 16px; font-weight: bold;">\${item.product?.name || 'Event Experience'}</h4>
+                      <p style="color: #4a5568; margin: 0; font-size: 14px;">Quantity: \${item.quantity} × $\${(item.price / 100).toFixed(2)}</p>
+                      \${item.sessionInfo ? \`
+                        <div style="background: #edf2f7; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                          <p style="margin: 0; color: #2d3748; font-size: 13px;"><strong>📅 Session:</strong> \${item.sessionInfo}</p>
+                        </div>
+                      \` : ''}
+                    </div>
+                    <div style="text-align: right;">
+                      <span style="background: #48bb78; color: white; padding: 5px 10px; border-radius: 6px; font-weight: bold; font-size: 14px;">
+                        $\${((item.price * item.quantity) / 100).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              \`).join('')}
+            </div>
+            
+            <!-- Next Steps -->
+            <div style="background: #fff5f5; border: 1px solid #fed7d7; padding: 20px; border-radius: 8px;">
+              <h3 style="color: #c53030; margin: 0 0 15px; font-size: 16px;">⚡ Action Required</h3>
+              <ul style="color: #742a2a; margin: 0; padding-left: 20px; line-height: 1.6;">
+                <li>Review customer details and contact information</li>
+                <li>Confirm event dates and session availability</li>
+                <li>Prepare any necessary materials or setup requirements</li>
+                <li>Contact customer within 24 hours if needed</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background: #2d3748; padding: 20px; text-align: center;">
+            <p style="color: #cbd5e0; margin: 0; font-size: 14px;">Host Hampton Business Dashboard</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    variables: ['orderId', 'customerName', 'customerEmail', 'customerPhone', 'orderDate', 'totalAmount', 'orderItems']
   }
 };
 
@@ -242,7 +331,7 @@ export async function sendEmail(params: EmailParams): Promise<{ success: boolean
 
     const msg: any = {
       to: params.to,
-      from: params.from || 'hosthampton295@gmail.com', // Default from address
+      from: params.from || 'hosthampton295@gmail.com', // Use gmail address
       subject: params.subject,
     };
 

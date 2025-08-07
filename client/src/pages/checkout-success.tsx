@@ -92,15 +92,20 @@ export default function CheckoutSuccess() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/shop-events">
+                <Link href="/my-events">
+                  <UnifiedButton className="w-full sm:w-auto">
+                    <span>View My Events</span>
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </UnifiedButton>
+                </Link>
+                <Link href="/upcoming-events">
                   <UnifiedButton variant="outline" className="w-full sm:w-auto">
                     Continue Shopping
                   </UnifiedButton>
                 </Link>
                 <Link href="/">
-                  <UnifiedButton className="w-full sm:w-auto">
-                    <span>Back to Home</span>
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                  <UnifiedButton variant="outline" className="w-full sm:w-auto">
+                    Back to Home
                   </UnifiedButton>
                 </Link>
               </div>
