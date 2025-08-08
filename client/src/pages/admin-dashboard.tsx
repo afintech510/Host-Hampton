@@ -264,7 +264,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {events.slice(0, 5).map((event: Event) => (
+                    {Array.isArray(events) ? events.slice(0, 5).map((event: Event) => (
                       <div key={event.id} className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">{event.customerName || `Event #${event.id}`}</p>
@@ -276,7 +276,7 @@ export default function AdminDashboard() {
                           {event.status || 'pending'}
                         </Badge>
                       </div>
-                    ))}
+                    )) : []}
                   </div>
                 </CardContent>
               </Card>
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {leads.slice(0, 5).map((lead: Lead) => (
+                    {Array.isArray(leads) ? leads.slice(0, 5).map((lead: Lead) => (
                       <div key={lead.id} className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">{lead.name}</p>
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
                           {lead.status || 'new'}
                         </Badge>
                       </div>
-                    ))}
+                    )) : []}
                   </div>
                 </CardContent>
               </Card>
