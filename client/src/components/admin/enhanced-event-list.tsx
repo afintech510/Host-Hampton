@@ -190,10 +190,27 @@ export default function EnhancedEventList() {
   });
 
   const filteredPublicEvents = publicEvents.filter((event: any) => {
-    if (eventTypeFilter !== "all" && eventTypeFilter !== "public") return false;
-    if (statusFilter !== "all" && event.status !== statusFilter) return false;
-    return true;
+    // For event type filtering
+    if (eventTypeFilter === "private") return false; // Don't show public events when filtering for private
+    if (eventTypeFilter === "public" || eventTypeFilter === "all") {
+      // Show public events when filtering for public or all
+      if (statusFilter === "all") return true; // Show all statuses when status filter is "all"
+      return event.status === statusFilter; // Match specific status
+    }
+    return false;
   });
+
+  // Debug logging to see what's happening with filtering
+  console.log("Debug Event Filtering:");
+  console.log("- All events count:", allEvents.length);
+  console.log("- Public events count:", publicEvents.length);
+  console.log("- Private events count:", privateEvents.length);
+  console.log("- Status filter:", statusFilter);
+  console.log("- Event type filter:", eventTypeFilter);
+  console.log("- Filtered public events count:", filteredPublicEvents.length);
+  console.log("- Filtered private events count:", filteredPrivateEvents.length);
+  console.log("- Sample public event:", publicEvents[0]);
+  console.log("- Sample filtered public event:", filteredPublicEvents[0]);
 
   const formatTime = (time: string) => {
     if (!time) return "";
