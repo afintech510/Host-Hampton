@@ -56,15 +56,79 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20 sm:h-16">
-          {/* Logo */}
-          <div className="flex items-center flex-1">
+        {/* Mobile Layout: Stacked with logo centered above buttons */}
+        <div className="block sm:hidden">
+          {/* Logo Row */}
+          <div className="flex justify-center py-3">
             <Link href="/">
               <div className="flex items-center cursor-pointer">
                 <img
                   src="/images/host-hampton-logo.png"
                   alt="Host Hampton"
-                  className="h-12 sm:h-12 md:h-14 w-auto object-contain max-w-[200px]"
+                  className="h-12 w-auto object-contain max-w-[200px]"
+                  onError={(e) => {
+                    console.log('Logo failed to load from public path');
+                    e.currentTarget.style.display = 'none';
+                  }}
+                  onLoad={() => {
+                    console.log('Logo loaded successfully from public path');
+                  }}
+                />
+              </div>
+            </Link>
+          </div>
+          
+          {/* Buttons Row */}
+          <div className="flex justify-center items-center space-x-2 pb-3">
+            <Link href="/get-quote">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs px-3 py-2">
+                Instant Quote
+              </Button>
+            </Link>
+            
+            <Link href="/upcoming-events">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs px-3 py-2">
+                Upcoming Events
+              </Button>
+            </Link>
+
+            {/* Shopping Cart Icon */}
+            <Link href="/cart">
+              <div className="relative cursor-pointer">
+                <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
+                {actualCartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {actualCartCount}
+                  </span>
+                )}
+              </div>
+            </Link>
+
+            {/* Menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Desktop Layout: Horizontal */}
+        <div className="hidden sm:flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link href="/">
+              <div className="flex items-center cursor-pointer">
+                <img
+                  src="/images/host-hampton-logo.png"
+                  alt="Host Hampton"
+                  className="h-12 md:h-14 w-auto object-contain max-w-[200px]"
                   onError={(e) => {
                     console.log('Logo failed to load from public path');
                     e.currentTarget.style.display = 'none';
@@ -78,20 +142,20 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
           </div>
 
           {/* Right side - Instant Quote, Upcoming Events Button, Cart Icon and Menu Button */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-4">
             <Link href="/get-quote">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs sm:text-sm px-3 sm:px-4 py-2">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-2">
                 Instant Quote
               </Button>
             </Link>
             
             <Link href="/upcoming-events">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs sm:text-sm px-3 sm:px-4 py-2">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-2">
                 Upcoming Events
               </Button>
             </Link>
 
-            {/* Shopping Cart Icon - moved to the right side */}
+            {/* Shopping Cart Icon */}
             <Link href="/cart">
               <div className="relative cursor-pointer">
                 <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
@@ -103,7 +167,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
               </div>
             </Link>
 
-            {/* Menu button - now visible on all screen sizes */}
+            {/* Menu button */}
             <Button
               variant="ghost"
               size="sm"
