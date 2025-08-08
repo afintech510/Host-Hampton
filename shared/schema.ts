@@ -235,6 +235,8 @@ export const leads = pgTable("leads", {
   childName: text("child_name"),
   childAge: integer("child_age"),
   partyThemeId: integer("party_theme_id"),
+  partyTheme: text("party_theme"), // Theme name for display
+  customTheme: text("custom_theme"), // Custom theme name when user selects 'custom'
   
   // Package and Add-ons Selection
   selectedPackageId: integer("selected_package_id"),
@@ -284,7 +286,6 @@ export const leads = pgTable("leads", {
   foodPreferences: json("food_preferences"), // Food choices, cupcake flavors, etc.
   
   // Strategic missing fields for enhanced invoice building and admin display
-  partyTheme: text("party_theme"), // Birthday party theme selection
   dateNotes: text("date_notes"), // Notes when user selects "not sure" for dates
   jewelryVision: text("jewelry_vision"), // Permanent jewelry event vision/description
   packageTotal: integer("package_total"), // Calculated package total in cents

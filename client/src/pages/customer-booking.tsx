@@ -34,6 +34,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
+  const [showCustomTheme, setShowCustomTheme] = useState(false);
   const [billingData, setBillingData] = useState({
     firstName: '',
     lastName: '',
@@ -147,11 +148,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
         timeSlot: booking.timeSlot || '',
         notes: booking.notes || '',
         partyTheme: booking.partyTheme || '',
+        customTheme: booking.customTheme || '',
         packageSelection: booking.packageSelection || '',
         selectedAddons: booking.selectedAddons || [],
         foodPreferences: booking.foodPreferences || {},
         specialRequirements: booking.specialRequirements || []
       });
+      
+      // Initialize custom theme display state
+      setShowCustomTheme(booking.partyTheme === 'custom');
       
       // Pre-fill billing data from booking
       setBillingData({
@@ -386,11 +391,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     
                     {/* Theme Pill */}
                     <div className="mb-3">
-                      {allThemes?.find((theme: any) => theme.name === booking.partyTheme) && (
-                        <Badge variant="outline" className="mr-2 bg-white">
-                          {allThemes.find((theme: any) => theme.name === booking.partyTheme)?.icon} {booking.partyTheme}
-                        </Badge>
-                      )}
+                      <Badge variant="outline" className="mr-2 bg-white">
+                        {booking.partyTheme === 'custom' && booking.customTheme ? 
+                          `✨ ${booking.customTheme}` : 
+                          `${allThemes?.find((theme: any) => theme.name === booking.partyTheme)?.icon || '🎉'} ${booking.partyTheme || 'Party Theme'}`
+                        }
+                      </Badge>
                     </div>
 
                     {/* Package Pill */}
@@ -476,18 +482,38 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                   {/* Theme Selection */}
                   <div>
                     <Label htmlFor="theme">Party Theme</Label>
-                    <Select value={editData.partyTheme} onValueChange={(value) => setEditData({...editData, partyTheme: value})}>
+                    <Select value={editData.partyTheme} onValueChange={(value) => {
+                      if (value === 'custom') {
+                        setShowCustomTheme(true);
+                        setEditData({...editData, partyTheme: 'custom'});
+                      } else {
+                        setShowCustomTheme(false);
+                        setEditData({...editData, partyTheme: value, customTheme: ''});
+                      }
+                    }}>
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="Select theme" />
                       </SelectTrigger>
                       <SelectContent>
                         {allThemes?.map((theme: any) => (
                           <SelectItem key={theme.id} value={theme.name}>
-                            {theme.name}
+                            {theme.icon} {theme.name}
                           </SelectItem>
                         ))}
+                        <SelectItem value="custom">
+                          ✨ Custom Theme
+                        </SelectItem>
                       </SelectContent>
                     </Select>
+                    {(showCustomTheme || editData.partyTheme === 'custom') && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Enter your custom theme name"
+                          value={editData.customTheme || ''}
+                          onChange={(e) => setEditData({...editData, customTheme: e.target.value})}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Package Selection */}
@@ -769,6 +795,62 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Party Summary Header */}
+              <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400">
+                <div className="space-y-2">
+                  <h3 className="font-bold text-purple-900">
+                    {booking?.childName || 'Birthday Child'}'s {booking?.childAge ? `${booking.childAge}${getOrdinalSuffix(booking.childAge)} ` : ''}Birthday Party
+                  </h3>
+                  <div className="flex items-center gap-2 text-sm text-purple-700">
+                    <span className="flex items-center gap-1">
+                      {(() => {
+                        const theme = allThemes?.find((t: any) => t.name === booking?.partyTheme);
+                        return (
+                          <>
+                            {booking?.partyTheme === 'custom' && booking?.customTheme ? '✨' : (theme?.icon || '🎉')}
+                            {booking?.partyTheme === 'custom' && booking?.customTheme ? booking.customTheme : (booking?.partyTheme || 'Party Theme')}
+                          </>
+                        );
+                      })()}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {booking?.guestCount || 0} guests
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {booking?.eventDate ? new Date(booking.eventDate).toLocaleDateString() : 'TBD'}
+                    </span>
+                    {booking?.timeSlot && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {booking.timeSlot}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-purple-700">
+                    <MapPin className="w-3 h-3" />
+                    Host Hampton Studio, Speonk NY
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-purple-700">
+                    {(() => {
+                      const packageIcon = booking?.packageSelection === 'Make it Shine Add-On' ? '✨' :
+                                         booking?.packageSelection === 'Party Envy Add-On' ? '👑' :
+                                         '🎉';
+                      return (
+                        <>
+                          {packageIcon} {booking?.packageSelection || 'Base Birthday Party'}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Base Party Package ({baseGuestCount} guests)</span>
