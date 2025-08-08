@@ -73,7 +73,7 @@ export default function FloatingCheckoutButton() {
       <Button
         onClick={handleCheckout}
         size="lg"
-        className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:scale-105"
+        className="bg-blue-300 hover:bg-blue-400 text-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:scale-105 border-2 border-black"
       >
         <div className="relative">
           <ShoppingCart className="w-5 h-5" />
@@ -84,10 +84,7 @@ export default function FloatingCheckoutButton() {
             {totalItems}
           </Badge>
         </div>
-        <div className="flex flex-col items-start">
-          <span className="text-sm font-medium">Check Out</span>
-          <span className="text-xs opacity-90">${(totalPrice / 100).toFixed(2)}</span>
-        </div>
+        <span className="text-sm font-medium">Proceed to Checkout</span>
       </Button>
     </div>
   );
