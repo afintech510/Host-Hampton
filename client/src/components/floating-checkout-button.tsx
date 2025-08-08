@@ -24,13 +24,13 @@ interface Product {
 export default function FloatingCheckoutButton() {
   const [, setLocation] = useLocation();
   const [location] = useLocation();
-  
+
   // Get session ID from localStorage or generate one (consistent with shop-events)
   const getSessionId = () => {
-    let sessionId = localStorage.getItem('shop_session_id');
+    let sessionId = localStorage.getItem("shop_session_id");
     if (!sessionId) {
       sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('shop_session_id', sessionId);
+      localStorage.setItem("shop_session_id", sessionId);
     }
     return sessionId;
   };
@@ -46,27 +46,42 @@ export default function FloatingCheckoutButton() {
     queryKey: ["/api/products"],
   });
 
-  // Don't show button if cart is empty or on cart/checkout pages
-  if (!cartItems || cartItems.length === 0 || location === '/cart' || location === '/checkout') {
+  // Don't show button if cart is empty or on cart/checkout/get-quote pages
+  if (
+    !cartItems ||
+    cartItems.length === 0 ||
+    location === "/cart" ||
+    location === "/checkout" ||
+    location === "/get-quote"
+  ) {
     return null;
   }
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  
+
   // Calculate total price by looking up product prices
   const totalPrice = cartItems.reduce((sum, item) => {
-    const product = products.find(p => p.id === item.productId);
+    const product = products.find((p) => p.id === item.productId);
     if (product) {
-      return sum + (product.price * item.quantity);
+      return sum + product.price * item.quantity;
     }
     return sum;
   }, 0);
 
   // Debug logging
-  console.log('FloatingCheckoutButton - cartItems:', cartItems, 'sessionId:', getSessionId(), 'totalItems:', totalItems, 'totalPrice:', totalPrice);
+  console.log(
+    "FloatingCheckoutButton - cartItems:",
+    cartItems,
+    "sessionId:",
+    getSessionId(),
+    "totalItems:",
+    totalItems,
+    "totalPrice:",
+    totalPrice,
+  );
 
   const handleCheckout = () => {
-    setLocation('/checkout');
+    setLocation("/checkout");
   };
 
   return (
@@ -78,8 +93,8 @@ export default function FloatingCheckoutButton() {
       >
         <div className="relative">
           <ShoppingCart className="w-7 h-7" />
-          <Badge 
-            variant="destructive" 
+          <Badge
+            variant="destructive"
             className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center p-0 text-xs font-bold"
           >
             {totalItems}
