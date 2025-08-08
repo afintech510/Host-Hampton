@@ -96,7 +96,8 @@ export default function EnhancedEventList() {
   });
 
   // Handle different API response structures
-  const allEvents = allEventsData.events || allEventsData || [];
+  const allEvents = Array.isArray(allEventsData?.events) ? allEventsData.events : 
+                   Array.isArray(allEventsData) ? allEventsData : [];
   console.log("Processed allEvents:", allEvents);
   console.log("allEventsData structure:", allEventsData);
   
