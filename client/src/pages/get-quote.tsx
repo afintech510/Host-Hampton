@@ -29,6 +29,7 @@ import { StudioContactStep } from "@/components/party-form/steps/studio-contact-
 import { StudioUsageStep } from "@/components/party-form/steps/studio-usage-step";
 import { StudioDetailsStep } from "@/components/party-form/steps/studio-details-step";
 import { ThemeStep } from "@/components/party-form/steps/theme-step";
+import { LocationStep } from "@/components/party-form/steps/location-step";
 import { PackageStep } from "@/components/party-form/steps/package-step";
 import { AddonsStep } from "@/components/party-form/steps/addons-step";
 import { ChildDetailsStep } from "@/components/party-form/steps/child-details-step";
@@ -59,7 +60,7 @@ const generateBookingId = () => {
 const getFlowSteps = (eventType: string) => {
   switch (eventType) {
     case "birthday-party":
-      return 10; // Welcome → EventType → Theme → Package → Addons → Extras → Date/Time → PartyDetails → Food → Contact
+      return 11; // Welcome → EventType → Location → Theme → Package → Addons → Extras → Date/Time → PartyDetails → Food → Contact
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
@@ -212,10 +213,10 @@ export default function GetQuote() {
           />
         );
       case 3:
-        // Kids Themed Party: Select Theme
+        // Kids Themed Party: Select Location
         if (isKidsPartyFlow(eventType)) {
           return (
-            <ThemeStep
+            <LocationStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -288,10 +289,10 @@ export default function GetQuote() {
           />
         );
       case 4:
-        // Kids Themed Party: Select Package
+        // Kids Themed Party: Select Theme (moved from step 3)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <PackageStep
+            <ThemeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -346,10 +347,10 @@ export default function GetQuote() {
         }
         break;
       case 5:
-        // Kids Themed Party: Select Add-ons
+        // Kids Themed Party: Select Package (moved from step 4)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <AddonsStep
+            <PackageStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -404,13 +405,24 @@ export default function GetQuote() {
         }
         break;
       case 6:
-        // Kids Themed Party: Extras Selection (Decor, Food, Drinks)
+        // Kids Themed Party: Select Add-ons (moved from step 5)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <ExtrasStep
+            <AddonsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
+        // Studio Rental: Contact (final step)
+        if (isStudioRentalFlow(eventType)) {
+          return (
+            <ContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
@@ -428,20 +440,16 @@ export default function GetQuote() {
         }
         break;
       case 7:
-        // Kids Themed Party: Date/Time Selection
+        // Kids Themed Party: Extras Selection (moved from step 6)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <DateTimeStep
+            <ExtrasStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
               onBack={handlePreviousStep}
             />
           );
-        }
-        // Trucker Hat Bar: No step 7 (flow ends at step 5)
-        if (isTruckerHatFlow(eventType)) {
-          return null;
         }
         // Studio Rental: Contact (final step)
         if (isStudioRentalFlow(eventType)) {
@@ -454,20 +462,22 @@ export default function GetQuote() {
             />
           );
         }
-        // Permanent Jewelry: Contact (final step)
-        if (isJewelryFlow(eventType)) {
+        break;
+      case 8:
+        // Kids Themed Party: Date/Time Selection (moved from step 7)
+        if (isKidsPartyFlow(eventType)) {
           return (
-            <ContactStep
+            <DateTimeStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleSubmitQuote}
+              onNext={handleNextStep}
               onBack={handlePreviousStep}
             />
           );
         }
         break;
-      case 8:
-        // Kids Themed Party: Child Details
+      case 9:
+        // Kids Themed Party: Child Details (moved from step 8)
         if (isKidsPartyFlow(eventType)) {
           return (
             <ChildDetailsStep
@@ -479,8 +489,8 @@ export default function GetQuote() {
           );
         }
         break;
-      case 9:
-        // Kids Themed Party: Food & Special Needs
+      case 10:
+        // Kids Themed Party: Food & Special Needs (moved from step 9)
         if (isKidsPartyFlow(eventType)) {
           return (
             <FoodStep
@@ -492,8 +502,8 @@ export default function GetQuote() {
           );
         }
         break;
-      case 10:
-        // Kids Themed Party: Contact (final step)
+      case 11:
+        // Kids Themed Party: Contact (final step, moved from step 10)
         if (isKidsPartyFlow(eventType)) {
           return (
             <ContactStep
