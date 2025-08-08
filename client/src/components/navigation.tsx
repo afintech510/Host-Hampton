@@ -11,7 +11,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
+import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
 import type { CartItem } from "@shared/schema";
 
 interface NavigationProps {
@@ -56,7 +56,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20 sm:h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/">
@@ -64,7 +64,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                 <img
                   src={hostHamptonLogo}
                   alt="Host Hampton"
-                  className="h-12 md:h-14 w-auto object-contain"
+                  className="h-12 sm:h-12 md:h-14 w-auto object-contain"
                 />
               </div>
             </Link>
