@@ -58,28 +58,35 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 sm:h-16">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-1">
             <Link href="/">
               <div className="flex items-center cursor-pointer">
                 <img
-                  src={hostHamptonLogo}
+                  src="/images/host-hampton-logo.png"
                   alt="Host Hampton"
-                  className="h-12 sm:h-12 md:h-14 w-auto object-contain"
+                  className="h-12 sm:h-12 md:h-14 w-auto object-contain max-w-[200px]"
+                  onError={(e) => {
+                    console.log('Logo failed to load from public path');
+                    e.currentTarget.style.display = 'none';
+                  }}
+                  onLoad={() => {
+                    console.log('Logo loaded successfully from public path');
+                  }}
                 />
               </div>
             </Link>
           </div>
 
           {/* Right side - Instant Quote, Upcoming Events Button, Cart Icon and Menu Button */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Link href="/get-quote">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs sm:text-sm px-3 sm:px-4 py-2">
                 Instant Quote
               </Button>
             </Link>
             
             <Link href="/upcoming-events">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs sm:text-sm px-3 sm:px-4 py-2">
                 Upcoming Events
               </Button>
             </Link>
