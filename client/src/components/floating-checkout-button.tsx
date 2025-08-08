@@ -23,6 +23,7 @@ interface Product {
 
 export default function FloatingCheckoutButton() {
   const [, setLocation] = useLocation();
+  const [location] = useLocation();
   
   // Get session ID from localStorage or generate one (consistent with shop-events)
   const getSessionId = () => {
@@ -45,8 +46,8 @@ export default function FloatingCheckoutButton() {
     queryKey: ["/api/products"],
   });
 
-  // Don't show button if cart is empty
-  if (!cartItems || cartItems.length === 0) {
+  // Don't show button if cart is empty or on cart/checkout pages
+  if (!cartItems || cartItems.length === 0 || location === '/cart' || location === '/checkout') {
     return null;
   }
 
@@ -73,13 +74,13 @@ export default function FloatingCheckoutButton() {
       <Button
         onClick={handleCheckout}
         size="lg"
-        className="bg-blue-300 hover:bg-blue-400 text-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:scale-105 border-2 border-black"
+        className="bg-dusty-blue hover:opacity-90 text-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:scale-105 border-2 border-black"
       >
         <div className="relative">
-          <ShoppingCart className="w-5 h-5" />
+          <ShoppingCart className="w-7 h-7" />
           <Badge 
             variant="destructive" 
-            className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center p-0 text-xs"
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center p-0 text-xs font-bold"
           >
             {totalItems}
           </Badge>
