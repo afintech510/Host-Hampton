@@ -8,22 +8,28 @@ interface CartItem {
   id: number;
   sessionId: string;
   productId: number;
-  productName: string;
+  productSessionId?: number;
   quantity: number;
-  unitPrice: number;
-  selectedSessions?: string[];
   createdAt: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  siblingPrice: number;
 }
 
 export default function FloatingCheckoutButton() {
   const [, setLocation] = useLocation();
   
-  // Get session ID from localStorage or generate one
+  // Get session ID from localStorage or generate one (consistent with shop-events)
   const getSessionId = () => {
-    let sessionId = localStorage.getItem('sessionId');
+    let sessionId = localStorage.getItem('shop_session_id');
     if (!sessionId) {
       sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('sessionId', sessionId);
+      localStorage.setItem('shop_session_id', sessionId);
     }
     return sessionId;
   };
@@ -34,13 +40,29 @@ export default function FloatingCheckoutButton() {
     refetchInterval: 2000, // Refresh cart every 2 seconds
   });
 
+  // Get products data to calculate prices
+  const { data: products = [] } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
   // Don't show button if cart is empty
   if (!cartItems || cartItems.length === 0) {
     return null;
   }
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+  
+  // Calculate total price by looking up product prices
+  const totalPrice = cartItems.reduce((sum, item) => {
+    const product = products.find(p => p.id === item.productId);
+    if (product) {
+      return sum + (product.price * item.quantity);
+    }
+    return sum;
+  }, 0);
+
+  // Debug logging
+  console.log('FloatingCheckoutButton - cartItems:', cartItems, 'sessionId:', getSessionId(), 'totalItems:', totalItems, 'totalPrice:', totalPrice);
 
   const handleCheckout = () => {
     setLocation('/checkout');
