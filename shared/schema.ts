@@ -726,6 +726,12 @@ export type InsertOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
 
+// Enhanced order item type with product and session information for admin display
+export type EnhancedOrderItem = OrderItem & {
+  productName?: string | null;
+  sessionName?: string | null;
+};
+
 // E-commerce schemas
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,

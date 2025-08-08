@@ -9,7 +9,7 @@ import {
   type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar,
   type RoomRentalPricing, type Lead, type InsertLead, type EventStatusHistory, type InsertEventStatusHistory,
   type Product, type InsertProduct, type ProductSession, type InsertProductSession, type CartItem, type InsertCartItem,
-  type Order, type InsertOrder, type OrderItem, type InsertOrderItem
+  type Order, type InsertOrder, type OrderItem, type InsertOrderItem, type EnhancedOrderItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, gte, isNull } from "drizzle-orm";
@@ -104,7 +104,7 @@ export interface IStorage {
   getOrders(): Promise<Order[]>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem>;
-  getOrderItems(orderId: number): Promise<OrderItem[]>;
+  getOrderItems(orderId: number): Promise<EnhancedOrderItem[]>;
   getRoomRentalPricing(): Promise<RoomRentalPricing[]>;
   
   // Customer authentication methods
@@ -801,7 +801,7 @@ export class MemStorage implements IStorage {
     throw new Error("Not implemented in MemStorage");
   }
 
-  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+  async getOrderItems(orderId: number): Promise<EnhancedOrderItem[]> {
     return [];
   }
 
@@ -1436,7 +1436,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
-    return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+    const items = await db
+      .select({
+        id: orderItems.id,
+        orderId: orderItems.orderId,
+        productId: orderItems.productId,
+        productSessionId: orderItems.productSessionId,
+        quantity: orderItems.quantity,
+        price: orderItems.price,
+        createdAt: orderItems.createdAt,
+        productName: products.name,
+        sessionName: productSessions.sessionName,
+      })
+      .from(orderItems)
+      .leftJoin(products, eq(orderItems.productId, products.id))
+      .leftJoin(productSessions, eq(orderItems.productSessionId, productSessions.id))
+      .where(eq(orderItems.orderId, orderId));
+    
+    return items as EnhancedOrderItem[];
   }
 
   async getInvoiceById(id: number): Promise<any | null> {
