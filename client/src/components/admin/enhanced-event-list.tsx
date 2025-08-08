@@ -81,7 +81,8 @@ export default function EnhancedEventList() {
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/orders");
       const data = await response.json();
-      return data.orders || [];
+      console.log("Orders with items:", data.slice(0, 2));
+      return data; // Server now includes order items in the response
     },
   });
 

@@ -2122,7 +2122,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/orders", async (req, res) => {
     try {
       const orders = await storage.getOrders();
-      res.json(orders);
+      
+      // Include order items for each order
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => {
+          const orderItems = await storage.getOrderItems(order.id);
+          return {
+            ...order,
+            items: orderItems
+          };
+        })
+      );
+      
+      res.json(ordersWithItems);
     } catch (error) {
       console.error("Error fetching orders:", error);
       res.status(500).json({ message: "Failed to fetch orders" });
@@ -2139,6 +2151,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching order:", error);
       res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Get order items for a specific order
+  app.get("/api/order-items/:orderId", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const orderItems = await storage.getOrderItems(orderId);
+      res.json(orderItems);
+    } catch (error) {
+      console.error("Error fetching order items:", error);
+      res.status(500).json({ message: "Failed to fetch order items" });
     }
   });
 
