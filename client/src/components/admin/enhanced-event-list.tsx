@@ -279,11 +279,11 @@ export default function EnhancedEventList() {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex gap-4 items-center">
-        <div className="flex gap-2 items-center">
-          <label className="text-sm font-medium">Status:</label>
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+          <label className="text-sm font-medium whitespace-nowrap">Status:</label>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -296,10 +296,10 @@ export default function EnhancedEventList() {
           </Select>
         </div>
         
-        <div className="flex gap-2 items-center">
-          <label className="text-sm font-medium">Event Type:</label>
+        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+          <label className="text-sm font-medium whitespace-nowrap">Event Type:</label>
           <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -311,8 +311,113 @@ export default function EnhancedEventList() {
         </div>
       </div>
 
-      {/* Events Table */}
-      <Card>
+      {/* Mobile Card Layout */}
+      <div className="block md:hidden space-y-4">
+        {filteredPublicEvents.map((event: any) => {
+          const attendeeCount = getEventAttendeeCount(event.id, event.notes || "");
+          const revenue = calculateRevenue(event, true);
+          const eventName = event.notes || `Event #${event.id}`;
+          
+          return (
+            <Card key={`mobile-public-${event.id}`}>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">{eventName}</h3>
+                      <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                        <Users className="w-3 h-3" />
+                        {attendeeCount} signed up / 20 max
+                      </div>
+                    </div>
+                    <Badge className={getStatusColor(event.status)}>
+                      {event.status}
+                    </Badge>
+                  </div>
+                  
+                  <div className="text-xs text-gray-600">
+                    {formatDateTime(event.eventDate, event.startTime)}
+                    {event.endTime && ` - ${formatTime(event.endTime)}`}
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <Badge className="bg-green-100 text-green-800 text-xs">
+                        Host Hampton Event
+                      </Badge>
+                      <div className="text-xs font-medium text-gray-900">
+                        Revenue: ${revenue.toFixed(2)}
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewEvent(event, true)}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        
+        {filteredPrivateEvents.map((event: any) => {
+          const revenue = calculateRevenue(event, false);
+          const eventName = event.notes || `Event #${event.id}`;
+          
+          return (
+            <Card key={`mobile-private-${event.id}`}>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">{eventName}</h3>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Private Event
+                      </div>
+                    </div>
+                    <Badge className={getStatusColor(event.status)}>
+                      {event.status}
+                    </Badge>
+                  </div>
+                  
+                  <div className="text-xs text-gray-600">
+                    {formatDateTime(event.eventDate, event.startTime)}
+                    {event.endTime && ` - ${formatTime(event.endTime)}`}
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        Private Event
+                      </Badge>
+                      <div className="text-xs font-medium text-gray-900">
+                        Revenue: ${revenue.toFixed(2)}
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewEvent(event, false)}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <Card className="hidden md:block">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">

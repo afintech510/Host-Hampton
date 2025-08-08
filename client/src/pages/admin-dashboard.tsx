@@ -164,37 +164,39 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="w-full px-6 py-4">
+        <div className="w-full px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
               <img 
                 src={hostHamptonLogo} 
                 alt="Host Hampton" 
-                className="h-12 md:h-14 w-auto object-contain"
+                className="h-8 md:h-12 w-auto object-contain flex-shrink-0"
               />
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-gray-900 truncate">Admin Dashboard</h1>
             </div>
             <Button 
               variant="outline"
+              size="sm"
               onClick={() => setShowNewEventPanel(true)}
+              className="flex-shrink-0"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              New Event
+              <Plus className="w-4 h-4 md:mr-2" />
+              <span className="hidden sm:inline">New Event</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="w-full px-6 py-8">
+      <div className="w-full px-4 md:px-6 py-4 md:py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7 bg-slate-100">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Overview</TabsTrigger>
-            <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Events</TabsTrigger>
-            <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Invoices</TabsTrigger>
-            <TabsTrigger value="quotes" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Quotes</TabsTrigger>
-            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Leads</TabsTrigger>
-            <TabsTrigger value="gallery" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Gallery</TabsTrigger>
-            <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white">Staff</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 bg-slate-100 h-auto">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Overview</TabsTrigger>
+            <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Events</TabsTrigger>
+            <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3 md:col-span-1 col-span-2">Invoices</TabsTrigger>
+            <TabsTrigger value="quotes" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Quotes</TabsTrigger>
+            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Leads</TabsTrigger>
+            <TabsTrigger value="gallery" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Gallery</TabsTrigger>
+            <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Staff</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -295,20 +297,20 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Events Tab */}
-          <TabsContent value="events" className="space-y-6">
+          <TabsContent value="events" className="space-y-4 md:space-y-6">
             {showNewEventPanel ? (
               <div className="space-y-4">
                 <NewEventPanel onClose={() => setShowNewEventPanel(false)} />
               </div>
             ) : (
               <>
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Event Management</h2>
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <h2 className="text-xl md:text-2xl font-bold">Event Management</h2>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                     <div className="flex rounded-md shadow-sm">
                       <button
                         onClick={() => setEventViewMode("list")}
-                        className={`px-4 py-2 text-sm font-medium rounded-l-md border ${
+                        className={`px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-l-md border ${
                           eventViewMode === "list"
                             ? "bg-blue-600 text-white border-blue-600"
                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
@@ -318,7 +320,7 @@ export default function AdminDashboard() {
                       </button>
                       <button
                         onClick={() => setEventViewMode("calendar")}
-                        className={`px-4 py-2 text-sm font-medium rounded-r-md border-t border-r border-b ${
+                        className={`px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-r-md border-t border-r border-b ${
                           eventViewMode === "calendar"
                             ? "bg-blue-600 text-white border-blue-600"
                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
@@ -327,7 +329,7 @@ export default function AdminDashboard() {
                         Calendar View
                       </button>
                     </div>
-                    <Button onClick={() => setShowNewEventPanel(true)}>
+                    <Button onClick={() => setShowNewEventPanel(true)} size="sm" className="w-full sm:w-auto">
                       <Plus className="w-4 h-4 mr-2" />
                       New Event
                     </Button>
