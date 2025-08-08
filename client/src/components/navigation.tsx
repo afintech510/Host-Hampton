@@ -20,10 +20,10 @@ interface NavigationProps {
 
 export default function Navigation({ cartItemCount }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [sessionId, setSessionId] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string>("");
 
   useEffect(() => {
-    const storedSessionId = localStorage.getItem('shop_session_id');
+    const storedSessionId = localStorage.getItem("shop_session_id");
     if (storedSessionId) {
       setSessionId(storedSessionId);
     }
@@ -44,13 +44,14 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
   const actualCartCount = cartItemCount ?? cartItems.length;
 
   const menuItems = [
-    { name: "Shop Events", href: "/shop-events" },
-    { name: "Cart", href: "/cart" },
     { name: "Theme Parties", href: "/themed-parties" },
     { name: "Party Room Rental", href: "/party-room-rental" },
     { name: "Trucker Hat Bar", href: "/trucker-hat-bar" },
     { name: "Permanent Jewelry", href: "/permanent-jewelry" },
+    { name: "Shop Events", href: "/upcoming-events" },
+    { name: "Cart", href: "/cart" },
     { name: "My Events", href: "/my-events" },
+    { name: "admin", href: "/admin" },
   ];
 
   return (
@@ -67,17 +68,17 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                   alt="Host Hampton"
                   className="h-12 w-auto object-contain max-w-[200px]"
                   onError={(e) => {
-                    console.log('Logo failed to load from public path');
-                    e.currentTarget.style.display = 'none';
+                    console.log("Logo failed to load from public path");
+                    e.currentTarget.style.display = "none";
                   }}
                   onLoad={() => {
-                    console.log('Logo loaded successfully from public path');
+                    console.log("Logo loaded successfully from public path");
                   }}
                 />
               </div>
             </Link>
           </div>
-          
+
           {/* Buttons Row */}
           <div className="px-4 pb-3">
             <div className="flex space-x-2 mb-3">
@@ -86,14 +87,14 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                   Instant Quote
                 </Button>
               </Link>
-              
+
               <Link href="/upcoming-events" className="flex-1">
                 <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-3 w-full">
                   Upcoming Events
                 </Button>
               </Link>
             </div>
-            
+
             <div className="flex justify-center items-center space-x-4">
               {/* Shopping Cart Icon */}
               <Link href="/cart">
@@ -134,11 +135,11 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                   alt="Host Hampton"
                   className="h-12 md:h-14 w-auto object-contain max-w-[200px]"
                   onError={(e) => {
-                    console.log('Logo failed to load from public path');
-                    e.currentTarget.style.display = 'none';
+                    console.log("Logo failed to load from public path");
+                    e.currentTarget.style.display = "none";
                   }}
                   onLoad={() => {
-                    console.log('Logo loaded successfully from public path');
+                    console.log("Logo loaded successfully from public path");
                   }}
                 />
               </div>
@@ -152,7 +153,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                 Instant Quote
               </Button>
             </Link>
-            
+
             <Link href="/upcoming-events">
               <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-2">
                 Upcoming Events

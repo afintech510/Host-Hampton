@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Eye, Users, Calendar, DollarSign, Mail } from "lucide-react";
+import { Eye, Users, Calendar, DollarSign, Mail, RotateCcw } from "lucide-react";
 
 interface PublicEvent {
   id: number;
@@ -61,6 +61,15 @@ export default function EnhancedEventList() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState<"public" | "private">("public");
+  
+  const queryClient = useQueryClient();
+  
+  const handleRefreshData = async () => {
+    // Invalidate all relevant queries to refresh data
+    await queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+  };
 
   // Fetch all events from events table (these are the individual session events)
   const { data: allEventsData = { events: [] } } = useQuery({
@@ -439,6 +448,18 @@ export default function EnhancedEventList() {
       {/* Desktop Table Layout */}
       <Card className="hidden md:block">
         <CardContent className="p-0">
+          {/* Refresh Button - positioned above the table */}
+          <div className="flex justify-end p-4 pb-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshData}
+              className="flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
