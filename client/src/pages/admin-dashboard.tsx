@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,8 @@ import {
   Edit,
   Trash2,
   Plus,
-  ImageIcon
+  ImageIcon,
+  RotateCcw
 } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
 
@@ -127,22 +128,29 @@ export default function AdminDashboard() {
     }
   });
 
-  // Calculate stats
-  const upcomingEvents = events.filter((event: Event) => 
+  // Calculate stats - ensure arrays are valid before filtering
+  const upcomingEvents = Array.isArray(events) ? events.filter((event: Event) => 
     new Date(event.eventDate) >= new Date() && event.status !== 'cancelled'
-  ).length;
+  ).length : 0;
 
-  const totalRevenue = invoices.reduce((sum: number, invoice: Invoice) => 
+  const totalRevenue = Array.isArray(invoices) ? invoices.reduce((sum: number, invoice: Invoice) => 
     sum + (invoice.totalAmount / 100), 0
-  );
+  ) : 0;
 
-  const pendingInvoices = invoices.filter((invoice: Invoice) => 
+  const pendingInvoices = Array.isArray(invoices) ? invoices.filter((invoice: Invoice) => 
     invoice.status === 'pending'
-  ).length;
+  ).length : 0;
 
-  const newLeads = leads.filter((lead: Lead) => 
+  const newLeads = Array.isArray(leads) ? leads.filter((lead: Lead) => 
     lead.status === 'new' || lead.status === 'contacted'
-  ).length;
+  ).length : 0;
+
+  // Refresh function for events data
+  const handleRefreshData = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+  };
 
   const getStatusColor = (status: string | undefined) => {
     if (!status) return 'bg-gray-100 text-gray-800';
@@ -329,10 +337,25 @@ export default function AdminDashboard() {
                         Calendar View
                       </button>
                     </div>
-                    <Button onClick={() => setShowNewEventPanel(true)} size="sm" className="w-full sm:w-auto">
-                      <Plus className="w-4 h-4 mr-2" />
-                      New Event
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRefreshData}
+                        className="flex items-center gap-2"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        Refresh
+                      </Button>
+                      <Button 
+                        onClick={() => setShowNewEventPanel(true)} 
+                        size="sm" 
+                        className="w-full sm:w-auto"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Event
+                      </Button>
+                    </div>
                   </div>
                 </div>
 

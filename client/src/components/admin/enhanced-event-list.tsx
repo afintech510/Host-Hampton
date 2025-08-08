@@ -450,17 +450,7 @@ export default function EnhancedEventList() {
       <Card className="hidden md:block">
         <CardContent className="p-0">
           {/* Refresh Button - positioned above the table */}
-          <div className="flex justify-end p-4 pb-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefreshData}
-              className="flex items-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
