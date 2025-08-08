@@ -378,7 +378,23 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                 <MapPin className="w-5 h-5 text-purple-600" />
                 <div>
                   <p className="font-medium">Location</p>
-                  <p className="text-gray-600">Host Hampton Studio, Speonk NY</p>
+                  <p className="text-gray-600">
+                    {(() => {
+                      // Show location based on booking data
+                      if (booking?.eventLocation === 'mobile' && booking?.mobileAddress) {
+                        // For mobile parties, show "Mobile - <address>"
+                        return `Mobile - ${booking.mobileAddress}`;
+                      } else if (booking?.location === 'customer_location' && booking?.customerAddress) {
+                        // For customer location parties using customerAddress JSON field
+                        const addr = booking.customerAddress;
+                        const address = [addr.street, addr.city, addr.state].filter(Boolean).join(', ');
+                        return `Mobile - ${address}`;
+                      } else {
+                        // For studio parties or when no location type is specified (legacy)
+                        return 'Host Hampton Studio, Speonk NY';
+                      }
+                    })()}
+                  </p>
                 </div>
               </div>
 
@@ -835,7 +851,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                   </div>
                   <div className="flex items-center gap-1 text-sm text-purple-700">
                     <MapPin className="w-3 h-3" />
-                    Host Hampton Studio, Speonk NY
+                    {(() => {
+                      // Show location based on booking data
+                      if (booking?.eventLocation === 'mobile' && booking?.mobileAddress) {
+                        // For mobile parties, show "Mobile - <address>"
+                        return `Mobile - ${booking.mobileAddress}`;
+                      } else if (booking?.location === 'customer_location' && booking?.customerAddress) {
+                        // For customer location parties using customerAddress JSON field
+                        const addr = booking.customerAddress;
+                        const address = [addr.street, addr.city, addr.state].filter(Boolean).join(', ');
+                        return `Mobile - ${address}`;
+                      } else if (booking?.eventLocation === 'studio' || booking?.location === 'studio' || !booking?.eventLocation) {
+                        // For studio parties or when no location type is specified (legacy)
+                        return 'Host Hampton Studio, Speonk NY';
+                      } else {
+                        // Fallback
+                        return 'Host Hampton Studio, Speonk NY';
+                      }
+                    })()}
                   </div>
                   <div className="flex items-center gap-1 text-sm text-purple-700">
                     {(() => {

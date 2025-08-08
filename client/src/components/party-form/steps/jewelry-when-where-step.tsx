@@ -97,7 +97,7 @@ export function JewelryWhenWhereStep({ formData, updateFormData, onNext, onBack 
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-5 w-5 text-gray-600" />
                   <div>
-                    <div className="font-medium text-gray-900">Host Hampton Studio</div>
+                    <div className="font-medium text-gray-900">Host Hampton</div>
                     <div className="text-sm text-gray-600">Come to our beautiful studio</div>
                   </div>
                 </div>

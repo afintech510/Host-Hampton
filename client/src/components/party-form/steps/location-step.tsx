@@ -13,8 +13,15 @@ interface LocationStepProps {
   onBack: () => void;
 }
 
-export function LocationStep({ formData, updateFormData, onNext, onBack }: LocationStepProps) {
-  const [selectedLocation, setSelectedLocation] = useState(formData.locationType || "");
+export function LocationStep({
+  formData,
+  updateFormData,
+  onNext,
+  onBack,
+}: LocationStepProps) {
+  const [selectedLocation, setSelectedLocation] = useState(
+    formData.locationType || "",
+  );
   const [address, setAddress] = useState(formData.address || "");
   const [city, setCity] = useState(formData.city || "");
   const [state, setState] = useState(formData.state || "NY");
@@ -23,51 +30,63 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
   const locationOptions = [
     {
       id: "host-hampton",
-      title: "Host Hampton Studio",
-      description: "Party at our beautiful studio location",
+      title: "Host Hampton",
+      description: "Party at our beautiful studio",
       icon: Home,
     },
     {
       id: "mobile",
       title: "Mobile Party",
-      description: "We'll come to your location",
+      description: "We'll bring the party to you!",
       icon: Truck,
     },
   ];
 
   const handleLocationSelect = (locationType: string) => {
     setSelectedLocation(locationType);
-    updateFormData({ 
+    updateFormData({
       locationType,
       // Clear address fields if switching back to studio
       ...(locationType === "host-hampton" && {
         address: "",
         city: "",
         state: "NY",
-        zipCode: ""
-      })
+        zipCode: "",
+      }),
     });
   };
 
   const handleNext = () => {
-    const locationData: any = { locationType: selectedLocation };
-    
-    // Include address data if mobile party is selected
+    const locationData: any = {};
+
     if (selectedLocation === "mobile") {
-      locationData.address = address;
-      locationData.city = city;
-      locationData.state = state;
-      locationData.zipCode = zipCode;
+      // Set eventLocation for schema compatibility
+      locationData.eventLocation = "mobile";
+      // Create full address string for mobileAddress field
+      const fullAddress = [address, city, state, zipCode].filter(Boolean).join(', ');
+      locationData.mobileAddress = fullAddress;
+      // Also save in customerAddress JSON format for backward compatibility
+      locationData.customerAddress = {
+        street: address,
+        city: city,
+        state: state,
+        zip: zipCode
+      };
+      locationData.location = "customer_location";
+    } else {
+      // Host Hampton studio location
+      locationData.eventLocation = "studio";
+      locationData.location = "studio";
     }
-    
+
     updateFormData(locationData);
     onNext();
   };
 
-  const isValid = selectedLocation && (
-    selectedLocation === "host-hampton" || 
-    (selectedLocation === "mobile" && address && city && state && zipCode)
-  );
+  const isValid =
+    selectedLocation &&
+    (selectedLocation === "host-hampton" ||
+      (selectedLocation === "mobile" && address && city && state && zipCode));
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-8">
@@ -77,15 +96,19 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
             <MapPin className="w-8 h-8 text-dusty-blue" />
           </div>
         </div>
-        <h2 className="text-3xl font-bold text-slate-800">Where would you like to party?</h2>
-        <p className="text-slate-600 text-lg">Choose your preferred party location</p>
+        <h2 className="text-3xl font-bold text-slate-800">
+          Where would you like to party?
+        </h2>
+        <p className="text-slate-600 text-lg">
+          Choose your preferred party location
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {locationOptions.map((option) => {
           const Icon = option.icon;
           const isSelected = selectedLocation === option.id;
-          
+
           return (
             <motion.div
               key={option.id}
@@ -94,21 +117,29 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
             >
               <Card
                 className={`cursor-pointer transition-all duration-200 ${
-                  isSelected 
-                    ? "ring-2 ring-dusty-blue bg-dusty-blue/5 shadow-lg" 
+                  isSelected
+                    ? "ring-2 ring-dusty-blue bg-dusty-blue/5 shadow-lg"
                     : "hover:shadow-md hover:bg-slate-50"
                 }`}
                 onClick={() => handleLocationSelect(option.id)}
               >
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className={`mx-auto p-4 rounded-full ${
-                    isSelected ? "bg-dusty-blue text-white" : "bg-slate-100 text-slate-600"
-                  }`}>
+                  <div
+                    className={`mx-auto p-4 rounded-full ${
+                      isSelected
+                        ? "bg-dusty-blue text-white"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
                     <Icon className="w-8 h-8" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg text-slate-800">{option.title}</h3>
-                    <p className="text-slate-600 text-sm mt-1">{option.description}</p>
+                    <h3 className="font-semibold text-lg text-slate-800">
+                      {option.title}
+                    </h3>
+                    <p className="text-slate-600 text-sm mt-1">
+                      {option.description}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -129,7 +160,7 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
             <MapPin className="w-5 h-5 text-dusty-blue" />
             Party Address
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             <div>
               <Label htmlFor="address">Street Address</Label>
@@ -143,7 +174,7 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
                 required
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="city">City</Label>
@@ -157,7 +188,7 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
                   required
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="state">State</Label>
                 <Input
@@ -171,7 +202,7 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
                 />
               </div>
             </div>
-            
+
             <div className="w-1/2">
               <Label htmlFor="zipCode">ZIP Code</Label>
               <Input
@@ -190,15 +221,11 @@ export function LocationStep({ formData, updateFormData, onNext, onBack }: Locat
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-6">
-        <Button 
-          variant="outline" 
-          onClick={onBack}
-          className="px-8"
-        >
+        <Button variant="outline" onClick={onBack} className="px-8">
           Back
         </Button>
-        
-        <Button 
+
+        <Button
           onClick={handleNext}
           disabled={!isValid}
           className="px-8 bg-dusty-blue hover:opacity-90"
