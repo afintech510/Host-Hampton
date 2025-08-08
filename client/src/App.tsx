@@ -41,6 +41,7 @@ import GalleryManagement from "./pages/admin/gallery-management";
 import About from "./pages/about";
 import Contact from "./pages/contact";
 import Footer from "@/components/footer";
+import FloatingCheckoutButton from "@/components/floating-checkout-button";
 
 function Router() {
   return (
@@ -91,6 +92,7 @@ function Router() {
         </Switch>
       </div>
       <Footer />
+      <FloatingCheckoutButton />
     </div>
   );
 }

@@ -1,0 +1,72 @@
+import { ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+
+interface CartItem {
+  id: number;
+  sessionId: string;
+  productId: number;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  selectedSessions?: string[];
+  createdAt: string;
+}
+
+export default function FloatingCheckoutButton() {
+  const [, setLocation] = useLocation();
+  
+  // Get session ID from localStorage or generate one
+  const getSessionId = () => {
+    let sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('sessionId', sessionId);
+    }
+    return sessionId;
+  };
+
+  // Get cart items
+  const { data: cartItems = [] } = useQuery<CartItem[]>({
+    queryKey: [`/api/cart/${getSessionId()}`],
+    refetchInterval: 2000, // Refresh cart every 2 seconds
+  });
+
+  // Don't show button if cart is empty
+  if (!cartItems || cartItems.length === 0) {
+    return null;
+  }
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+
+  const handleCheckout = () => {
+    setLocation('/checkout');
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <Button
+        onClick={handleCheckout}
+        size="lg"
+        className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:scale-105"
+      >
+        <div className="relative">
+          <ShoppingCart className="w-5 h-5" />
+          <Badge 
+            variant="destructive" 
+            className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center p-0 text-xs"
+          >
+            {totalItems}
+          </Badge>
+        </div>
+        <div className="flex flex-col items-start">
+          <span className="text-sm font-medium">Check Out</span>
+          <span className="text-xs opacity-90">${(totalPrice / 100).toFixed(2)}</span>
+        </div>
+      </Button>
+    </div>
+  );
+}
