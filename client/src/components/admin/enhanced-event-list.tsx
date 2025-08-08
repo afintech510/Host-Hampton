@@ -165,6 +165,21 @@ export default function EnhancedEventList() {
       productName = "Not Miss Rachel";
     }
     
+    // Debug logging for attendee count issues
+    if (eventId === 43) { // Debug first event
+      console.log(`Debug Attendee Count for Event ${eventId}:`);
+      console.log("- Event Notes:", eventNotes);
+      console.log("- Mapped Product Name:", productName);
+      console.log("- Session ID:", sessionId);
+      console.log("- Total Orders:", orders.length);
+      console.log("- Completed Orders:", completedOrders.length);
+      console.log("- Orders data sample:", orders.slice(0, 2));
+      
+      if (completedOrders.length > 0) {
+        console.log("- First completed order items:", completedOrders[0].items);
+      }
+    }
+    
     // Count attendees from orders
     completedOrders.forEach((order: any) => {
       order.items?.forEach((item: any) => {
@@ -183,6 +198,10 @@ export default function EnhancedEventList() {
         }
       });
     });
+    
+    if (eventId === 43) { // Debug first event
+      console.log("- Final Attendee Count:", totalAttendees);
+    }
     
     return totalAttendees;
   };
