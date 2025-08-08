@@ -67,7 +67,9 @@ export default function EnhancedEventList() {
     queryKey: ["/api/events"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/events");
-      return response.json();
+      const data = await response.json();
+      console.log("Raw API response from /api/events:", data);
+      return data;
     },
   });
 
@@ -83,7 +85,10 @@ export default function EnhancedEventList() {
     },
   });
 
-  const allEvents = allEventsData.events || [];
+  // Handle different API response structures
+  const allEvents = allEventsData.events || allEventsData || [];
+  console.log("Processed allEvents:", allEvents);
+  console.log("allEventsData structure:", allEventsData);
   
   // Separate public events (from products/sessions) and private events
   const publicEvents = allEvents.filter((event: any) => 
