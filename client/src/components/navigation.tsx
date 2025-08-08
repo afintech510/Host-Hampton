@@ -79,43 +79,47 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
           </div>
           
           {/* Buttons Row */}
-          <div className="flex justify-center items-center space-x-2 pb-3">
-            <Link href="/get-quote">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs px-3 py-2">
-                Instant Quote
-              </Button>
-            </Link>
+          <div className="px-4 pb-3">
+            <div className="flex space-x-2 mb-3">
+              <Link href="/get-quote" className="flex-1">
+                <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-3 w-full">
+                  Instant Quote
+                </Button>
+              </Link>
+              
+              <Link href="/upcoming-events" className="flex-1">
+                <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-3 w-full">
+                  Upcoming Events
+                </Button>
+              </Link>
+            </div>
             
-            <Link href="/upcoming-events">
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-xs px-3 py-2">
-                Upcoming Events
-              </Button>
-            </Link>
+            <div className="flex justify-center items-center space-x-4">
+              {/* Shopping Cart Icon */}
+              <Link href="/cart">
+                <div className="relative cursor-pointer">
+                  <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
+                  {actualCartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {actualCartCount}
+                    </span>
+                  )}
+                </div>
+              </Link>
 
-            {/* Shopping Cart Icon */}
-            <Link href="/cart">
-              <div className="relative cursor-pointer">
-                <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
-                {actualCartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {actualCartCount}
-                  </span>
+              {/* Menu button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
                 )}
-              </div>
-            </Link>
-
-            {/* Menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
+              </Button>
+            </div>
           </div>
         </div>
 
