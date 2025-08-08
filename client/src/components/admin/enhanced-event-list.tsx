@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Eye, Users, Calendar, DollarSign, Mail, UserGroup } from "lucide-react";
+import { Eye, Users, Calendar, DollarSign, Mail } from "lucide-react";
 
 interface PublicEvent {
   id: number;
@@ -20,6 +20,7 @@ interface PublicEvent {
   hasMultipleSessions: boolean;
   ticketsSold?: number;
   sessions?: ProductSession[];
+  isActive?: boolean;
 }
 
 interface ProductSession {
@@ -61,23 +62,16 @@ export default function EnhancedEventList() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState<"public" | "private">("public");
 
-  // Fetch public events (products)
-  const { data: publicEvents = [] } = useQuery({
-    queryKey: ["/api/products"],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/products");
-      return response.json();
-    },
-  });
-
-  // Fetch private events
-  const { data: privateEventsData = { events: [] } } = useQuery({
+  // Fetch all events from events table (these are the individual session events)
+  const { data: allEventsData = { events: [] } } = useQuery({
     queryKey: ["/api/events"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/events");
       return response.json();
     },
   });
+
+  // Remove unused productSessions query since we're getting data from events and orders directly
 
   // Fetch order data for public events attendee counts
   const { data: orders = [] } = useQuery({
@@ -89,20 +83,97 @@ export default function EnhancedEventList() {
     },
   });
 
-  const privateEvents = privateEventsData.events || [];
+  const allEvents = allEventsData.events || [];
+  
+  // Separate public events (from products/sessions) and private events
+  const publicEvents = allEvents.filter((event: any) => 
+    event.notes && (
+      event.notes.includes("Kids Summer Classes") || 
+      event.notes.includes("Open Soft Play") || 
+      event.notes.includes("Advanced Beginner Mahjong") ||
+      event.notes.includes("Sourdough for Beginners") ||
+      event.notes.includes("Spirit Medium") ||
+      event.notes.includes("Not Miss Rachel")
+    )
+  );
+  
+  const privateEvents = allEvents.filter((event: any) => 
+    !event.notes || !(
+      event.notes.includes("Kids Summer Classes") || 
+      event.notes.includes("Open Soft Play") || 
+      event.notes.includes("Advanced Beginner Mahjong") ||
+      event.notes.includes("Sourdough for Beginners") ||
+      event.notes.includes("Spirit Medium") ||
+      event.notes.includes("Not Miss Rachel")
+    )
+  );
 
-  // Calculate attendee counts for public events
-  const getEventAttendeeCount = (productId: number, sessionId?: number) => {
+  // Create precise event-to-session mapping based on our database analysis
+  const eventSessionMapping: { [eventId: number]: number | null } = {
+    // Kids Summer Classes sessions
+    43: 1,  // Canvas Bag Painting -> session_id 1
+    44: 2,  // Fake Cake Decorating -> session_id 2 
+    45: 3,  // Scrap Booking -> session_id 3
+    46: 4,  // Make Your Own Slime -> session_id 4
+    47: 5,  // Marbled Mug -> session_id 5
+    48: 6,  // Charm Necklace Making -> session_id 6
+    
+    // Open Soft Play sessions (all Tuesday Morning)
+    49: 7,  // Aug 5 -> session_id 7
+    50: 8,  // Aug 12 -> session_id 8
+    51: 9,  // Aug 19 -> session_id 9
+    52: 10, // Aug 26 -> session_id 10
+    53: 11, // Sep 2 -> session_id 11
+    
+    // Advanced Beginner Mahjong sessions
+    54: 12, // September Week 1 -> session_id 12
+    55: 13, // September Week 2 -> session_id 13
+    56: 14, // September Week 3 -> session_id 14
+    57: 15, // September Week 4 -> session_id 15
+    
+    // Single events (no sessions)
+    58: null, // Sourdough for Beginners
+    59: null, // Spirit Medium Kayla
+    60: null, // Not Miss Rachel
+  };
+
+  // Calculate attendee counts by matching events to their specific sessions
+  const getEventAttendeeCount = (eventId: number, eventNotes: string) => {
     const completedOrders = orders.filter((order: any) => order.status === "completed");
     let totalAttendees = 0;
     
+    const sessionId = eventSessionMapping[eventId];
+    
+    // Map event notes to product names
+    let productName = "";
+    if (eventNotes.includes("Kids Summer Classes")) {
+      productName = "Kids Summer Classes";
+    } else if (eventNotes.includes("Open Soft Play")) {
+      productName = "Open Soft Play";
+    } else if (eventNotes.includes("Advanced Beginner Mahjong")) {
+      productName = "Advanced Beginner Mahjong Course";
+    } else if (eventNotes.includes("Sourdough for Beginners")) {
+      productName = "Sourdough for Beginners";
+    } else if (eventNotes.includes("Spirit Medium")) {
+      productName = "Spirit Medium Kayla";
+    } else if (eventNotes.includes("Not Miss Rachel")) {
+      productName = "Not Miss Rachel";
+    }
+    
+    // Count attendees from orders
     completedOrders.forEach((order: any) => {
       order.items?.forEach((item: any) => {
-        if (item.productId === productId) {
-          if (sessionId && item.productSessionId === sessionId) {
-            totalAttendees += item.quantity;
-          } else if (!sessionId && !item.productSessionId) {
-            totalAttendees += item.quantity;
+        if (item.productName === productName) {
+          if (sessionId !== null) {
+            // For session-based events, match exact session ID
+            if (item.productSessionId === sessionId) {
+              totalAttendees += item.quantity;
+            }
+          } else {
+            // For non-session events, match items without session ID
+            if (!item.productSessionId) {
+              totalAttendees += item.quantity;
+            }
           }
         }
       });
@@ -118,10 +189,9 @@ export default function EnhancedEventList() {
     return true;
   });
 
-  const filteredPublicEvents = publicEvents.filter((event: PublicEvent) => {
+  const filteredPublicEvents = publicEvents.filter((event: any) => {
     if (eventTypeFilter !== "all" && eventTypeFilter !== "public") return false;
-    // For public events, we only show confirmed/active ones by default
-    if (statusFilter === "confirmed") return event.isActive !== false;
+    if (statusFilter !== "all" && event.status !== statusFilter) return false;
     return true;
   });
 
@@ -171,8 +241,8 @@ export default function EnhancedEventList() {
 
   const calculateRevenue = (event: any, isPublic: boolean) => {
     if (isPublic) {
-      const attendeeCount = getEventAttendeeCount(event.id);
-      return attendeeCount * (event.price / 100);
+      const attendeeCount = getEventAttendeeCount(event.id, event.notes || "");
+      return attendeeCount * ((event.estimatedCost || 0) / 100);
     } else {
       return (event.estimatedCost || 0) / 100;
     }
@@ -252,29 +322,34 @@ export default function EnhancedEventList() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {/* Public Events */}
-                {filteredPublicEvents.map((event: PublicEvent) => {
-                  const attendeeCount = getEventAttendeeCount(event.id);
+                {/* Public Events (Individual Sessions) */}
+                {filteredPublicEvents.map((event: any) => {
+                  const attendeeCount = getEventAttendeeCount(event.id, event.notes || "");
                   const revenue = calculateRevenue(event, true);
+                  const eventName = event.notes || `Event #${event.id}`;
                   
                   return (
                     <tr key={`public-${event.id}`} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{event.name}</div>
+                          <div className="text-sm font-medium text-gray-900">{eventName}</div>
                           <div className="text-sm text-gray-500 flex items-center gap-1">
                             <Users className="w-4 h-4" />
-                            {attendeeCount} signed up
-                            {event.maxTickets && ` / ${event.maxTickets} max`}
+                            {attendeeCount} signed up / 20 max
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {event.eventDate ? formatDateTime(event.eventDate) : 'Multiple Sessions'}
+                        {formatDateTime(event.eventDate, event.startTime)}
+                        {event.endTime && (
+                          <div className="text-gray-500">
+                            - {formatTime(event.endTime)}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge className="bg-green-100 text-green-800">
-                          Active
+                        <Badge className={getStatusColor(event.status)}>
+                          {event.status}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
