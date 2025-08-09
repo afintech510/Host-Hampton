@@ -187,23 +187,25 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
           </div>
         </div>
 
-        {/* Navigation Menu - overlays content when hamburger is clicked */}
-        {isMenuOpen && (
-          <div className="absolute top-full left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {menuItems.map((item) => (
-                <Link key={item.name} href={item.href}>
-                  <span
-                    className="text-gray-600 hover:text-pink-600 block px-3 py-2 rounded-md text-base font-medium cursor-pointer text-right"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
+        {/* Navigation Menu - dropdown from hamburger button */}
+        <div className={`absolute top-full right-4 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
+          isMenuOpen 
+            ? 'opacity-100 scale-100 translate-y-0' 
+            : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+        }`}>
+          <div className="py-2">
+            {menuItems.map((item) => (
+              <Link key={item.name} href={item.href}>
+                <span
+                  className="text-gray-600 hover:text-pink-600 hover:bg-gray-50 block px-4 py-2 text-base font-medium cursor-pointer text-right transition-colors duration-150"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </span>
+              </Link>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );
