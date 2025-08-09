@@ -188,7 +188,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
         </div>
 
         {/* Navigation Menu - dropdown from hamburger button */}
-        <div className={`absolute top-full right-4 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
+        <div className={`absolute top-full right-0 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
           isMenuOpen 
             ? 'opacity-100 scale-100 translate-y-0' 
             : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
