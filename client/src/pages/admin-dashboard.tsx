@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Navigation from "@/components/navigation";
 import LeadManagement from "@/components/admin/lead-management";
 import QuotesManagement from "@/components/admin/quotes-management";
 import GalleryManagement from "@/pages/admin/gallery-management";
@@ -30,7 +31,7 @@ import {
   ImageIcon,
   RotateCcw
 } from "lucide-react";
-import hostHamptonLogo from "@assets/host-hampton-logo_300_1753333962128.png";
+
 
 interface Event {
   id: number;
@@ -170,16 +171,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Main Website Navigation */}
+      <Navigation />
+      
+      {/* Admin Dashboard Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="w-full px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
-              <img 
-                src={hostHamptonLogo} 
-                alt="Host Hampton" 
-                className="h-8 md:h-12 w-auto object-contain flex-shrink-0"
-              />
               <h1 className="text-lg md:text-2xl font-bold text-gray-900 truncate">Admin Dashboard</h1>
             </div>
             <Button 
