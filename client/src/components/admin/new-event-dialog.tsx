@@ -1,9 +1,24 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Calendar, MapPin, Users, DollarSign, Clock, Tag, X } from "lucide-react";
+import { 
+  Calendar, 
+  MapPin, 
+  Users, 
+  DollarSign, 
+  Clock, 
+  Tag, 
+  X, 
+  Plus, 
+  Trash2, 
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  AlertCircle,
+  Settings
+} from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,18 +41,47 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
+// Enhanced schema for comprehensive event creation
+const sessionSchema = z.object({
+  sessionName: z.string().min(1, "Session name is required"),
+  sessionDate: z.string().min(1, "Session date is required"),
+  sessionTime: z.string().min(1, "Session time is required"),
+  maxTickets: z.number().min(1, "Must have at least 1 ticket"),
+  priceOverride: z.number().optional(),
+});
+
 const newEventSchema = z.object({
+  // Basic Info
   name: z.string().min(1, "Event name is required"),
   description: z.string().min(1, "Description is required"),
   category: z.string().min(1, "Category is required"),
-  price: z.string().min(1, "Price is required"),
-  eventDate: z.string().min(1, "Event date is required"),
+  
+  // Event Type Configuration
+  eventType: z.enum(["single", "multi-session-choose", "multi-session-series"]),
+  
+  // Pricing Configuration
+  basePrice: z.number().min(0, "Price must be non-negative"),
+  hasSiblingDiscount: z.boolean().default(false),
+  siblingPrice: z.number().optional(),
+  
+  // Single Event Fields (when eventType === "single")
+  eventDate: z.string().optional(),
+  eventTime: z.string().optional(),
   location: z.string().min(1, "Location is required"),
-  maxTickets: z.string().min(1, "Maximum tickets is required"),
-  eventType: z.string().min(1, "Event type is required"),
+  maxTickets: z.number().min(1, "Must have at least 1 ticket"),
+  
+  // Multi-Session Fields (when eventType starts with "multi-session")
+  sessions: z.array(sessionSchema).optional(),
+  
+  // Associated Event Type for booking management
+  associatedEventType: z.string().min(1, "Event type is required"),
 });
 
 type NewEventFormData = z.infer<typeof newEventSchema>;
@@ -49,6 +93,7 @@ interface NewEventPanelProps {
 export default function NewEventPanel({ onClose }: NewEventPanelProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const form = useForm<NewEventFormData>({
     resolver: zodResolver(newEventSchema),
@@ -56,13 +101,26 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
       name: "",
       description: "",
       category: "",
-      price: "",
+      eventType: "single",
+      basePrice: 0,
+      hasSiblingDiscount: false,
+      siblingPrice: undefined,
       eventDate: "",
+      eventTime: "",
       location: "Host Hampton",
-      maxTickets: "",
-      eventType: "",
+      maxTickets: 1,
+      sessions: [],
+      associatedEventType: "",
     },
   });
+
+  const { fields: sessionFields, append: appendSession, remove: removeSession } = useFieldArray({
+    control: form.control,
+    name: "sessions",
+  });
+
+  const watchEventType = form.watch("eventType");
+  const watchHasSiblingDiscount = form.watch("hasSiblingDiscount");
 
   // Fetch event types for the dropdown
   const { data: eventTypes = [] } = useQuery({
@@ -74,19 +132,68 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
     }
   });
 
-  // Create product mutation
+  // Create product and sessions mutation
   const createProductMutation = useMutation({
-    mutationFn: async (productData: any) => {
-      const response = await apiRequest("POST", "/api/products", productData);
-      if (!response.ok) {
+    mutationFn: async (data: NewEventFormData) => {
+      // Create the main product
+      const priceInCents = Math.round(data.basePrice * 100);
+      const siblingPriceInCents = data.hasSiblingDiscount && data.siblingPrice 
+        ? Math.round(data.siblingPrice * 100) 
+        : null;
+
+      const productData = {
+        name: data.name,
+        description: data.description,
+        price: priceInCents,
+        siblingPrice: siblingPriceInCents,
+        hasSiblingDiscount: data.hasSiblingDiscount,
+        category: data.category,
+        location: data.location,
+        hasMultipleSessions: data.eventType !== "single",
+        isActive: true,
+        // For single events, set the event date directly
+        eventDate: data.eventType === "single" && data.eventDate 
+          ? new Date(data.eventDate).toISOString() 
+          : null,
+        maxTickets: data.eventType === "single" ? data.maxTickets : null,
+        availableTickets: data.eventType === "single" ? data.maxTickets : null,
+      };
+
+      const productResponse = await apiRequest("POST", "/api/products", productData);
+      if (!productResponse.ok) {
         throw new Error("Failed to create event");
       }
-      return response.json();
+      
+      const productResult = await productResponse.json();
+      const productId = productResult.product.id;
+
+      // For multi-session events, create the sessions
+      if (data.eventType !== "single" && data.sessions && data.sessions.length > 0) {
+        for (const session of data.sessions) {
+          const sessionData = {
+            productId,
+            sessionName: session.sessionName,
+            sessionDate: new Date(session.sessionDate).toISOString(),
+            sessionTime: session.sessionTime,
+            maxTickets: session.maxTickets,
+            availableTickets: session.maxTickets,
+            priceOverride: session.priceOverride ? Math.round(session.priceOverride * 100) : null,
+            isActive: true,
+          };
+
+          const sessionResponse = await apiRequest("POST", "/api/product-sessions", sessionData);
+          if (!sessionResponse.ok) {
+            throw new Error(`Failed to create session: ${session.sessionName}`);
+          }
+        }
+      }
+
+      return { product: productResult.product };
     },
     onSuccess: () => {
       toast({
-        title: "Event Created",
-        description: "New event has been created successfully and is now available for sale.",
+        title: "Event Created Successfully",
+        description: "Your new event has been created and is now available for customers to purchase.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       form.reset();
@@ -94,7 +201,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "Error Creating Event",
         description: error.message,
         variant: "destructive",
       });
@@ -105,27 +212,30 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
     setIsSubmitting(true);
     
     try {
-      // Convert price from dollars to cents
-      const priceInCents = Math.round(parseFloat(data.price) * 100);
-      
-      const productData = {
-        name: data.name,
-        description: data.description,
-        price: priceInCents,
-        category: data.category,
-        eventDate: new Date(data.eventDate).toISOString(),
-        location: data.location,
-        maxTickets: parseInt(data.maxTickets),
-        availableTickets: parseInt(data.maxTickets),
-        isActive: true,
-      };
-
-      await createProductMutation.mutateAsync(productData);
+      await createProductMutation.mutateAsync(data);
     } catch (error) {
       console.error("Error creating event:", error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const addSession = () => {
+    appendSession({
+      sessionName: "",
+      sessionDate: "",
+      sessionTime: "",
+      maxTickets: 1,
+      priceOverride: undefined,
+    });
+  };
+
+  const nextStep = () => {
+    setCurrentStep(prev => Math.min(prev + 1, 3));
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
   const eventCategories = [
@@ -138,8 +248,516 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
     { value: "popup-event", label: "Pop-up Event", icon: "✨" },
   ];
 
+  const eventTypeOptions = [
+    {
+      value: "single",
+      label: "Single Event",
+      description: "A one-time event with a specific date and time",
+      icon: "📅"
+    },
+    {
+      value: "multi-session-choose",
+      label: "Multi-Session (Choose One)",
+      description: "Customers choose one session from multiple available times",
+      icon: "🎯"
+    },
+    {
+      value: "multi-session-series",
+      label: "Multi-Session Series",
+      description: "Customers buy the entire series of sessions",
+      icon: "📚"
+    }
+  ];
+
+  const renderStepIndicator = () => (
+    <div className="flex items-center justify-center space-x-4 mb-6">
+      {[1, 2, 3].map((step) => (
+        <div key={step} className="flex items-center">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              step === currentStep
+                ? "bg-blue-600 text-white"
+                : step < currentStep
+                ? "bg-green-600 text-white"
+                : "bg-gray-300 text-gray-600"
+            }`}
+          >
+            {step < currentStep ? <Check className="w-4 h-4" /> : step}
+          </div>
+          {step < 3 && (
+            <div
+              className={`w-12 h-0.5 ${
+                step < currentStep ? "bg-green-600" : "bg-gray-300"
+              }`}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderStep1 = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Event Name */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Cookie Decorating Workshop" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Category */}
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Category</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {eventCategories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      <span className="flex items-center gap-2">
+                        <span>{category.icon}</span>
+                        {category.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Description */}
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Describe what's included in this event package..."
+                className="min-h-[100px]"
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Event Type Selection */}
+      <FormField
+        control={form.control}
+        name="eventType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Event Type</FormLabel>
+            <FormControl>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {eventTypeOptions.map((option) => (
+                  <Card
+                    key={option.value}
+                    className={`cursor-pointer transition-all hover:shadow-md ${
+                      field.value === option.value
+                        ? "border-blue-500 ring-2 ring-blue-200 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => field.onChange(option.value)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-2">
+                        <div className="text-2xl">{option.icon}</div>
+                        <h3 className="font-medium">{option.label}</h3>
+                        <p className="text-sm text-gray-600">{option.description}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Associated Event Type */}
+      <FormField
+        control={form.control}
+        name="associatedEventType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Associated Event Type</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Link to event type for booking management" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {eventTypes.map((type: any) => (
+                  <SelectItem key={type.id} value={type.id.toString()}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              This links your product to an existing event type for booking management
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Base Price */}
+        <FormField
+          control={form.control}
+          name="basePrice"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Base Price (USD)
+              </FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="0.00" 
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormDescription>
+                {watchEventType === "multi-session-series" 
+                  ? "Price for the entire series" 
+                  : "Price per person/ticket"}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Location */}
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Location
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="Host Hampton" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Sibling Discount */}
+      <div className="space-y-4">
+        <FormField
+          control={form.control}
+          name="hasSiblingDiscount"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Sibling Discount</FormLabel>
+                <FormDescription>
+                  Offer a discounted price for additional siblings
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {watchHasSiblingDiscount && (
+          <FormField
+            control={form.control}
+            name="siblingPrice"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sibling Price (USD)</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    placeholder="0.00" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Price for each additional sibling
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
+
+      {/* Single Event Fields */}
+      {watchEventType === "single" && (
+        <div className="space-y-4">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Configure the specific date, time, and capacity for your single event.
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="eventDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="eventTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Time</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="maxTickets"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Tickets</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="20" 
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className="space-y-6">
+      {/* Multi-Session Configuration */}
+      {watchEventType !== "single" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium">Session Configuration</h3>
+              <p className="text-sm text-gray-600">
+                {watchEventType === "multi-session-choose" 
+                  ? "Add multiple sessions that customers can choose from"
+                  : "Add all sessions in the series that customers will purchase together"}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addSession}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Session
+            </Button>
+          </div>
+
+          {sessionFields.length === 0 && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Add at least one session to continue. Each session can have its own date, time, and capacity.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {sessionFields.map((session, index) => (
+            <Card key={session.id} className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-medium">Session {index + 1}</h4>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeSession(index)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name={`sessions.${index}.sessionName`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Session Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Morning Session" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`sessions.${index}.maxTickets`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Max Tickets</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="20" 
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`sessions.${index}.sessionDate`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Session Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`sessions.${index}.sessionTime`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Session Time</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {watchEventType === "multi-session-choose" && (
+                  <FormField
+                    control={form.control}
+                    name={`sessions.${index}.priceOverride`}
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Price Override (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.01" 
+                            placeholder="Leave empty to use base price" 
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Override the base price for this specific session
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Summary */}
+      <Card className="bg-gray-50">
+        <CardHeader>
+          <CardTitle className="text-lg">Event Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 text-sm">
+            <div><strong>Name:</strong> {form.watch("name") || "Not set"}</div>
+            <div><strong>Type:</strong> {eventTypeOptions.find(t => t.value === watchEventType)?.label}</div>
+            <div><strong>Base Price:</strong> ${form.watch("basePrice")?.toFixed(2) || "0.00"}</div>
+            {watchHasSiblingDiscount && (
+              <div><strong>Sibling Price:</strong> ${form.watch("siblingPrice")?.toFixed(2) || "0.00"}</div>
+            )}
+            {watchEventType !== "single" && (
+              <div><strong>Sessions:</strong> {sessionFields.length} configured</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full max-w-5xl mx-auto">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -156,228 +774,63 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
           </Button>
         </div>
         <p className="text-sm text-gray-600">
-          Create a new event that will be available for customers to purchase on the Shop Events page.
+          Create a comprehensive event that will be available for customers to purchase on the Upcoming Events page.
         </p>
       </CardHeader>
       <CardContent>
+        {renderStepIndicator()}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Event Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Kids Birthday Party Package" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
 
-              {/* Category */}
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {eventCategories.map((category) => (
-                          <SelectItem key={category.value} value={category.value}>
-                            <span className="flex items-center gap-2">
-                              <span>{category.icon}</span>
-                              {category.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe what's included in this event package..."
-                      className="min-h-[100px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Price */}
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      Price (USD)
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        placeholder="0.00" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Enter the ticket price in dollars
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Max Tickets */}
-              <FormField
-                control={form.control}
-                name="maxTickets"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Maximum Tickets
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="20" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Total number of tickets available
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Event Date */}
-              <FormField
-                control={form.control}
-                name="eventDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Event Date
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="datetime-local" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Location */}
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      Location
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Host Hampton" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Event Type */}
-            <FormField
-              control={form.control}
-              name="eventType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Associated Event Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select event type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {eventTypes.map((type: any) => (
-                        <SelectItem key={type.id} value={type.id.toString()}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Link this product to an existing event type for booking management
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onClose}
-                disabled={isSubmitting}
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between pt-6 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className="flex items-center gap-2"
               >
-                Cancel
+                <ArrowLeft className="w-4 h-4" />
+                Previous
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-slate-600 hover:bg-slate-700"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                    Creating...
-                  </div>
-                ) : (
-                  "Create Event"
-                )}
-              </Button>
+
+              <div className="text-sm text-gray-600">
+                Step {currentStep} of 3
+              </div>
+
+              {currentStep < 3 ? (
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                  className="flex items-center gap-2"
+                >
+                  Next
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Create Event
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </form>
         </Form>

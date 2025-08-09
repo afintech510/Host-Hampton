@@ -7,7 +7,7 @@ import {
   insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
   insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema,
-  insertLeadSchema, insertProductSchema, insertCartItemSchema, insertOrderSchema, insertOrderItemSchema
+  insertLeadSchema, insertProductSchema, insertProductSessionSchema, insertCartItemSchema, insertOrderSchema, insertOrderItemSchema
 } from "@shared/schema";
 import { sendEmail, sendTemplateEmail, getEmailTemplates } from "./email-service";
 import { z } from "zod";
@@ -1964,6 +1964,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching all product sessions:", error);
       res.status(500).json({ message: "Failed to fetch product sessions" });
+    }
+  });
+
+  app.post("/api/product-sessions", async (req, res) => {
+    try {
+      const validation = insertProductSessionSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid product session data", 
+          errors: validation.error.issues 
+        });
+      }
+      
+      const session = await storage.createProductSession(validation.data);
+      res.status(201).json({ success: true, session });
+    } catch (error) {
+      console.error("Error creating product session:", error);
+      res.status(500).json({ message: "Failed to create product session" });
     }
   });
 
