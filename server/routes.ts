@@ -1929,7 +1929,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
-      const validation = insertProductSchema.safeParse(req.body);
+      // Convert eventDate string to Date object if present
+      const requestData = { ...req.body };
+      if (requestData.eventDate && typeof requestData.eventDate === 'string') {
+        requestData.eventDate = new Date(requestData.eventDate);
+      }
+      
+      const validation = insertProductSchema.safeParse(requestData);
       if (!validation.success) {
         return res.status(400).json({ 
           message: "Invalid product data", 
@@ -1969,7 +1975,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/product-sessions", async (req, res) => {
     try {
-      const validation = insertProductSessionSchema.safeParse(req.body);
+      // Convert sessionDate string to Date object if present
+      const requestData = { ...req.body };
+      if (requestData.sessionDate && typeof requestData.sessionDate === 'string') {
+        requestData.sessionDate = new Date(requestData.sessionDate);
+      }
+      
+      const validation = insertProductSessionSchema.safeParse(requestData);
       if (!validation.success) {
         return res.status(400).json({ 
           message: "Invalid product session data", 
