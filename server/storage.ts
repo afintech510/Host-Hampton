@@ -1,6 +1,7 @@
 import { 
   users, reviews, eventTypes, customers, packages, addons, partyThemes, events, invoices, invoiceItems, eventCalendar,
   roomRentalPricing, verificationCodes, leads, eventStatusHistory, products, cartItems, orders, orderItems, productSessions,
+  productOptionCategories, productOptions,
   type User, type InsertUser, type Review, type InsertReview,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
@@ -8,7 +9,9 @@ import {
   type Event, type InsertEvent, type Invoice, type InsertInvoice,
   type InvoiceItem, type InsertInvoiceItem, type EventCalendar, type InsertEventCalendar,
   type RoomRentalPricing, type Lead, type InsertLead, type EventStatusHistory, type InsertEventStatusHistory,
-  type Product, type InsertProduct, type ProductSession, type InsertProductSession, type CartItem, type InsertCartItem,
+  type Product, type InsertProduct, type ProductSession, type InsertProductSession, 
+  type ProductOptionCategory, type InsertProductOptionCategory, type ProductOption, type InsertProductOption,
+  type CartItem, type InsertCartItem,
   type Order, type InsertOrder, type OrderItem, type InsertOrderItem, type EnhancedOrderItem
 } from "@shared/schema";
 import { db } from "./db";
@@ -89,6 +92,10 @@ export interface IStorage {
   getProductSession(sessionId: number): Promise<ProductSession | undefined>;
   getAllProductSessions(): Promise<ProductSession[]>;
   createProductSession(session: InsertProductSession): Promise<ProductSession>;
+  
+  // Product option categories and options
+  createProductOptionCategory(category: InsertProductOptionCategory): Promise<ProductOptionCategory>;
+  createProductOption(option: InsertProductOption): Promise<ProductOption>;
   
   // Cart management
   getCartItems(sessionId: string): Promise<CartItem[]>;
@@ -754,6 +761,14 @@ export class MemStorage implements IStorage {
   }
 
   async createProductSession(session: InsertProductSession): Promise<ProductSession> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async createProductOptionCategory(category: InsertProductOptionCategory): Promise<ProductOptionCategory> {
+    throw new Error("Not implemented in MemStorage");
+  }
+
+  async createProductOption(option: InsertProductOption): Promise<ProductOption> {
     throw new Error("Not implemented in MemStorage");
   }
 
@@ -1562,6 +1577,24 @@ export class DatabaseStorage implements IStorage {
     const [created] = await db
       .insert(productSessions)
       .values(session)
+      .returning();
+    
+    return created;
+  }
+
+  async createProductOptionCategory(category: InsertProductOptionCategory): Promise<ProductOptionCategory> {
+    const [created] = await db
+      .insert(productOptionCategories)
+      .values(category)
+      .returning();
+    
+    return created;
+  }
+
+  async createProductOption(option: InsertProductOption): Promise<ProductOption> {
+    const [created] = await db
+      .insert(productOptions)
+      .values(option)
       .returning();
     
     return created;

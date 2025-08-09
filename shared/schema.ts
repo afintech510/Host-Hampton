@@ -676,6 +676,28 @@ export const productSessions = pgTable("product_sessions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Product option categories (e.g., "Wood Type", "Size")
+export const productOptionCategories = pgTable("product_option_categories", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  name: text("name").notNull(), // e.g., "Wood Type", "Size"
+  description: text("description"),
+  isRequired: boolean("is_required").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Individual options within a category (e.g., "Coaster", "Cutting Board", "Lazy Susan")
+export const productOptions = pgTable("product_options", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").notNull().references(() => productOptionCategories.id),
+  name: text("name").notNull(), // e.g., "Coaster", "Cutting Board"
+  description: text("description"),
+  priceModifier: integer("price_modifier").default(0), // Price difference in cents (+/- from base price)
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Shopping Cart
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
@@ -720,6 +742,10 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 export type ProductSession = typeof productSessions.$inferSelect;
 export type InsertProductSession = typeof productSessions.$inferInsert;
+export type ProductOptionCategory = typeof productOptionCategories.$inferSelect;
+export type InsertProductOptionCategory = typeof productOptionCategories.$inferInsert;
+export type ProductOption = typeof productOptions.$inferSelect;
+export type InsertProductOption = typeof productOptions.$inferInsert;
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;
 export type Order = typeof orders.$inferSelect;
@@ -754,6 +780,16 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertProductOptionCategorySchema = createInsertSchema(productOptionCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProductOptionSchema = createInsertSchema(productOptions).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({

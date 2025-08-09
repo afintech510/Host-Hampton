@@ -7,7 +7,7 @@ import {
   insertReviewSchema, 
   insertEventTypeSchema, insertCustomerSchema, insertPackageSchema, 
   insertAddonSchema, insertPartyThemeSchema, insertEventSchema, insertInvoiceSchema, insertInvoiceItemSchema,
-  insertLeadSchema, insertProductSchema, insertProductSessionSchema, insertCartItemSchema, insertOrderSchema, insertOrderItemSchema
+  insertLeadSchema, insertProductSchema, insertProductSessionSchema, insertProductOptionCategorySchema, insertProductOptionSchema, insertCartItemSchema, insertOrderSchema, insertOrderItemSchema
 } from "@shared/schema";
 import { sendEmail, sendTemplateEmail, getEmailTemplates } from "./email-service";
 import { z } from "zod";
@@ -1982,6 +1982,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating product session:", error);
       res.status(500).json({ message: "Failed to create product session" });
+    }
+  });
+
+  // Product option categories
+  app.post("/api/product-option-categories", async (req, res) => {
+    try {
+      const validation = insertProductOptionCategorySchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid option category data", 
+          errors: validation.error.issues 
+        });
+      }
+      
+      const category = await storage.createProductOptionCategory(validation.data);
+      res.status(201).json({ success: true, category });
+    } catch (error) {
+      console.error("Error creating option category:", error);
+      res.status(500).json({ message: "Failed to create option category" });
+    }
+  });
+
+  // Product options
+  app.post("/api/product-options", async (req, res) => {
+    try {
+      const validation = insertProductOptionSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid option data", 
+          errors: validation.error.issues 
+        });
+      }
+      
+      const option = await storage.createProductOption(validation.data);
+      res.status(201).json({ success: true, option });
+    } catch (error) {
+      console.error("Error creating option:", error);
+      res.status(500).json({ message: "Failed to create option" });
     }
   });
 

@@ -17,7 +17,8 @@ import {
   ArrowRight,
   Check,
   AlertCircle,
-  Settings
+  Settings,
+  ImageIcon
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +58,20 @@ const sessionSchema = z.object({
   priceOverride: z.number().optional(),
 });
 
+const productOptionSchema = z.object({
+  name: z.string().min(1, "Option name is required"),
+  description: z.string().optional(),
+  priceModifier: z.number().default(0),
+  isDefault: z.boolean().default(false),
+});
+
+const optionCategorySchema = z.object({
+  name: z.string().min(1, "Category name is required"),
+  description: z.string().optional(),
+  isRequired: z.boolean().default(true),
+  options: z.array(productOptionSchema).min(1, "At least one option is required"),
+});
+
 const newEventSchema = z.object({
   // Basic Info
   name: z.string().min(1, "Event name is required"),
@@ -71,6 +86,9 @@ const newEventSchema = z.object({
   hasSiblingDiscount: z.boolean().default(false),
   siblingPrice: z.number().optional(),
   
+  // Media
+  imageUrl: z.string().optional(),
+  
   // Single Event Fields (when eventType === "single")
   eventDate: z.string().optional(),
   eventTime: z.string().optional(),
@@ -80,6 +98,9 @@ const newEventSchema = z.object({
   // Multi-Session Fields (when eventType starts with "multi-session")
   sessions: z.array(sessionSchema).optional(),
   
+  // Option Categories (for workshops with choices like wood types)
+  optionCategories: z.array(optionCategorySchema).optional(),
+  
   // Associated Event Type for booking management
   associatedEventType: z.string().min(1, "Event type is required"),
 });
@@ -88,6 +109,127 @@ type NewEventFormData = z.infer<typeof newEventSchema>;
 
 interface NewEventPanelProps {
   onClose: () => void;
+}
+
+// Helper component for managing options within a category
+function OptionFieldArray({ control, categoryIndex }: { control: any; categoryIndex: number }) {
+  const { fields: optionFields, append: appendOption, remove: removeOption } = useFieldArray({
+    control,
+    name: `optionCategories.${categoryIndex}.options`,
+  });
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h5 className="font-medium text-sm">Options</h5>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => appendOption({
+            name: "",
+            description: "",
+            priceModifier: 0,
+            isDefault: false
+          })}
+          className="flex items-center gap-1 text-xs"
+        >
+          <Plus className="w-3 h-3" />
+          Add Option
+        </Button>
+      </div>
+      
+      {optionFields.length === 0 && (
+        <div className="text-sm text-gray-500 p-3 border border-dashed rounded-md text-center">
+          No options added yet. Click "Add Option" to create choices for this category.
+        </div>
+      )}
+
+      {optionFields.map((option, optionIndex) => (
+        <Card key={option.id} className="p-3 bg-gray-50">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium">Option {optionIndex + 1}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => removeOption(optionIndex)}
+              className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
+            >
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <FormField
+              control={control}
+              name={`optionCategories.${categoryIndex}.options.${optionIndex}.name`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs">Option Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Coaster" {...field} className="h-8 text-sm" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name={`optionCategories.${categoryIndex}.options.${optionIndex}.priceModifier`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs">Price Modifier ($)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      placeholder="0.00" 
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      className="h-8 text-sm" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name={`optionCategories.${categoryIndex}.options.${optionIndex}.description`}
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel className="text-xs">Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Additional details about this option" {...field} className="h-8 text-sm" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name={`optionCategories.${categoryIndex}.options.${optionIndex}.isDefault`}
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-2 space-y-0 md:col-span-2">
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="text-xs">Default option</FormLabel>
+                </FormItem>
+              )}
+            />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 export default function NewEventPanel({ onClose }: NewEventPanelProps) {
@@ -105,11 +247,13 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
       basePrice: 0,
       hasSiblingDiscount: false,
       siblingPrice: undefined,
+      imageUrl: "",
       eventDate: "",
       eventTime: "",
       location: "Host Hampton",
       maxTickets: 1,
       sessions: [],
+      optionCategories: [],
       associatedEventType: "",
     },
   });
@@ -117,6 +261,11 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
   const { fields: sessionFields, append: appendSession, remove: removeSession } = useFieldArray({
     control: form.control,
     name: "sessions",
+  });
+
+  const { fields: optionCategoryFields, append: appendOptionCategory, remove: removeOptionCategory } = useFieldArray({
+    control: form.control,
+    name: "optionCategories",
   });
 
   const watchEventType = form.watch("eventType");
@@ -149,6 +298,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         hasSiblingDiscount: data.hasSiblingDiscount,
         category: data.category,
         location: data.location,
+        imageUrl: data.imageUrl || null,
         hasMultipleSessions: data.eventType !== "single",
         isActive: true,
         // For single events, set the event date directly
@@ -188,6 +338,43 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         }
       }
 
+      // Create option categories if any
+      if (data.optionCategories && data.optionCategories.length > 0) {
+        for (const category of data.optionCategories) {
+          const categoryData = {
+            productId,
+            name: category.name,
+            description: category.description,
+            isRequired: category.isRequired,
+          };
+
+          const categoryResponse = await apiRequest("POST", "/api/product-option-categories", categoryData);
+          if (!categoryResponse.ok) {
+            throw new Error(`Failed to create option category: ${category.name}`);
+          }
+          
+          const categoryResult = await categoryResponse.json();
+          const categoryId = categoryResult.category.id;
+
+          // Create options for this category
+          for (const option of category.options) {
+            const optionData = {
+              categoryId,
+              name: option.name,
+              description: option.description,
+              priceModifier: Math.round(option.priceModifier * 100), // Convert to cents
+              isDefault: option.isDefault,
+              isActive: true,
+            };
+
+            const optionResponse = await apiRequest("POST", "/api/product-options", optionData);
+            if (!optionResponse.ok) {
+              throw new Error(`Failed to create option: ${option.name}`);
+            }
+          }
+        }
+      }
+
       return { product: productResult.product };
     },
     onSuccess: () => {
@@ -215,6 +402,16 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
       await createProductMutation.mutateAsync(data);
     } catch (error) {
       console.error("Error creating event:", error);
+      // Log the full error details for debugging
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+      toast({
+        title: "Error Creating Event",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -480,6 +677,30 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         />
       </div>
 
+      {/* Photo Upload */}
+      <FormField
+        control={form.control}
+        name="imageUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              Event Photo URL
+            </FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="https://example.com/photo.jpg (optional)" 
+                {...field} 
+              />
+            </FormControl>
+            <FormDescription>
+              Add a photo URL to showcase your event. This will help customers understand what to expect.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Sibling Discount */}
       <div className="space-y-4">
         <FormField
@@ -589,6 +810,109 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
           </div>
         </div>
       )}
+
+      {/* Option Categories */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium">Workshop Options</h3>
+            <p className="text-sm text-gray-600">
+              Add customizable options like material choices, sizes, or add-ons with different prices
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => appendOptionCategory({
+              name: "",
+              description: "",
+              isRequired: false,
+              options: []
+            })}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Option Category
+          </Button>
+        </div>
+
+        {optionCategoryFields.map((category, categoryIndex) => (
+          <Card key={category.id} className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-medium">Option Category {categoryIndex + 1}</h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeOptionCategory(categoryIndex)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name={`optionCategories.${categoryIndex}.name`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Wood Type" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`optionCategories.${categoryIndex}.description`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Choose your preferred material" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name={`optionCategories.${categoryIndex}.isRequired`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Required Selection</FormLabel>
+                      <FormDescription>
+                        Customers must choose an option from this category
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* Option Management */}
+              <OptionFieldArray 
+                control={form.control} 
+                categoryIndex={categoryIndex} 
+              />
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 
