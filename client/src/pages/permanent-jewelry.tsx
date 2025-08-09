@@ -4,6 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Gem, Users, Clock, Star, Heart, Sparkles } from "lucide-react";
 import { Link } from "wouter";
+import goldBraceletsImg from "@assets/generated_images/Gold_permanent_jewelry_bracelets_2cb3619d.png";
+import silverCollectionImg from "@assets/generated_images/Silver_permanent_jewelry_collection_77685982.png";
+import weldingProcessImg from "@assets/generated_images/Permanent_jewelry_welding_process_3aa3b2b7.png";
+import partyExperienceImg from "@assets/generated_images/Permanent_jewelry_party_experience_31a850db.png";
 
 export default function PermanentJewelry() {
   const services = [
@@ -32,25 +36,29 @@ export default function PermanentJewelry() {
       name: "Bracelets",
       price: "Starting at $65",
       description: "Delicate chains welded perfectly to your wrist",
-      image: "✨"
+      image: goldBraceletsImg,
+      alt: "Gold permanent jewelry bracelets"
     },
     {
       name: "Anklets", 
       price: "Starting at $70",
       description: "Elegant ankle jewelry for that perfect touch",
-      image: "👸"
+      image: silverCollectionImg,
+      alt: "Silver permanent jewelry collection"
     },
     {
       name: "Necklaces",
       price: "Starting at $85",
       description: "Custom length chains that never come off",
-      image: "💎"
+      image: weldingProcessImg,
+      alt: "Permanent jewelry welding process"
     },
     {
       name: "Ring Stacks",
       price: "Starting at $45",
       description: "Connected rings for a unique look",
-      image: "💍"
+      image: partyExperienceImg,
+      alt: "Permanent jewelry party experience"
     }
   ];
 
@@ -100,17 +108,23 @@ export default function PermanentJewelry() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50 to-gray-50">
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <div className="text-6xl mb-6">💎✨</div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden shadow-lg">
+            <img 
+              src={goldBraceletsImg} 
+              alt="Permanent Jewelry" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 bg-clip-text text-transparent mb-4">
             Permanent Jewelry
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             Create lasting memories with our permanent jewelry service. We custom weld beautiful 
             chains that become a part of you - symbolizing unbreakable bonds and special moments.
           </p>
@@ -118,22 +132,22 @@ export default function PermanentJewelry() {
 
         {/* Services Overview */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+          <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent mb-8">
             Our Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 border-amber-100 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <div className="text-rose-600 flex justify-center mb-4">{service.icon}</div>
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
-                  <CardDescription>{service.description}</CardDescription>
+                  <div className="text-amber-600 flex justify-center mb-4">{service.icon}</div>
+                  <CardTitle className="text-xl text-gray-800">{service.title}</CardTitle>
+                  <CardDescription className="text-gray-600">{service.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {service.details.map((detail, idx) => (
                       <li key={idx} className="text-sm text-gray-600 flex items-center justify-center">
-                        <Heart className="w-3 h-3 text-rose-500 mr-2" />
+                        <Gem className="w-3 h-3 text-amber-500 mr-2" />
                         {detail}
                       </li>
                     ))}
@@ -146,16 +160,22 @@ export default function PermanentJewelry() {
 
         {/* Jewelry Types */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+          <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-gray-600 to-gray-800 bg-clip-text text-transparent mb-8">
             Jewelry Options
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {jewelryTypes.map((type, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <Card key={index} className="text-center hover:shadow-xl transition-all duration-300 border-gray-200 bg-white/90 backdrop-blur-sm overflow-hidden">
                 <CardHeader>
-                  <div className="text-4xl mb-4">{type.image}</div>
-                  <CardTitle className="text-lg">{type.name}</CardTitle>
-                  <div className="text-lg font-semibold text-rose-600">{type.price}</div>
+                  <div className="w-24 h-24 mx-auto mb-4 rounded-lg overflow-hidden shadow-md">
+                    <img 
+                      src={type.image} 
+                      alt={type.alt}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <CardTitle className="text-lg text-gray-800">{type.name}</CardTitle>
+                  <div className="text-lg font-semibold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">{type.price}</div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-600">{type.description}</p>
@@ -167,34 +187,34 @@ export default function PermanentJewelry() {
 
         {/* Packages */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+          <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-gray-600 to-gray-800 bg-clip-text text-transparent mb-8">
             Booking Options
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {packages.map((pkg, index) => (
-              <Card key={index} className={`relative ${pkg.popular ? 'ring-2 ring-rose-500' : ''}`}>
+              <Card key={index} className={`relative border-gray-200 bg-white/90 backdrop-blur-sm ${pkg.popular ? 'ring-2 ring-amber-400 shadow-xl' : 'hover:shadow-lg'} transition-all duration-300`}>
                 {pkg.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-rose-500">
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white">
                     Most Popular
                   </Badge>
                 )}
                 <CardHeader className="text-center">
-                  <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                  <CardDescription>{pkg.description}</CardDescription>
-                  <div className="text-2xl font-bold text-rose-600 mt-4">{pkg.price}</div>
+                  <CardTitle className="text-xl text-gray-800">{pkg.name}</CardTitle>
+                  <CardDescription className="text-gray-600">{pkg.description}</CardDescription>
+                  <div className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent mt-4">{pkg.price}</div>
                   <div className="text-sm text-gray-500">{pkg.duration}</div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {pkg.features.map((feature, idx) => (
                       <li key={idx} className="text-sm text-gray-600 flex items-center">
-                        <Gem className="w-3 h-3 text-rose-500 mr-2 flex-shrink-0" />
+                        <Gem className="w-3 h-3 text-amber-500 mr-2 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
                   </ul>
                   <Link href="/book-event">
-                    <Button className="w-full mt-6 bg-rose-600 hover:bg-rose-700">
+                    <Button className="w-full mt-6 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-md">
                       Book Appointment
                     </Button>
                   </Link>
@@ -205,22 +225,28 @@ export default function PermanentJewelry() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-4xl mb-4">💕</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="bg-gradient-to-r from-white via-amber-50 to-white rounded-xl shadow-xl p-8 text-center border border-amber-100">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full overflow-hidden shadow-lg">
+            <img 
+              src={partyExperienceImg} 
+              alt="Permanent jewelry experience" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent mb-4">
             Ready for Your Forever Jewelry?
           </h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+          <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
             Book your permanent jewelry experience today. Perfect for celebrating milestones, 
             friendships, love, or just treating yourself to something special that lasts forever.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/book-event">
-              <Button size="lg" className="bg-rose-600 hover:bg-rose-700">
+              <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-md">
                 Schedule Appointment
               </Button>
             </Link>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" className="border-amber-300 text-amber-700 hover:bg-amber-50">
               View Portfolio
             </Button>
           </div>
