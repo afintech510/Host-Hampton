@@ -315,7 +315,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
       }
       
       const productResult = await productResponse.json();
-      const productId = productResult.product.id;
+      const productId = productResult.id;
 
       // For multi-session events, create the sessions
       if (data.eventType !== "single" && data.sessions && data.sessions.length > 0) {
@@ -375,7 +375,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         }
       }
 
-      return { product: productResult.product };
+      return { product: productResult };
     },
     onSuccess: () => {
       toast({
