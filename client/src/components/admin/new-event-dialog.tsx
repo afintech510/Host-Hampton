@@ -303,7 +303,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         isActive: true,
         // For single events, set the event date directly
         eventDate: data.eventType === "single" && data.eventDate 
-          ? new Date(data.eventDate).toISOString() 
+          ? new Date(data.eventDate) 
           : null,
         maxTickets: data.eventType === "single" ? data.maxTickets : null,
         availableTickets: data.eventType === "single" ? data.maxTickets : null,
@@ -323,7 +323,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
           const sessionData = {
             productId,
             sessionName: session.sessionName,
-            sessionDate: new Date(session.sessionDate).toISOString(),
+            sessionDate: new Date(session.sessionDate),
             sessionTime: session.sessionTime,
             maxTickets: session.maxTickets,
             availableTickets: session.maxTickets,
