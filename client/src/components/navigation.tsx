@@ -108,18 +108,40 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                 </div>
               </Link>
 
-              {/* Menu button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </Button>
+              {/* Menu button with relative container */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  {isMenuOpen ? (
+                    <X className="h-6 w-6" />
+                  ) : (
+                    <Menu className="h-6 w-6" />
+                  )}
+                </Button>
+                
+                {/* Mobile Navigation Menu - dropdown from hamburger button */}
+                <div className={`absolute top-full right-0 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
+                  isMenuOpen 
+                    ? 'opacity-100 scale-100 translate-y-0' 
+                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                }`}>
+                  <div className="py-2">
+                    {menuItems.map((item) => (
+                      <Link key={item.name} href={item.href}>
+                        <span
+                          className="text-gray-600 hover:text-pink-600 hover:bg-gray-50 block px-4 py-2 text-base font-medium cursor-pointer text-right transition-colors duration-150"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {item.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -172,40 +194,44 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
               </div>
             </Link>
 
-            {/* Menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
+            {/* Menu button with relative container */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </Button>
+              
+              {/* Desktop Navigation Menu - dropdown from hamburger button */}
+              <div className={`absolute top-full right-0 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
+                isMenuOpen 
+                  ? 'opacity-100 scale-100 translate-y-0' 
+                  : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+              }`}>
+                <div className="py-2">
+                  {menuItems.map((item) => (
+                    <Link key={item.name} href={item.href}>
+                      <span
+                        className="text-gray-600 hover:text-pink-600 hover:bg-gray-50 block px-4 py-2 text-base font-medium cursor-pointer text-right transition-colors duration-150"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Navigation Menu - dropdown from hamburger button */}
-        <div className={`absolute top-full right-0 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
-          isMenuOpen 
-            ? 'opacity-100 scale-100 translate-y-0' 
-            : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-        }`}>
-          <div className="py-2">
-            {menuItems.map((item) => (
-              <Link key={item.name} href={item.href}>
-                <span
-                  className="text-gray-600 hover:text-pink-600 hover:bg-gray-50 block px-4 py-2 text-base font-medium cursor-pointer text-right transition-colors duration-150"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
+
       </div>
     </nav>
   );
