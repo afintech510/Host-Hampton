@@ -623,6 +623,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log("Parsing invoice data...");
+      
+      // Convert eventDate string to Date object if needed
+      if (invoiceData.eventDate && typeof invoiceData.eventDate === 'string') {
+        invoiceData.eventDate = new Date(invoiceData.eventDate);
+      }
+      
       const invoice = insertInvoiceSchema.parse(invoiceData);
       console.log("Creating invoice...");
       const created = await storage.createInvoice(invoice);
