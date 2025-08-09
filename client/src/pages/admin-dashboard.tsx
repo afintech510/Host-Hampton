@@ -15,12 +15,12 @@ import InvoiceDetailsDialog from "@/components/admin/invoice-details-dialog";
 import InvoiceCreationDialog from "@/components/admin/invoice-creation-dialog";
 import NewEventPanel from "@/components/admin/new-event-dialog";
 import EnhancedEventList from "@/components/admin/enhanced-event-list";
-import { 
-  Calendar, 
-  Users, 
-  FileText, 
-  DollarSign, 
-  Clock, 
+import {
+  Calendar,
+  Users,
+  FileText,
+  DollarSign,
+  Clock,
   Mail,
   Phone,
   MapPin,
@@ -29,9 +29,8 @@ import {
   Trash2,
   Plus,
   ImageIcon,
-  RotateCcw
+  RotateCcw,
 } from "lucide-react";
-
 
 interface Event {
   id: number;
@@ -83,13 +82,22 @@ interface StaffMember {
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [eventViewMode, setEventViewMode] = useState<"list" | "calendar">("list");
+  const [eventViewMode, setEventViewMode] = useState<"list" | "calendar">(
+    "list",
+  );
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
-  const [eventDialogMode, setEventDialogMode] = useState<"view" | "edit">("view");
-  const [invoiceDialogMode, setInvoiceDialogMode] = useState<"view" | "edit">("view");
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
+    null,
+  );
+  const [eventDialogMode, setEventDialogMode] = useState<"view" | "edit">(
+    "view",
+  );
+  const [invoiceDialogMode, setInvoiceDialogMode] = useState<"view" | "edit">(
+    "view",
+  );
   const [showNewEventPanel, setShowNewEventPanel] = useState(false);
-  const [showInvoiceCreationDialog, setShowInvoiceCreationDialog] = useState(false);
+  const [showInvoiceCreationDialog, setShowInvoiceCreationDialog] =
+    useState(false);
   const [invoiceEditData, setInvoiceEditData] = useState<any>(null);
 
   // Fetch dashboard data
@@ -99,7 +107,7 @@ export default function AdminDashboard() {
       const response = await apiRequest("GET", "/api/events");
       const data = await response.json();
       return data.success ? data.events : [];
-    }
+    },
   });
 
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
@@ -108,7 +116,7 @@ export default function AdminDashboard() {
       const response = await apiRequest("GET", "/api/invoices");
       const data = await response.json();
       return data.success ? data.invoices : [];
-    }
+    },
   });
 
   const { data: leads = [], isLoading: leadsLoading } = useQuery({
@@ -117,7 +125,7 @@ export default function AdminDashboard() {
       const response = await apiRequest("GET", "/api/leads");
       const data = await response.json();
       return data.success ? data.leads : [];
-    }
+    },
   });
 
   const { data: staff = [], isLoading: staffLoading } = useQuery({
@@ -126,25 +134,34 @@ export default function AdminDashboard() {
       const response = await apiRequest("GET", "/api/staff");
       const data = await response.json();
       return data.success ? data.staff : [];
-    }
+    },
   });
 
   // Calculate stats - ensure arrays are valid before filtering
-  const upcomingEvents = Array.isArray(events) ? events.filter((event: Event) => 
-    new Date(event.eventDate) >= new Date() && event.status !== 'cancelled'
-  ).length : 0;
+  const upcomingEvents = Array.isArray(events)
+    ? events.filter(
+        (event: Event) =>
+          new Date(event.eventDate) >= new Date() &&
+          event.status !== "cancelled",
+      ).length
+    : 0;
 
-  const totalRevenue = Array.isArray(invoices) ? invoices.reduce((sum: number, invoice: Invoice) => 
-    sum + (invoice.totalAmount / 100), 0
-  ) : 0;
+  const totalRevenue = Array.isArray(invoices)
+    ? invoices.reduce(
+        (sum: number, invoice: Invoice) => sum + invoice.totalAmount / 100,
+        0,
+      )
+    : 0;
 
-  const pendingInvoices = Array.isArray(invoices) ? invoices.filter((invoice: Invoice) => 
-    invoice.status === 'pending'
-  ).length : 0;
+  const pendingInvoices = Array.isArray(invoices)
+    ? invoices.filter((invoice: Invoice) => invoice.status === "pending").length
+    : 0;
 
-  const newLeads = Array.isArray(leads) ? leads.filter((lead: Lead) => 
-    lead.status === 'new' || lead.status === 'contacted'
-  ).length : 0;
+  const newLeads = Array.isArray(leads)
+    ? leads.filter(
+        (lead: Lead) => lead.status === "new" || lead.status === "contacted",
+      ).length
+    : 0;
 
   // Refresh function for events data
   const handleRefreshData = async () => {
@@ -154,18 +171,27 @@ export default function AdminDashboard() {
   };
 
   const getStatusColor = (status: string | undefined) => {
-    if (!status) return 'bg-gray-100 text-gray-800';
-    
+    if (!status) return "bg-gray-100 text-gray-800";
+
     switch (status.toLowerCase()) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'contacted': return 'bg-purple-100 text-purple-800';
-      case 'converted': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "overdue":
+        return "bg-red-100 text-red-800";
+      case "new":
+        return "bg-blue-100 text-blue-800";
+      case "contacted":
+        return "bg-purple-100 text-purple-800";
+      case "converted":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -173,15 +199,17 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Main Website Navigation */}
       <Navigation />
-      
+
       {/* Admin Dashboard Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="w-full px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
-              <h1 className="text-lg md:text-2xl font-bold text-gray-900 truncate">Admin Dashboard</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-gray-900 truncate">
+                Dashboard
+              </h1>
             </div>
-            <Button 
+            <Button
               variant="outline"
               size="sm"
               onClick={() => setShowNewEventPanel(true)}
@@ -197,13 +225,48 @@ export default function AdminDashboard() {
       <div className="w-full px-4 md:px-6 py-4 md:py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 bg-slate-100 h-auto">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Overview</TabsTrigger>
-            <TabsTrigger value="events" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Events</TabsTrigger>
-            <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3 md:col-span-1 col-span-2">Invoices</TabsTrigger>
-            <TabsTrigger value="quotes" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Quotes</TabsTrigger>
-            <TabsTrigger value="leads" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Leads</TabsTrigger>
-            <TabsTrigger value="gallery" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Gallery</TabsTrigger>
-            <TabsTrigger value="staff" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3">Staff</TabsTrigger>
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="events"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3"
+            >
+              Events
+            </TabsTrigger>
+            <TabsTrigger
+              value="invoices"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3 md:col-span-1 col-span-2"
+            >
+              Invoices
+            </TabsTrigger>
+            <TabsTrigger
+              value="quotes"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3"
+            >
+              Quotes
+            </TabsTrigger>
+            <TabsTrigger
+              value="leads"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3"
+            >
+              Leads
+            </TabsTrigger>
+            <TabsTrigger
+              value="gallery"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3"
+            >
+              Gallery
+            </TabsTrigger>
+            <TabsTrigger
+              value="staff"
+              className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-xs md:text-sm p-2 md:p-3"
+            >
+              Staff
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -212,7 +275,9 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Upcoming Events
+                  </CardTitle>
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -223,29 +288,39 @@ export default function AdminDashboard() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Total Revenue
+                  </CardTitle>
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">
+                    ${totalRevenue.toLocaleString()}
+                  </div>
                   <p className="text-xs text-muted-foreground">All time</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Pending Invoices
+                  </CardTitle>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{pendingInvoices}</div>
-                  <p className="text-xs text-muted-foreground">Need attention</p>
+                  <p className="text-xs text-muted-foreground">
+                    Need attention
+                  </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">New Leads</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    New Leads
+                  </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -263,19 +338,27 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {Array.isArray(events) ? events.slice(0, 5).map((event: Event) => (
-                      <div key={event.id} className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{event.customerName || `Event #${event.id}`}</p>
-                          <p className="text-sm text-gray-600">
-                            {new Date(event.eventDate).toLocaleDateString()} at {event.startTime}
-                          </p>
-                        </div>
-                        <Badge className={getStatusColor(event.status)}>
-                          {event.status || 'pending'}
-                        </Badge>
-                      </div>
-                    )) : []}
+                    {Array.isArray(events)
+                      ? events.slice(0, 5).map((event: Event) => (
+                          <div
+                            key={event.id}
+                            className="flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {event.customerName || `Event #${event.id}`}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(event.eventDate).toLocaleDateString()}{" "}
+                                at {event.startTime}
+                              </p>
+                            </div>
+                            <Badge className={getStatusColor(event.status)}>
+                              {event.status || "pending"}
+                            </Badge>
+                          </div>
+                        ))
+                      : []}
                   </div>
                 </CardContent>
               </Card>
@@ -286,17 +369,24 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {Array.isArray(leads) ? leads.slice(0, 5).map((lead: Lead) => (
-                      <div key={lead.id} className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{lead.name}</p>
-                          <p className="text-sm text-gray-600">{lead.email}</p>
-                        </div>
-                        <Badge className={getStatusColor(lead.status)}>
-                          {lead.status || 'new'}
-                        </Badge>
-                      </div>
-                    )) : []}
+                    {Array.isArray(leads)
+                      ? leads.slice(0, 5).map((lead: Lead) => (
+                          <div
+                            key={lead.id}
+                            className="flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium">{lead.name}</p>
+                              <p className="text-sm text-gray-600">
+                                {lead.email}
+                              </p>
+                            </div>
+                            <Badge className={getStatusColor(lead.status)}>
+                              {lead.status || "new"}
+                            </Badge>
+                          </div>
+                        ))
+                      : []}
                   </div>
                 </CardContent>
               </Card>
@@ -312,7 +402,9 @@ export default function AdminDashboard() {
             ) : (
               <>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <h2 className="text-xl md:text-2xl font-bold">Event Management</h2>
+                  <h2 className="text-xl md:text-2xl font-bold">
+                    Event Management
+                  </h2>
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                     <div className="flex rounded-md shadow-sm">
                       <button
@@ -337,7 +429,7 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         variant="outline"
                         size="sm"
                         onClick={handleRefreshData}
@@ -346,9 +438,9 @@ export default function AdminDashboard() {
                         <RotateCcw className="w-4 h-4" />
                         Refresh
                       </Button>
-                      <Button 
-                        onClick={() => setShowNewEventPanel(true)} 
-                        size="sm" 
+                      <Button
+                        onClick={() => setShowNewEventPanel(true)}
+                        size="sm"
                         className="w-full sm:w-auto"
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -417,7 +509,10 @@ export default function AdminDashboard() {
                         </tr>
                       ) : invoices.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                          <td
+                            colSpan={6}
+                            className="px-6 py-4 text-center text-gray-500"
+                          >
                             No invoices found
                           </td>
                         </tr>
@@ -425,27 +520,49 @@ export default function AdminDashboard() {
                         invoices.map((invoice: any) => (
                           <tr key={invoice.id}>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{invoice.clientName || invoice.customerName || 'Unknown Customer'}</div>
-                              <div className="text-sm text-gray-500">{invoice.customerEmail || ''}</div>
+                              <div className="text-sm text-gray-900">
+                                {invoice.clientName ||
+                                  invoice.customerName ||
+                                  "Unknown Customer"}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {invoice.customerEmail || ""}
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{invoice.eventTypeName || 'Event'}</div>
+                              <div className="text-sm text-gray-900">
+                                {invoice.eventTypeName || "Event"}
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                              ${(invoice.total ? invoice.total / 100 : 0).toFixed(2)}
+                              $
+                              {(invoice.total
+                                ? invoice.total / 100
+                                : 0
+                              ).toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <span className={`font-medium ${invoice.balanceDue && invoice.balanceDue > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                ${(invoice.balanceDue ? invoice.balanceDue / 100 : 0).toFixed(2)}
+                              <span
+                                className={`font-medium ${invoice.balanceDue && invoice.balanceDue > 0 ? "text-red-600" : "text-green-600"}`}
+                              >
+                                $
+                                {(invoice.balanceDue
+                                  ? invoice.balanceDue / 100
+                                  : 0
+                                ).toFixed(2)}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {invoice.eventDate ? new Date(invoice.eventDate).toLocaleDateString() : 'N/A'}
+                              {invoice.eventDate
+                                ? new Date(
+                                    invoice.eventDate,
+                                  ).toLocaleDateString()
+                                : "N/A"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   size="sm"
                                   onClick={() => {
                                     setSelectedInvoiceId(invoice.id);
@@ -454,8 +571,8 @@ export default function AdminDashboard() {
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   size="sm"
                                   onClick={() => {
                                     setInvoiceEditData(invoice);
@@ -516,10 +633,14 @@ export default function AdminDashboard() {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg">{member.name}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {member.name}
+                          </CardTitle>
                           <p className="text-sm text-gray-600">{member.role}</p>
                         </div>
-                        <Badge variant={member.active ? "default" : "secondary"}>
+                        <Badge
+                          variant={member.active ? "default" : "secondary"}
+                        >
                           {member.active ? "Active" : "Inactive"}
                         </Badge>
                       </div>
@@ -527,11 +648,19 @@ export default function AdminDashboard() {
                     <CardContent>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">Hourly Rate:</span>
-                          <span className="text-sm font-medium">${member.hourlyRate}/hr</span>
+                          <span className="text-sm text-gray-600">
+                            Hourly Rate:
+                          </span>
+                          <span className="text-sm font-medium">
+                            ${member.hourlyRate}/hr
+                          </span>
                         </div>
                         <div className="flex space-x-2 mt-4">
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
                             <Clock className="w-4 h-4 mr-2" />
                             Schedule
                           </Button>
@@ -571,7 +700,7 @@ export default function AdminDashboard() {
             setShowInvoiceCreationDialog(false);
             setInvoiceEditData(null);
           }}
-          mode={invoiceEditData ? 'edit' : 'create'}
+          mode={invoiceEditData ? "edit" : "create"}
           invoiceId={invoiceEditData?.id || null}
           lead={null}
           onSuccess={() => {
@@ -579,8 +708,6 @@ export default function AdminDashboard() {
             setInvoiceEditData(null);
           }}
         />
-
-
       </div>
     </div>
   );
