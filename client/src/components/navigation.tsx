@@ -55,7 +55,7 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile Layout: Stacked with logo centered above buttons */}
         <div className="block sm:hidden">
@@ -187,10 +187,10 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
           </div>
         </div>
 
-        {/* Navigation Menu - now shows on all screen sizes when hamburger is clicked */}
+        {/* Navigation Menu - overlays content when hamburger is clicked */}
         {isMenuOpen && (
-          <div>
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
+          <div className="absolute top-full left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {menuItems.map((item) => (
                 <Link key={item.name} href={item.href}>
                   <span
