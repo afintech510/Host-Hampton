@@ -60,7 +60,7 @@ const generateBookingId = () => {
 const getFlowSteps = (eventType: string) => {
   switch (eventType) {
     case "birthday-party":
-      return 11; // Welcome → EventType → Location → Theme → Package → Addons → Extras → Date/Time → PartyDetails → Food → Contact
+      return 7; // Welcome → EventType → Theme → Package → Date/Time → PartyDetails → Contact
     case "studio-rental":
       return 6; // Welcome → EventType → Usage → Details → Date/Time → Contact
     case "trucker-hat":
@@ -213,10 +213,10 @@ export default function GetQuote() {
           />
         );
       case 3:
-        // Kids Themed Party: Select Location
+        // Kids Themed Party: Select Theme (skipping Location)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <LocationStep
+            <ThemeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -289,10 +289,10 @@ export default function GetQuote() {
           />
         );
       case 4:
-        // Kids Themed Party: Select Theme (moved from step 3)
+        // Kids Themed Party: Select Package  
         if (isKidsPartyFlow(eventType)) {
           return (
-            <ThemeStep
+            <PackageStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -347,10 +347,10 @@ export default function GetQuote() {
         }
         break;
       case 5:
-        // Kids Themed Party: Select Package (moved from step 4)
+        // Kids Themed Party: Date/Time Selection
         if (isKidsPartyFlow(eventType)) {
           return (
-            <PackageStep
+            <DateTimeStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -405,10 +405,10 @@ export default function GetQuote() {
         }
         break;
       case 6:
-        // Kids Themed Party: Select Add-ons (moved from step 5)
+        // Kids Themed Party: Party Details (modified - no child name, add allergies)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <AddonsStep
+            <ChildDetailsStep
               formData={formData}
               updateFormData={updateFormData}
               onNext={handleNextStep}
@@ -440,13 +440,13 @@ export default function GetQuote() {
         }
         break;
       case 7:
-        // Kids Themed Party: Extras Selection (moved from step 6)
+        // Kids Themed Party: Contact (final step)
         if (isKidsPartyFlow(eventType)) {
           return (
-            <ExtrasStep
+            <ContactStep
               formData={formData}
               updateFormData={updateFormData}
-              onNext={handleNextStep}
+              onNext={handleSubmitQuote}
               onBack={handlePreviousStep}
             />
           );
