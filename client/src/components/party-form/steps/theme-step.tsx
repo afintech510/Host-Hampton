@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import partyTimeImage from "@assets/image_1752579930605.png";
@@ -25,6 +26,7 @@ interface PartyTheme {
 
 export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeStepProps) {
   const [partyTheme, setPartyTheme] = useState(formData.partyTheme || "");
+  const [customThemeText, setCustomThemeText] = useState(formData.customThemeText || "");
 
   // Fetch themes from database
   const { data: themes = [], isLoading } = useQuery({
@@ -36,12 +38,26 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
     },
   });
 
+  // Custom theme option
+  const customTheme: PartyTheme = {
+    id: -1,
+    name: "Custom",
+    description: "Tell us about your unique party vision!",
+    price: 0,
+    icon: "🎨",
+    color: "#8B5CF6",
+    active: true,
+  };
+
   const handleNext = () => {
-    updateFormData({ partyTheme });
+    updateFormData({ 
+      partyTheme,
+      customThemeText: partyTheme === "Custom" ? customThemeText : ""
+    });
     onNext();
   };
 
-  const isValid = partyTheme;
+  const isValid = partyTheme && (partyTheme !== "Custom" || (partyTheme === "Custom" && customThemeText.trim()));
 
   if (isLoading) {
     return (
@@ -85,7 +101,38 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
               </Label>
             </div>
           ))}
+          
+          {/* Custom Theme Option */}
+          <div className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+            <RadioGroupItem value={customTheme.name} id={customTheme.name} className="mr-4" />
+            <Label htmlFor={customTheme.name} className="flex items-center cursor-pointer flex-1">
+              <span className="text-2xl mr-3">{customTheme.icon}</span>
+              <div className="flex-1">
+                <div className="flex items-center">
+                  <span className="text-lg font-medium">{customTheme.name}</span>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">{customTheme.description}</p>
+              </div>
+            </Label>
+          </div>
         </RadioGroup>
+
+        {/* Custom Theme Text Input */}
+        {partyTheme === "Custom" && (
+          <div className="mt-4 p-4 bg-purple-50 rounded-xl border border-purple-200">
+            <Label htmlFor="customThemeText" className="block text-sm font-medium text-gray-700 mb-2">
+              Describe your custom party theme:
+            </Label>
+            <Input
+              id="customThemeText"
+              type="text"
+              placeholder="e.g., Unicorn and rainbow theme with glitter decorations..."
+              value={customThemeText}
+              onChange={(e) => setCustomThemeText(e.target.value)}
+              className="w-full"
+            />
+          </div>
+        )}
       </div>
 
       <UnifiedButton
