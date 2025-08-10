@@ -722,23 +722,222 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     </div>
                   )}
 
-                  {/* Add-ons Selection by Category */}
+                  {/* Add-ons Selection - Organized Structure */}
                   <div>
                     <Label>Selected Add-ons</Label>
-                    <div className="mt-2 space-y-4">
-                      {['food', 'drink', 'activity', 'premium_activity', 'decor', 'extra'].map((category) => {
-                        const categoryAddons = allAddons?.filter((addon: any) => 
-                          addon.category === category && addon.name !== 'Extra Child Guest'
-                        );
-                        if (!categoryAddons || categoryAddons.length === 0) return null;
-                        
-                        return (
-                          <div key={category}>
-                            <h5 className="text-sm font-medium text-gray-700 mb-2 capitalize">
-                              {category === 'premium_activity' ? 'Premium Activities' : category}
-                            </h5>
+                    <div className="mt-2 space-y-6">
+                      
+                      {/* Premium Activities Section */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Premium Activities</h5>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Select {editData.activityAllowances?.premiumCount || 1} premium activity{(editData.activityAllowances?.premiumCount || 1) > 1 ? 'ies' : ''}
+                          {editData.activityAllowances?.canUpgradeToPremium && ' (or upgrade to 2 premium)'}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {allAddons?.filter((addon: any) => addon.category === 'premium activity').map((addon: any) => {
+                            const isSelected = editData.selectedAddons?.includes(addon.name);
+                            const selectedPremiumCount = editData.selectedAddons?.filter((name: string) => 
+                              allAddons?.find((a: any) => a.name === name && a.category === 'premium activity')
+                            ).length || 0;
+                            const maxPremium = editData.activityAllowances?.canUpgradeToPremium ? 2 : (editData.activityAllowances?.premiumCount || 1);
+                            const canSelect = selectedPremiumCount < maxPremium || isSelected;
+                            
+                            return (
+                              <Button
+                                key={addon.id}
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="h-8 text-xs"
+                                disabled={!canSelect}
+                                onClick={() => {
+                                  const current = editData.selectedAddons || [];
+                                  if (current.includes(addon.name)) {
+                                    setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                  } else {
+                                    setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                  }
+                                }}
+                              >
+                                {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span> pp)
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Standard Activities Section */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Activities</h5>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Select max {editData.activityAllowances?.standardCount || 2} standard activities
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {allAddons?.filter((addon: any) => addon.category === 'activity').map((addon: any) => {
+                            const isSelected = editData.selectedAddons?.includes(addon.name);
+                            const selectedStandardCount = editData.selectedAddons?.filter((name: string) => 
+                              allAddons?.find((a: any) => a.name === name && a.category === 'activity')
+                            ).length || 0;
+                            const maxStandard = editData.activityAllowances?.standardCount || 2;
+                            const canSelect = selectedStandardCount < maxStandard || isSelected;
+                            
+                            return (
+                              <Button
+                                key={addon.id}
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="h-8 text-xs"
+                                disabled={!canSelect}
+                                onClick={() => {
+                                  const current = editData.selectedAddons || [];
+                                  if (current.includes(addon.name)) {
+                                    setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                  } else {
+                                    setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                  }
+                                }}
+                              >
+                                {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span> pp)
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Food Section */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Food</h5>
+                        <div className="space-y-3">
+                          {/* Base Food Choice */}
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">Includes Pizza or Bagels (select one):</p>
                             <div className="flex flex-wrap gap-2">
-                              {categoryAddons.map((addon: any) => {
+                              {['pizza', 'bagels'].map((option) => (
+                                <Button
+                                  key={option}
+                                  type="button"
+                                  variant={editData.foodPreferences?.foodChoice === option ? "default" : "outline"}
+                                  size="sm"
+                                  className="h-8 text-xs capitalize"
+                                  onClick={() => setEditData({
+                                    ...editData, 
+                                    foodPreferences: {...editData.foodPreferences, foodChoice: option}
+                                  })}
+                                >
+                                  {option === 'pizza' ? '🍕' : '🥯'} {option}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {/* Food Add-ons */}
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">Food add-ons:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {allAddons?.filter((addon: any) => addon.category === 'food').map((addon: any) => {
+                                const isSelected = editData.selectedAddons?.includes(addon.name);
+                                
+                                return (
+                                  <Button
+                                    key={addon.id}
+                                    type="button"
+                                    variant={isSelected ? "default" : "outline"}
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => {
+                                      const current = editData.selectedAddons || [];
+                                      if (current.includes(addon.name)) {
+                                        setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                      } else {
+                                        setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                      }
+                                    }}
+                                  >
+                                    {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dessert Section */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Dessert</h5>
+                        <div className="space-y-3">
+                          {/* Cupcake Flavor Choice */}
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">Choose cupcake flavor:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {['chocolate', 'vanilla', 'none'].map((flavor) => (
+                                <Button
+                                  key={flavor}
+                                  type="button"
+                                  variant={editData.foodPreferences?.cupcakeFlavor === flavor ? "default" : "outline"}
+                                  size="sm"
+                                  className="h-8 text-xs capitalize"
+                                  onClick={() => setEditData({
+                                    ...editData, 
+                                    foodPreferences: {...editData.foodPreferences, cupcakeFlavor: flavor}
+                                  })}
+                                >
+                                  {flavor === 'chocolate' ? '🍫' : flavor === 'vanilla' ? '🧁' : '🚫'} {flavor === 'none' ? 'No Cupcakes' : flavor}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {/* Dessert Add-ons */}
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">Dessert add-ons:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {allAddons?.filter((addon: any) => addon.category === 'dessert').map((addon: any) => {
+                                const isSelected = editData.selectedAddons?.includes(addon.name);
+                                
+                                return (
+                                  <Button
+                                    key={addon.id}
+                                    type="button"
+                                    variant={isSelected ? "default" : "outline"}
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => {
+                                      const current = editData.selectedAddons || [];
+                                      if (current.includes(addon.name)) {
+                                        setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                      } else {
+                                        setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                      }
+                                    }}
+                                  >
+                                    {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Drink Options */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Drink Options</h5>
+                        <div className="space-y-2">
+                          {/* Always Included */}
+                          <div className="bg-green-50 p-2 rounded border border-green-200">
+                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                              🔒 🧃 Juice Boxes and Waters - Always Included
+                            </Badge>
+                          </div>
+                          
+                          {/* Other Drink Options */}
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">Additional drink options:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {allAddons?.filter((addon: any) => addon.category === 'drink').map((addon: any) => {
                                 const isLocked = editData.lockedAddons?.includes(addon.name);
                                 const isSelected = editData.selectedAddons?.includes(addon.name);
                                 
@@ -768,54 +967,90 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                               })}
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      </div>
+
+                      {/* Decor Options */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Decor Options</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {allAddons?.filter((addon: any) => addon.category === 'decor').map((addon: any) => {
+                            const isSelected = editData.selectedAddons?.includes(addon.name);
+                            
+                            return (
+                              <Button
+                                key={addon.id}
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="h-8 text-xs"
+                                onClick={() => {
+                                  const current = editData.selectedAddons || [];
+                                  if (current.includes(addon.name)) {
+                                    setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                  } else {
+                                    setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                  }
+                                }}
+                              >
+                                {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Extras Section */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Extras</h5>
+                        <div className="space-y-3">
+                          {['equipment', 'entertainment', 'gift'].map((category) => {
+                            const categoryAddons = allAddons?.filter((addon: any) => addon.category === category);
+                            if (!categoryAddons || categoryAddons.length === 0) return null;
+                            
+                            return (
+                              <div key={category}>
+                                <p className="text-xs text-gray-500 mb-2 capitalize">{category}:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {categoryAddons.map((addon: any) => {
+                                    const isLocked = editData.lockedAddons?.includes(addon.name);
+                                    const isSelected = editData.selectedAddons?.includes(addon.name);
+                                    
+                                    return (
+                                      <Button
+                                        key={addon.id}
+                                        type="button"
+                                        variant={isSelected ? "default" : "outline"}
+                                        size="sm"
+                                        className={`h-8 text-xs ${isLocked ? 'bg-orange-100 border-orange-300 text-orange-800' : ''}`}
+                                        disabled={isLocked}
+                                        onClick={() => {
+                                          if (isLocked) return;
+                                          const current = editData.selectedAddons || [];
+                                          if (current.includes(addon.name)) {
+                                            setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                          } else {
+                                            setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                          }
+                                        }}
+                                      >
+                                        {isLocked && '🔒 '}
+                                        {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>{addon.perGuest ? ' pp' : ''})
+                                        {isLocked && ' - Included'}
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      
                     </div>
                   </div>
 
-                  {/* Food Choice */}
-                  <div>
-                    <Label>Food Choice</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {['pizza', 'bagels', 'none'].map((option) => (
-                        <Button
-                          key={option}
-                          type="button"
-                          variant={editData.foodPreferences?.foodChoice === option ? "default" : "outline"}
-                          size="sm"
-                          className="h-8 text-xs capitalize"
-                          onClick={() => setEditData({
-                            ...editData, 
-                            foodPreferences: {...editData.foodPreferences, foodChoice: option}
-                          })}
-                        >
-                          {option === 'none' ? 'No Food' : option}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* Cupcake Flavor */}
-                  <div>
-                    <Label>Cupcake Flavor</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {['chocolate', 'vanilla', 'none'].map((flavor) => (
-                        <Button
-                          key={flavor}
-                          type="button"
-                          variant={editData.foodPreferences?.cupcakeFlavor === flavor ? "default" : "outline"}
-                          size="sm"
-                          className="h-8 text-xs capitalize"
-                          onClick={() => setEditData({
-                            ...editData, 
-                            foodPreferences: {...editData.foodPreferences, cupcakeFlavor: flavor}
-                          })}
-                        >
-                          {flavor === 'none' ? 'No Cupcakes' : flavor}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
 
                   {/* Special Requirements */}
                   <div>
