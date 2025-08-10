@@ -3,6 +3,7 @@ import { UnifiedButton } from "@/components/ui/unified-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Minus, Plus } from "lucide-react";
 import birthdayStarImage from "@assets/image_1752580458121.png";
 
@@ -14,28 +15,36 @@ interface ChildDetailsStepProps {
 }
 
 export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: ChildDetailsStepProps) {
-  const [childName, setChildName] = useState(formData.childName || "");
   const [childAge, setChildAge] = useState(formData.childAge || 5);
   const [guestCount, setGuestCount] = useState(formData.guestCount || 12);
+  const [allergies, setAllergies] = useState<string[]>(formData.allergies || []);
 
   // Save to session storage whenever values change
   useEffect(() => {
     const sessionData = JSON.parse(sessionStorage.getItem('partyFormData') || '{}');
     sessionStorage.setItem('partyFormData', JSON.stringify({
       ...sessionData,
-      childName,
       childAge,
-      guestCount
+      guestCount,
+      allergies
     }));
-  }, [childName, childAge, guestCount]);
+  }, [childAge, guestCount, allergies]);
 
   const handleNext = () => {
     updateFormData({ 
-      childName, 
       childAge, 
-      guestCount 
+      guestCount,
+      allergies
     });
     onNext();
+  };
+
+  const handleAllergyChange = (allergy: string, checked: boolean) => {
+    if (checked) {
+      setAllergies([...allergies, allergy]);
+    } else {
+      setAllergies(allergies.filter(a => a !== allergy));
+    }
   };
 
   const incrementAge = () => {
@@ -54,7 +63,7 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
     setGuestCount(Math.max(guestCount - 1, 5));
   };
 
-  const isValid = childName && childAge && guestCount;
+  const isValid = childAge && guestCount;
 
   return (
     <div className="text-center">
@@ -72,16 +81,28 @@ export function ChildDetailsStep({ formData, updateFormData, onNext, onBack }: C
 
       <div className="space-y-6 text-left">
         <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">
-            Birthday child's first name
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            Any dietary restrictions or allergies?
           </Label>
-          <Input
-            type="text"
-            placeholder="Enter their name"
-            value={childName}
-            onChange={(e) => setChildName(e.target.value)}
-            className="w-full p-4 border-2 border-gray-200 rounded-xl text-lg focus:border-coral"
-          />
+          <div className="space-y-3">
+            {[
+              { id: 'gluten-free', label: '🌾 Gluten-Free', value: 'Gluten-Free' },
+              { id: 'dairy-free', label: '🥛 Dairy-Free', value: 'Dairy-Free' },
+              { id: 'nut-allergy', label: '🥜 Nut Allergy', value: 'Nut Allergy' }
+            ].map((option) => (
+              <div key={option.id} className="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-coral transition-colors">
+                <Checkbox
+                  id={option.id}
+                  checked={allergies.includes(option.value)}
+                  onCheckedChange={(checked) => handleAllergyChange(option.value, checked as boolean)}
+                  className="mr-3"
+                />
+                <Label htmlFor={option.id} className="text-lg cursor-pointer flex-1">
+                  {option.label}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div>
