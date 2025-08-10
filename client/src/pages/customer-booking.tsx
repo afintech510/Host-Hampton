@@ -22,6 +22,93 @@ function getOrdinalSuffix(num: number): string {
   return suffixes[mod >= 11 && mod <= 13 ? 0 : num % 10] || suffixes[0];
 }
 
+// Helper function to determine auto-selected items based on package selection
+function getAutoSelectedItemsForPackage(packageName: string, allAddons: any[]) {
+  const result = {
+    selectedAddons: [] as string[],
+    lockedAddons: [] as string[],
+    balloonBudget: 0,
+    foodBudget: 0,
+    activityAllowances: {
+      premiumCount: 0,
+      standardCount: 0,
+      canUpgradeToPremium: false
+    }
+  };
+
+  if (!allAddons) return result;
+
+  switch (packageName) {
+    case '⭐ Base Package':
+      // 1 star: either "1 premium + 2 standard" or "3 standard"
+      result.activityAllowances = {
+        premiumCount: 1,
+        standardCount: 2,
+        canUpgradeToPremium: false
+      };
+      break;
+
+    case '⭐⭐ Enhanced Package':
+      // 2 star: Goody Bags, Photo Booth, 3 Extra Guests + upgrade to 2nd premium activity or add another standard activity
+      result.selectedAddons = ['Photo Booth'];
+      result.lockedAddons = ['Photo Booth'];
+      result.activityAllowances = {
+        premiumCount: 1,
+        standardCount: 2,
+        canUpgradeToPremium: true
+      };
+      break;
+
+    case '⭐⭐⭐ Premium Package':
+      // 3 star: Goody Bags, Photo Booth, 4 Extra Guests, $200 Balloons, & Curated Birthday Gift Basket + upgrade option
+      result.selectedAddons = ['Photo Booth'];
+      result.lockedAddons = ['Photo Booth'];
+      result.balloonBudget = 20000; // $200 in cents
+      result.activityAllowances = {
+        premiumCount: 1,
+        standardCount: 2,
+        canUpgradeToPremium: true
+      };
+      break;
+
+    case '⭐⭐⭐⭐ Deluxe Package':
+      // 4 star: Premium Goody Bags, Photo Booth, 5 Extra Guests, $300 Balloons, & Curated Birthday Gift Basket, Bubbles Drink Package, Custom Treats 1pp + upgrade option
+      result.selectedAddons = ['Photo Booth', 'Bubbles Drink Package'];
+      result.lockedAddons = ['Photo Booth', 'Bubbles Drink Package'];
+      result.balloonBudget = 30000; // $300 in cents
+      result.activityAllowances = {
+        premiumCount: 1,
+        standardCount: 2,
+        canUpgradeToPremium: true
+      };
+      break;
+
+    case '⭐⭐⭐⭐⭐ Ultimate Package':
+      // 5 star: Premium Goody Bags, Photo Booth, 6 Extra Guests, $400 Balloons, & Curated Birthday Gift Basket, Bubbles Drink Package, $150 in Food Add-ons, Custom Treat Table 3pp + upgrade option
+      result.selectedAddons = ['Photo Booth', 'Bubbles Drink Package'];
+      result.lockedAddons = ['Photo Booth', 'Bubbles Drink Package'];
+      result.balloonBudget = 40000; // $400 in cents
+      result.foodBudget = 15000; // $150 in cents
+      result.activityAllowances = {
+        premiumCount: 1,
+        standardCount: 2,
+        canUpgradeToPremium: true
+      };
+      break;
+
+    default:
+      // No package or unknown package
+      result.activityAllowances = {
+        premiumCount: 0,
+        standardCount: 0,
+        canUpgradeToPremium: false
+      };
+      break;
+  }
+
+  return result;
+}
+
 interface CustomerBookingProps {
   leadId?: string | null;
 }
@@ -555,12 +642,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                       {allPackages?.map((pkg: any) => {
                         // Calculate display price based on package type
                         let displayPrice = '';
-                        if (pkg.name === 'Base Birthday Party') {
-                          displayPrice = '$875';
-                        } else if (pkg.name === 'Make it Shine Add-On') {
-                          displayPrice = '+$25/person';
-                        } else if (pkg.name === 'Party Envy Add-On') {
-                          displayPrice = '+$50/person';
+                        if (pkg.name === '⭐ Base Package') {
+                          displayPrice = 'Base Price';
+                        } else if (pkg.name === '⭐⭐ Enhanced Package') {
+                          displayPrice = '+$350';
+                        } else if (pkg.name === '⭐⭐⭐ Premium Package') {
+                          displayPrice = '+$695';
+                        } else if (pkg.name === '⭐⭐⭐⭐ Deluxe Package') {
+                          displayPrice = '+$925';
+                        } else if (pkg.name === '⭐⭐⭐⭐⭐ Ultimate Package') {
+                          displayPrice = '+$1,375';
                         } else {
                           displayPrice = `$${(pkg.basePrice / 100).toFixed(0)}`;
                         }
@@ -572,7 +663,17 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                             variant={editData.packageSelection === pkg.name ? "default" : "outline"}
                             size="sm"
                             className="h-8 text-xs"
-                            onClick={() => setEditData({...editData, packageSelection: pkg.name})}
+                            onClick={() => {
+                              const newData = {...editData, packageSelection: pkg.name};
+                              // Auto-select items based on package
+                              const autoSelectedItems = getAutoSelectedItemsForPackage(pkg.name, allAddons);
+                              newData.selectedAddons = autoSelectedItems.selectedAddons;
+                              newData.lockedAddons = autoSelectedItems.lockedAddons;
+                              newData.balloonBudget = autoSelectedItems.balloonBudget;
+                              newData.foodBudget = autoSelectedItems.foodBudget;
+                              newData.activityAllowances = autoSelectedItems.activityAllowances;
+                              setEditData(newData);
+                            }}
                           >
                             📦 {pkg.name} (<span className="pricing-font">{displayPrice}</span>)
                           </Button>
@@ -581,11 +682,40 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     </div>
                   </div>
 
+                  {/* Activity Allowances Display */}
+                  {editData.activityAllowances && (
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                      <h5 className="text-sm font-medium text-blue-800 mb-2">🎪 Activity Allowances</h5>
+                      <div className="text-xs text-blue-700 space-y-1">
+                        <div>Premium Activities: {editData.activityAllowances.premiumCount}</div>
+                        <div>Standard Activities: {editData.activityAllowances.standardCount}</div>
+                        {editData.activityAllowances.canUpgradeToPremium && (
+                          <div className="text-blue-600 font-medium">✨ Can upgrade to 2nd premium activity or add another standard activity</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Budget Display */}
+                  {(editData.balloonBudget > 0 || editData.foodBudget > 0) && (
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                      <h5 className="text-sm font-medium text-green-800 mb-2">💰 Package Budgets</h5>
+                      <div className="text-xs text-green-700 space-y-1">
+                        {editData.balloonBudget > 0 && (
+                          <div>🎈 Balloon Budget: ${(editData.balloonBudget / 100).toFixed(0)}</div>
+                        )}
+                        {editData.foodBudget > 0 && (
+                          <div>🍕 Food Budget: ${(editData.foodBudget / 100).toFixed(0)}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Add-ons Selection by Category */}
                   <div>
                     <Label>Selected Add-ons</Label>
                     <div className="mt-2 space-y-4">
-                      {['food', 'drink', 'activity', 'decor', 'extra'].map((category) => {
+                      {['food', 'drink', 'activity', 'premium_activity', 'decor', 'extra'].map((category) => {
                         const categoryAddons = allAddons?.filter((addon: any) => 
                           addon.category === category && addon.name !== 'Extra Child Guest'
                         );
@@ -593,27 +723,38 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                         
                         return (
                           <div key={category}>
-                            <h5 className="text-sm font-medium text-gray-700 mb-2 capitalize">{category}</h5>
+                            <h5 className="text-sm font-medium text-gray-700 mb-2 capitalize">
+                              {category === 'premium_activity' ? 'Premium Activities' : category}
+                            </h5>
                             <div className="flex flex-wrap gap-2">
-                              {categoryAddons.map((addon: any) => (
-                                <Button
-                                  key={addon.id}
-                                  type="button"
-                                  variant={editData.selectedAddons?.includes(addon.name) ? "default" : "outline"}
-                                  size="sm"
-                                  className="h-8 text-xs"
-                                  onClick={() => {
-                                    const current = editData.selectedAddons || [];
-                                    if (current.includes(addon.name)) {
-                                      setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
-                                    } else {
-                                      setEditData({...editData, selectedAddons: [...current, addon.name]});
-                                    }
-                                  }}
-                                >
-                                  {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
-                                </Button>
-                              ))}
+                              {categoryAddons.map((addon: any) => {
+                                const isLocked = editData.lockedAddons?.includes(addon.name);
+                                const isSelected = editData.selectedAddons?.includes(addon.name);
+                                
+                                return (
+                                  <Button
+                                    key={addon.id}
+                                    type="button"
+                                    variant={isSelected ? "default" : "outline"}
+                                    size="sm"
+                                    className={`h-8 text-xs ${isLocked ? 'bg-orange-100 border-orange-300 text-orange-800' : ''}`}
+                                    disabled={isLocked}
+                                    onClick={() => {
+                                      if (isLocked) return;
+                                      const current = editData.selectedAddons || [];
+                                      if (current.includes(addon.name)) {
+                                        setEditData({...editData, selectedAddons: current.filter((name: string) => name !== addon.name)});
+                                      } else {
+                                        setEditData({...editData, selectedAddons: [...current, addon.name]});
+                                      }
+                                    }}
+                                  >
+                                    {isLocked && '🔒 '}
+                                    {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
+                                    {isLocked && ' - Included'}
+                                  </Button>
+                                );
+                              })}
                             </div>
                           </div>
                         );

@@ -35,6 +35,49 @@ export interface BookingResult {
 
 class BookingService {
   
+  // Get package details including cost, included items, and budgets
+  private getPackageDetails(packageName: string) {
+    const packages: { [key: string]: { cost: number; includedItems: string[]; balloonBudget: number; foodBudget: number } } = {
+      '⭐ Base Package': {
+        cost: 0, // Base package
+        includedItems: [],
+        balloonBudget: 0,
+        foodBudget: 0
+      },
+      '⭐⭐ Enhanced Package': {
+        cost: 35000, // +$350
+        includedItems: ['Photo Booth'],
+        balloonBudget: 0,
+        foodBudget: 0
+      },
+      '⭐⭐⭐ Premium Package': {
+        cost: 69500, // +$695
+        includedItems: ['Photo Booth'],
+        balloonBudget: 20000, // $200
+        foodBudget: 0
+      },
+      '⭐⭐⭐⭐ Deluxe Package': {
+        cost: 92500, // +$925
+        includedItems: ['Photo Booth', 'Bubbles Drink Package'],
+        balloonBudget: 30000, // $300
+        foodBudget: 0
+      },
+      '⭐⭐⭐⭐⭐ Ultimate Package': {
+        cost: 137500, // +$1,375
+        includedItems: ['Photo Booth', 'Bubbles Drink Package'],
+        balloonBudget: 40000, // $400
+        foodBudget: 15000 // $150
+      }
+    };
+
+    return packages[packageName] || {
+      cost: 0,
+      includedItems: [],
+      balloonBudget: 0,
+      foodBudget: 0
+    };
+  }
+  
   /**
    * Main booking handler - routes to appropriate flow based on event type
    */
@@ -325,43 +368,60 @@ class BookingService {
     
     // Calculate star package cost based on new pricing structure
     let packageCost = 0;
+    let includedItems: string[] = [];
+    let balloonBudget = 0;
+    let foodBudget = 0;
+    
     if (data.packageSelection) {
-      const packagePrices: { [key: string]: number } = {
-        '⭐ Base Package': 0, // 1 star is the base package (875 or 950)
-        '⭐⭐ Enhanced Package': 35000, // +$350
-        '⭐⭐⭐ Premium Package': 69500, // +$695  
-        '⭐⭐⭐⭐ Deluxe Package': 92500, // +$925
-        '⭐⭐⭐⭐⭐ Ultimate Package': 137500, // +$1,375
-      };
-      packageCost = packagePrices[data.packageSelection] || 0;
+      const packageDetails = this.getPackageDetails(data.packageSelection);
+      packageCost = packageDetails.cost;
+      includedItems = packageDetails.includedItems;
+      balloonBudget = packageDetails.balloonBudget;
+      foodBudget = packageDetails.foodBudget;
     }
     
     const basePrice = baseThemePrice + packageCost;
     
-    // Calculate addon costs from selected additional addons
+    // Calculate addon costs from selected additional addons (excluding included items)
     let addonTotal = 0;
-    if (data.partyAddons && Array.isArray(data.partyAddons)) {
-      const addonPrices: { [key: string]: number } = {
-        "Face Painting": 7500,
-        "Balloon Animals": 5000,
-        "Magic Show": 12000,
-        "Photo Booth": 1500,
-        "Character Visit": 15000,
-        "Craft Station": 6000,
-        "Goodie Bags": 800, // per child
-        "Extra Hour": 10000,
-        "Glittery Makeup": 1000,
-        "Hair Tinsel": 1000,
-        "Beaded Hair Braid": 1000,
-        "Coffee Bar": 7500
-      };
+    let balloonTotal = 0;
+    let foodTotal = 0;
+    
+    if (data.selectedAddons && Array.isArray(data.selectedAddons)) {
+      // Get all addons from storage to get actual prices
+      const allAddons = await storage.getAllAddons();
       
-      addonTotal = data.partyAddons.reduce((total: number, addonName: string) => {
-        const price = addonPrices[addonName] || 0;
-        // Special handling for per-child addons
-        if (addonName === "Goodie Bags") {
-          return total + (price * (data.guestCount || 1));
+      addonTotal = data.selectedAddons.reduce((total: number, addonName: string) => {
+        // Skip items that are included in the package
+        if (includedItems.includes(addonName)) {
+          return total;
         }
+        
+        const addon = allAddons?.find(a => a.name === addonName);
+        if (!addon) return total;
+        
+        const price = addon.price;
+        
+        // Track balloon and food spending against budgets
+        if (addon.category === 'decor' && (addonName.includes('Balloon') || addonName.includes('balloon'))) {
+          balloonTotal += price;
+          // Only charge if over budget
+          if (balloonBudget > 0 && balloonTotal <= balloonBudget) {
+            return total; // Covered by package budget
+          }
+          return total + Math.max(0, price - Math.max(0, balloonBudget - (balloonTotal - price)));
+        }
+        
+        if (addon.category === 'food') {
+          foodTotal += price;
+          // Only charge if over budget
+          if (foodBudget > 0 && foodTotal <= foodBudget) {
+            return total; // Covered by package budget
+          }
+          return total + Math.max(0, price - Math.max(0, foodBudget - (foodTotal - price)));
+        }
+        
+        // Regular pricing for other categories
         return total + price;
       }, 0);
     }
