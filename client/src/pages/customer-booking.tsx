@@ -406,14 +406,25 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                   Party Details
                 </div>
                 {!isLocked && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    {isEditing ? 'Cancel' : 'Edit'}
-                  </Button>
+                  <div className="flex gap-2">
+                    {isEditing && (
+                      <Button
+                        size="sm"
+                        onClick={handleSaveChanges}
+                        disabled={updateMutation.isPending}
+                      >
+                        {updateMutation.isPending ? 'Saving...' : 'Save'}
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      {isEditing ? 'Cancel' : 'Edit'}
+                    </Button>
+                  </div>
                 )}
               </CardTitle>
             </CardHeader>
@@ -861,7 +872,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               </div>
 
               {isEditing && !isLocked && (
-                <div className="flex gap-2 pt-4">
+                <div className="flex justify-end gap-2 pt-4">
                   <Button onClick={handleSaveChanges} disabled={updateMutation.isPending}>
                     {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
