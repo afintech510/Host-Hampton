@@ -319,24 +319,24 @@ class BookingService {
    */
   private async createBirthdayPartyInvoice(eventId: number, data: BookingData) {
     // Determine base theme price
-    // Standard theme: $875, Custom theme: $950
+    // Standard theme: $875, Custom theme: $950+
     const isCustomTheme = data.partyTheme === 'custom' || data.customTheme;
     const baseThemePrice = isCustomTheme ? 95000 : 87500; // $950 or $875
     
-    // Calculate star package modifier based on package selection
-    let starPackageModifier = 0;
+    // Calculate star package cost based on new pricing structure
+    let packageCost = 0;
     if (data.packageSelection) {
-      const starPackagePrices: { [key: string]: number } = {
-        '⭐ 1 Star Party': 0, // No additional cost for 1 star
-        '⭐⭐ 2 Star Party': 1500, // Photo Booth addon
-        '⭐⭐⭐ 3 Star Party': 2500, // Photo Booth + Glittery Makeup
-        '⭐⭐⭐⭐ 4 Star Party': 4500, // Photo Booth + Glittery Makeup + Hair Tinsel + Beaded Hair Braid
-        '⭐⭐⭐⭐⭐ 5 Star Party': 12000, // All above + Coffee Bar
+      const packagePrices: { [key: string]: number } = {
+        '⭐ Base Package': 0, // 1 star is the base package (875 or 950)
+        '⭐⭐ Enhanced Package': 35000, // +$350
+        '⭐⭐⭐ Premium Package': 69500, // +$695  
+        '⭐⭐⭐⭐ Deluxe Package': 92500, // +$925
+        '⭐⭐⭐⭐⭐ Ultimate Package': 137500, // +$1,375
       };
-      starPackageModifier = starPackagePrices[data.packageSelection] || 0;
+      packageCost = packagePrices[data.packageSelection] || 0;
     }
     
-    const basePrice = baseThemePrice + starPackageModifier;
+    const basePrice = baseThemePrice + packageCost;
     
     // Calculate addon costs from selected additional addons
     let addonTotal = 0;

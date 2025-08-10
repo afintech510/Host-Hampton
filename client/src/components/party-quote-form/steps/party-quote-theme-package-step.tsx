@@ -12,40 +12,49 @@ interface Props {
 
 const packageData = {
   level1: {
-    name: "Level 1 Package",
+    name: "⭐ Base Package",
+    price: 0, // 1 star is the base package (875 or 950)
+    value: 0,
+    savings: 0,
+    savingsPercent: 0,
+    includes: ["Choice of activities: Either 1 premium + 2 standard OR 3 standard activities"],
+    description: "Perfect starter package with essential party elements"
+  },
+  level2: {
+    name: "⭐⭐ Enhanced Package", 
     price: 350,
     value: 435,
     savings: 85,
     savingsPercent: 19.5,
-    includes: ["Goody Bags", "Photo Booth", "3 Extra Guests"],
-    description: "Perfect starter package for intimate celebrations"
+    includes: ["Goody Bags", "Photo Booth", "3 Extra Guests", "Upgrade to Premium 2nd premium activity or add another standard activity"],
+    description: "Great value with photo memories and extras"
   },
-  level2: {
-    name: "Level 2 Package", 
+  level3: {
+    name: "⭐⭐⭐ Premium Package",
     price: 695,
     value: 935,
     savings: 240,
     savingsPercent: 25.7,
-    includes: ["Premium Activities", "Balloon Tower", "Gift Basket", "4 Extra Guests"],
-    description: "Enhanced experience with premium touches"
+    includes: ["Goody Bags", "Photo Booth", "4 Extra Guests", "$200 Balloons", "Curated Birthday Gift Basket", "Upgrade to Premium 2nd premium activity or add another standard activity"],
+    description: "Enhanced experience with decorations and gifts"
   },
-  level3: {
-    name: "Level 3 Package",
+  level4: {
+    name: "⭐⭐⭐⭐ Deluxe Package",
     price: 925,
     value: 1310,
     savings: 385,
     savingsPercent: 29.4,
-    includes: ["Premium Goody Bags", "Multiple Balloons", "5 Extra Guests", "Drinks Package"],
-    description: "Comprehensive party experience"
+    includes: ["Premium Goody Bags", "Photo Booth", "5 Extra Guests", "$300 Balloons", "Curated Birthday Gift Basket", "Bubbles Drink Package", "Custom Treats 1pp", "Upgrade to Premium 2nd premium activity or add another standard activity"],
+    description: "Premium experience with enhanced amenities"
   },
-  level4: {
-    name: "Level 4 Package",
+  level5: {
+    name: "⭐⭐⭐⭐⭐ Ultimate Package",
     price: 1375,
     value: 2124,
     savings: 749,
     savingsPercent: 35.3,
-    includes: ["Custom Treat Table", "Food Allowances", "6 Extra Guests", "Ultimate Experience"],
-    description: "The complete luxury party package"
+    includes: ["Premium Goody Bags", "Photo Booth", "6 Extra Guests", "$400 Balloons", "Curated Birthday Gift Basket", "Bubbles Drink Package", "$150 in Food Add-ons", "Custom Treat Table 3pp", "Upgrade to Premium 2nd premium activity or add another standard activity"],
+    description: "The complete party experience with everything included"
   }
 };
 
@@ -160,7 +169,7 @@ export function PartyQuoteThemePackageStep({ formData, updateFormData }: Props) 
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {Object.entries(packageData).map(([key, pkg]) => (
             <Card 
               key={key}
@@ -173,9 +182,11 @@ export function PartyQuoteThemePackageStep({ formData, updateFormData }: Props) 
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h4 className="font-semibold text-lg">{pkg.name}</h4>
-                    <Badge variant="secondary" className="mt-1">
-                      Save {pkg.savingsPercent}%
-                    </Badge>
+                    {pkg.savingsPercent > 0 && (
+                      <Badge variant="secondary" className="mt-1">
+                        Save {pkg.savingsPercent}%
+                      </Badge>
+                    )}
                   </div>
                   {formData.selectedPackage === key && (
                     <Check className="h-5 w-5 text-pink-500" />
@@ -184,14 +195,18 @@ export function PartyQuoteThemePackageStep({ formData, updateFormData }: Props) 
                 
                 <div className="mb-4">
                   <div className="text-2xl font-bold text-pink-600 mb-1">
-                    ${pkg.price}
+                    {pkg.price === 0 ? 'Base Price' : `+$${pkg.price}`}
                   </div>
-                  <div className="text-sm text-gray-600 mb-1">
-                    Value: ${pkg.value}
-                  </div>
-                  <div className="text-sm font-medium text-green-600">
-                    You save ${pkg.savings}
-                  </div>
+                  {pkg.value > 0 && (
+                    <div className="text-sm text-gray-600 mb-1">
+                      Value: ${pkg.value}
+                    </div>
+                  )}
+                  {pkg.savings > 0 && (
+                    <div className="text-sm font-medium text-green-600">
+                      You save ${pkg.savings}
+                    </div>
+                  )}
                 </div>
                 
                 <p className="text-sm text-gray-600 mb-3">

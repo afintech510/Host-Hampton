@@ -266,20 +266,20 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   const isCustomTheme = booking?.partyTheme === 'custom' || booking?.customTheme;
   const baseThemePrice = isCustomTheme ? 95000 : 87500; // $950 or $875
   
-  // Calculate star package modifier
-  let starPackageModifier = 0;
+  // Calculate star package cost based on new pricing structure
+  let packageCost = 0;
   if (booking?.packageSelection) {
-    const starPackagePrices: { [key: string]: number } = {
-      '⭐ 1 Star Party': 0, // No additional cost for 1 star
-      '⭐⭐ 2 Star Party': 1500, // Photo Booth addon
-      '⭐⭐⭐ 3 Star Party': 2500, // Photo Booth + Glittery Makeup
-      '⭐⭐⭐⭐ 4 Star Party': 4500, // Photo Booth + Glittery Makeup + Hair Tinsel + Beaded Hair Braid
-      '⭐⭐⭐⭐⭐ 5 Star Party': 12000, // All above + Coffee Bar
+    const packagePrices: { [key: string]: number } = {
+      '⭐ Base Package': 0, // 1 star is the base package (875 or 950)
+      '⭐⭐ Enhanced Package': 35000, // +$350
+      '⭐⭐⭐ Premium Package': 69500, // +$695  
+      '⭐⭐⭐⭐ Deluxe Package': 92500, // +$925
+      '⭐⭐⭐⭐⭐ Ultimate Package': 137500, // +$1,375
     };
-    starPackageModifier = starPackagePrices[booking.packageSelection] || 0;
+    packageCost = packagePrices[booking.packageSelection] || 0;
   }
   
-  const basePackagePrice = baseThemePrice + starPackageModifier;
+  const basePackagePrice = baseThemePrice + packageCost;
   
   // Calculate extra guests
   const baseGuestCount = 10;
@@ -905,10 +905,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                   <span>{isCustomTheme ? 'Custom' : 'Standard'} Theme Package</span>
                   <span className="pricing-font">{formatPrice(baseThemePrice)}</span>
                 </div>
-                {starPackageModifier > 0 && (
+                {packageCost > 0 && (
                   <div className="flex justify-between">
                     <span>{booking?.packageSelection || 'Star Package'} Upgrades</span>
-                    <span className="pricing-font">{formatPrice(starPackageModifier)}</span>
+                    <span className="pricing-font">{formatPrice(packageCost)}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-medium border-t pt-1">
