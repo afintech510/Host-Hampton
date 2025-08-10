@@ -31,20 +31,20 @@ interface Addon {
 }
 
 export function PackageStep({ formData, updateFormData, onNext, onBack }: PackageStepProps) {
-  const [selectedPackage, setSelectedPackage] = useState<number | null>(formData.selectedPackageId || null);
+  const [selectedStars, setSelectedStars] = useState<number>(formData.selectedStars || 1);
   const guestCount = parseInt(formData.guestCount) || 11;
 
-  // Fetch packages from database
+  // Fetch packages from database (ordered by star rating)
   const { data: packages = [], isLoading: packagesLoading } = useQuery({
     queryKey: ["/api/packages"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/packages");
       const data = await response.json();
-      return data.success ? data.packages : [];
+      return data.success ? data.packages.sort((a: Package, b: Package) => a.id - b.id) : [];
     },
   });
 
-  // Fetch addons from database to show included addon details
+  // Fetch addons from database to show activity lists
   const { data: addons = [], isLoading: addonsLoading } = useQuery({
     queryKey: ["/api/addons"],
     queryFn: async () => {
@@ -54,23 +54,47 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
     },
   });
 
-  const getIncludedAddonNames = (packageData: Package): string[] => {
-    if (!packageData.includedAddons || packageData.includedAddons.length === 0) {
-      return [];
+  // Base party includes (always included)
+  const baseIncludes = [
+    "E-vite invitation",
+    "Choice of pizza or bagels", 
+    "Chocolate or vanilla cupcakes",
+    "Up to 3 activities (only 1 premium)"
+  ];
+
+  // Get cumulative addons for selected star level
+  const getCumulativeAddons = (starLevel: number): string[] => {
+    const allAddons: string[] = [];
+    
+    for (let i = 1; i <= starLevel && i <= packages.length; i++) {
+      const pkg = packages[i - 1];
+      if (pkg && pkg.includedAddons) {
+        pkg.includedAddons.forEach((addonId: number) => {
+          const addon = addons.find((a: Addon) => a.id === addonId);
+          if (addon && !allAddons.includes(addon.name)) {
+            allAddons.push(addon.name);
+          }
+        });
+      }
     }
     
-    return packageData.includedAddons
-      .map(addonId => {
-        const addon = addons.find((a: Addon) => a.id === addonId);
-        return addon ? addon.name : null;
-      })
-      .filter(Boolean) as string[];
+    return allAddons;
   };
 
+  // Separate premium and standard activities
+  const premiumActivities = addons.filter((addon: Addon) => 
+    addon.category === 'activity' || addon.name.includes('Coffee') || addon.name.includes('Photo')
+  );
+  
+  const standardActivities = addons.filter((addon: Addon) => 
+    addon.category === 'equipment' && !addon.name.includes('Photo')
+  );
+
   const handleNext = () => {
-    const selectedPackageData = packages.find((pkg: Package) => pkg.id === selectedPackage);
+    const selectedPackageData = packages[selectedStars - 1];
     updateFormData({ 
-      selectedPackageId: selectedPackage,
+      selectedStars: selectedStars,
+      selectedPackageId: selectedPackageData?.id,
       selectedPackage: selectedPackageData,
       // Don't store pricing information here - will be calculated after contact info
     });
@@ -101,70 +125,95 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
         </p>
       </div>
 
-      <RadioGroup 
-        value={selectedPackage?.toString() || ""} 
-        onValueChange={(value) => setSelectedPackage(parseInt(value))}
-      >
-        <div className="space-y-4">
-          {packages.map((pkg: Package) => {
-            const includedAddons = getIncludedAddonNames(pkg);
-            const isSelected = selectedPackage === pkg.id;
-            
-            return (
-              <div key={pkg.id} className="relative">
-                <div className={`p-6 border-2 rounded-xl transition-all ${
-                  isSelected
-                    ? "border-pink-300 bg-pink-50" 
-                    : "border-gray-200 hover:border-gray-300"
-                }`}>
-                  <div className="flex items-start space-x-3">
-                    <RadioGroupItem value={pkg.id.toString()} id={pkg.id.toString()} className="mt-1" />
-                    <Label htmlFor={pkg.id.toString()} className="flex-1 cursor-pointer">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{pkg.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1 mb-3">
-                          {pkg.description}
-                        </p>
-                        
-                        {/* Show included addons if any */}
-                        {includedAddons.length > 0 && (
-                          <div className="mt-3">
-                            <p className="text-xs font-medium text-gray-700 mb-2">Included:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {includedAddons.map((addonName, index) => (
-                                <span 
-                                  key={index}
-                                  className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                                >
-                                  {addonName}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        <p className="text-xs text-gray-500 mt-3">
-                          Up to {pkg.maxGuests} guests included
-                        </p>
-                      </div>
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+      {/* Star Rating Selector */}
+      <div className="bg-gray-50 p-6 rounded-xl">
+        <div className="text-center mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Rate Your Party Experience</h3>
+          <div className="flex justify-center space-x-2">
+            {[1, 2, 3, 4, 5].map((stars) => (
+              <button
+                key={stars}
+                onClick={() => setSelectedStars(stars)}
+                className={`text-3xl transition-all ${
+                  stars <= selectedStars 
+                    ? 'text-yellow-400 scale-110' 
+                    : 'text-gray-300 hover:text-yellow-200'
+                }`}
+              >
+                ⭐
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            {selectedStars} Star{selectedStars !== 1 ? 's' : ''} Selected
+          </p>
         </div>
-      </RadioGroup>
+
+        {/* Package Features Display */}
+        <div className="space-y-4">
+          {/* Base Includes */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-800 mb-2">Base Party Includes:</h4>
+            <div className="flex flex-wrap gap-2">
+              {baseIncludes.map((item, index) => (
+                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Progressive Addons */}
+          {selectedStars > 1 && (
+            <div>
+              <h4 className="text-sm font-semibold text-gray-800 mb-2">
+                Added with {selectedStars} Star{selectedStars !== 1 ? 's' : ''}:
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {getCumulativeAddons(selectedStars).map((addon, index) => (
+                  <span key={index} className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    {addon}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Activities List */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Premium Activities */}
+        <div className="bg-purple-50 p-4 rounded-lg">
+          <h4 className="text-sm font-bold text-purple-800 mb-3">🌟 Premium Activities</h4>
+          <div className="space-y-1">
+            {premiumActivities.map((activity: Addon) => (
+              <div key={activity.id} className="text-xs text-purple-700">
+                • {activity.name}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Standard Activities */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h4 className="text-sm font-bold text-gray-700 mb-3">⚡ Standard Activities</h4>
+          <div className="space-y-1">
+            {standardActivities.map((activity: Addon) => (
+              <div key={activity.id} className="text-xs text-gray-600">
+                • {activity.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-4">
         <div className="flex justify-between pt-4 border-t border-gray-200">
           <UnifiedButton variant="outline" onClick={onBack}>
             Back
           </UnifiedButton>
-          <UnifiedButton 
-            onClick={handleNext}
-            disabled={selectedPackage === null}
-          >
+          <UnifiedButton onClick={handleNext}>
             Continue to Add-ons
           </UnifiedButton>
         </div>
