@@ -318,20 +318,42 @@ class BookingService {
    * Create invoice for birthday party events
    */
   private async createBirthdayPartyInvoice(eventId: number, data: BookingData) {
-    const basePrice = 80000; // $800 base price for birthday parties
+    // Determine base theme price
+    // Standard theme: $875, Custom theme: $950
+    const isCustomTheme = data.partyTheme === 'custom' || data.customTheme;
+    const baseThemePrice = isCustomTheme ? 95000 : 87500; // $950 or $875
     
-    // Calculate addon costs
+    // Calculate star package modifier based on package selection
+    let starPackageModifier = 0;
+    if (data.packageSelection) {
+      const starPackagePrices: { [key: string]: number } = {
+        '⭐ 1 Star Party': 0, // No additional cost for 1 star
+        '⭐⭐ 2 Star Party': 1500, // Photo Booth addon
+        '⭐⭐⭐ 3 Star Party': 2500, // Photo Booth + Glittery Makeup
+        '⭐⭐⭐⭐ 4 Star Party': 4500, // Photo Booth + Glittery Makeup + Hair Tinsel + Beaded Hair Braid
+        '⭐⭐⭐⭐⭐ 5 Star Party': 12000, // All above + Coffee Bar
+      };
+      starPackageModifier = starPackagePrices[data.packageSelection] || 0;
+    }
+    
+    const basePrice = baseThemePrice + starPackageModifier;
+    
+    // Calculate addon costs from selected additional addons
     let addonTotal = 0;
     if (data.partyAddons && Array.isArray(data.partyAddons)) {
       const addonPrices: { [key: string]: number } = {
         "Face Painting": 7500,
         "Balloon Animals": 5000,
         "Magic Show": 12000,
-        "Photo Booth": 8500,
+        "Photo Booth": 1500,
         "Character Visit": 15000,
         "Craft Station": 6000,
         "Goodie Bags": 800, // per child
-        "Extra Hour": 10000
+        "Extra Hour": 10000,
+        "Glittery Makeup": 1000,
+        "Hair Tinsel": 1000,
+        "Beaded Hair Braid": 1000,
+        "Coffee Bar": 7500
       };
       
       addonTotal = data.partyAddons.reduce((total: number, addonName: string) => {
@@ -361,9 +383,12 @@ class BookingService {
     });
     
     // Create invoice items
+    const themeName = isCustomTheme ? (data.customTheme || "Custom Theme") : (data.partyTheme || "Standard Theme");
+    const packageName = data.packageSelection || "⭐ 1 Star Party";
+    
     await storage.createInvoiceItem({
       invoiceId: invoice.id,
-      name: "Birthday Party - Theme: " + (data.partyTheme || "Standard"),
+      name: `${packageName} - ${themeName}`,
       type: "package",
       quantity: 1,
       unitPrice: basePrice,
@@ -372,17 +397,23 @@ class BookingService {
     
     // Add addon items
     if (data.partyAddons && Array.isArray(data.partyAddons)) {
+      const addonPriceMap = {
+        "Face Painting": 7500,
+        "Balloon Animals": 5000,
+        "Magic Show": 12000,
+        "Photo Booth": 1500,
+        "Character Visit": 15000,
+        "Craft Station": 6000,
+        "Goodie Bags": 800,
+        "Extra Hour": 10000,
+        "Glittery Makeup": 1000,
+        "Hair Tinsel": 1000,
+        "Beaded Hair Braid": 1000,
+        "Coffee Bar": 7500
+      };
+      
       for (const addonName of data.partyAddons) {
-        const price = {
-          "Face Painting": 7500,
-          "Balloon Animals": 5000,
-          "Magic Show": 12000,
-          "Photo Booth": 8500,
-          "Character Visit": 15000,
-          "Craft Station": 6000,
-          "Goodie Bags": 800,
-          "Extra Hour": 10000
-        }[addonName as keyof typeof addonPrices] || 0;
+        const price = addonPriceMap[addonName as keyof typeof addonPriceMap] || 0;
         
         if (price > 0) {
           const quantity = addonName === "Goodie Bags" ? (data.guestCount || 1) : 1;
@@ -550,7 +581,7 @@ class BookingService {
       const calendarEntry: InsertEventCalendar = {
         eventId: event.id,
         title: `${event.status} - ${customer.name}`,
-        eventDate: event.eventDate,
+        eventDate: event.eventDate || new Date(),
         startTime: "14:00", // Default start time, should be extracted from event data
         endTime: "18:00", // Default end time
         eventType: "event", // This should map from eventTypeId

@@ -262,16 +262,32 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   const totalWithTax = (booking?.estimatedCost || 0) + salesTax;
   const remainingBalance = totalWithTax - depositAmount;
 
-  // Calculate base package pricing
-  const baseGuestCount = 10;
-  const basePackagePrice = booking?.packageTotal || 0;
-  const extraGuests = Math.max(0, (booking?.guestCount || 0) - baseGuestCount);
+  // Calculate pricing with new theme + star structure
+  const isCustomTheme = booking?.partyTheme === 'custom' || booking?.customTheme;
+  const baseThemePrice = isCustomTheme ? 95000 : 87500; // $950 or $875
   
-  // Get Extra Child Guest addon price from database ($35 each)
+  // Calculate star package modifier
+  let starPackageModifier = 0;
+  if (booking?.packageSelection) {
+    const starPackagePrices: { [key: string]: number } = {
+      '⭐ 1 Star Party': 0, // No additional cost for 1 star
+      '⭐⭐ 2 Star Party': 1500, // Photo Booth addon
+      '⭐⭐⭐ 3 Star Party': 2500, // Photo Booth + Glittery Makeup
+      '⭐⭐⭐⭐ 4 Star Party': 4500, // Photo Booth + Glittery Makeup + Hair Tinsel + Beaded Hair Braid
+      '⭐⭐⭐⭐⭐ 5 Star Party': 12000, // All above + Coffee Bar
+    };
+    starPackageModifier = starPackagePrices[booking.packageSelection] || 0;
+  }
+  
+  const basePackagePrice = baseThemePrice + starPackageModifier;
+  
+  // Calculate extra guests
+  const baseGuestCount = 10;
+  const extraGuests = Math.max(0, (booking?.guestCount || 0) - baseGuestCount);
   const extraChildGuestAddon = allAddons?.find((addon: any) => addon.name === 'Extra Child Guest');
   const extraGuestPrice = extraGuests * (extraChildGuestAddon?.price || 3500); // Default to $35 if not found
   
-  // Calculate add-on total
+  // Calculate add-on total (excluding star package included items)
   const addonTotal = booking?.selectedAddons?.reduce((total: number, addonName: string) => {
     const addon = allAddons?.find((a: any) => a.name === addonName);
     if (addon) {
@@ -886,7 +902,17 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span>Base Party Package ({baseGuestCount} guests)</span>
+                  <span>{isCustomTheme ? 'Custom' : 'Standard'} Theme Package</span>
+                  <span className="pricing-font">{formatPrice(baseThemePrice)}</span>
+                </div>
+                {starPackageModifier > 0 && (
+                  <div className="flex justify-between">
+                    <span>{booking?.packageSelection || 'Star Package'} Upgrades</span>
+                    <span className="pricing-font">{formatPrice(starPackageModifier)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-medium border-t pt-1">
+                  <span>Package Total ({baseGuestCount} guests)</span>
                   <span className="pricing-font">{formatPrice(basePackagePrice)}</span>
                 </div>
                 {extraGuests > 0 && (

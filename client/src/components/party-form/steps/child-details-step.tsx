@@ -93,85 +93,85 @@ export function ChildDetailsStep({
         </p>
       </div>
 
-      <div>
-        <Label className="text-sm font-medium text-gray-700 mb-3 block">
-          How old are they turning?
-        </Label>
-        <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={decrementAge}
-            disabled={childAge <= 1}
-            className="h-10 w-10 rounded-full"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <Input
-            type="number"
-            value={childAge}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 1;
-              setChildAge(Math.max(1, Math.min(15, value)));
-            }}
-            className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
-            min="1"
-            max="15"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={incrementAge}
-            disabled={childAge >= 15}
-            className="h-10 w-10 rounded-full"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label className="text-sm font-medium text-gray-700 mb-3 block">
-          How many kids will attend? (including birthday child)
-        </Label>
-        <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={decrementGuestCount}
-            disabled={guestCount <= 5}
-            className="h-10 w-10 rounded-full"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <Input
-            type="number"
-            value={guestCount}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 5;
-              setGuestCount(Math.max(5, Math.min(35, value)));
-            }}
-            className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
-            min="5"
-            max="35"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={incrementGuestCount}
-            disabled={guestCount >= 35}
-            className="h-10 w-10 rounded-full"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
       <div className="space-y-6 text-left">
+        <div>
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            How old are they turning?
+          </Label>
+          <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={decrementAge}
+              disabled={childAge <= 1}
+              className="h-10 w-10 rounded-full"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              value={childAge}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setChildAge(Math.max(1, Math.min(15, value)));
+              }}
+              className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+              min="1"
+              max="15"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={incrementAge}
+              disabled={childAge >= 15}
+              className="h-10 w-10 rounded-full"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            How many kids will attend? (including birthday child)
+          </Label>
+          <div className="flex items-center justify-center space-x-4 p-4 border-2 border-gray-200 rounded-xl">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={decrementGuestCount}
+              disabled={guestCount <= 5}
+              className="h-10 w-10 rounded-full"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              type="number"
+              value={guestCount}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 5;
+                setGuestCount(Math.max(5, Math.min(35, value)));
+              }}
+              className="text-2xl font-semibold w-16 text-center border-0 bg-transparent focus:ring-0 focus:border-0"
+              min="5"
+              max="35"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={incrementGuestCount}
+              disabled={guestCount >= 35}
+              className="h-10 w-10 rounded-full"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
         <div>
           <Label className="text-sm font-medium text-gray-700 mb-3 block">
             Any dietary restrictions or allergies?
