@@ -64,15 +64,16 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 
 ## Recent Updates (August 2025)
 
-**Authentic Business Data Integration - Party Pricing Structure (August 10, 2025):**
-- ✅ Complete database overhaul with authentic Host Hampton pricing from business spreadsheet
-- ✅ Updated 51 addons across 9 categories with real business pricing (all prices in cents)
-- ✅ Activities: Standard ($10) and Premium ($20) per person structure
-- ✅ Entertainment: Professional services ranging $399-$699 (Character, Magician, DJ, Face Painting)
-- ✅ Food & Desserts: Comprehensive options from $30-$499 including specialty items
-- ✅ Decor: Balloon packages ($100-$195) and custom theme options ($875-$950)
-- ✅ New 4-tier package structure: Level 1 ($435), Level 2 ($935), Level 3 ($1,310), Level 4 ($2,124)
-- ✅ Database ready for new /invoice form implementation with authentic pricing calculations
+**Complete Addon Database Overhaul (August 10, 2025):**
+- ✅ Updated addons table with 44 authentic Host Hampton offerings from business spreadsheet
+- ✅ Activities: 9 standard activities ($10 per guest) - Glittery Makeup, Hair Tinsel, Beaded Hair Braid, etc.
+- ✅ Premium Activities: 10 premium activities ($20 per guest) - DIY Nail Polish, Slime Making, Canvas Painting, etc.
+- ✅ Food & Desserts: 11 options ranging from $28-$200 - Pizza, French Fries, Macarons, Candy Wall
+- ✅ Entertainment: 4 professional services ($399-$699) - Face Painting, Character Visit, Magician, DJ
+- ✅ Equipment & Decor: 7 items including Photo Booth ($150), Balloon packages ($95-$195), Softplay Area ($300)
+- ✅ Drinks: 3 packages from $50-$75 - Basic drinks, Coffee Bar, Bubbles Package
+- ✅ Proper categorization with per_guest flags and authentic business pricing
+- ✅ 5-star package auto-selection system with activity allowances and budget tracking
 
 **Complete Create New Event System Implementation (August 9, 2025):**
 - ✅ Fully revamped Create New Event dialog with comprehensive 3-step form design

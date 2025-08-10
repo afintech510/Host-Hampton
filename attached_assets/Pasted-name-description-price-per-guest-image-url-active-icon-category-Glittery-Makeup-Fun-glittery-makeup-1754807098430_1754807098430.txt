@@ -1,0 +1,45 @@
+name	description	price	per_guest	image_url	active	icon	category
+Glittery Makeup	Fun glittery makeup application	1000	TRUE		TRUE	✨	activity
+Hair Tinsel	Sparkly hair tinsel application	1000	TRUE		TRUE	✨	activity
+Beaded Hair Braid	Beautiful beaded hair braiding	1000	TRUE		TRUE	💫	activity
+Glitter Tattoo	Temporary glitter tattoos	1000	TRUE		TRUE	⭐	activity
+Manicure	Mini manicure for each guest	1000	TRUE		TRUE	💅	activity
+Bracelet Making	Bracelet making activity for girls	1000	TRUE		TRUE	📿	activity
+Fashion show / Dress-up (Barbie)		1000	TRUE		TRUE		activity
+Unicorn Craft		1000	TRUE		TRUE		activity
+Hair Makeover		1000	TRUE		TRUE		activity
+DIY Nail Polish	Make your own nail polish activity	2000	TRUE		TRUE	💅	premium activity
+Make Your Own Slime	Fun slime making activity	2000	TRUE		TRUE	🟢	premium activity
+DIY Sunglasses		2000	TRUE		TRUE		premium activity
+Custom Trucker Hat		2000	TRUE		TRUE		premium activity
+Custom Make-up Pouch		2000	TRUE		TRUE		premium activity
+Sand Art		2000	TRUE		TRUE		premium activity
+Fake Cake Decorating		2000	TRUE		TRUE		premium activity
+Scrapbooking		2000	TRUE		TRUE		premium activity
+Canvas Painting		2000	TRUE		TRUE		premium activity
+Sea Shell Decorating		2000	TRUE		TRUE		premium activity
+Adult Pizza Pie	Pizza for adult guests	2800	FALSE		TRUE	🍕	food
+Specialty Pizza Pie		3500	FALSE		TRUE	🍕	food
+Macarons	Gourmet macarons by Allie - per dozen	4500	FALSE		TRUE	🧁	dessert
+Chocolate Covered Pretzels	Sweet treats by Allie - per dozen	4500	FALSE		TRUE	🥨	dessert
+Drinks Package	Water and seltzer for 10 guests	5000	FALSE		TRUE	🥤	drink
+French Fries Platter		5000	FALSE		TRUE		food
+Chocolate Covered Rice Krispies	Delicious treats by Allie - per dozen	5900	FALSE		TRUE	🍫	dessert
+Coffee Bar	Nespresso machine with coffee service	7500	FALSE		TRUE	☕	drink
+Bubbles Drink Package		7500	FALSE		TRUE		drink
+Karaoke	Fun karaoke setup for party entertainment	7500	FALSE		TRUE	🎤	equipment
+Fruit Platter	Seasonal fresh fruits	7500	FALSE		TRUE	🍓	food
+Chicken Fingers Platter		7500	FALSE		TRUE		food
+Balloon Custom Stack	Personalized with name - starting price	9500	FALSE		TRUE	🔢	decor
+Decorated Sugar Cookies	Custom treats by Allie - per dozen	9900	FALSE		TRUE	🍪	dessert
+Barbie Box Rental	Rent the 6 ft life size pink Barbie photo box	10000	FALSE		TRUE	💖	decor
+Photo Booth	Digital photos sent to your phone; no printer	15000	FALSE		TRUE	📸	equipment
+Popcorn Bar	Freshly popped popcorn with four toppings	15000	FALSE		TRUE	🍿	food
+Balloon Garland (6 ft)	Custom colors - starting price	19500	FALSE		TRUE	🎈	decor
+Balloon Tower (6 ft)	Custom balloon tower - starting price	19500	FALSE		TRUE	🎈	decor
+Candy Wall	Custom selection of candy + guest take-home bags	20000	FALSE		TRUE	🍭	dessert
+Softplay Area	Includes 4 ft ball pit, rocker, climber, bouncy animals	30000	FALSE		TRUE	🤸	equipment
+Face Paiting		39900	FALSE		TRUE		entertainment
+Character Visit		59900	FALSE		TRUE		entertainment
+Magician 		59900	FALSE		TRUE		entertainment
+DJ		69900	FALSE		TRUE		entertainment
