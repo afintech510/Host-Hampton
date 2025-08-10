@@ -20,6 +20,7 @@ import TruckHatBar from "@/pages/truck-hat-bar";
 import PermanentJewelry from "@/pages/permanent-jewelry";
 import MyEvents from "@/pages/my-events";
 import Quote from "@/pages/quote-new";
+import Invoice from "@/pages/invoice";
 import InvoiceCreate from "@/pages/admin/invoice-create";
 import InvoiceView from "@/pages/invoice-view";
 import InvoicePayment from "@/pages/invoice-payment";
@@ -52,6 +53,7 @@ function Router() {
           <Route path="/book-event" component={BookEvent} />
           <Route path="/get-quote" component={GetQuote} />
           <Route path="/quote" component={Quote} />
+          <Route path="/invoice" component={Invoice} />
           <Route path="/themed-parties" component={ThemedParties} />
           <Route path="/party-designer" component={PartyDesigner} />
           <Route path="/admin" component={AdminDashboard} />
