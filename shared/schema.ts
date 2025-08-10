@@ -50,6 +50,7 @@ export const packages = pgTable("packages", {
   maxGuests: integer("max_guests"),
   imageUrl: text("image_url"),
   eventTypeId: integer("event_type_id"),
+  includedAddons: json("included_addons").default([]).notNull(), // Array of addon IDs included in package
   active: boolean("active").default(true).notNull(),
 });
 

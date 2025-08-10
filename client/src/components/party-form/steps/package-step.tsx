@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 
 interface PackageStepProps {
@@ -13,12 +12,30 @@ interface PackageStepProps {
   onBack: () => void;
 }
 
+interface Package {
+  id: number;
+  name: string;
+  description: string;
+  basePrice: number;
+  maxGuests: number;
+  includedAddons: number[];
+  active: boolean;
+}
+
+interface Addon {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+}
+
 export function PackageStep({ formData, updateFormData, onNext, onBack }: PackageStepProps) {
-  const [selectedPackage, setSelectedPackage] = useState(formData.partyPackage || "base");
+  const [selectedPackage, setSelectedPackage] = useState<number | null>(formData.selectedPackageId || null);
   const guestCount = parseInt(formData.guestCount) || 11;
 
   // Fetch packages from database
-  const { data: packagesData, isLoading } = useQuery({
+  const { data: packages = [], isLoading: packagesLoading } = useQuery({
     queryKey: ["/api/packages"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/packages");
@@ -27,41 +44,40 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
     },
   });
 
-  const calculatePackagePrice = (packageData: any) => {
-    if (!packageData) return 0;
-    
-    if (packageData.name === "Base Birthday Party") {
-      // Base package: $875 for 11 guests, $35 per additional guest
-      const basePrice = 875;
-      const additionalGuests = Math.max(0, guestCount - 11);
-      return basePrice + (additionalGuests * 35);
-    } else {
-      // Make it Shine (+$25/guest) or Party Envy (+$50/guest)
-      const perGuestPrice = packageData.base_price / 100; // Convert cents to dollars
-      return perGuestPrice * guestCount;
-    }
-  };
+  // Fetch addons from database to show included addon details
+  const { data: addons = [], isLoading: addonsLoading } = useQuery({
+    queryKey: ["/api/addons"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/addons");
+      const data = await response.json();
+      return data.success ? data.addons : [];
+    },
+  });
 
-  const getPackageTotal = () => {
-    const basePackage = packagesData?.find((p: any) => p.name === "Base Birthday Party");
-    const selectedPackageData = packagesData?.find((p: any) => p.name.toLowerCase().includes(selectedPackage.replace("-", " ")));
-    
-    let total = calculatePackagePrice(basePackage);
-    
-    if (selectedPackage !== "base" && selectedPackageData) {
-      total += calculatePackagePrice(selectedPackageData);
+  const getIncludedAddonNames = (packageData: Package): string[] => {
+    if (!packageData.includedAddons || packageData.includedAddons.length === 0) {
+      return [];
     }
     
-    return total;
+    return packageData.includedAddons
+      .map(addonId => {
+        const addon = addons.find((a: Addon) => a.id === addonId);
+        return addon ? addon.name : null;
+      })
+      .filter(Boolean) as string[];
   };
 
   const handleNext = () => {
+    const selectedPackageData = packages.find((pkg: Package) => pkg.id === selectedPackage);
     updateFormData({ 
-      partyPackage: selectedPackage,
-      packageTotal: getPackageTotal()
+      selectedPackageId: selectedPackage,
+      selectedPackage: selectedPackageData,
+      // Don't store pricing information here - will be calculated after contact info
     });
     onNext();
   };
+
+  const isLoading = packagesLoading || addonsLoading;
 
   if (isLoading) {
     return (
@@ -85,83 +101,58 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
         </p>
       </div>
 
-      <RadioGroup value={selectedPackage} onValueChange={setSelectedPackage}>
+      <RadioGroup 
+        value={selectedPackage?.toString() || ""} 
+        onValueChange={(value) => setSelectedPackage(parseInt(value))}
+      >
         <div className="space-y-4">
-          {/* Base Package */}
-          <div className="relative">
-            <div className={`p-6 border-2 rounded-xl transition-all ${
-              selectedPackage === "base" 
-                ? "border-pink-300 bg-pink-50" 
-                : "border-gray-200 hover:border-gray-300"
-            }`}>
-              <div className="flex items-center space-x-3">
-                <RadioGroupItem value="base" id="base" />
-                <Label htmlFor="base" className="flex-1 cursor-pointer">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Base Birthday Party</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Complete party package with decorations, activities, and setup
-                    </p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Up to 11 guests (including birthday child), <span className="pricing-font">$35</span> per additional guest
-                    </p>
-                  </div>
-                </Label>
-              </div>
-            </div>
-          </div>
-
-          {/* Make it Shine Package */}
-          <div className="relative">
-            <div className={`p-6 border-2 rounded-xl transition-all ${
-              selectedPackage === "make-it-shine" 
-                ? "border-pink-300 bg-pink-50" 
-                : "border-gray-200 hover:border-gray-300"
-            }`}>
-              <div className="flex items-center space-x-3">
-                <RadioGroupItem value="make-it-shine" id="make-it-shine" />
-                <Label htmlFor="make-it-shine" className="flex-1 cursor-pointer">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-gray-900">Make it Shine</h3>
-                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 pricing-font">+$25/guest</Badge>
+          {packages.map((pkg: Package) => {
+            const includedAddons = getIncludedAddonNames(pkg);
+            const isSelected = selectedPackage === pkg.id;
+            
+            return (
+              <div key={pkg.id} className="relative">
+                <div className={`p-6 border-2 rounded-xl transition-all ${
+                  isSelected
+                    ? "border-pink-300 bg-pink-50" 
+                    : "border-gray-200 hover:border-gray-300"
+                }`}>
+                  <div className="flex items-start space-x-3">
+                    <RadioGroupItem value={pkg.id.toString()} id={pkg.id.toString()} className="mt-1" />
+                    <Label htmlFor={pkg.id.toString()} className="flex-1 cursor-pointer">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{pkg.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1 mb-3">
+                          {pkg.description}
+                        </p>
+                        
+                        {/* Show included addons if any */}
+                        {includedAddons.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-xs font-medium text-gray-700 mb-2">Included:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {includedAddons.map((addonName, index) => (
+                                <span 
+                                  key={index}
+                                  className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+                                >
+                                  {addonName}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-gray-500 mt-3">
+                          Up to {pkg.maxGuests} guests included
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Base package + premium touches and enhanced activities
-                      </p>
-                    </div>
+                    </Label>
                   </div>
-                </Label>
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Party Envy Package */}
-          <div className="relative">
-            <div className={`p-6 border-2 rounded-xl transition-all ${
-              selectedPackage === "party-envy" 
-                ? "border-pink-300 bg-pink-50" 
-                : "border-gray-200 hover:border-gray-300"
-            }`}>
-              <div className="flex items-center space-x-3">
-                <RadioGroupItem value="party-envy" id="party-envy" />
-                <Label htmlFor="party-envy" className="flex-1 cursor-pointer">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-gray-900">Party Envy</h3>
-                        <Badge variant="secondary" className="bg-purple-100 text-purple-800 pricing-font">+$50/guest</Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Ultimate premium package with all the bells and whistles
-                      </p>
-                    </div>
-                  </div>
-                </Label>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </RadioGroup>
 
@@ -170,7 +161,10 @@ export function PackageStep({ formData, updateFormData, onNext, onBack }: Packag
           <UnifiedButton variant="outline" onClick={onBack}>
             Back
           </UnifiedButton>
-          <UnifiedButton onClick={handleNext}>
+          <UnifiedButton 
+            onClick={handleNext}
+            disabled={selectedPackage === null}
+          >
             Continue to Add-ons
           </UnifiedButton>
         </div>

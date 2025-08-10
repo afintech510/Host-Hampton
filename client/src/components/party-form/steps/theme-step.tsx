@@ -123,13 +123,13 @@ export function ThemeStep({ formData, updateFormData, onNext, onBack }: ThemeSte
             <Label htmlFor="customThemeText" className="block text-sm font-medium text-gray-700 mb-2">
               Describe your custom party theme:
             </Label>
-            <Input
+            <textarea
               id="customThemeText"
-              type="text"
               placeholder="e.g., Unicorn and rainbow theme with glitter decorations..."
               value={customThemeText}
               onChange={(e) => setCustomThemeText(e.target.value)}
-              className="w-full"
+              className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows={2}
             />
           </div>
         )}
