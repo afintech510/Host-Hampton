@@ -8,11 +8,26 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar, Clock, Users, MapPin, CreditCard, Edit, User, Gem } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  MapPin,
+  CreditCard,
+  Edit,
+  User,
+  Gem,
+} from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
 
 // Helper function to get ordinal suffix
@@ -26,7 +41,9 @@ interface PermanentJewelryReservationProps {
   leadId?: string | null;
 }
 
-export default function PermanentJewelryReservation({ leadId }: PermanentJewelryReservationProps = {}) {
+export default function PermanentJewelryReservation({
+  leadId,
+}: PermanentJewelryReservationProps = {}) {
   // Also support legacy URL param approach for backward compatibility
   const { leadId: urlLeadId } = useParams<{ leadId: string }>();
   const effectiveLeadId = leadId || urlLeadId;
@@ -35,16 +52,16 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<any>({});
   const [billingData, setBillingData] = useState({
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    phone: '',
-    email: '',
+    firstName: "",
+    lastName: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    phone: "",
+    email: "",
     agreeToTerms: false,
-    agreeToCommunications: false
+    agreeToCommunications: false,
   });
 
   // Fetch lead/booking data
@@ -55,7 +72,7 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
       const data = await response.json();
       return data.success ? data.lead : null;
     },
-    enabled: !!effectiveLeadId
+    enabled: !!effectiveLeadId,
   });
 
   // Stripe deposit payment mutation
@@ -64,7 +81,7 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
       const response = await apiRequest("POST", "/api/create-deposit-payment", {
         leadId: parseInt(effectiveLeadId!),
         amount: 5000, // $50 booking fee for jewelry session
-        bookingData
+        bookingData,
       });
       return response.json();
     },
@@ -80,21 +97,28 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
         description: "Failed to create booking fee payment. Please try again.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Update booking mutation
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
-      const response = await apiRequest("PATCH", `/api/leads/${effectiveLeadId}`, updates);
+      const response = await apiRequest(
+        "PATCH",
+        `/api/leads/${effectiveLeadId}`,
+        updates,
+      );
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads", effectiveLeadId] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/leads", effectiveLeadId],
+      });
       setIsEditing(false);
       toast({
         title: "Session Updated",
-        description: "Your permanent jewelry session details have been updated successfully.",
+        description:
+          "Your permanent jewelry session details have been updated successfully.",
       });
     },
     onError: (error) => {
@@ -103,7 +127,7 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
         description: "Failed to update session details. Please try again.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   useEffect(() => {
@@ -111,21 +135,23 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
       setEditData({
         jewelryPieces: booking.jewelryPieces || 1,
         attendeeCount: booking.attendeeCount || 1,
-        eventDate: booking.eventDate ? new Date(booking.eventDate).toISOString().split('T')[0] : '',
-        startTime: booking.startTime || '',
-        notes: booking.notes || '',
-        eventLocation: booking.eventLocation || 'studio'
+        eventDate: booking.eventDate
+          ? new Date(booking.eventDate).toISOString().split("T")[0]
+          : "",
+        startTime: booking.startTime || "",
+        notes: booking.notes || "",
+        eventLocation: booking.eventLocation || "studio",
       });
 
       // Pre-fill billing data if available
       if (booking.name || booking.email) {
-        const nameParts = booking.name?.split(' ') || [];
-        setBillingData(prev => ({
+        const nameParts = booking.name?.split(" ") || [];
+        setBillingData((prev) => ({
           ...prev,
-          firstName: nameParts[0] || '',
-          lastName: nameParts.slice(1).join(' ') || '',
-          email: booking.email || '',
-          phone: booking.phone || ''
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          email: booking.email || "",
+          phone: booking.phone || "",
         }));
       }
     }
@@ -134,7 +160,7 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
   const handlePayDeposit = () => {
     if (!billingData.agreeToTerms) {
       toast({
-        title: "Terms Required", 
+        title: "Terms Required",
         description: "Please agree to the terms and conditions to proceed.",
         variant: "destructive",
       });
@@ -144,7 +170,7 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
     depositMutation.mutate({
       ...billingData,
       leadId: effectiveLeadId,
-      bookingType: 'permanent-jewelry'
+      bookingType: "permanent-jewelry",
     });
   };
 
@@ -157,7 +183,9 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-amber-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
-          <p className="text-yellow-800">Loading your jewelry session details...</p>
+          <p className="text-yellow-800">
+            Loading your jewelry session details...
+          </p>
         </div>
       </div>
     );
@@ -170,8 +198,13 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
           <CardContent className="p-6 text-center">
             <Gem className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Session Not Found</h2>
-            <p className="text-gray-600 mb-4">We couldn't find your permanent jewelry session details.</p>
-            <Button onClick={() => window.location.href = '/get-quote'} className="w-full">
+            <p className="text-gray-600 mb-4">
+              We couldn't find your permanent jewelry session details.
+            </p>
+            <Button
+              onClick={() => (window.location.href = "/get-quote")}
+              className="w-full"
+            >
               Start New Session Request
             </Button>
           </CardContent>
@@ -192,13 +225,15 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img 
-                src={hostHamptonLogo} 
-                alt="Host Hampton" 
+              <img
+                src={hostHamptonLogo}
+                alt="Host Hampton"
                 className="h-12 md:h-14 w-auto object-contain"
               />
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Permanent Jewelry Session</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                  Permanent Jewelry Session
+                </h1>
                 <p className="text-sm text-gray-600">Complete your booking</p>
               </div>
             </div>
@@ -223,21 +258,28 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                   onClick={() => setIsEditing(!isEditing)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
-                  {isEditing ? 'Cancel' : 'Edit'}
+                  {isEditing ? "Cancel" : "Edit"}
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isEditing ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="jewelryPieces">Number of Jewelry Pieces</Label>
+                      <Label htmlFor="jewelryPieces">
+                        Number of Jewelry Pieces
+                      </Label>
                       <Input
                         id="jewelryPieces"
                         type="number"
                         min="1"
                         max="10"
-                        value={editData.jewelryPieces || ''}
-                        onChange={(e) => setEditData({...editData, jewelryPieces: parseInt(e.target.value) || 1})}
+                        value={editData.jewelryPieces || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            jewelryPieces: parseInt(e.target.value) || 1,
+                          })
+                        }
                       />
                     </div>
                     <div>
@@ -247,8 +289,13 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                         type="number"
                         min="1"
                         max="20"
-                        value={editData.attendeeCount || ''}
-                        onChange={(e) => setEditData({...editData, attendeeCount: parseInt(e.target.value) || 1})}
+                        value={editData.attendeeCount || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            attendeeCount: parseInt(e.target.value) || 1,
+                          })
+                        }
                       />
                     </div>
                     <div>
@@ -256,13 +303,23 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       <Input
                         id="eventDate"
                         type="date"
-                        value={editData.eventDate || ''}
-                        onChange={(e) => setEditData({...editData, eventDate: e.target.value})}
+                        value={editData.eventDate || ""}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            eventDate: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div>
                       <Label htmlFor="startTime">Preferred Time</Label>
-                      <Select value={editData.startTime || ''} onValueChange={(value) => setEditData({...editData, startTime: value})}>
+                      <Select
+                        value={editData.startTime || ""}
+                        onValueChange={(value) =>
+                          setEditData({ ...editData, startTime: value })
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
@@ -280,13 +337,20 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     </div>
                     <div className="md:col-span-2">
                       <Label htmlFor="location">Session Location</Label>
-                      <Select value={editData.eventLocation || 'studio'} onValueChange={(value) => setEditData({...editData, eventLocation: value})}>
+                      <Select
+                        value={editData.eventLocation || "studio"}
+                        onValueChange={(value) =>
+                          setEditData({ ...editData, eventLocation: value })
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="studio">Host Hampton Studio</SelectItem>
-                          <SelectItem value="mobile">Mobile (we come to you)</SelectItem>
+                          <SelectItem value="studio">Host Hampton</SelectItem>
+                          <SelectItem value="mobile">
+                            Mobile (we come to you)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -295,13 +359,20 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       <Textarea
                         id="notes"
                         placeholder="Any special jewelry preferences, allergies, or requests..."
-                        value={editData.notes || ''}
-                        onChange={(e) => setEditData({...editData, notes: e.target.value})}
+                        value={editData.notes || ""}
+                        onChange={(e) =>
+                          setEditData({ ...editData, notes: e.target.value })
+                        }
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
-                        {updateMutation.isPending ? 'Updating...' : 'Update Session'}
+                      <Button
+                        onClick={handleUpdate}
+                        disabled={updateMutation.isPending}
+                      >
+                        {updateMutation.isPending
+                          ? "Updating..."
+                          : "Update Session"}
                       </Button>
                     </div>
                   </div>
@@ -311,14 +382,18 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       <Gem className="h-5 w-5 text-yellow-600" />
                       <div>
                         <p className="text-sm text-gray-600">Jewelry Pieces</p>
-                        <p className="font-medium">{jewelryPieces} piece{jewelryPieces !== 1 ? 's' : ''}</p>
+                        <p className="font-medium">
+                          {jewelryPieces} piece{jewelryPieces !== 1 ? "s" : ""}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5 text-yellow-600" />
                       <div>
                         <p className="text-sm text-gray-600">People Count</p>
-                        <p className="font-medium">{attendeeCount} person{attendeeCount !== 1 ? 's' : ''}</p>
+                        <p className="font-medium">
+                          {attendeeCount} person{attendeeCount !== 1 ? "s" : ""}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -326,7 +401,9 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       <div>
                         <p className="text-sm text-gray-600">Preferred Date</p>
                         <p className="font-medium">
-                          {booking.eventDate ? new Date(booking.eventDate).toLocaleDateString() : 'To be scheduled'}
+                          {booking.eventDate
+                            ? new Date(booking.eventDate).toLocaleDateString()
+                            : "To be scheduled"}
                         </p>
                       </div>
                     </div>
@@ -334,7 +411,9 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       <Clock className="h-5 w-5 text-yellow-600" />
                       <div>
                         <p className="text-sm text-gray-600">Preferred Time</p>
-                        <p className="font-medium">{booking.startTime || 'To be scheduled'}</p>
+                        <p className="font-medium">
+                          {booking.startTime || "To be scheduled"}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -342,13 +421,17 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       <div>
                         <p className="text-sm text-gray-600">Location</p>
                         <p className="font-medium">
-                          {booking.eventLocation === 'mobile' ? 'Mobile Service' : 'Host Hampton Studio'}
+                          {booking.eventLocation === "mobile"
+                            ? "Mobile Service"
+                            : "Host Hampton"}
                         </p>
                       </div>
                     </div>
                     {booking.notes && (
                       <div className="md:col-span-2">
-                        <p className="text-sm text-gray-600">Special Requests</p>
+                        <p className="text-sm text-gray-600">
+                          Special Requests
+                        </p>
                         <p className="font-medium">{booking.notes}</p>
                       </div>
                     )}
@@ -369,7 +452,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     <Input
                       id="firstName"
                       value={billingData.firstName}
-                      onChange={(e) => setBillingData({...billingData, firstName: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          firstName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -378,7 +466,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     <Input
                       id="lastName"
                       value={billingData.lastName}
-                      onChange={(e) => setBillingData({...billingData, lastName: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          lastName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -388,7 +481,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       id="email"
                       type="email"
                       value={billingData.email}
-                      onChange={(e) => setBillingData({...billingData, email: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          email: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -398,7 +496,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                       id="phone"
                       type="tel"
                       value={billingData.phone}
-                      onChange={(e) => setBillingData({...billingData, phone: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          phone: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -407,7 +510,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     <Input
                       id="address"
                       value={billingData.address}
-                      onChange={(e) => setBillingData({...billingData, address: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          address: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div>
@@ -415,12 +523,19 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     <Input
                       id="city"
                       value={billingData.city}
-                      onChange={(e) => setBillingData({...billingData, city: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({ ...billingData, city: e.target.value })
+                      }
                     />
                   </div>
                   <div>
                     <Label htmlFor="state">State</Label>
-                    <Select value={billingData.state} onValueChange={(value) => setBillingData({...billingData, state: value})}>
+                    <Select
+                      value={billingData.state}
+                      onValueChange={(value) =>
+                        setBillingData({ ...billingData, state: value })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
@@ -439,7 +554,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     <Checkbox
                       id="terms"
                       checked={billingData.agreeToTerms}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: !!checked})}
+                      onCheckedChange={(checked) =>
+                        setBillingData({
+                          ...billingData,
+                          agreeToTerms: !!checked,
+                        })
+                      }
                     />
                     <label htmlFor="terms" className="text-sm">
                       I agree to the terms and conditions *
@@ -449,7 +569,12 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
                     <Checkbox
                       id="communications"
                       checked={billingData.agreeToCommunications}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: !!checked})}
+                      onCheckedChange={(checked) =>
+                        setBillingData({
+                          ...billingData,
+                          agreeToCommunications: !!checked,
+                        })
+                      }
                     />
                     <label htmlFor="communications" className="text-sm">
                       I agree to receive communications about my session
@@ -468,17 +593,24 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-medium mb-2">Permanent Jewelry Session</h3>
+                  <h3 className="font-medium mb-2">
+                    Permanent Jewelry Session
+                  </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>{jewelryPieces} jewelry piece{jewelryPieces !== 1 ? 's' : ''}</span>
+                      <span>
+                        {jewelryPieces} jewelry piece
+                        {jewelryPieces !== 1 ? "s" : ""}
+                      </span>
                       <span>${(jewelryPieces * 75).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>{attendeeCount} person{attendeeCount !== 1 ? 's' : ''}</span>
+                      <span>
+                        {attendeeCount} person{attendeeCount !== 1 ? "s" : ""}
+                      </span>
                       <span>${(attendeeCount * 25).toFixed(2)}</span>
                     </div>
-                    {booking.eventLocation === 'mobile' && (
+                    {booking.eventLocation === "mobile" && (
                       <div className="flex justify-between">
                         <span>Mobile service fee</span>
                         <span>$50.00</span>
@@ -502,13 +634,17 @@ export default function PermanentJewelryReservation({ leadId }: PermanentJewelry
 
                 <Separator />
 
-                <Button 
+                <Button
                   onClick={handlePayDeposit}
-                  disabled={depositMutation.isPending || !billingData.agreeToTerms}
+                  disabled={
+                    depositMutation.isPending || !billingData.agreeToTerms
+                  }
                   className="w-full bg-yellow-600 hover:bg-yellow-700"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  {depositMutation.isPending ? 'Processing...' : 'Pay $50 Booking Fee'}
+                  {depositMutation.isPending
+                    ? "Processing..."
+                    : "Pay $50 Booking Fee"}
                 </Button>
 
                 <p className="text-xs text-gray-600 text-center">

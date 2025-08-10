@@ -63,18 +63,20 @@ export function LocationStep({
       // Set eventLocation for schema compatibility
       locationData.eventLocation = "mobile";
       // Create full address string for mobileAddress field
-      const fullAddress = [address, city, state, zipCode].filter(Boolean).join(', ');
+      const fullAddress = [address, city, state, zipCode]
+        .filter(Boolean)
+        .join(", ");
       locationData.mobileAddress = fullAddress;
       // Also save in customerAddress JSON format for backward compatibility
       locationData.customerAddress = {
         street: address,
         city: city,
         state: state,
-        zip: zipCode
+        zip: zipCode,
       };
       locationData.location = "customer_location";
     } else {
-      // Host Hampton studio location
+      // Host Hampton location
       locationData.eventLocation = "studio";
       locationData.location = "studio";
     }

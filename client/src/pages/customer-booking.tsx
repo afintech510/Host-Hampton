@@ -391,7 +391,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                         return `Mobile - ${address}`;
                       } else {
                         // For studio parties or when no location type is specified (legacy)
-                        return 'Host Hampton Studio, Speonk NY';
+                        return 'Host Hampton, Speonk NY';
                       }
                     })()}
                   </p>
@@ -863,10 +863,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                         return `Mobile - ${address}`;
                       } else if (booking?.eventLocation === 'studio' || booking?.location === 'studio' || !booking?.eventLocation) {
                         // For studio parties or when no location type is specified (legacy)
-                        return 'Host Hampton Studio, Speonk NY';
+                        return 'Host Hampton, Speonk NY';
                       } else {
                         // Fallback
-                        return 'Host Hampton Studio, Speonk NY';
+                        return 'Host Hampton, Speonk NY';
                       }
                     })()}
                   </div>

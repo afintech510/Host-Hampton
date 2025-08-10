@@ -2,7 +2,13 @@ import { UnifiedButton } from "@/components/ui/unified-button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -21,11 +27,17 @@ export function StudioDetailsStep({
   onNext,
   onBack,
 }: StudioDetailsStepProps) {
-  const [eventDescription, setEventDescription] = useState(formData.eventDescription || "");
+  const [eventDescription, setEventDescription] = useState(
+    formData.eventDescription || "",
+  );
   const [adultCount, setAdultCount] = useState(formData.adultCount || 0);
   const [childCount, setChildCount] = useState(formData.childCount || 0);
-  const [eventLocation, setEventLocation] = useState(formData.eventLocation || "studio");
-  const [mobileAddress, setMobileAddress] = useState(formData.mobileAddress || "");
+  const [eventLocation, setEventLocation] = useState(
+    formData.eventLocation || "studio",
+  );
+  const [mobileAddress, setMobileAddress] = useState(
+    formData.mobileAddress || "",
+  );
 
   const handleNext = () => {
     updateFormData({
@@ -38,18 +50,19 @@ export function StudioDetailsStep({
     onNext();
   };
 
-  const isValid = eventDescription.trim() !== "" && (adultCount > 0 || childCount > 0);
+  const isValid =
+    eventDescription.trim() !== "" && (adultCount > 0 || childCount > 0);
 
-  const incrementCount = (type: 'adult' | 'child') => {
-    if (type === 'adult') {
+  const incrementCount = (type: "adult" | "child") => {
+    if (type === "adult") {
       setAdultCount(Math.min(adultCount + 1, 50));
     } else {
       setChildCount(Math.min(childCount + 1, 50));
     }
   };
 
-  const decrementCount = (type: 'adult' | 'child') => {
-    if (type === 'adult') {
+  const decrementCount = (type: "adult" | "child") => {
+    if (type === "adult") {
       setAdultCount(Math.max(adultCount - 1, 0));
     } else {
       setChildCount(Math.max(childCount - 1, 0));
@@ -94,7 +107,7 @@ export function StudioDetailsStep({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => decrementCount('adult')}
+                onClick={() => decrementCount("adult")}
                 disabled={adultCount <= 0}
                 className="h-10 w-10 rounded-full"
               >
@@ -115,7 +128,7 @@ export function StudioDetailsStep({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => incrementCount('adult')}
+                onClick={() => incrementCount("adult")}
                 disabled={adultCount >= 50}
                 className="h-10 w-10 rounded-full"
               >
@@ -133,7 +146,7 @@ export function StudioDetailsStep({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => decrementCount('child')}
+                onClick={() => decrementCount("child")}
                 disabled={childCount <= 0}
                 className="h-10 w-10 rounded-full"
               >
@@ -154,7 +167,7 @@ export function StudioDetailsStep({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => incrementCount('child')}
+                onClick={() => incrementCount("child")}
                 disabled={childCount >= 50}
                 className="h-10 w-10 rounded-full"
               >
@@ -173,8 +186,10 @@ export function StudioDetailsStep({
               <SelectValue placeholder="Select location" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="studio">At Host Hampton Studio</SelectItem>
-              <SelectItem value="mobile">Mobile Service (We come to you)</SelectItem>
+              <SelectItem value="studio">At Host Hampton</SelectItem>
+              <SelectItem value="mobile">
+                Mobile Service (We come to you)
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -201,22 +216,22 @@ export function StudioDetailsStep({
 
         <div className="bg-blue-50 p-4 rounded-xl">
           <p className="text-sm text-blue-800">
-            <strong>Our Studio Features:</strong> Professional lighting, backdrop options, sound system, tables, chairs, basic AV equipment, kitchen facilities, and restrooms available.
+            <strong>Our Studio Features:</strong> Professional lighting,
+            backdrop options, sound system, tables, chairs, basic AV equipment,
+            kitchen facilities, and restrooms available.
           </p>
         </div>
       </div>
 
       <div className="flex space-x-3 pt-4">
-        <UnifiedButton 
-          variant="outline" 
-          onClick={onBack}
-          className="flex-1"
-        >
+        <UnifiedButton variant="outline" onClick={onBack} className="flex-1">
           Back
         </UnifiedButton>
-        <UnifiedButton 
+        <UnifiedButton
           onClick={handleNext}
-          disabled={!isValid || (eventLocation === "mobile" && !mobileAddress.trim())}
+          disabled={
+            !isValid || (eventLocation === "mobile" && !mobileAddress.trim())
+          }
           variant="primary"
           className="flex-1"
         >

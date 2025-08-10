@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +11,15 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, ShoppingCart, X, Sparkles, Clock } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Users,
+  ShoppingCart,
+  X,
+  Sparkles,
+  Clock,
+} from "lucide-react";
 import { UnifiedButton } from "@/components/ui/unified-button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -32,13 +37,13 @@ const formatPricing = (product: Product) => {
     return {
       primary: `$${(product.price / 100).toFixed(2)}`,
       secondary: `$${(product.siblingPrice / 100).toFixed(2)} siblings`,
-      label: "1st ticket"
+      label: "1st ticket",
     };
   }
   return {
     primary: `$${(product.price / 100).toFixed(2)}`,
     secondary: null,
-    label: null
+    label: null,
   };
 };
 
@@ -64,9 +69,12 @@ export default function UpcomingEvents() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [selectedEvent, setSelectedEvent] = useState<Product | null>(null);
-  const [selectedSession, setSelectedSession] = useState<ProductSession | null>(null);
+  const [selectedSession, setSelectedSession] = useState<ProductSession | null>(
+    null,
+  );
   const [loadingCart, setLoadingCart] = useState<number | null>(null);
-  const [sessionSelectionProduct, setSessionSelectionProduct] = useState<Product | null>(null);
+  const [sessionSelectionProduct, setSessionSelectionProduct] =
+    useState<Product | null>(null);
 
   // Fetch products (events)
   const { data: products = [], isLoading: productsLoading } = useQuery<
@@ -76,22 +84,26 @@ export default function UpcomingEvents() {
   });
 
   // Filter for active events only
-  const upcomingEvents = products.filter(product => 
-    product.isActive && (
-      // Include events with specific dates
-      (product.eventDate && new Date(product.eventDate) > new Date()) ||
-      // Include events with multiple sessions
-      product.hasMultipleSessions
+  const upcomingEvents = products
+    .filter(
+      (product) =>
+        product.isActive &&
+        // Include events with specific dates
+        ((product.eventDate && new Date(product.eventDate) > new Date()) ||
+          // Include events with multiple sessions
+          product.hasMultipleSessions),
     )
-  ).sort((a, b) => {
-    // Sort events with dates first, then events with multiple sessions
-    if (a.eventDate && b.eventDate) {
-      return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
-    }
-    if (a.eventDate && !b.eventDate) return -1;
-    if (!a.eventDate && b.eventDate) return 1;
-    return a.name.localeCompare(b.name);
-  });
+    .sort((a, b) => {
+      // Sort events with dates first, then events with multiple sessions
+      if (a.eventDate && b.eventDate) {
+        return (
+          new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
+        );
+      }
+      if (a.eventDate && !b.eventDate) return -1;
+      if (!a.eventDate && b.eventDate) return 1;
+      return a.name.localeCompare(b.name);
+    });
 
   // Fetch sessions for a specific product
   const { data: productSessions = [] } = useQuery<ProductSession[]>({
@@ -100,7 +112,10 @@ export default function UpcomingEvents() {
   });
 
   // Add to cart
-  const handleAddToCart = async (product: Product, session?: ProductSession) => {
+  const handleAddToCart = async (
+    product: Product,
+    session?: ProductSession,
+  ) => {
     // If product has multiple sessions but no session is selected, show session selector
     if (product.hasMultipleSessions && !session) {
       setSessionSelectionProduct(product);
@@ -169,7 +184,7 @@ export default function UpcomingEvents() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <Navigation />
-      
+
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <div className="container mx-auto px-4 py-16 text-center">
@@ -177,12 +192,12 @@ export default function UpcomingEvents() {
             Upcoming Events
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-            Join us for amazing workshops, classes, and special events at Host Hampton. 
-            Book your spot today and create unforgettable memories!
+            Join us for amazing workshops, classes, and special events at Host
+            Hampton. Book your spot today and create unforgettable memories!
           </p>
           <div className="flex items-center justify-center gap-2 text-sm">
             <Calendar className="w-5 h-5" />
-            <span>All events held at Host Hampton Studio</span>
+            <span>All events held at Host Hampton</span>
           </div>
         </div>
       </div>
@@ -202,8 +217,8 @@ export default function UpcomingEvents() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {upcomingEvents.map((event) => (
-              <Card 
-                key={event.id} 
+              <Card
+                key={event.id}
                 className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white h-fit"
               >
                 {/* Large Event Image */}
@@ -240,12 +255,16 @@ export default function UpcomingEvents() {
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
                           <div className="flex items-center justify-between text-white">
                             <div>
-                              <h3 className="text-xl font-bold mb-1">{event.name}</h3>
+                              <h3 className="text-xl font-bold mb-1">
+                                {event.name}
+                              </h3>
                               <div className="flex items-center gap-4 text-sm">
                                 {event.eventDate && (
                                   <div className="flex items-center gap-1">
                                     <Calendar className="w-4 h-4" />
-                                    <span>{formatDate(new Date(event.eventDate))}</span>
+                                    <span>
+                                      {formatDate(new Date(event.eventDate))}
+                                    </span>
                                   </div>
                                 )}
                                 <div className="pricing-font text-lg font-bold">
@@ -255,10 +274,16 @@ export default function UpcomingEvents() {
                                       <div className="flex flex-col items-end">
                                         <div className="flex items-center gap-1">
                                           <span>{pricing.primary}</span>
-                                          {pricing.label && <span className="text-xs opacity-75">({pricing.label})</span>}
+                                          {pricing.label && (
+                                            <span className="text-xs opacity-75">
+                                              ({pricing.label})
+                                            </span>
+                                          )}
                                         </div>
                                         {pricing.secondary && (
-                                          <div className="text-sm opacity-75">{pricing.secondary}</div>
+                                          <div className="text-sm opacity-75">
+                                            {pricing.secondary}
+                                          </div>
                                         )}
                                       </div>
                                     );
@@ -268,23 +293,30 @@ export default function UpcomingEvents() {
                             </div>
                             <UnifiedButton
                               onClick={() => handleAddToCart(event)}
-                              disabled={(event.availableTickets || 0) === 0 || loadingCart === event.id}
+                              disabled={
+                                (event.availableTickets || 0) === 0 ||
+                                loadingCart === event.id
+                              }
                               className={`${
-                                (event.availableTickets || 0) === 0 
-                                  ? 'bg-gray-400 cursor-not-allowed' 
-                                  : 'bg-purple-600 hover:bg-purple-700'
-                              } ${loadingCart === event.id ? 'bg-purple-700' : ''}`}
+                                (event.availableTickets || 0) === 0
+                                  ? "bg-gray-400 cursor-not-allowed"
+                                  : "bg-purple-600 hover:bg-purple-700"
+                              } ${loadingCart === event.id ? "bg-purple-700" : ""}`}
                               size="lg"
                             >
                               {loadingCart === event.id ? (
                                 <>
                                   <Sparkles className="w-4 h-4 mr-2 animate-spin" />
-                                  <span className="animate-pulse">Adding...</span>
+                                  <span className="animate-pulse">
+                                    Adding...
+                                  </span>
                                 </>
                               ) : (
                                 <>
                                   <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                                  {(event.availableTickets || 0) === 0
+                                    ? "Sold Out"
+                                    : "Add to Cart"}
                                 </>
                               )}
                             </UnifiedButton>
@@ -293,10 +325,10 @@ export default function UpcomingEvents() {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  
+
                   {/* Category Badge */}
                   <div className="absolute top-4 left-4 pointer-events-none">
-                    <Badge 
+                    <Badge
                       variant="secondary"
                       className="bg-white/90 text-gray-800 font-medium"
                     >
@@ -311,13 +343,13 @@ export default function UpcomingEvents() {
                       if (pricing.secondary) {
                         return (
                           <div className="flex flex-col gap-1 items-end">
-                            <Badge 
+                            <Badge
                               variant="default"
                               className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
                             >
                               {pricing.primary}
                             </Badge>
-                            <Badge 
+                            <Badge
                               variant="secondary"
                               className="bg-purple-100 text-purple-700 font-medium text-sm px-2 py-0.5 pricing-font"
                             >
@@ -327,7 +359,7 @@ export default function UpcomingEvents() {
                         );
                       }
                       return (
-                        <Badge 
+                        <Badge
                           variant="default"
                           className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
                         >
@@ -338,20 +370,24 @@ export default function UpcomingEvents() {
                   </div>
 
                   {/* Availability Indicator */}
-                  {event.availableTickets !== undefined && event.maxTickets !== undefined && (
-                    <div className="absolute bottom-4 left-4 pointer-events-none">
-                      <Badge 
-                        variant={event.availableTickets > 5 ? "default" : "destructive"}
-                        className="bg-black/70 text-white"
-                      >
-                        <Users className="w-3 h-3 mr-1" />
-                        {event.availableTickets > 0 
-                          ? `${event.availableTickets} spots left`
-                          : "Sold Out"
-                        }
-                      </Badge>
-                    </div>
-                  )}
+                  {event.availableTickets !== undefined &&
+                    event.maxTickets !== undefined && (
+                      <div className="absolute bottom-4 left-4 pointer-events-none">
+                        <Badge
+                          variant={
+                            event.availableTickets > 5
+                              ? "default"
+                              : "destructive"
+                          }
+                          className="bg-black/70 text-white"
+                        >
+                          <Users className="w-3 h-3 mr-1" />
+                          {event.availableTickets > 0
+                            ? `${event.availableTickets} spots left`
+                            : "Sold Out"}
+                        </Badge>
+                      </div>
+                    )}
                 </div>
 
                 {/* Event Details */}
@@ -381,7 +417,9 @@ export default function UpcomingEvents() {
                     {event.hasMultipleSessions && (
                       <div className="flex items-center gap-2 text-purple-600">
                         <Clock className="w-4 h-4" />
-                        <span className="text-sm font-medium">Multiple sessions available</span>
+                        <span className="text-sm font-medium">
+                          Multiple sessions available
+                        </span>
                       </div>
                     )}
 
@@ -403,12 +441,15 @@ export default function UpcomingEvents() {
                     {/* Add to Cart Button */}
                     <UnifiedButton
                       onClick={() => handleAddToCart(event)}
-                      disabled={(event.availableTickets || 0) === 0 || loadingCart === event.id}
+                      disabled={
+                        (event.availableTickets || 0) === 0 ||
+                        loadingCart === event.id
+                      }
                       className={`w-full mt-4 relative ${
-                        (event.availableTickets || 0) === 0 
-                          ? 'bg-gray-400 cursor-not-allowed' 
-                          : 'bg-purple-600 hover:bg-purple-700'
-                      } ${loadingCart === event.id ? 'bg-purple-700' : ''}`}
+                        (event.availableTickets || 0) === 0
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-purple-600 hover:bg-purple-700"
+                      } ${loadingCart === event.id ? "bg-purple-700" : ""}`}
                       size="lg"
                     >
                       {loadingCart === event.id ? (
@@ -419,7 +460,9 @@ export default function UpcomingEvents() {
                       ) : (
                         <>
                           <ShoppingCart className="w-4 h-4 mr-2" />
-                          {(event.availableTickets || 0) === 0 ? 'Sold Out' : 'Add to Cart'}
+                          {(event.availableTickets || 0) === 0
+                            ? "Sold Out"
+                            : "Add to Cart"}
                         </>
                       )}
                     </UnifiedButton>
@@ -431,11 +474,15 @@ export default function UpcomingEvents() {
         )}
 
         {/* Session Selection Dialog */}
-        <Dialog open={!!sessionSelectionProduct} onOpenChange={(open) => !open && setSessionSelectionProduct(null)}>
+        <Dialog
+          open={!!sessionSelectionProduct}
+          onOpenChange={(open) => !open && setSessionSelectionProduct(null)}
+        >
           <DialogContent className="max-w-md">
             <DialogTitle>Select Session</DialogTitle>
             <DialogDescription>
-              Choose which session you'd like to attend for {sessionSelectionProduct?.name}
+              Choose which session you'd like to attend for{" "}
+              {sessionSelectionProduct?.name}
             </DialogDescription>
             <div className="space-y-3 max-h-60 overflow-y-auto">
               {productSessions.map((session) => (
@@ -475,7 +522,7 @@ export default function UpcomingEvents() {
             Don't See What You're Looking For?
           </h2>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            We offer custom workshops and private events! Contact us to discuss 
+            We offer custom workshops and private events! Contact us to discuss
             your specific needs and we'll create something special just for you.
           </p>
           <UnifiedButton
