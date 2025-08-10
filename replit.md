@@ -65,14 +65,15 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 ## Recent Updates (August 2025)
 
 **Complete Addon Database Overhaul (August 10, 2025):**
-- ✅ Updated addons table with 44 authentic Host Hampton offerings from business spreadsheet
+- ✅ Updated addons table with 47 authentic Host Hampton offerings from business spreadsheet
 - ✅ Activities: 9 standard activities ($10 per guest) - Glittery Makeup, Hair Tinsel, Beaded Hair Braid, etc.
 - ✅ Premium Activities: 10 premium activities ($20 per guest) - DIY Nail Polish, Slime Making, Canvas Painting, etc.
 - ✅ Food & Desserts: 11 options ranging from $28-$200 - Pizza, French Fries, Macarons, Candy Wall
 - ✅ Entertainment: 4 professional services ($399-$699) - Face Painting, Character Visit, Magician, DJ
 - ✅ Equipment & Decor: 7 items including Photo Booth ($150), Balloon packages ($95-$195), Softplay Area ($300)
 - ✅ Drinks: 3 packages from $50-$75 - Basic drinks, Coffee Bar, Bubbles Package
-- ✅ Proper categorization with per_guest flags and authentic business pricing
+- ✅ Gifts: 3 items including Goodie Bags ($8 per guest), Premium Goodie Bags ($15 per guest), Birthday Gift Basket ($25)
+- ✅ Proper categorization with per_guest flags and authentic business pricing across 9 categories
 - ✅ 5-star package auto-selection system with activity allowances and budget tracking
 
 **Complete Create New Event System Implementation (August 9, 2025):**
