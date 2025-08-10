@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FormHeader } from "@/components/party-form/form-header";
 import { ProgressBar } from "@/components/party-form/progress-bar";
 import { StepContainer } from "@/components/party-form/step-container";
-import { InvoiceThemePackageStep } from "@/components/invoice-form/steps/invoice-theme-package-step";
-import { InvoiceActivitiesStep } from "@/components/invoice-form/steps/invoice-activities-step";
-import { InvoiceFoodDessertStep } from "@/components/invoice-form/steps/invoice-food-dessert-step";
-import { InvoiceAddonsStep } from "@/components/invoice-form/steps/invoice-addons-step";
-import { InvoiceLocationDateTimeStep } from "@/components/invoice-form/steps/invoice-location-datetime-step";
-import { InvoiceGuestsStep } from "@/components/invoice-form/steps/invoice-guests-step";
-import { InvoiceContactNotesStep } from "@/components/invoice-form/steps/invoice-contact-notes-step";
-import { InvoiceReviewQuoteStep } from "@/components/invoice-form/steps/invoice-review-quote-step";
-import { useInvoiceForm } from "@/hooks/use-invoice-form";
+import { PartyQuoteThemePackageStep } from "@/components/party-quote-form/steps/party-quote-theme-package-step";
+import { usePartyQuoteForm } from "@/hooks/use-party-quote-form";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, MapPin, RotateCcw } from "lucide-react";
 import { useLocation } from "wouter";
@@ -19,48 +11,55 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 1; // Start with just step 1 for now
 
 const stepTitles = [
-  "Theme & Package",
-  "Activities", 
-  "Food & Dessert",
-  "Add-ons",
-  "Location & Date",
-  "Guest Details",
-  "Contact & Notes",
-  "Review & Quote"
+  "Theme & Package"
 ];
 
-export default function Invoice() {
+export default function PartyQuote() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { formData, updateFormData, resetForm, clearFormData } = useInvoiceForm();
+  const { formData, updateFormData, resetForm, clearFormData } = usePartyQuoteForm();
 
   // Clear form data when component mounts to ensure fresh start
   useEffect(() => {
     clearFormData();
   }, []);
 
+  // Generate random 12-character ID for quote permalink
+  const generateQuoteId = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 12; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   // Quote submission mutation
   const submitQuoteMutation = useMutation({
     mutationFn: async (quoteData: any) => {
-      const response = await apiRequest("POST", "/api/invoice-quotes", quoteData);
-      return response.json();
+      const quoteId = generateQuoteId();
+      const response = await apiRequest("POST", "/api/party-quotes", {
+        ...quoteData,
+        quoteId
+      });
+      return { ...response.json(), quoteId };
     },
     onSuccess: (data) => {
       toast({
-        title: "Quote Created! 🎉",
+        title: "Quote Created!",
         description: "Review your quote and pay deposit to secure your booking.",
       });
       
-      // Redirect to invoice view page
-      if (data.invoiceId) {
-        setLocation(`/invoice/${data.invoiceId}`);
+      // Redirect to quote permalink with random ID
+      if (data.quoteId) {
+        setLocation(`/party-quote?id=${data.quoteId}`);
       }
     },
     onError: (error) => {
@@ -101,23 +100,9 @@ export default function Invoice() {
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        return <InvoiceThemePackageStep formData={formData} updateFormData={updateFormData} />;
-      case 2:
-        return <InvoiceActivitiesStep formData={formData} updateFormData={updateFormData} />;
-      case 3:
-        return <InvoiceFoodDessertStep formData={formData} updateFormData={updateFormData} />;
-      case 4:
-        return <InvoiceAddonsStep formData={formData} updateFormData={updateFormData} />;
-      case 5:
-        return <InvoiceLocationDateTimeStep formData={formData} updateFormData={updateFormData} />;
-      case 6:
-        return <InvoiceGuestsStep formData={formData} updateFormData={updateFormData} />;
-      case 7:
-        return <InvoiceContactNotesStep formData={formData} updateFormData={updateFormData} />;
-      case 8:
-        return <InvoiceReviewQuoteStep formData={formData} updateFormData={updateFormData} />;
+        return <PartyQuoteThemePackageStep formData={formData} updateFormData={updateFormData} />;
       default:
-        return <InvoiceThemePackageStep formData={formData} updateFormData={updateFormData} />;
+        return <PartyQuoteThemePackageStep formData={formData} updateFormData={updateFormData} />;
     }
   };
 
@@ -125,20 +110,6 @@ export default function Invoice() {
     switch (currentStep) {
       case 1:
         return formData.selectedTheme;
-      case 2:
-        return formData.selectedActivities?.length > 0;
-      case 3:
-        return formData.selectedFood || formData.selectedDessert;
-      case 4:
-        return true; // Add-ons are optional
-      case 5:
-        return formData.location && formData.preferredDate;
-      case 6:
-        return formData.guestCount > 0 && formData.childName && formData.childAge;
-      case 7:
-        return formData.hostName && formData.email && formData.phone;
-      case 8:
-        return true; // Review step
       default:
         return false;
     }
@@ -148,10 +119,10 @@ export default function Invoice() {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <FormHeader 
-          title="Party Quote & Booking" 
-          subtitle="Design your perfect party experience"
-        />
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Party Quote & Booking</h1>
+          <p className="text-xl text-gray-600">Design your perfect party experience</p>
+        </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
@@ -161,7 +132,7 @@ export default function Invoice() {
         {/* Step Title */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Step {currentStep}: {stepTitles[currentStep - 1]}
+            Step {currentStep}: {stepTitles[currentStep - 1] || "Theme & Package"}
           </h2>
           <p className="text-gray-600">
             {currentStep < TOTAL_STEPS ? "Complete this step to continue" : "Review your selections and get your quote"}

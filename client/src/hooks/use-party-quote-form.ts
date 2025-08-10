@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export interface InvoiceFormData {
+export interface PartyQuoteFormData {
   // Step 1: Theme & Package
   selectedTheme?: 'standard' | 'custom';
   customThemeDescription?: string;
@@ -83,14 +83,14 @@ export interface InvoiceFormData {
   };
 }
 
-const INITIAL_FORM_DATA: InvoiceFormData = {
+const INITIAL_FORM_DATA: PartyQuoteFormData = {
   guestCount: 10, // Base includes 10 guests
 };
 
-export function useInvoiceForm() {
-  const [formData, setFormData] = useState<InvoiceFormData>(INITIAL_FORM_DATA);
+export function usePartyQuoteForm() {
+  const [formData, setFormData] = useState<PartyQuoteFormData>(INITIAL_FORM_DATA);
 
-  const updateFormData = useCallback((updates: Partial<InvoiceFormData>) => {
+  const updateFormData = useCallback((updates: Partial<PartyQuoteFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   }, []);
 

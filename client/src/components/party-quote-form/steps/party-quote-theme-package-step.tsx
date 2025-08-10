@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, Palette, Gift } from "lucide-react";
-import { InvoiceFormData } from "@/hooks/use-invoice-form";
+import { PartyQuoteFormData } from "@/hooks/use-party-quote-form";
 
 interface Props {
-  formData: InvoiceFormData;
-  updateFormData: (updates: Partial<InvoiceFormData>) => void;
+  formData: PartyQuoteFormData;
+  updateFormData: (updates: Partial<PartyQuoteFormData>) => void;
 }
 
 const packageData = {
@@ -49,7 +49,7 @@ const packageData = {
   }
 };
 
-export function InvoiceThemePackageStep({ formData, updateFormData }: Props) {
+export function PartyQuoteThemePackageStep({ formData, updateFormData }: Props) {
   return (
     <div className="space-y-8">
       {/* Theme Selection */}
