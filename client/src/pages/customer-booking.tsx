@@ -345,8 +345,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
   const depositAmount = 20000; // $200
-  const salesTax = Math.round((booking?.estimatedCost || 0) * 0.0875); // 8.75% sales tax
-  const totalWithTax = (booking?.estimatedCost || 0) + salesTax;
+  
+  // Calculate correct subtotal: base package + extra guests + non-included addons
+  const subtotal = basePackagePrice + extraGuestPrice + addonTotal;
+  const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
+  const totalWithTax = subtotal + salesTax;
   const remainingBalance = totalWithTax - depositAmount;
 
   // Calculate pricing with new theme + star structure
@@ -374,8 +377,17 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   const extraChildGuestAddon = allAddons?.find((addon: any) => addon.name === 'Extra Child Guest');
   const extraGuestPrice = extraGuests * (extraChildGuestAddon?.price || 3500); // Default to $35 if not found
   
+  // Get locked/included items for this package
+  const packageAutoItems = getAutoSelectedItemsForPackage(booking?.packageSelection || '', allAddons);
+  const lockedAddons = packageAutoItems.lockedAddons;
+
   // Calculate add-on total (excluding star package included items)
   const addonTotal = booking?.selectedAddons?.reduce((total: number, addonName: string) => {
+    // Skip locked/included items - they shouldn't add to the price
+    if (lockedAddons.includes(addonName)) {
+      return total;
+    }
+    
     const addon = allAddons?.find((a: any) => a.name === addonName);
     if (addon) {
       return total + (addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price);
@@ -1314,26 +1326,34 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     {booking.selectedAddons.map((addonName: string) => {
                       const addon = allAddons?.find((a: any) => a.name === addonName);
                       if (!addon) return null;
+                      
+                      const isIncluded = lockedAddons.includes(addonName);
                       const itemPrice = addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price;
+                      
                       return (
-                        <div key={addonName} className="flex justify-between text-sm pl-4">
+                        <div key={addonName} className={`flex justify-between text-sm pl-4 ${isIncluded ? 'text-green-700 bg-green-50 px-2 py-1 rounded' : ''}`}>
                           <span>
-                            {addon.icon} {addon.name}
+                            {isIncluded && '🔒 '}{addon.icon} {addon.name}
                             {addon.perGuest && ` (`}<span className="pricing-font">{addon.perGuest && `${formatPrice(addon.price)}`}</span>{addon.perGuest && ` pp)`}
+                            {isIncluded && ' - Included'}
                           </span>
-                          <span className="pricing-font">{formatPrice(itemPrice)}</span>
+                          <span className="pricing-font">
+                            {isIncluded ? 'Included' : formatPrice(itemPrice)}
+                          </span>
                         </div>
                       );
                     })}
-                    <div className="flex justify-between font-medium border-t pt-1">
-                      <span>Add-ons Subtotal:</span>
-                      <span className="pricing-font">{formatPrice(addonTotal)}</span>
-                    </div>
+                    {addonTotal > 0 && (
+                      <div className="flex justify-between font-medium border-t pt-1">
+                        <span>Add-ons Subtotal:</span>
+                        <span className="pricing-font">{formatPrice(addonTotal)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="pricing-font">{formatPrice(booking?.estimatedCost || 0)}</span>
+                  <span className="pricing-font">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Sales Tax (8.75%)</span>
