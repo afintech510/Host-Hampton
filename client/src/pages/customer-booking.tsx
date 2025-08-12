@@ -345,12 +345,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
   const depositAmount = 20000; // $200
-  
-  // Calculate correct subtotal: base package + extra guests + non-included addons
-  const subtotal = basePackagePrice + extraGuestPrice + addonTotal;
-  const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
-  const totalWithTax = subtotal + salesTax;
-  const remainingBalance = totalWithTax - depositAmount;
 
   // Calculate pricing with new theme + star structure
   const isCustomTheme = booking?.partyTheme === 'custom' || booking?.customTheme;
@@ -394,6 +388,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
     }
     return total;
   }, 0) || 0;
+
+  // Calculate correct subtotal: base package + extra guests + non-included addons
+  const subtotal = basePackagePrice + extraGuestPrice + addonTotal;
+  const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
+  const totalWithTax = subtotal + salesTax;
+  const remainingBalance = totalWithTax - depositAmount;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
