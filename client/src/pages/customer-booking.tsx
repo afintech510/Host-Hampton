@@ -510,7 +510,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           key={theme.id}
                           onClick={() => {
                             setSelectedTheme(theme.name);
-                            handleRealTimeUpdate('partyTheme', theme.name, true);
+                            handleRealTimeUpdate('partyTheme', theme.name);
                           }}
                           className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-white hover:bg-gray-50 min-h-[60px] flex items-center"
                         >
@@ -524,7 +524,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 min-h-[60px] flex items-center"
                         onClick={() => {
                           setSelectedTheme('custom');
-                          handleRealTimeUpdate('partyTheme', 'custom', true);
+                          handleRealTimeUpdate('partyTheme', 'custom');
                         }}
                       >
                         <div className="flex items-center gap-3 w-full">
@@ -627,56 +627,254 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         })()}
                       </div>
 
-                      {/* Add-ons for Selected Level */}
-                      <div className="border-2 border-gray-200 p-4">
-                        <h4 className="font-medium text-gray-800 mb-3">Available Add-ons for Level {selectedStars}</h4>
-                        <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
-                          {allAddons?.filter((addon: any) => {
-                            // Show relevant add-ons based on package level
-                            if (selectedStars === 1) return ['activity', 'food', 'drink'].includes(addon.category);
-                            if (selectedStars === 2) return ['activity', 'food', 'drink', 'decor'].includes(addon.category);
-                            if (selectedStars === 3) return ['activity', 'food', 'drink', 'decor', 'entertainment'].includes(addon.category);
-                            if (selectedStars === 4 || selectedStars === 5) return true; // 4-star and 5-star packages show all add-ons
-                            return false;
-                          }).map((addon: any) => {
-                            const isSelected = booking.selectedAddons?.includes(addon.name);
-                            const addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
-                            
-                            return (
-                              <div
-                                key={addon.id}
-                                onClick={() => {
-                                  const currentAddons = booking.selectedAddons || [];
-                                  const updatedAddons = isSelected 
-                                    ? currentAddons.filter((name: string) => name !== addon.name)
-                                    : [...currentAddons, addon.name];
-                                  handleRealTimeUpdate('selectedAddons', updatedAddons);
-                                }}
-                                className={`border-2 p-3 cursor-pointer transition-all text-sm ${
-                                  isSelected 
-                                    ? 'border-purple-500 bg-purple-50' 
-                                    : 'border-gray-200 bg-white hover:border-purple-300'
-                                }`}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-lg">{addon.icon}</span>
-                                    <span className="font-medium">{addon.name}</span>
-                                  </div>
-                                  <span className="text-purple-600 font-semibold">
-                                    {formatPrice(addonPrice)}
-                                    {addon.per_guest && '/guest'}
-                                  </span>
+                      {/* Structured Activity & Food Selection */}
+                      <div className="space-y-4">
+                        {(() => {
+                          const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
+                          const selectedPackageKey = starKeys[selectedStars - 1];
+                          const selectedPackage = packageDefinitions[selectedPackageKey as keyof typeof packageDefinitions];
+                          
+                          // Get currently selected activities
+                          const currentPremiumActivities = booking.selectedPremiumActivities || [];
+                          const currentStandardActivities = booking.selectedStandardActivities || [];
+                          const currentFood = booking.selectedFood || 'pizza';
+                          const currentCupcakeFlavor = booking.selectedCupcakeFlavor || 'vanilla';
+                          const hasChickenUpgrade = booking.hasChickenUpgrade || false;
+
+                          const premiumActivitiesData = allAddons?.filter((addon: any) => 
+                            addon.category === 'premium activity'
+                          ) || [];
+                          
+                          const standardActivitiesData = allAddons?.filter((addon: any) => 
+                            addon.category === 'activity'
+                          ) || [];
+
+                          const premiumQuotaReached = currentPremiumActivities.length >= selectedPackage.premiumActivities;
+                          const standardQuotaReached = currentStandardActivities.length >= selectedPackage.standardActivities;
+
+                          return (
+                            <>
+                              {/* Premium Activities Section */}
+                              {selectedPackage.premiumActivities > 0 && (
+                                <div className="border-2 border-gray-200 p-4">
+                                  <h4 className="font-medium text-gray-800 mb-2">
+                                    Select Premium Activities ({currentPremiumActivities.length}/{selectedPackage.premiumActivities})
+                                  </h4>
+                                  
+                                  {premiumQuotaReached ? (
+                                    <div className="space-y-2">
+                                      <p className="text-sm text-green-600 mb-2">✓ Premium activity selection complete</p>
+                                      {currentPremiumActivities.map((activityName: string) => {
+                                        const activity = premiumActivitiesData.find((a: any) => a.name === activityName);
+                                        if (!activity) return null;
+                                        return (
+                                          <div key={activity.id} className="border-2 border-green-500 bg-green-50 p-3">
+                                            <div className="flex justify-between items-center">
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-lg">{activity.icon}</span>
+                                                <span className="font-medium">{activity.name}</span>
+                                              </div>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                  const updated = currentPremiumActivities.filter((name: string) => name !== activity.name);
+                                                  handleRealTimeUpdate('selectedPremiumActivities', updated);
+                                                }}
+                                              >
+                                                Change
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                                      {premiumActivitiesData.map((addon: any) => {
+                                        const isSelected = currentPremiumActivities.includes(addon.name);
+                                        const addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
+                                        
+                                        return (
+                                          <div
+                                            key={addon.id}
+                                            onClick={() => {
+                                              if (isSelected) {
+                                                const updated = currentPremiumActivities.filter((name: string) => name !== addon.name);
+                                                handleRealTimeUpdate('selectedPremiumActivities', updated);
+                                              } else if (!premiumQuotaReached) {
+                                                const updated = [...currentPremiumActivities, addon.name];
+                                                handleRealTimeUpdate('selectedPremiumActivities', updated);
+                                              }
+                                            }}
+                                            className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                              isSelected 
+                                                ? 'border-purple-500 bg-purple-50' 
+                                                : 'border-gray-200 bg-white hover:border-purple-300'
+                                            }`}
+                                          >
+                                            <div className="flex justify-between items-center">
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-lg">{addon.icon}</span>
+                                                <span className="font-medium">{addon.name}</span>
+                                              </div>
+                                              <span className="text-purple-600 font-semibold">
+                                                {formatPrice(addonPrice)}
+                                                {addon.per_guest && '/guest'}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
-                                {addon.description && (
-                                  <div className="text-xs text-gray-500 mt-1 ml-7">
-                                    {addon.description}
+                              )}
+
+                              {/* Standard Activities Section */}
+                              {selectedPackage.standardActivities > 0 && (
+                                <div className="border-2 border-gray-200 p-4">
+                                  <h4 className="font-medium text-gray-800 mb-2">
+                                    Select Standard Activities ({currentStandardActivities.length}/{selectedPackage.standardActivities})
+                                  </h4>
+                                  
+                                  {standardQuotaReached ? (
+                                    <div className="space-y-2">
+                                      <p className="text-sm text-green-600 mb-2">✓ Standard activity selection complete</p>
+                                      {currentStandardActivities.map((activityName: string) => {
+                                        const activity = standardActivitiesData.find((a: any) => a.name === activityName);
+                                        if (!activity) return null;
+                                        return (
+                                          <div key={activity.id} className="border-2 border-green-500 bg-green-50 p-3">
+                                            <div className="flex justify-between items-center">
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-lg">{activity.icon}</span>
+                                                <span className="font-medium">{activity.name}</span>
+                                              </div>
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                  const updated = currentStandardActivities.filter((name: string) => name !== activity.name);
+                                                  handleRealTimeUpdate('selectedStandardActivities', updated);
+                                                }}
+                                              >
+                                                Change
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                                      {standardActivitiesData.map((addon: any) => {
+                                        const isSelected = currentStandardActivities.includes(addon.name);
+                                        const addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
+                                        
+                                        return (
+                                          <div
+                                            key={addon.id}
+                                            onClick={() => {
+                                              if (isSelected) {
+                                                const updated = currentStandardActivities.filter((name: string) => name !== addon.name);
+                                                handleRealTimeUpdate('selectedStandardActivities', updated);
+                                              } else if (!standardQuotaReached) {
+                                                const updated = [...currentStandardActivities, addon.name];
+                                                handleRealTimeUpdate('selectedStandardActivities', updated);
+                                              }
+                                            }}
+                                            className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                              isSelected 
+                                                ? 'border-purple-500 bg-purple-50' 
+                                                : 'border-gray-200 bg-white hover:border-purple-300'
+                                            }`}
+                                          >
+                                            <div className="flex justify-between items-center">
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-lg">{addon.icon}</span>
+                                                <span className="font-medium">{addon.name}</span>
+                                              </div>
+                                              <span className="text-purple-600 font-semibold">
+                                                {formatPrice(addonPrice)}
+                                                {addon.per_guest && '/guest'}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Food Selection */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Select Food</h4>
+                                <div className="space-y-3">
+                                  {/* Base Food Options */}
+                                  <div className="space-y-2">
+                                    <p className="text-sm text-gray-600">Choose your base meal:</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {['pizza', 'bagels'].map((food) => (
+                                        <div
+                                          key={food}
+                                          onClick={() => handleRealTimeUpdate('selectedFood', food)}
+                                          className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                            currentFood === food 
+                                              ? 'border-purple-500 bg-purple-50' 
+                                              : 'border-gray-200 bg-white hover:border-purple-300'
+                                          }`}
+                                        >
+                                          <div className="font-medium capitalize">{food}</div>
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
-                                )}
+                                  
+                                  {/* Chicken Upgrade Option */}
+                                  <div className="border-t pt-3">
+                                    <div
+                                      onClick={() => handleRealTimeUpdate('hasChickenUpgrade', !hasChickenUpgrade)}
+                                      className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                        hasChickenUpgrade 
+                                          ? 'border-purple-500 bg-purple-50' 
+                                          : 'border-gray-200 bg-white hover:border-purple-300'
+                                      }`}
+                                    >
+                                      <div className="flex justify-between items-center">
+                                        <span className="font-medium">🍗 Upgrade to Chicken Fingers & French Fries</span>
+                                        <span className="text-purple-600 font-semibold">+$100</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                            );
-                          })}
-                        </div>
+
+                              {/* Cupcake Flavor Selection */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Select Cupcake Flavor</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                  {['vanilla', 'chocolate'].map((flavor) => (
+                                    <div
+                                      key={flavor}
+                                      onClick={() => handleRealTimeUpdate('selectedCupcakeFlavor', flavor)}
+                                      className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                        currentCupcakeFlavor === flavor 
+                                          ? 'border-purple-500 bg-purple-50' 
+                                          : 'border-gray-200 bg-white hover:border-purple-300'
+                                      }`}
+                                    >
+                                      <div className="font-medium">
+                                        {flavor === 'vanilla' ? '🧁' : '🍫'} {flavor.charAt(0).toUpperCase() + flavor.slice(1)} Cupcakes
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
