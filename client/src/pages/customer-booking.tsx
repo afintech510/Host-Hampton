@@ -383,9 +383,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
           <p className="text-gray-600">Complete your booking details below</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
           {/* Left Column - Design Form */}
-          <div>
+          <div className="order-2 lg:order-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -396,13 +396,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
               <CardContent className="space-y-6 p-6">
                 {/* Child Details */}
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-semibold text-gray-700">Child's First Name</Label>
                       <Input
                         value={booking.childName || ''}
                         onChange={(e) => handleTextInputUpdate('childName', e.target.value)}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
                         placeholder="Enter child's name"
                       />
                     </div>
@@ -414,7 +414,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         max="18"
                         value={booking.childAge || ''}
                         onChange={(e) => handleRealTimeUpdate('childAge', parseInt(e.target.value))}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
                         placeholder="Age"
                       />
                     </div>
@@ -427,7 +427,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <Calendar className="w-5 h-5 text-purple-600" />
                     Date & Time
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-semibold text-gray-700">Event Date</Label>
                       <Input
@@ -459,7 +459,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <Users className="w-5 h-5 text-purple-600" />
                     Party Details
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm font-semibold text-gray-700">Guest Count</Label>
                       <Input
@@ -505,7 +505,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </h3>
                   
                   {!selectedTheme ? (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {allThemes?.map((theme: any) => (
                         <div
                           key={theme.id}
@@ -800,7 +800,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 <h4 className="font-medium text-gray-800 mb-3">Food Selection</h4>
                                 
                                 {/* Base Food Selection */}
-                                <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                   <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'pizza')}
                                     className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
@@ -883,7 +883,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 {/* Base Cupcakes (Included) */}
                                 <div className="mb-4">
                                   <p className="text-xs text-gray-600 mb-2">Included:</p>
-                                  <div className="grid grid-cols-2 gap-3">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {['vanilla', 'chocolate'].map((flavor) => (
                                       <div
                                         key={flavor}
@@ -1037,7 +1037,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                         key={allergy}
                                         onClick={() => {
                                           const updated = isSelected 
-                                            ? currentAllergies.filter(a => a !== allergy)
+                                            ? currentAllergies.filter((a: string) => a !== allergy)
                                             : [...currentAllergies, allergy];
                                           handleRealTimeUpdate('selectedAllergies', updated);
                                         }}
@@ -1080,9 +1080,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
           </div>
 
           {/* Right Column - Quotation & Billing */}
-          <div className="space-y-6">
+          <div className="space-y-6 order-1 lg:order-2">
             {/* Pricing Summary - Sticky */}
-            <Card className="sticky top-4 z-10 bg-white shadow-lg">
+            <div className="sticky top-4 z-10">
+              <Card className="bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
@@ -1127,7 +1128,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </label>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            </div>
 
             {/* Billing Information - Conditional */}
             {showBillingInfo && (
@@ -1139,7 +1141,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name *</Label>
                     <Input
@@ -1170,7 +1172,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="city">City *</Label>
                     <Input
@@ -1191,7 +1193,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="zipCode">ZIP Code *</Label>
                     <Input
