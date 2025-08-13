@@ -399,6 +399,23 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   const packageAutoItems = getAutoSelectedItemsForPackage(booking?.packageSelection || '', allAddons);
   const lockedAddons = packageAutoItems.lockedAddons;
 
+  // First, calculate total food/dessert cost for food budget application
+  const selectedFoodItems = booking?.selectedAddons?.filter((name: string) => {
+    const addon = allAddons?.find((a: any) => a.name === name);
+    return addon && (addon.category === 'food' || addon.category === 'dessert') && !lockedAddons.includes(name);
+  }) || [];
+  
+  const totalFoodCost = selectedFoodItems.reduce((total: number, addonName: string) => {
+    const addon = allAddons?.find((a: any) => a.name === addonName);
+    if (addon) {
+      const itemPrice = addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price;
+      return total + itemPrice;
+    }
+    return total;
+  }, 0);
+  
+  const foodBudgetDiscount = packageAutoItems.foodBudget > 0 ? Math.min(totalFoodCost, packageAutoItems.foodBudget) : 0;
+
   // Calculate add-on total (excluding star package included items and base activities)
   const addonTotal = booking?.selectedAddons?.reduce((total: number, addonName: string) => {
     // Skip locked/included items - they shouldn't add to the price
@@ -464,34 +481,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
       }
     }
     
-    // Handle food budget for Ultimate Package (Level 5)
-    if ((addon.category === 'food' || addon.category === 'dessert') && packageAutoItems.foodBudget > 0) {
-      const itemPrice = addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price;
-      
-      // Calculate total food/dessert cost so far (excluding this item)
-      const otherFoodCost = booking.selectedAddons?.reduce((foodTotal: number, otherAddonName: string) => {
-        if (otherAddonName === addonName) return foodTotal; // Skip current item
-        const otherAddon = allAddons?.find((a: any) => a.name === otherAddonName);
-        if (otherAddon && (otherAddon.category === 'food' || otherAddon.category === 'dessert')) {
-          const otherPrice = otherAddon.perGuest ? otherAddon.price * (booking.guestCount || 0) : otherAddon.price;
-          return foodTotal + otherPrice;
-        }
-        return foodTotal;
-      }, 0) || 0;
-      
-      // Apply food budget credit
-      const remainingBudget = Math.max(0, packageAutoItems.foodBudget - otherFoodCost);
-      const discountedPrice = Math.max(0, itemPrice - remainingBudget);
-      
-      return total + discountedPrice;
-    }
-    
     // Charge for non-activity addons or activities beyond allowances
     return total + (addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price);
   }, 0) || 0;
+  
+  // Apply food budget discount to the total
+  const finalAddonTotal = addonTotal - foodBudgetDiscount;
 
-  // Calculate correct subtotal: base package + extra guests + non-included addons
-  const subtotal = basePackagePrice + extraGuestPrice + addonTotal;
+  // Calculate correct subtotal: base package + extra guests + non-included addons (with food budget applied)
+  const subtotal = basePackagePrice + extraGuestPrice + finalAddonTotal;
   const salesTax = Math.round(subtotal * 0.0875); // 8.75% sales tax
   const totalWithTax = subtotal + salesTax;
   const remainingBalance = totalWithTax - depositAmount;
@@ -1434,6 +1432,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     <span>{formatPrice(packageAutoItems.foodBudget)}</span>
                   </div>
                 )}
+                
+                {foodBudgetDiscount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Food Budget Applied</span>
+                    <span className="pricing-font">-{formatPrice(foodBudgetDiscount)}</span>
+                  </div>
+                )}
                 {booking?.selectedAddons && booking.selectedAddons.length > 0 && (
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-gray-700">Selected Add-ons:</div>
@@ -1476,25 +1481,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                         }
                       }
                       
-                      // Check if this is food/dessert with budget savings
+                      // Check if this is food/dessert that benefits from budget discount
                       let hasFoodBudgetSavings = false;
                       let displayPrice = itemPrice;
-                      if ((addon.category === 'food' || addon.category === 'dessert') && packageAutoItems.foodBudget > 0) {
-                        // Calculate food budget usage
-                        const otherFoodCost = booking.selectedAddons?.reduce((foodTotal: number, otherAddonName: string) => {
-                          if (otherAddonName === addonName) return foodTotal;
-                          const otherAddon = allAddons?.find((a: any) => a.name === otherAddonName);
-                          if (otherAddon && (otherAddon.category === 'food' || otherAddon.category === 'dessert')) {
-                            const otherPrice = otherAddon.perGuest ? otherAddon.price * (booking.guestCount || 0) : otherAddon.price;
-                            return foodTotal + otherPrice;
-                          }
-                          return foodTotal;
-                        }, 0) || 0;
-                        
-                        const remainingBudget = Math.max(0, packageAutoItems.foodBudget - otherFoodCost);
-                        if (remainingBudget > 0) {
-                          hasFoodBudgetSavings = true;
-                          displayPrice = Math.max(0, itemPrice - remainingBudget);
+                      if ((addon.category === 'food' || addon.category === 'dessert') && packageAutoItems.foodBudget > 0 && !isPackageIncluded) {
+                        hasFoodBudgetSavings = foodBudgetDiscount > 0;
+                        // For display purposes, show proportional discount if there's a food budget
+                        if (hasFoodBudgetSavings) {
+                          const discountRatio = foodBudgetDiscount / totalFoodCost;
+                          const itemDiscount = Math.round(itemPrice * discountRatio);
+                          displayPrice = Math.max(0, itemPrice - itemDiscount);
                         }
                       }
                       
