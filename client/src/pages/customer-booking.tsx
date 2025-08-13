@@ -1136,27 +1136,136 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {billingData.email && billingData.agreeToCommunications ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Base Party Price</span>
-                      <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
+                  <div className="space-y-4">
+                    {/* Party Details Header */}
+                    <div className="text-center p-3 bg-purple-50 rounded-lg">
+                      <h3 className="text-lg font-bold text-purple-800">
+                        {booking.childName || 'Child'} turning {booking.childAge || 'Age'} Birthday Party! 🎉
+                      </h3>
                     </div>
-                    {pricing.packagePrice > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Package Add-on</span>
-                        <span className="font-semibold">+{formatPrice(pricing.packagePrice)}</span>
+
+                    {/* Party Information */}
+                    <div className="space-y-2 text-sm">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-gray-600">Date:</span>
+                          <p className="font-medium">{booking.partyDate || 'To be scheduled'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Time:</span>
+                          <p className="font-medium">{booking.partyTime || 'To be scheduled'}</p>
+                        </div>
                       </div>
-                    )}
-                    {pricing.addonsTotal > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Additional Extras</span>
-                        <span className="font-semibold">+{formatPrice(pricing.addonsTotal)}</span>
+                      
+                      <div>
+                        <span className="text-gray-600">Location:</span>
+                        <p className="font-medium">{booking.eventLocation === 'studio' ? 'Host Hampton Studio' : 'Mobile Service'}</p>
                       </div>
-                    )}
+                      
+                      <div>
+                        <span className="text-gray-600">Theme:</span>
+                        <p className="font-medium">{selectedTheme || booking.partyTheme || 'To be selected'}</p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-gray-600">Expected Guests:</span>
+                        <p className="font-medium">{booking.guestCount || 10} children</p>
+                      </div>
+                    </div>
+
                     <Separator />
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total</span>
-                      <span className="text-purple-600">{formatPrice(pricing.total)}</span>
+
+                    {/* Package Details */}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-purple-700">⭐ {selectedStars}-Star Package (up to 12 guests)</h4>
+                      
+                      {/* Included Items */}
+                      <div className="bg-green-50 p-2 rounded">
+                        <p className="text-xs font-medium text-green-800 mb-1">✓ Included:</p>
+                        <ul className="text-xs text-green-700 space-y-0.5">
+                          <li>• 2-hour party celebration</li>
+                          <li>• Dedicated party host</li>
+                          <li>• All party supplies & decorations</li>
+                          <li>• Themed activities & games</li>
+                          {selectedStars >= 2 && <li>• Photo booth with props</li>}
+                          {selectedStars >= 3 && <li>• Professional face painting</li>}
+                          {selectedStars >= 4 && <li>• Character visit</li>}
+                          {selectedStars >= 5 && <li>• DJ & sound system</li>}
+                        </ul>
+                      </div>
+
+                      {/* Selected Activities */}
+                      {(booking.selectedStandardActivities?.length > 0 || booking.selectedPremiumActivities?.length > 0) && (
+                        <div className="bg-blue-50 p-2 rounded">
+                          <p className="text-xs font-medium text-blue-800 mb-1">🎨 Selected Activities:</p>
+                          <ul className="text-xs text-blue-700 space-y-0.5">
+                            {booking.selectedPremiumActivities?.map((activity: string) => (
+                              <li key={activity}>• {activity} (Premium)</li>
+                            ))}
+                            {booking.selectedStandardActivities?.map((activity: string) => (
+                              <li key={activity}>• {activity}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Extra Add-ons */}
+                      {(booking.selectedFoodAddons || booking.selectedSweetAddons || booking.selectedDrinkAddons) && (
+                        <div className="bg-amber-50 p-2 rounded">
+                          <p className="text-xs font-medium text-amber-800 mb-1">+ Extra Items:</p>
+                          <ul className="text-xs text-amber-700 space-y-0.5">
+                            {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
+                              .filter(([name, qty]) => Number(qty) > 0)
+                              .map(([name, qty]) => (
+                                <li key={name}>• {name} (×{qty})</li>
+                              ))}
+                            {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
+                              .filter(([name, qty]) => Number(qty) > 0)
+                              .map(([name, qty]) => (
+                                <li key={name}>• {name} (×{qty})</li>
+                              ))}
+                            {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
+                              .filter(([name, qty]) => Number(qty) > 0)
+                              .map(([name, qty]) => (
+                                <li key={name}>• {name} (×{qty})</li>
+                              ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    <Separator />
+
+                    {/* Pricing Breakdown */}
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{selectedStars}-Star Package</span>
+                        <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
+                      </div>
+                      
+                      {(booking.guestCount && booking.guestCount > 12) && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Additional guests ({booking.guestCount - 12})</span>
+                          <span className="font-semibold">+{formatPrice((booking.guestCount - 12) * 25)}</span>
+                        </div>
+                      )}
+                      
+                      {pricing.addonsTotal > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Extra Items & Activities</span>
+                          <span className="font-semibold">+{formatPrice(pricing.addonsTotal)}</span>
+                        </div>
+                      )}
+                      
+                      <Separator />
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total Party Cost</span>
+                        <span className="text-purple-600">{formatPrice(pricing.total)}</span>
+                      </div>
+                      
+                      <div className="text-center text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                        <strong>Deposit to Secure Date:</strong> $200
+                      </div>
                     </div>
                   </div>
                 ) : (
