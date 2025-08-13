@@ -260,10 +260,60 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     
     const packagePrice = packageObj?.price || 0;
 
-    // Calculate add-ons total (excluding package-included items)
+    // Calculate add-ons total from new structure
     let addonsTotal = 0;
+    
+    // Food add-ons
+    const foodPrices = {
+      'Fruit Tray': 45,
+      'Tray of Chicken Fingers': 65, 
+      'Tray of French Fries': 35,
+      'Regular Pizza (Adults)': 28,
+      'Specialty Pizza': 35,
+      'Popcorn Bar': 75
+    };
+    if (booking.selectedFoodAddons) {
+      Object.entries(booking.selectedFoodAddons).forEach(([name, quantity]) => {
+        if (quantity > 0 && foodPrices[name as keyof typeof foodPrices]) {
+          addonsTotal += foodPrices[name as keyof typeof foodPrices] * (quantity as number);
+        }
+      });
+    }
+
+    // Sweet add-ons  
+    const sweetPrices = {
+      'Macarons': 24,
+      'Chocolate Covered Pretzels': 18,
+      'Chocolate Covered Rice Krispies': 20, 
+      'Decorated Sugar Cookies': 30,
+      'Candy Wall': 200,
+      'Custom Treat Table': 150
+    };
+    if (booking.selectedSweetAddons) {
+      Object.entries(booking.selectedSweetAddons).forEach(([name, quantity]) => {
+        if (quantity > 0 && sweetPrices[name as keyof typeof sweetPrices]) {
+          addonsTotal += sweetPrices[name as keyof typeof sweetPrices] * (quantity as number);
+        }
+      });
+    }
+
+    // Drink add-ons
+    const drinkPrices = {
+      'Bubbles Drink Package': 75,
+      'Coffee Bar': 75,
+      'Drinks Package': 50
+    };
+    if (booking.selectedDrinkAddons) {
+      Object.entries(booking.selectedDrinkAddons).forEach(([name, quantity]) => {
+        if (quantity > 0 && drinkPrices[name as keyof typeof drinkPrices]) {
+          addonsTotal += drinkPrices[name as keyof typeof drinkPrices] * (quantity as number);
+        }
+      });
+    }
+
+    // Legacy selectedAddons for backward compatibility
     if (booking.selectedAddons && booking.selectedAddons.length > 0) {
-      addonsTotal = booking.selectedAddons.reduce((total: number, addonName: string) => {
+      addonsTotal += booking.selectedAddons.reduce((total: number, addonName: string) => {
         const addon = allAddons?.find((a: any) => a.name === addonName);
         if (!addon) return total;
 
@@ -383,9 +433,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
           <p className="text-gray-600">Complete your booking details below</p>
         </div>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Design Form */}
-          <div className="order-2 lg:order-1">
+          <div className="order-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1080,9 +1130,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
           </div>
 
           {/* Right Column - Quotation & Billing */}
-          <div className="space-y-6 order-1 lg:order-2">
+          <div className="space-y-6 order-2">
             {/* Pricing Summary - Sticky */}
-            <div className="sticky top-4 z-10">
+            <div className="lg:sticky lg:top-4 z-10">
               <Card className="bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
