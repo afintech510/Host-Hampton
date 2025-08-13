@@ -1160,27 +1160,55 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-600">
-                    <DollarSign className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <div className="text-center py-6 text-gray-600">
+                    <DollarSign className="w-10 h-10 mx-auto mb-3 text-gray-400" />
                     <p className="text-lg font-semibold mb-2">Get Your Quote</p>
-                    <p className="text-sm">
-                      Please provide your email and accept communications below to see pricing details.
+                    <p className="text-sm mb-4">
+                      Please provide your email and accept communications to see pricing details.
                     </p>
                   </div>
                 )}
                 
-                {/* Show/Hide Billing Checkbox */}
-                <div className="border-t pt-3">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showBillingInfo}
-                      onChange={(e) => setShowBillingInfo(e.target.checked)}
-                      className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                {/* Email and Communications - Always visible */}
+                <div className="border-t pt-4 space-y-3">
+                  <div>
+                    <Label htmlFor="quoteEmail" className="text-sm font-medium">Email Address *</Label>
+                    <Input
+                      id="quoteEmail"
+                      type="email"
+                      value={billingData.email}
+                      onChange={(e) => setBillingData({...billingData, email: e.target.value})}
+                      className="mt-1"
+                      placeholder="Enter your email"
                     />
-                    <span className="text-sm text-gray-600">Show billing information</span>
-                  </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="quoteCommunications"
+                      checked={billingData.agreeToCommunications}
+                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
+                    />
+                    <Label htmlFor="quoteCommunications" className="text-sm">
+                      I agree to receive communications about my event *
+                    </Label>
+                  </div>
                 </div>
+                
+                {/* Show/Hide Additional Billing Checkbox */}
+                {billingData.email && billingData.agreeToCommunications && (
+                  <div className="border-t pt-3">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showBillingInfo}
+                        onChange={(e) => setShowBillingInfo(e.target.checked)}
+                        className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                      />
+                      <span className="text-sm text-gray-600">Show additional billing information</span>
+                    </label>
+                  </div>
+                )}
               </CardContent>
               </Card>
             </div>
@@ -1268,17 +1296,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={billingData.email}
-                    onChange={(e) => setBillingData({...billingData, email: e.target.value})}
-                    className="mt-1"
-                  />
-                </div>
-
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -1288,17 +1305,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     />
                     <Label htmlFor="agreeToTerms" className="text-sm">
                       I agree to the terms and conditions *
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="agreeToCommunications"
-                      checked={billingData.agreeToCommunications}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
-                    />
-                    <Label htmlFor="agreeToCommunications" className="text-sm">
-                      I agree to receive communications about my event *
                     </Label>
                   </div>
                 </div>
