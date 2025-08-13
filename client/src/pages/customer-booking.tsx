@@ -151,19 +151,25 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     }
   });
 
-  // Update booking mutation
+  // Update booking mutation - NO QUERY INVALIDATION to prevent re-renders during typing
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
       const response = await apiRequest("PATCH", `/api/leads/${effectiveLeadId}`, updates);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads", effectiveLeadId] });
+    onSuccess: (data, variables) => {
+      // Update the cache directly instead of invalidating to prevent re-renders
+      queryClient.setQueryData(["/api/leads", effectiveLeadId], (oldData: any) => {
+        if (oldData) {
+          return { ...oldData, ...variables };
+        }
+        return oldData;
+      });
       // Silent update - no toast notifications
     },
     onError: () => {
       toast({
-        title: "Update Failed",
+        title: "Update Failed", 
         description: "Failed to update booking. Please try again.",
         variant: "destructive",
       });
@@ -173,23 +179,31 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   // Separate timeout refs for different fields to prevent interference
   const timeoutRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
   
-  // Simple immediate update for all non-text fields
+  // Immediate update for non-text fields
   const handleRealTimeUpdate = (field: string, value: any) => {
     updateMutation.mutate({ [field]: value });
   };
   
-  // Debounced update specifically for text inputs to avoid typing interference  
+  // Debounced update for text inputs with local state update for immediate UI feedback
   const handleTextInputUpdate = (field: string, value: any) => {
+    // Update local cache immediately for UI responsiveness
+    queryClient.setQueryData(["/api/leads", effectiveLeadId], (oldData: any) => {
+      if (oldData) {
+        return { ...oldData, [field]: value };
+      }
+      return oldData;
+    });
+    
     // Clear existing timeout for this specific field
     if (timeoutRefs.current[field]) {
       clearTimeout(timeoutRefs.current[field]!);
     }
     
-    // Set new timeout for this field
+    // Set new timeout for server sync
     timeoutRefs.current[field] = setTimeout(() => {
       updateMutation.mutate({ [field]: value });
       timeoutRefs.current[field] = null;
-    }, 1500); // 1.5 second debounce for text inputs
+    }, 2000); // 2 second debounce for text inputs
   };
 
   // Cleanup effect to clear all timeouts on unmount
