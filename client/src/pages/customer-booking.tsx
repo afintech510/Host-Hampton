@@ -362,9 +362,31 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   
   const basePackagePrice = baseThemePrice + packageCost;
   
-  // Calculate extra guests
+  // Calculate extra guests based on package inclusions
   const baseGuestCount = 10;
-  const extraGuests = Math.max(0, (booking?.guestCount || 0) - baseGuestCount);
+  let packageIncludedGuests = 0;
+  
+  // Determine how many extra guests are included in the package
+  switch (booking?.packageSelection) {
+    case '⭐⭐ Enhanced Package':
+      packageIncludedGuests = 3; // Level 1 includes 3 extra guests
+      break;
+    case '⭐⭐⭐ Premium Package':
+      packageIncludedGuests = 4; // Level 2 includes 4 extra guests
+      break;
+    case '⭐⭐⭐⭐ Deluxe Package':
+      packageIncludedGuests = 5; // Level 3 includes 5 extra guests
+      break;
+    case '⭐⭐⭐⭐⭐ Ultimate Package':
+      packageIncludedGuests = 6; // Level 4 includes 6 extra guests
+      break;
+    default:
+      packageIncludedGuests = 0; // Base package includes no extra guests
+      break;
+  }
+  
+  const totalIncludedGuests = baseGuestCount + packageIncludedGuests;
+  const extraGuests = Math.max(0, (booking?.guestCount || 0) - totalIncludedGuests);
   const extraChildGuestAddon = allAddons?.find((addon: any) => addon.name === 'Extra Child Guest');
   const extraGuestPrice = extraGuests * (extraChildGuestAddon?.price || 3500); // Default to $35 if not found
   
@@ -1311,9 +1333,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                   <span>Package Total ({baseGuestCount} guests)</span>
                   <span className="pricing-font">{formatPrice(basePackagePrice)}</span>
                 </div>
+                {packageIncludedGuests > 0 && (
+                  <div className="flex justify-between text-green-700 bg-green-50 px-2 py-1 rounded">
+                    <span>🔒 Extra Guests Included ({packageIncludedGuests})</span>
+                    <span>Included</span>
+                  </div>
+                )}
                 {extraGuests > 0 && (
                   <div className="flex justify-between">
-                    <span>Extra Guests ({extraGuests} × <span className="pricing-font">$35</span>)</span>
+                    <span>Additional Extra Guests ({extraGuests} × <span className="pricing-font">$35</span>)</span>
                     <span className="pricing-font">{formatPrice(extraGuestPrice)}</span>
                   </div>
                 )}
