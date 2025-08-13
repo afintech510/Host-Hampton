@@ -796,7 +796,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                               {/* Food Selection */}
                               <div className="border-2 border-gray-200 p-4">
-                                <div className="grid grid-cols-1 gap-3">
+                                <h4 className="font-medium text-gray-800 mb-3">Food Selection</h4>
+                                
+                                {/* Base Food Selection */}
+                                <div className="grid grid-cols-2 gap-3 mb-4">
                                   <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'pizza')}
                                     className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
@@ -817,40 +820,139 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   >
                                     <div className="font-medium">🥯 Bagels</div>
                                   </div>
-                                  <div
-                                    onClick={() => handleRealTimeUpdate('hasChickenUpgrade', !hasChickenUpgrade)}
-                                    className={`border-2 p-3 cursor-pointer transition-all text-sm ${
-                                      hasChickenUpgrade 
-                                        ? 'border-purple-500 bg-purple-50' 
-                                        : 'border-gray-200 bg-white hover:border-purple-300'
-                                    }`}
-                                  >
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-medium">🍗 Upgrade to Chicken Fingers & French Fries</span>
-                                      <span className="text-purple-600 font-semibold">+$100</span>
-                                    </div>
+                                </div>
+
+                                {/* Food Add-ons */}
+                                <div className="border-t pt-3">
+                                  <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
+                                  <div className="space-y-2">
+                                    {[
+                                      { name: 'Fruit Tray', icon: '🍓', price: 45 },
+                                      { name: 'Tray of Chicken Fingers', icon: '🍗', price: 65 },
+                                      { name: 'Tray of French Fries', icon: '🍟', price: 35 },
+                                      { name: 'Regular Pizza (Adults)', icon: '🍕', price: 28 },
+                                      { name: 'Specialty Pizza', icon: '🍕', price: 35 },
+                                      { name: 'Popcorn Bar', icon: '🍿', price: 75 }
+                                    ].map((addon) => {
+                                      const currentFoodAddons = booking.selectedFoodAddons || {};
+                                      const quantity = currentFoodAddons[addon.name] || 0;
+                                      
+                                      return (
+                                        <div key={addon.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-lg">{addon.icon}</span>
+                                            <span className="text-sm font-medium">{addon.name}</span>
+                                            <span className="text-xs text-gray-500">${addon.price}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <button
+                                              onClick={() => {
+                                                const updated = { ...currentFoodAddons };
+                                                if (quantity > 0) {
+                                                  updated[addon.name] = quantity - 1;
+                                                  if (updated[addon.name] === 0) delete updated[addon.name];
+                                                }
+                                                handleRealTimeUpdate('selectedFoodAddons', updated);
+                                              }}
+                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                            >
+                                              -
+                                            </button>
+                                            <span className="w-8 text-center text-sm">{quantity}</span>
+                                            <button
+                                              onClick={() => {
+                                                const updated = { ...currentFoodAddons, [addon.name]: quantity + 1 };
+                                                handleRealTimeUpdate('selectedFoodAddons', updated);
+                                              }}
+                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               </div>
 
-                              {/* Cupcake Flavor Selection */}
+                              {/* Sweets & Treats */}
                               <div className="border-2 border-gray-200 p-4">
-                                <div className="grid grid-cols-2 gap-3">
-                                  {['vanilla', 'chocolate'].map((flavor) => (
-                                    <div
-                                      key={flavor}
-                                      onClick={() => handleRealTimeUpdate('selectedCupcakeFlavor', flavor)}
-                                      className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
-                                        currentCupcakeFlavor === flavor 
-                                          ? 'border-purple-500 bg-purple-50' 
-                                          : 'border-gray-200 bg-white hover:border-purple-300'
-                                      }`}
-                                    >
-                                      <div className="font-medium">
-                                        {flavor === 'vanilla' ? '🧁' : '🍫'} {flavor.charAt(0).toUpperCase() + flavor.slice(1)} Cupcakes
+                                <h4 className="font-medium text-gray-800 mb-3">Sweets & Treats</h4>
+                                
+                                {/* Base Cupcakes (Included) */}
+                                <div className="mb-4">
+                                  <p className="text-xs text-gray-600 mb-2">Included:</p>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    {['vanilla', 'chocolate'].map((flavor) => (
+                                      <div
+                                        key={flavor}
+                                        onClick={() => handleRealTimeUpdate('selectedCupcakeFlavor', flavor)}
+                                        className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                          currentCupcakeFlavor === flavor 
+                                            ? 'border-purple-500 bg-purple-50' 
+                                            : 'border-gray-200 bg-white hover:border-purple-300'
+                                        }`}
+                                      >
+                                        <div className="font-medium">
+                                          {flavor === 'vanilla' ? '🧁' : '🍫'} {flavor.charAt(0).toUpperCase() + flavor.slice(1)} Cupcakes
+                                        </div>
                                       </div>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Sweet Add-ons */}
+                                <div className="border-t pt-3">
+                                  <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
+                                  <div className="space-y-2">
+                                    {[
+                                      { name: 'Macarons', icon: '🧡', price: 24, unit: '/dz' },
+                                      { name: 'Chocolate Covered Pretzels', icon: '🥨', price: 18, unit: '/dz' },
+                                      { name: 'Chocolate Covered Rice Krispies', icon: '🍚', price: 20, unit: '/dz' },
+                                      { name: 'Decorated Sugar Cookies', icon: '🍪', price: 30, unit: '/dz' },
+                                      { name: 'Candy Wall', icon: '🍭', price: 200, unit: '' },
+                                      { name: 'Custom Treat Table', icon: '🍰', price: 150, unit: '' }
+                                    ].map((addon) => {
+                                      const currentSweetAddons = booking.selectedSweetAddons || {};
+                                      const quantity = currentSweetAddons[addon.name] || 0;
+                                      
+                                      return (
+                                        <div key={addon.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-lg">{addon.icon}</span>
+                                            <span className="text-sm font-medium">{addon.name}</span>
+                                            <span className="text-xs text-gray-500">${addon.price}{addon.unit}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <button
+                                              onClick={() => {
+                                                const updated = { ...currentSweetAddons };
+                                                if (quantity > 0) {
+                                                  updated[addon.name] = quantity - 1;
+                                                  if (updated[addon.name] === 0) delete updated[addon.name];
+                                                }
+                                                handleRealTimeUpdate('selectedSweetAddons', updated);
+                                              }}
+                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                            >
+                                              -
+                                            </button>
+                                            <span className="w-8 text-center text-sm">{quantity}</span>
+                                            <button
+                                              onClick={() => {
+                                                const updated = { ...currentSweetAddons, [addon.name]: quantity + 1 };
+                                                handleRealTimeUpdate('selectedSweetAddons', updated);
+                                              }}
+                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
                               </div>
                             </>
