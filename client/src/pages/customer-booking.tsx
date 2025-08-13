@@ -508,7 +508,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
           <p className="text-gray-600">Review your details and secure your reservation</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto relative">
           {/* Party Details */}
           <Card>
             <CardHeader>
@@ -1317,13 +1317,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
           </Card>
 
           {/* Quote Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Quote Summary
-              </CardTitle>
-            </CardHeader>
+          <div className="sticky top-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Quote Summary
+                </CardTitle>
+              </CardHeader>
             <CardContent className="space-y-4">
               {/* Party Summary Header */}
               <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400">
@@ -1400,12 +1401,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span>{isCustomTheme ? 'Custom' : 'Standard'} Theme Package</span>
+                  <span>{isCustomTheme ? 'Custom' : 'Standard'} Theme</span>
                   <span className="pricing-font">{formatPrice(baseThemePrice)}</span>
                 </div>
                 {packageCost > 0 && (
                   <div className="flex justify-between">
-                    <span>{booking?.packageSelection || 'Star Package'} Upgrades</span>
+                    <span>{booking?.packageSelection}</span>
                     <span className="pricing-font">{formatPrice(packageCost)}</span>
                   </div>
                 )}
@@ -1425,20 +1426,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     <span className="pricing-font">{formatPrice(extraGuestPrice)}</span>
                   </div>
                 )}
-                
-                {packageAutoItems.foodBudget > 0 && (
-                  <div className="flex justify-between text-green-700 bg-green-50 px-2 py-1 rounded">
-                    <span>🔒 Food Budget Included</span>
-                    <span>{formatPrice(packageAutoItems.foodBudget)}</span>
-                  </div>
-                )}
-                
-                {foodBudgetDiscount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Food Budget Applied</span>
-                    <span className="pricing-font">-{formatPrice(foodBudgetDiscount)}</span>
-                  </div>
-                )}
+
                 {booking?.selectedAddons && booking.selectedAddons.length > 0 && (
                   <div className="space-y-2">
                     <div className="text-sm font-medium text-gray-700">Selected Add-ons:</div>
@@ -1518,10 +1506,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                         </div>
                       );
                     })}
-                    {addonTotal > 0 && (
+                    {foodBudgetDiscount > 0 && (
+                      <div className="flex justify-between text-green-600 bg-green-50 px-2 py-1 rounded text-sm">
+                        <span>🔒 Food Budget Applied ({formatPrice(packageAutoItems.foodBudget)} included)</span>
+                        <span className="pricing-font">-{formatPrice(foodBudgetDiscount)}</span>
+                      </div>
+                    )}
+                    {finalAddonTotal > 0 && (
                       <div className="flex justify-between font-medium border-t pt-1">
                         <span>Add-ons Subtotal:</span>
-                        <span className="pricing-font">{formatPrice(addonTotal)}</span>
+                        <span className="pricing-font">{formatPrice(finalAddonTotal)}</span>
                       </div>
                     )}
                   </div>
@@ -1607,7 +1601,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                 <p>• Need help? Contact us at hosthampton295@gmail.com</p>
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
