@@ -40,56 +40,61 @@ function getAutoSelectedItemsForPackage(packageName: string, allAddons: any[]) {
 
   switch (packageName) {
     case '⭐ Base Package':
-      // Base package - no inclusions, just the base party
+      // Base package - includes base activities: 1 premium + 1 standard OR 3 standard
       result.activityAllowances = {
         premiumCount: 1,
-        standardCount: 2,
-        canUpgradeToPremium: false
+        standardCount: 1,
+        canUpgradeToPremium: false,
+        alternativeStandard: 3 // Can choose 3 standard instead of 1 premium + 1 standard
       };
       break;
 
     case '⭐⭐ Enhanced Package':
-      // Level 1: $350 - Goody Bags, Photo Booth, 3 Extra Guests
+      // Level 1: $350 - Goody Bags, Photo Booth, 3 Extra Guests (activities same as base)
       result.selectedAddons = ['Goodie Bags', 'Photo Booth'];
       result.lockedAddons = ['Goodie Bags', 'Photo Booth'];
       result.activityAllowances = {
         premiumCount: 1,
-        standardCount: 2,
-        canUpgradeToPremium: false
+        standardCount: 1,
+        canUpgradeToPremium: false,
+        alternativeStandard: 3
       };
       break;
 
     case '⭐⭐⭐ Premium Package':
-      // Level 2: $695 - Upgrade to Premium Activity or add Standard, Goody Bags, Balloon Tower, Photo Booth, 4 Extra Guests, Birthday Gift Basket
+      // Level 2: $695 - Upgrade to Premium Activity or add Standard
       result.selectedAddons = ['Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Birthday Gift Basket'];
       result.lockedAddons = ['Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Birthday Gift Basket'];
       result.activityAllowances = {
         premiumCount: 1,
-        standardCount: 2,
-        canUpgradeToPremium: true
+        standardCount: 1,
+        canUpgradeToPremium: true, // Can upgrade 1 standard to premium OR add 1 more standard
+        alternativeStandard: 3
       };
       break;
 
     case '⭐⭐⭐⭐ Deluxe Package':
-      // Level 3: $925 - Upgrade to Premium Activity or add Standard, Premium Goody Bags, Balloon Tower, Photo Booth, Balloon Custom Stack, 5 Extra Guests, Birthday Gift Basket, Bubbles Drink Package
+      // Level 3: $925 - Upgrade to Premium Activity or add Standard
       result.selectedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Custom Stack', 'Birthday Gift Basket', 'Bubbles Drink Package'];
       result.lockedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Custom Stack', 'Birthday Gift Basket', 'Bubbles Drink Package'];
       result.activityAllowances = {
         premiumCount: 1,
-        standardCount: 2,
-        canUpgradeToPremium: true
+        standardCount: 1,
+        canUpgradeToPremium: true, // Can upgrade 1 standard to premium OR add 1 more standard
+        alternativeStandard: 3
       };
       break;
 
     case '⭐⭐⭐⭐⭐ Ultimate Package':
-      // Level 4: $1,375 - Upgrade to Premium Activity or add Standard, Premium Goody Bags, Balloon Tower, Photo Booth, Balloon Garland, 6 Extra Guests, Birthday Gift Basket, Themed Custom Treat Table, Bubbles Drink Package, Up to $150 in Food Add-ons
+      // Level 4: $1,375 - Upgrade to Premium Activity or add Standard
       result.selectedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Garland', 'Birthday Gift Basket', 'Themed Custom Treat Table', 'Bubbles Drink Package'];
       result.lockedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Garland', 'Birthday Gift Basket', 'Themed Custom Treat Table', 'Bubbles Drink Package'];
       result.foodBudget = 15000; // $150 in cents for food add-ons
       result.activityAllowances = {
         premiumCount: 1,
-        standardCount: 2,
-        canUpgradeToPremium: true
+        standardCount: 1,
+        canUpgradeToPremium: true, // Can upgrade 1 standard to premium OR add 1 more standard
+        alternativeStandard: 3
       };
       break;
 
@@ -394,7 +399,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
   const packageAutoItems = getAutoSelectedItemsForPackage(booking?.packageSelection || '', allAddons);
   const lockedAddons = packageAutoItems.lockedAddons;
 
-  // Calculate add-on total (excluding star package included items)
+  // Calculate add-on total (excluding star package included items and base activities)
   const addonTotal = booking?.selectedAddons?.reduce((total: number, addonName: string) => {
     // Skip locked/included items - they shouldn't add to the price
     if (lockedAddons.includes(addonName)) {
@@ -402,10 +407,65 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
     }
     
     const addon = allAddons?.find((a: any) => a.name === addonName);
-    if (addon) {
-      return total + (addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price);
+    if (!addon) return total;
+    
+    // Handle activity pricing - all parties include base activities (1 premium + 1 standard OR 3 standard)
+    if (addon.category === 'activity' || addon.category === 'premium_activity') {
+      const selectedActivities = booking.selectedAddons?.filter((name: string) => {
+        const a = allAddons?.find((addon: any) => addon.name === name);
+        return a && (a.category === 'activity' || a.category === 'premium_activity');
+      }) || [];
+      
+      const premiumActivities = selectedActivities.filter((name: string) => {
+        const a = allAddons?.find((addon: any) => addon.name === name);
+        return a && a.category === 'premium_activity';
+      });
+      const standardActivities = selectedActivities.filter((name: string) => {
+        const a = allAddons?.find((addon: any) => addon.name === name);
+        return a && a.category === 'activity';
+      });
+      
+      const isPremium = addon.category === 'premium_activity';
+      
+      // Base inclusions for all packages: 1 premium + 1 standard OR 3 standard
+      if (isPremium) {
+        const premiumIndex = premiumActivities.indexOf(addonName);
+        if (premiumIndex === 0) {
+          return total; // First premium activity is always included
+        }
+      } else {
+        const standardIndex = standardActivities.indexOf(addonName);
+        const totalPremiums = premiumActivities.length;
+        
+        // If choosing 1 premium + standard combo: first standard is free
+        // If choosing all standard combo: first 3 standards are free
+        if (totalPremiums > 0) {
+          // Premium + standard combo: first standard is included
+          if (standardIndex === 0) {
+            return total;
+          }
+        } else {
+          // All standard combo: first 3 are included
+          if (standardIndex < 3) {
+            return total;
+          }
+        }
+      }
+      
+      // For packages 3, 4, 5: can upgrade OR add additional
+      if (packageAutoItems.activityAllowances.canUpgradeToPremium) {
+        // Additional upgrade allowances for higher packages
+        const totalIncludedActivities = Math.max(premiumActivities.length, 0) + Math.max(standardActivities.length, 0);
+        const baseIncluded = premiumActivities.length > 0 ? 2 : 3; // 1P+1S=2 or 3S=3
+        
+        if (totalIncludedActivities <= baseIncluded + 1) { // +1 upgrade/additional allowed
+          return total;
+        }
+      }
     }
-    return total;
+    
+    // Charge for non-activity addons or activities beyond allowances
+    return total + (addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price);
   }, 0) || 0;
 
   // Calculate correct subtotal: base package + extra guests + non-included addons
@@ -1352,8 +1412,42 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                       const addon = allAddons?.find((a: any) => a.name === addonName);
                       if (!addon) return null;
                       
-                      const isIncluded = lockedAddons.includes(addonName);
+                      const isPackageIncluded = lockedAddons.includes(addonName);
                       const itemPrice = addon.perGuest ? addon.price * (booking.guestCount || 0) : addon.price;
+                      
+                      // Check if this is a base activity that should be included
+                      let isActivityIncluded = false;
+                      if (addon.category === 'activity' || addon.category === 'premium_activity') {
+                        const selectedActivities = booking.selectedAddons?.filter((name: string) => {
+                          const a = allAddons?.find((addon: any) => addon.name === name);
+                          return a && (a.category === 'activity' || a.category === 'premium_activity');
+                        }) || [];
+                        
+                        const premiumActivities = selectedActivities.filter((name: string) => {
+                          const a = allAddons?.find((addon: any) => addon.name === name);
+                          return a && a.category === 'premium_activity';
+                        });
+                        const standardActivities = selectedActivities.filter((name: string) => {
+                          const a = allAddons?.find((addon: any) => addon.name === name);
+                          return a && a.category === 'activity';
+                        });
+                        
+                        const isPremium = addon.category === 'premium_activity';
+                        if (isPremium) {
+                          const premiumIndex = premiumActivities.indexOf(addonName);
+                          isActivityIncluded = premiumIndex === 0; // First premium is included
+                        } else {
+                          const standardIndex = standardActivities.indexOf(addonName);
+                          const totalPremiums = premiumActivities.length;
+                          if (totalPremiums > 0) {
+                            isActivityIncluded = standardIndex === 0; // First standard in premium combo
+                          } else {
+                            isActivityIncluded = standardIndex < 3; // First 3 in all-standard combo
+                          }
+                        }
+                      }
+                      
+                      const isIncluded = isPackageIncluded || isActivityIncluded;
                       
                       return (
                         <div key={addonName} className={`flex justify-between text-sm pl-4 ${isIncluded ? 'text-green-700 bg-green-50 px-2 py-1 rounded' : ''}`}>
