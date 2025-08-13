@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar, Clock, Users, MapPin, CreditCard, User, Phone, Mail, Palette, Sparkles, DollarSign } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, CreditCard, User, Phone, Mail, Palette, Sparkles, DollarSign, Star } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
 
 // Helper function to get ordinal suffix
@@ -79,6 +79,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   const queryClient = useQueryClient();
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [selectedStars, setSelectedStars] = useState(1);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [billingData, setBillingData] = useState({
     firstName: '',
     lastName: '',
@@ -141,10 +143,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/leads", effectiveLeadId] });
-      toast({
-        title: "Updated",
-        description: "Party details updated successfully.",
-      });
+      // Silent update - no toast notifications
     },
     onError: () => {
       toast({
@@ -230,6 +229,18 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
   useEffect(() => {
     if (booking) {
+      // Initialize selected theme state
+      if (booking.partyTheme) {
+        setSelectedTheme(booking.partyTheme);
+      }
+      
+      // Initialize star rating based on package
+      const packageKey = booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+      if (packageKey.includes('level1') || packageKey.includes('350')) setSelectedStars(1);
+      else if (packageKey.includes('level2') || packageKey.includes('695')) setSelectedStars(2);
+      else if (packageKey.includes('level3') || packageKey.includes('925')) setSelectedStars(3);
+      else if (packageKey.includes('level4') || packageKey.includes('1375')) setSelectedStars(4);
+      
       setBillingData({
         firstName: booking.name?.split(' ')[0] || '',
         lastName: booking.name?.split(' ').slice(1).join(' ') || '',
@@ -311,9 +322,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
           <p className="text-gray-600">Complete your booking details below</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Design Form */}
-          <div className="lg:col-span-2">
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -431,69 +442,177 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <Sparkles className="w-5 h-5 text-purple-600" />
                     Party Theme
                   </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {allThemes?.slice(0, 6).map((theme: any) => (
-                      <div
-                        key={theme.id}
-                        onClick={() => handleRealTimeUpdate('partyTheme', theme.name)}
-                        className={`border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 ${
-                          booking.partyTheme === theme.name ? 'border-purple-500 bg-purple-50' : 'bg-white hover:bg-gray-50'
-                        }`}
+                  
+                  {!selectedTheme ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {allThemes?.slice(0, 6).map((theme: any) => (
+                        <div
+                          key={theme.id}
+                          onClick={() => {
+                            setSelectedTheme(theme.name);
+                            handleRealTimeUpdate('partyTheme', theme.name);
+                          }}
+                          className="border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 bg-white hover:bg-gray-50"
+                        >
+                          <div className="text-center">
+                            <div className="text-2xl mb-2">{theme.icon}</div>
+                            <div className="text-sm font-medium text-gray-700">{theme.name}</div>
+                          </div>
+                        </div>
+                      ))}
+                      <div 
+                        className="border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50"
+                        onClick={() => {
+                          setSelectedTheme('custom');
+                          handleRealTimeUpdate('partyTheme', 'custom');
+                        }}
                       >
                         <div className="text-center">
-                          <div className="text-2xl mb-2">{theme.icon}</div>
-                          <div className="text-sm font-medium text-gray-700">{theme.name}</div>
+                          <div className="text-2xl mb-2">✨</div>
+                          <div className="text-sm font-medium text-gray-700">Custom Theme</div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  <div 
-                    className="border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50"
-                    onClick={() => handleRealTimeUpdate('partyTheme', 'custom')}
-                  >
-                    <div className="text-center">
-                      <div className="text-2xl mb-2">✨</div>
-                      <div className="text-sm font-medium text-gray-700">Custom Theme</div>
                     </div>
-                  </div>
-                  {booking.partyTheme === 'custom' && (
-                    <Input
-                      value={booking.customTheme || ''}
-                      onChange={(e) => handleRealTimeUpdate('customTheme', e.target.value)}
-                      className="mt-2 border-2 border-gray-200 rounded-none focus:border-purple-500"
-                      placeholder="Describe your custom theme..."
-                    />
+                  ) : (
+                    <div className="border-2 border-purple-500 bg-purple-50 p-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">
+                            {selectedTheme === 'custom' ? '✨' : allThemes?.find((t: any) => t.name === selectedTheme)?.icon}
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-800">
+                              {selectedTheme === 'custom' ? 'Custom Theme' : selectedTheme}
+                            </div>
+                            {selectedTheme === 'custom' && (
+                              <Input
+                                value={booking.customTheme || ''}
+                                onChange={(e) => handleRealTimeUpdate('customTheme', e.target.value)}
+                                className="mt-2 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                                placeholder="Describe your custom theme..."
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedTheme(null)}
+                          className="text-gray-600 hover:text-gray-800"
+                        >
+                          Change
+                        </Button>
+                      </div>
+                    </div>
                   )}
                 </div>
 
-                {/* Package Selection */}
+                {/* 5-Star Package Selection */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-gray-800">Package Level</h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {Object.entries(packageDefinitions).map(([key, pkg]) => (
-                      <div
-                        key={key}
-                        onClick={() => handleRealTimeUpdate('packageSelection', pkg.name)}
-                        className={`border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 ${
-                          booking.packageSelection === pkg.name ? 'border-purple-500 bg-purple-50' : 'bg-white hover:bg-gray-50'
+                  
+                  {/* 5-Star Horizontal Rating */}
+                  <div className="flex items-center justify-center gap-2 py-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => {
+                          setSelectedStars(star);
+                          const selectedPackage = Object.values(packageDefinitions)[star - 1];
+                          if (selectedPackage) {
+                            handleRealTimeUpdate('packageSelection', selectedPackage.name);
+                          }
+                        }}
+                        className={`w-12 h-12 rounded-full border-2 transition-all ${
+                          star <= selectedStars 
+                            ? 'border-purple-500 bg-purple-500 text-white' 
+                            : 'border-gray-300 bg-white text-gray-400 hover:border-purple-300'
                         }`}
                       >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <div className="font-medium text-gray-800">{pkg.name}</div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              {pkg.extras} extra guests • {pkg.standardCount} standard activity
-                              {pkg.premiumCount > 0 && ` • ${pkg.premiumCount} premium activity`}
-                              {pkg.foodBudget && ` • $${pkg.foodBudget} food budget`}
-                            </div>
-                          </div>
-                          <div className="text-lg font-bold text-purple-600">
-                            +{formatPrice(pkg.price)}
-                          </div>
-                        </div>
-                      </div>
+                        <Star className={`w-6 h-6 mx-auto ${star <= selectedStars ? 'fill-current' : ''}`} />
+                      </button>
                     ))}
                   </div>
+
+                  {/* Package Details & Add-ons Below Stars */}
+                  {selectedStars > 0 && selectedStars <= 4 && (
+                    <div className="space-y-4">
+                      {/* Package Summary */}
+                      <div className="border-2 border-purple-500 bg-purple-50 p-4">
+                        {(() => {
+                          const selectedPackage = Object.values(packageDefinitions)[selectedStars - 1];
+                          return (
+                            <div>
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="font-medium text-gray-800">{selectedPackage.name}</div>
+                                <div className="text-lg font-bold text-purple-600">
+                                  +{formatPrice(selectedPackage.price)}
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {selectedPackage.extras} extra guests • {selectedPackage.standardCount} standard activity
+                                {selectedPackage.premiumCount > 0 && ` • ${selectedPackage.premiumCount} premium activity`}
+                                {selectedPackage.foodBudget && ` • $${selectedPackage.foodBudget} food budget`}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Add-ons for Selected Level */}
+                      <div className="border-2 border-gray-200 p-4">
+                        <h4 className="font-medium text-gray-800 mb-3">Available Add-ons for Level {selectedStars}</h4>
+                        <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
+                          {allAddons?.filter((addon: any) => {
+                            // Show relevant add-ons based on package level
+                            const selectedPackage = Object.values(packageDefinitions)[selectedStars - 1];
+                            if (selectedStars === 1) return ['activity', 'food', 'drink'].includes(addon.category);
+                            if (selectedStars === 2) return ['activity', 'food', 'drink', 'decor'].includes(addon.category);
+                            if (selectedStars === 3) return ['activity', 'food', 'drink', 'decor', 'entertainment'].includes(addon.category);
+                            if (selectedStars === 4) return true; // Ultimate package shows all add-ons
+                            return false;
+                          }).map((addon: any) => {
+                            const isSelected = booking.selectedAddons?.includes(addon.name);
+                            const addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
+                            
+                            return (
+                              <div
+                                key={addon.id}
+                                onClick={() => {
+                                  const currentAddons = booking.selectedAddons || [];
+                                  const updatedAddons = isSelected 
+                                    ? currentAddons.filter((name: string) => name !== addon.name)
+                                    : [...currentAddons, addon.name];
+                                  handleRealTimeUpdate('selectedAddons', updatedAddons);
+                                }}
+                                className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                  isSelected 
+                                    ? 'border-purple-500 bg-purple-50' 
+                                    : 'border-gray-200 bg-white hover:border-purple-300'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-lg">{addon.icon}</span>
+                                    <span className="font-medium">{addon.name}</span>
+                                  </div>
+                                  <span className="text-purple-600 font-semibold">
+                                    {formatPrice(addonPrice)}
+                                    {addon.per_guest && '/guest'}
+                                  </span>
+                                </div>
+                                {addon.description && (
+                                  <div className="text-xs text-gray-500 mt-1 ml-7">
+                                    {addon.description}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
