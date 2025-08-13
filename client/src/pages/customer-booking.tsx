@@ -504,7 +504,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
             alt="Host Hampton" 
             className="w-24 h-24 mx-auto mb-4 rounded-full border-4 border-white shadow-lg"
           />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Party Booking</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Design Your Party</h1>
           <p className="text-gray-600">Review your details and secure your reservation</p>
         </div>
 
@@ -1040,7 +1040,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                           {/* Always Included */}
                           <div className="bg-green-50 p-2 rounded border border-green-200">
                             <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                              🔒 🧃 Juice Boxes and Waters - Always Included
+                              🧃 Juice Boxes and Waters - Always Included
                             </Badge>
                           </div>
                           
@@ -1070,7 +1070,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                                       }
                                     }}
                                   >
-                                    {isLocked && '🔒 '}
                                     {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>)
                                     {isLocked && ' - Included'}
                                   </Button>
@@ -1145,7 +1144,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                                           }
                                         }}
                                       >
-                                        {isLocked && '🔒 '}
                                         {addon.icon} {addon.name} (<span className="pricing-font">${(addon.price / 100).toFixed(0)}</span>{addon.perGuest ? ' pp' : ''})
                                         {isLocked && ' - Included'}
                                       </Button>
@@ -1322,7 +1320,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
-                  Quote Summary
+                  Quotation
                 </CardTitle>
               </CardHeader>
             <CardContent className="space-y-4">
@@ -1416,7 +1414,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                 </div>
                 {packageIncludedGuests > 0 && (
                   <div className="flex justify-between text-green-700 bg-green-50 px-2 py-1 rounded">
-                    <span>🔒 Extra Guests Included ({packageIncludedGuests})</span>
+                    <span>Extra Guests Included ({packageIncludedGuests})</span>
                     <span>Included</span>
                   </div>
                 )}
@@ -1487,7 +1485,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                       return (
                         <div key={addonName} className={`flex justify-between text-sm pl-4 ${isIncluded ? 'text-green-700 bg-green-50 px-2 py-1 rounded' : ''}`}>
                           <span>
-                            {isIncluded && '🔒 '}{addon.icon} {addon.name}
+                            {addon.icon} {addon.name}
                             {addon.perGuest && ` (`}<span className="pricing-font">{addon.perGuest && `${formatPrice(addon.price)}`}</span>{addon.perGuest && ` pp)`}
                             {isIncluded && ' - Included'}
                             {hasFoodBudgetSavings && !isIncluded && ' - Food Budget Applied'}
@@ -1508,7 +1506,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps = {}) {
                     })}
                     {foodBudgetDiscount > 0 && (
                       <div className="flex justify-between text-green-600 bg-green-50 px-2 py-1 rounded text-sm">
-                        <span>🔒 Food Budget Applied ({formatPrice(packageAutoItems.foodBudget)} included)</span>
+                        <span>Food Budget Applied ({formatPrice(packageAutoItems.foodBudget)} included)</span>
                         <span className="pricing-font">-{formatPrice(foodBudgetDiscount)}</span>
                       </div>
                     )}
