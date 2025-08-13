@@ -97,6 +97,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
   const [selectedStars, setSelectedStars] = useState(1);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [showBillingInfo, setShowBillingInfo] = useState(false);
   const [billingData, setBillingData] = useState({
     firstName: '',
     lastName: '',
@@ -968,8 +969,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
           {/* Right Column - Quotation & Billing */}
           <div className="space-y-6">
-            {/* Pricing Summary */}
-            <Card>
+            {/* Pricing Summary - Sticky */}
+            <Card className="sticky top-4 z-10 bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
@@ -1000,11 +1001,25 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <span className="text-purple-600">{formatPrice(pricing.total)}</span>
                   </div>
                 </div>
+                
+                {/* Show/Hide Billing Checkbox */}
+                <div className="border-t pt-3">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showBillingInfo}
+                      onChange={(e) => setShowBillingInfo(e.target.checked)}
+                      className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    />
+                    <span className="text-sm text-gray-600">Show billing information</span>
+                  </label>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Billing Information */}
-            <Card>
+            {/* Billing Information - Conditional */}
+            {showBillingInfo && (
+              <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="w-5 h-5" />
@@ -1145,6 +1160,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </div>
               </CardContent>
             </Card>
+            )}
           </div>
         </div>
       </div>
