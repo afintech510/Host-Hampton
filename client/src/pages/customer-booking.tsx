@@ -319,17 +319,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       });
     }
 
-    // Legacy selectedAddons for backward compatibility
-    if (booking.selectedAddons && booking.selectedAddons.length > 0) {
-      addonsTotal += booking.selectedAddons.reduce((total: number, addonName: string) => {
-        const addon = allAddons?.find((a: any) => a.name === addonName);
-        if (!addon) return total;
-
-        let addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
-        
-        return total + addonPrice;
-      }, 0);
-    }
+    // Legacy selectedAddons - DISABLED to prevent massive pricing issues
+    // The new system uses selectedFoodAddons, selectedSweetAddons, selectedDrinkAddons instead
 
     const total = basePrice + addonsTotal;
 
