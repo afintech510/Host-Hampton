@@ -78,6 +78,8 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - ✅ Modernized rectangular geometric design with real-time pricing calculations
 - ✅ Added Child First Name and Age fields for complete party personalization
 - ✅ Fixed text input responsiveness by removing query invalidation cascades
+- ✅ Added comprehensive Drinks Module with included items (Honest Juice Boxes, Mini Water Bottles) and add-ons
+- ✅ Added Allergy Module with Gluten-Free, Dairy-Free, and Nut Allergy options with visual indicators
 
 **Complete Addon Database Overhaul (August 10, 2025):**
 - ✅ Updated addons table with 47 authentic Host Hampton offerings from business spreadsheet

@@ -956,6 +956,121 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Drinks Module */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Drinks</h4>
+                                
+                                {/* Included Drinks */}
+                                <div className="mb-4">
+                                  <p className="text-xs text-gray-600 mb-2">Included:</p>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200">
+                                      <span className="text-lg">🧃</span>
+                                      <span className="text-sm font-medium">Honest Juice Boxes</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200">
+                                      <span className="text-lg">💧</span>
+                                      <span className="text-sm font-medium">Mini Water Bottles</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Drink Add-ons */}
+                                <div className="border-t pt-3">
+                                  <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
+                                  <div className="space-y-2">
+                                    {[
+                                      { name: 'Bubbles Drink Package', icon: '🫧', price: 75 },
+                                      { name: 'Coffee Bar', icon: '☕', price: 75 },
+                                      { name: 'Drinks Package', icon: '💧', price: 50 }
+                                    ].map((addon) => {
+                                      const currentDrinkAddons = booking.selectedDrinkAddons || {};
+                                      const quantity = currentDrinkAddons[addon.name] || 0;
+                                      
+                                      return (
+                                        <div key={addon.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-lg">{addon.icon}</span>
+                                            <span className="text-sm font-medium">{addon.name}</span>
+                                            <span className="text-xs text-gray-500">${addon.price}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <button
+                                              onClick={() => {
+                                                const updated = { ...currentDrinkAddons };
+                                                if (quantity > 0) {
+                                                  updated[addon.name] = quantity - 1;
+                                                  if (updated[addon.name] === 0) delete updated[addon.name];
+                                                }
+                                                handleRealTimeUpdate('selectedDrinkAddons', updated);
+                                              }}
+                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                            >
+                                              -
+                                            </button>
+                                            <span className="w-8 text-center text-sm">{quantity}</span>
+                                            <button
+                                              onClick={() => {
+                                                const updated = { ...currentDrinkAddons, [addon.name]: quantity + 1 };
+                                                handleRealTimeUpdate('selectedDrinkAddons', updated);
+                                              }}
+                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Allergy Module */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Allergies & Dietary Restrictions</h4>
+                                <div className="space-y-3">
+                                  {['Gluten-Free', 'Dairy-Free', 'Nut Allergy'].map((allergy) => {
+                                    const currentAllergies = booking.selectedAllergies || [];
+                                    const isSelected = currentAllergies.includes(allergy);
+                                    
+                                    return (
+                                      <div
+                                        key={allergy}
+                                        onClick={() => {
+                                          const updated = isSelected 
+                                            ? currentAllergies.filter(a => a !== allergy)
+                                            : [...currentAllergies, allergy];
+                                          handleRealTimeUpdate('selectedAllergies', updated);
+                                        }}
+                                        className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                          isSelected
+                                            ? 'border-red-500 bg-red-50' 
+                                            : 'border-gray-200 bg-white hover:border-red-300'
+                                        }`}
+                                      >
+                                        <div className="flex items-center justify-center gap-2">
+                                          <span className="text-lg">
+                                            {allergy === 'Gluten-Free' ? '🌾' : 
+                                             allergy === 'Dairy-Free' ? '🥛' : '🥜'}
+                                          </span>
+                                          <span className="font-medium">{allergy}</span>
+                                          {isSelected && <span className="text-red-600">✓</span>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                {(booking.selectedAllergies?.length > 0) && (
+                                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                    <p className="text-xs text-yellow-800">
+                                      <strong>Note:</strong> Please notify us of any allergies when placing your order. 
+                                      We'll ensure all food and activities are safe and suitable.
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
                             </>
                           );
                         })()}
