@@ -828,12 +828,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
                                   <div className="space-y-2">
                                     {[
-                                      { name: 'Fruit Tray', icon: '🍓', price: 45 },
-                                      { name: 'Tray of Chicken Fingers', icon: '🍗', price: 65 },
-                                      { name: 'Tray of French Fries', icon: '🍟', price: 35 },
-                                      { name: 'Regular Pizza (Adults)', icon: '🍕', price: 28 },
-                                      { name: 'Specialty Pizza', icon: '🍕', price: 35 },
-                                      { name: 'Popcorn Bar', icon: '🍿', price: 75 }
+                                      { name: 'Fruit Tray', icon: '🍓' },
+                                      { name: 'Tray of Chicken Fingers', icon: '🍗' },
+                                      { name: 'Tray of French Fries', icon: '🍟' },
+                                      { name: 'Regular Pizza (Adults)', icon: '🍕' },
+                                      { name: 'Specialty Pizza', icon: '🍕' },
+                                      { name: 'Popcorn Bar', icon: '🍿' }
                                     ].map((addon) => {
                                       const currentFoodAddons = booking.selectedFoodAddons || {};
                                       const quantity = currentFoodAddons[addon.name] || 0;
@@ -843,7 +843,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           <div className="flex items-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
                                             <span className="text-sm font-medium">{addon.name}</span>
-                                            <span className="text-xs text-gray-500">${addon.price}</span>
                                           </div>
                                           <div className="flex items-center gap-2">
                                             <button
@@ -908,12 +907,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
                                   <div className="space-y-2">
                                     {[
-                                      { name: 'Macarons', icon: '🧡', price: 24, unit: '/dz' },
-                                      { name: 'Chocolate Covered Pretzels', icon: '🥨', price: 18, unit: '/dz' },
-                                      { name: 'Chocolate Covered Rice Krispies', icon: '🍚', price: 20, unit: '/dz' },
-                                      { name: 'Decorated Sugar Cookies', icon: '🍪', price: 30, unit: '/dz' },
-                                      { name: 'Candy Wall', icon: '🍭', price: 200, unit: '' },
-                                      { name: 'Custom Treat Table', icon: '🍰', price: 150, unit: '' }
+                                      { name: 'Macarons', icon: '🧡' },
+                                      { name: 'Chocolate Covered Pretzels', icon: '🥨' },
+                                      { name: 'Chocolate Covered Rice Krispies', icon: '🍚' },
+                                      { name: 'Decorated Sugar Cookies', icon: '🍪' },
+                                      { name: 'Candy Wall', icon: '🍭' },
+                                      { name: 'Custom Treat Table', icon: '🍰' }
                                     ].map((addon) => {
                                       const currentSweetAddons = booking.selectedSweetAddons || {};
                                       const quantity = currentSweetAddons[addon.name] || 0;
@@ -923,7 +922,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           <div className="flex items-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
                                             <span className="text-sm font-medium">{addon.name}</span>
-                                            <span className="text-xs text-gray-500">${addon.price}{addon.unit}</span>
                                           </div>
                                           <div className="flex items-center gap-2">
                                             <button
@@ -981,9 +979,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
                                   <div className="space-y-2">
                                     {[
-                                      { name: 'Bubbles Drink Package', icon: '🫧', price: 75 },
-                                      { name: 'Coffee Bar', icon: '☕', price: 75 },
-                                      { name: 'Drinks Package', icon: '💧', price: 50 }
+                                      { name: 'Bubbles Drink Package', icon: '🫧' },
+                                      { name: 'Coffee Bar', icon: '☕' },
+                                      { name: 'Drinks Package', icon: '💧' }
                                     ].map((addon) => {
                                       const currentDrinkAddons = booking.selectedDrinkAddons || {};
                                       const quantity = currentDrinkAddons[addon.name] || 0;
@@ -993,7 +991,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           <div className="flex items-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
                                             <span className="text-sm font-medium">{addon.name}</span>
-                                            <span className="text-xs text-gray-500">${addon.price}</span>
                                           </div>
                                           <div className="flex items-center gap-2">
                                             <button
