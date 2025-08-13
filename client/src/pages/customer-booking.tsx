@@ -168,12 +168,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     }
   });
 
-  // Real-time update handler (debounced)
-  const handleRealTimeUpdate = (field: string, value: any) => {
+  // Real-time update handler (debounced) - but not for text inputs that user is typing
+  const handleRealTimeUpdate = (field: string, value: any, immediate = false) => {
     clearTimeout(updateTimeoutRef.current!);
-    updateTimeoutRef.current = setTimeout(() => {
+    
+    // Immediate update for non-text fields or when explicitly requested
+    if (immediate || (field !== 'customTheme' && field !== 'mobileAddress')) {
       updateMutation.mutate({ [field]: value });
-    }, 800);
+    } else {
+      // Longer debounce for text inputs to prevent interference with typing
+      updateTimeoutRef.current = setTimeout(() => {
+        updateMutation.mutate({ [field]: value });
+      }, 1500);
+    }
   };
 
   // Stripe deposit payment mutation
@@ -466,31 +473,31 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   
                   {!selectedTheme ? (
                     <div className="grid grid-cols-2 gap-3">
-                      {allThemes?.slice(0, 6).map((theme: any) => (
+                      {allThemes?.map((theme: any) => (
                         <div
                           key={theme.id}
                           onClick={() => {
                             setSelectedTheme(theme.name);
-                            handleRealTimeUpdate('partyTheme', theme.name);
+                            handleRealTimeUpdate('partyTheme', theme.name, true);
                           }}
-                          className="border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 bg-white hover:bg-gray-50"
+                          className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-white hover:bg-gray-50 min-h-[60px] flex items-center"
                         >
-                          <div className="text-center">
-                            <div className="text-2xl mb-2">{theme.icon}</div>
-                            <div className="text-sm font-medium text-gray-700">{theme.name}</div>
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="text-2xl">{theme.icon}</div>
+                            <div className="text-sm font-medium text-gray-700 flex-1">{theme.name}</div>
                           </div>
                         </div>
                       ))}
                       <div 
-                        className="border-2 border-gray-200 p-4 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50"
+                        className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 min-h-[60px] flex items-center"
                         onClick={() => {
                           setSelectedTheme('custom');
-                          handleRealTimeUpdate('partyTheme', 'custom');
+                          handleRealTimeUpdate('partyTheme', 'custom', true);
                         }}
                       >
-                        <div className="text-center">
-                          <div className="text-2xl mb-2">✨</div>
-                          <div className="text-sm font-medium text-gray-700">Custom Theme</div>
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="text-2xl">✨</div>
+                          <div className="text-sm font-medium text-gray-700 flex-1">Custom Theme</div>
                         </div>
                       </div>
                     </div>
