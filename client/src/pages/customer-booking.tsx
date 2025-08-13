@@ -31,40 +31,54 @@ function formatPrice(amount: number): string {
   return `$${amount.toFixed(0)}`;
 }
 
-// Package definitions for calculations
+// Package definitions for calculations - 5-Star System
 const packageDefinitions = {
-  level1: {
-    name: "Level 1 ($350)",
+  star1: {
+    name: "1-Star Package",
+    price: 0, // Base pricing is handled separately ($875/$950)
+    maxGuests: 10,
+    premiumActivities: 1,
+    standardActivities: 2, // Can choose 1 premium + 1 standard OR 3 standard
+    description: "Includes birthday child + 10 guests, exclusive studio use, theme decorated, personalized evite, boho table, juice/water, cupcakes, treat cart, pizza or bagels",
+    includes: ["Exclusive Studio Use", "Theme Decorated", "Personalized Evite", "Boho Table", "Honest Juice Boxes & Mini Waters", "Cupcakes", "Treat Cart", "Pizza or Bagels", "2 Activities (1 Premium + 1 Standard OR 3 Standard)"]
+  },
+  star2: {
+    name: "2-Star Package",
     price: 350,
-    extras: 3,
-    premiumCount: 0,
-    standardCount: 1,
-    canUpgradeToPremium: false
+    maxGuests: 13,
+    premiumActivities: 1,
+    standardActivities: 2,
+    description: "All 1-star plus goody bags and photo booth",
+    includes: ["All from 1-Star", "Goody Bags", "Photo Booth", "Up to 13 Guests"]
   },
-  level2: {
-    name: "Level 2 ($695)",
+  star3: {
+    name: "3-Star Package", 
     price: 695,
-    extras: 4,
-    premiumCount: 0,
-    standardCount: 1,
-    canUpgradeToPremium: true
+    maxGuests: 14,
+    premiumActivities: 2, // Can upgrade to premium or add standard
+    standardActivities: 2,
+    description: "All 2-star plus balloon budget, gift basket, and activity upgrade",
+    includes: ["All from 2-Star", "Upgrade to Premium Activity or Add Standard", "Balloon Budget", "Gift Basket for Birthday Child", "Up to 14 Guests"]
   },
-  level3: {
-    name: "Level 3 ($925)",
+  star4: {
+    name: "4-Star Package",
     price: 925,
-    extras: 5,
-    premiumCount: 1,
-    standardCount: 1,
-    canUpgradeToPremium: true
+    maxGuests: 15,
+    premiumActivities: 2,
+    standardActivities: 2,
+    foodBudget: 100,
+    description: "All 3-star plus premium goody bags, balloon tower, custom balloon stack, and $100 food budget",
+    includes: ["All from 3-Star", "Premium Goody Bags", "Balloon Tower", "Balloon Custom Stack", "$100 Food/Drink/Dessert Budget", "Up to 15 Guests"]
   },
-  level4: {
-    name: "Level 4 ($1,375)",
+  star5: {
+    name: "5-Star Package",
     price: 1375,
-    extras: 6,
-    premiumCount: 1,
-    standardCount: 1,
-    canUpgradeToPremium: true,
-    foodBudget: 150
+    maxGuests: 16,
+    premiumActivities: 2,
+    standardActivities: 2,
+    foodBudget: 200,
+    description: "Ultimate package with all features plus balloon garland, themed treat table, and $200 food budget",
+    includes: ["All from 4-Star", "Balloon Garland", "Themed Custom Treat Table", "$200 Food/Drink/Dessert Budget", "Up to 16 Guests"]
   }
 };
 
@@ -194,11 +208,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     const basePriceCustom = 950;
     const basePrice = booking.partyTheme === 'custom' ? basePriceCustom : basePriceStandard;
 
-    // Get package details
+    // Get package details - match star levels
     const packageKey = booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
-    const packageObj = Object.values(packageDefinitions).find(pkg => 
-      pkg.name.toLowerCase().replace(/[^a-z0-9]/g, '').includes(packageKey)
-    );
+    let packageObj;
+    if (packageKey.includes('1star') || packageKey.includes('star1')) packageObj = packageDefinitions.star1;
+    else if (packageKey.includes('2star') || packageKey.includes('star2')) packageObj = packageDefinitions.star2;
+    else if (packageKey.includes('3star') || packageKey.includes('star3')) packageObj = packageDefinitions.star3;
+    else if (packageKey.includes('4star') || packageKey.includes('star4')) packageObj = packageDefinitions.star4;
+    else if (packageKey.includes('5star') || packageKey.includes('star5')) packageObj = packageDefinitions.star5;
+    else packageObj = packageDefinitions.star1; // Default to 1-star
+    
     const packagePrice = packageObj?.price || 0;
 
     // Calculate add-ons total (excluding package-included items)
@@ -236,10 +255,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       
       // Initialize star rating based on package
       const packageKey = booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
-      if (packageKey.includes('level1') || packageKey.includes('350')) setSelectedStars(1);
-      else if (packageKey.includes('level2') || packageKey.includes('695')) setSelectedStars(2);
-      else if (packageKey.includes('level3') || packageKey.includes('925')) setSelectedStars(3);
-      else if (packageKey.includes('level4') || packageKey.includes('1375')) setSelectedStars(4);
+      if (packageKey.includes('1star') || packageKey.includes('star1')) setSelectedStars(1);
+      else if (packageKey.includes('2star') || packageKey.includes('star2')) setSelectedStars(2);
+      else if (packageKey.includes('3star') || packageKey.includes('star3')) setSelectedStars(3);
+      else if (packageKey.includes('4star') || packageKey.includes('star4')) setSelectedStars(4);
+      else if (packageKey.includes('5star') || packageKey.includes('star5')) setSelectedStars(5);
+      else setSelectedStars(1); // Default to 1-star
       
       setBillingData({
         firstName: booking.name?.split(' ')[0] || '',
@@ -518,7 +539,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         key={star}
                         onClick={() => {
                           setSelectedStars(star);
-                          const selectedPackage = Object.values(packageDefinitions)[star - 1];
+                          const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
+                          const selectedPackageKey = starKeys[star - 1];
+                          const selectedPackage = packageDefinitions[selectedPackageKey as keyof typeof packageDefinitions];
                           if (selectedPackage) {
                             handleRealTimeUpdate('packageSelection', selectedPackage.name);
                           }
@@ -535,24 +558,30 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </div>
 
                   {/* Package Details & Add-ons Below Stars */}
-                  {selectedStars > 0 && selectedStars <= 4 && (
+                  {selectedStars > 0 && selectedStars <= 5 && (
                     <div className="space-y-4">
                       {/* Package Summary */}
                       <div className="border-2 border-purple-500 bg-purple-50 p-4">
                         {(() => {
-                          const selectedPackage = Object.values(packageDefinitions)[selectedStars - 1];
+                          const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
+                          const selectedPackageKey = starKeys[selectedStars - 1];
+                          const selectedPackage = packageDefinitions[selectedPackageKey as keyof typeof packageDefinitions];
                           return (
                             <div>
                               <div className="flex justify-between items-center mb-3">
                                 <div className="font-medium text-gray-800">{selectedPackage.name}</div>
                                 <div className="text-lg font-bold text-purple-600">
-                                  +{formatPrice(selectedPackage.price)}
+                                  {selectedPackage.price > 0 ? `+${formatPrice(selectedPackage.price)}` : 'Base Package'}
                                 </div>
                               </div>
-                              <div className="text-sm text-gray-600">
-                                {selectedPackage.extras} extra guests • {selectedPackage.standardCount} standard activity
-                                {selectedPackage.premiumCount > 0 && ` • ${selectedPackage.premiumCount} premium activity`}
+                              <div className="text-sm text-gray-600 mb-2">
+                                Up to {selectedPackage.maxGuests} guests
+                                {selectedPackage.premiumActivities > 0 && ` • ${selectedPackage.premiumActivities} premium activities`}
+                                {selectedPackage.standardActivities > 0 && ` • ${selectedPackage.standardActivities} standard activities`}
                                 {selectedPackage.foodBudget && ` • $${selectedPackage.foodBudget} food budget`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {selectedPackage.description}
                               </div>
                             </div>
                           );
@@ -565,11 +594,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
                           {allAddons?.filter((addon: any) => {
                             // Show relevant add-ons based on package level
-                            const selectedPackage = Object.values(packageDefinitions)[selectedStars - 1];
                             if (selectedStars === 1) return ['activity', 'food', 'drink'].includes(addon.category);
                             if (selectedStars === 2) return ['activity', 'food', 'drink', 'decor'].includes(addon.category);
                             if (selectedStars === 3) return ['activity', 'food', 'drink', 'decor', 'entertainment'].includes(addon.category);
-                            if (selectedStars === 4) return true; // Ultimate package shows all add-ons
+                            if (selectedStars === 4 || selectedStars === 5) return true; // 4-star and 5-star packages show all add-ons
                             return false;
                           }).map((addon: any) => {
                             const isSelected = booking.selectedAddons?.includes(addon.name);
