@@ -39,6 +39,7 @@ const packageDefinitions = {
     maxGuests: 10,
     premiumActivities: 1,
     standardActivities: 2, // Can choose 1 premium + 1 standard OR 3 standard
+    foodBudget: 0,
     description: "Includes birthday child + 10 guests, exclusive studio use, theme decorated, personalized evite, boho table, juice/water, cupcakes, treat cart, pizza or bagels",
     includes: ["Exclusive Studio Use", "Theme Decorated", "Personalized Evite", "Boho Table", "Honest Juice Boxes & Mini Waters", "Cupcakes", "Treat Cart", "Pizza or Bagels", "2 Activities (1 Premium + 1 Standard OR 3 Standard)"]
   },
@@ -48,6 +49,7 @@ const packageDefinitions = {
     maxGuests: 13,
     premiumActivities: 1,
     standardActivities: 2,
+    foodBudget: 0,
     description: "All 1-star plus goody bags and photo booth",
     includes: ["All from 1-Star", "Goody Bags", "Photo Booth", "Up to 13 Guests"]
   },
@@ -57,6 +59,7 @@ const packageDefinitions = {
     maxGuests: 14,
     premiumActivities: 2, // Can upgrade to premium or add standard
     standardActivities: 2,
+    foodBudget: 0,
     description: "All 2-star plus balloon budget, gift basket, and activity upgrade",
     includes: ["All from 2-Star", "Upgrade to Premium Activity or Add Standard", "Balloon Budget", "Gift Basket for Birthday Child", "Up to 14 Guests"]
   },
@@ -91,7 +94,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   const effectiveLeadId = leadId || urlLeadId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [selectedStars, setSelectedStars] = useState(1);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
@@ -168,20 +170,36 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     }
   });
 
-  // Real-time update handler (debounced) - but not for text inputs that user is typing
+  // Separate timeout refs for different fields to prevent interference
+  const timeoutRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
+  
+  // Real-time update handler with field-specific debouncing
   const handleRealTimeUpdate = (field: string, value: any, immediate = false) => {
-    clearTimeout(updateTimeoutRef.current!);
+    // Clear existing timeout for this specific field
+    if (timeoutRefs.current[field]) {
+      clearTimeout(timeoutRefs.current[field]!);
+    }
     
     // Immediate update for non-text fields or when explicitly requested
-    if (immediate || (field !== 'customTheme' && field !== 'mobileAddress')) {
+    if (immediate || !['customTheme', 'mobileAddress', 'childFirstName'].includes(field)) {
       updateMutation.mutate({ [field]: value });
     } else {
-      // Longer debounce for text inputs to prevent interference with typing
-      updateTimeoutRef.current = setTimeout(() => {
+      // Field-specific debounce for text inputs to prevent interference with typing
+      timeoutRefs.current[field] = setTimeout(() => {
         updateMutation.mutate({ [field]: value });
-      }, 1500);
+        timeoutRefs.current[field] = null;
+      }, 2000); // 2 second debounce for text inputs
     }
   };
+
+  // Cleanup effect to clear all timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timeoutRefs.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
 
   // Stripe deposit payment mutation
   const depositMutation = useMutation({
