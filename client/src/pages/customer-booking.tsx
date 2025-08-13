@@ -1135,29 +1135,39 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Base Party Price</span>
-                    <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
-                  </div>
-                  {pricing.packagePrice > 0 && (
+                {billingData.email && billingData.agreeToCommunications ? (
+                  <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Package Add-on</span>
-                      <span className="font-semibold">+{formatPrice(pricing.packagePrice)}</span>
+                      <span className="text-gray-600">Base Party Price</span>
+                      <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
                     </div>
-                  )}
-                  {pricing.addonsTotal > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Additional Extras</span>
-                      <span className="font-semibold">+{formatPrice(pricing.addonsTotal)}</span>
+                    {pricing.packagePrice > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Package Add-on</span>
+                        <span className="font-semibold">+{formatPrice(pricing.packagePrice)}</span>
+                      </div>
+                    )}
+                    {pricing.addonsTotal > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Additional Extras</span>
+                        <span className="font-semibold">+{formatPrice(pricing.addonsTotal)}</span>
+                      </div>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total</span>
+                      <span className="text-purple-600">{formatPrice(pricing.total)}</span>
                     </div>
-                  )}
-                  <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span className="text-purple-600">{formatPrice(pricing.total)}</span>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-600">
+                    <DollarSign className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-lg font-semibold mb-2">Get Your Quote</p>
+                    <p className="text-sm">
+                      Please provide your email and accept communications below to see pricing details.
+                    </p>
+                  </div>
+                )}
                 
                 {/* Show/Hide Billing Checkbox */}
                 <div className="border-t pt-3">
