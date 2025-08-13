@@ -72,7 +72,7 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - ✅ Clean activity display: no prices shown, only icons and labels, 2-per-row layout, no scrolling
 - ✅ Streamlined food selection: Pizza, Bagels, or Chicken Fingers upgrade (+$100) - single select
 - ✅ Simplified cupcake selection: Vanilla or Chocolate options without label headers
-- ✅ Updated activity labels: "Premium Activities 2/2" and "Activities 2/2" format
+- ✅ Dynamic activity labels showing current selection count: "Select Premium Activities (X/Y)"
 - ✅ Silent real-time updates without toast popup notifications
 - ✅ Theme selection hides other options once selected with "Change" button
 - ✅ Modernized rectangular geometric design with real-time pricing calculations

@@ -658,7 +658,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {selectedPackage.premiumActivities > 0 && (
                                 <div className="border-2 border-gray-200 p-4">
                                   <h4 className="font-medium text-gray-800 mb-2">
-                                    Premium Activities {selectedPackage.premiumActivities}/{selectedPackage.premiumActivities}
+                                    Select Premium Activities ({currentPremiumActivities.length}/{selectedPackage.premiumActivities})
                                   </h4>
                                   
                                   {premiumQuotaReached ? (
@@ -728,7 +728,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {selectedPackage.standardActivities > 0 && (
                                 <div className="border-2 border-gray-200 p-4">
                                   <h4 className="font-medium text-gray-800 mb-2">
-                                    Activities {selectedPackage.standardActivities}/{selectedPackage.standardActivities}
+                                    Select Standard Activities ({currentStandardActivities.length}/{selectedPackage.standardActivities})
                                   </h4>
                                   
                                   {standardQuotaReached ? (
