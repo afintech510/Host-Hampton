@@ -173,23 +173,23 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   // Separate timeout refs for different fields to prevent interference
   const timeoutRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
   
-  // Real-time update handler with field-specific debouncing
-  const handleRealTimeUpdate = (field: string, value: any, immediate = false) => {
+  // Simple immediate update for all non-text fields
+  const handleRealTimeUpdate = (field: string, value: any) => {
+    updateMutation.mutate({ [field]: value });
+  };
+  
+  // Debounced update specifically for text inputs to avoid typing interference  
+  const handleTextInputUpdate = (field: string, value: any) => {
     // Clear existing timeout for this specific field
     if (timeoutRefs.current[field]) {
       clearTimeout(timeoutRefs.current[field]!);
     }
     
-    // Immediate update for non-text fields or when explicitly requested
-    if (immediate || !['customTheme', 'mobileAddress', 'childFirstName'].includes(field)) {
+    // Set new timeout for this field
+    timeoutRefs.current[field] = setTimeout(() => {
       updateMutation.mutate({ [field]: value });
-    } else {
-      // Field-specific debounce for text inputs to prevent interference with typing
-      timeoutRefs.current[field] = setTimeout(() => {
-        updateMutation.mutate({ [field]: value });
-        timeoutRefs.current[field] = null;
-      }, 2000); // 2 second debounce for text inputs
-    }
+      timeoutRefs.current[field] = null;
+    }, 1500); // 1.5 second debounce for text inputs
   };
 
   // Cleanup effect to clear all timeouts on unmount
@@ -386,7 +386,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       <Label className="text-sm font-semibold text-gray-700">Child's First Name</Label>
                       <Input
                         value={booking.childName || ''}
-                        onChange={(e) => handleRealTimeUpdate('childName', e.target.value)}
+                        onChange={(e) => handleTextInputUpdate('childName', e.target.value)}
                         className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
                         placeholder="Enter child's name"
                       />
@@ -474,7 +474,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       <Label className="text-sm font-semibold text-gray-700">Mobile Address</Label>
                       <Input
                         value={booking.mobileAddress || ''}
-                        onChange={(e) => handleRealTimeUpdate('mobileAddress', e.target.value)}
+                        onChange={(e) => handleTextInputUpdate('mobileAddress', e.target.value)}
                         className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
                         placeholder="Enter your full address"
                       />
@@ -533,7 +533,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             {selectedTheme === 'custom' && (
                               <Input
                                 value={booking.customTheme || ''}
-                                onChange={(e) => handleRealTimeUpdate('customTheme', e.target.value)}
+                                onChange={(e) => handleTextInputUpdate('customTheme', e.target.value)}
                                 className="mt-2 border-2 border-gray-200 rounded-none focus:border-purple-500"
                                 placeholder="Describe your custom theme..."
                               />
