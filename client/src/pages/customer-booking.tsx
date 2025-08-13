@@ -242,23 +242,28 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
   // Calculate pricing
   const calculatePricing = () => {
-    if (!booking) return { basePrice: 875, packagePrice: 0, addonsTotal: 0, total: 875 };
+    if (!booking) return { basePrice: 850, packagePrice: 0, addonsTotal: 0, total: 850 };
 
-    const basePriceStandard = 875;
-    const basePriceCustom = 950;
-    const basePrice = booking.partyTheme === 'custom' ? basePriceCustom : basePriceStandard;
+    // Star-level pricing structure
+    const isCustom = booking.partyTheme === 'custom';
+    const starPrices = {
+      1: isCustom ? 950 : 850,
+      2: isCustom ? 1350 : 1250,
+      3: isCustom ? 1650 : 1550,
+      4: isCustom ? 1900 : 1800,
+      5: isCustom ? 2325 : 2225
+    };
 
-    // Get package details - match star levels
+    // Get star level from package selection
     const packageKey = booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
-    let packageObj;
-    if (packageKey.includes('1star') || packageKey.includes('star1')) packageObj = packageDefinitions.star1;
-    else if (packageKey.includes('2star') || packageKey.includes('star2')) packageObj = packageDefinitions.star2;
-    else if (packageKey.includes('3star') || packageKey.includes('star3')) packageObj = packageDefinitions.star3;
-    else if (packageKey.includes('4star') || packageKey.includes('star4')) packageObj = packageDefinitions.star4;
-    else if (packageKey.includes('5star') || packageKey.includes('star5')) packageObj = packageDefinitions.star5;
-    else packageObj = packageDefinitions.star1; // Default to 1-star
+    let starLevel = 1; // Default
+    if (packageKey.includes('1star') || packageKey.includes('star1')) starLevel = 1;
+    else if (packageKey.includes('2star') || packageKey.includes('star2')) starLevel = 2;
+    else if (packageKey.includes('3star') || packageKey.includes('star3')) starLevel = 3;
+    else if (packageKey.includes('4star') || packageKey.includes('star4')) starLevel = 4;
+    else if (packageKey.includes('5star') || packageKey.includes('star5')) starLevel = 5;
     
-    const packagePrice = packageObj?.price || 0;
+    const basePrice = starPrices[starLevel as keyof typeof starPrices];
 
     // Calculate add-ons total from new structure
     let addonsTotal = 0;
@@ -274,8 +279,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     };
     if (booking.selectedFoodAddons) {
       Object.entries(booking.selectedFoodAddons).forEach(([name, quantity]) => {
-        if (quantity > 0 && foodPrices[name as keyof typeof foodPrices]) {
-          addonsTotal += foodPrices[name as keyof typeof foodPrices] * (quantity as number);
+        const qty = Number(quantity);
+        if (qty > 0 && foodPrices[name as keyof typeof foodPrices]) {
+          addonsTotal += foodPrices[name as keyof typeof foodPrices] * qty;
         }
       });
     }
@@ -291,8 +297,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     };
     if (booking.selectedSweetAddons) {
       Object.entries(booking.selectedSweetAddons).forEach(([name, quantity]) => {
-        if (quantity > 0 && sweetPrices[name as keyof typeof sweetPrices]) {
-          addonsTotal += sweetPrices[name as keyof typeof sweetPrices] * (quantity as number);
+        const qty = Number(quantity);
+        if (qty > 0 && sweetPrices[name as keyof typeof sweetPrices]) {
+          addonsTotal += sweetPrices[name as keyof typeof sweetPrices] * qty;
         }
       });
     }
@@ -305,8 +312,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     };
     if (booking.selectedDrinkAddons) {
       Object.entries(booking.selectedDrinkAddons).forEach(([name, quantity]) => {
-        if (quantity > 0 && drinkPrices[name as keyof typeof drinkPrices]) {
-          addonsTotal += drinkPrices[name as keyof typeof drinkPrices] * (quantity as number);
+        const qty = Number(quantity);
+        if (qty > 0 && drinkPrices[name as keyof typeof drinkPrices]) {
+          addonsTotal += drinkPrices[name as keyof typeof drinkPrices] * qty;
         }
       });
     }
@@ -319,18 +327,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
         let addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
         
-        // Apply Ultimate Package food budget if applicable
-        if (packageObj?.foodBudget && ['food', 'drink'].includes(addon.category)) {
-          addonPrice = Math.max(0, addonPrice - packageObj.foodBudget);
-        }
-
         return total + addonPrice;
       }, 0);
     }
 
-    const total = basePrice + packagePrice + addonsTotal;
+    const total = basePrice + addonsTotal;
 
-    return { basePrice, packagePrice, addonsTotal, total };
+    return { basePrice: basePrice, packagePrice: 0, addonsTotal, total };
   };
 
   const pricing = calculatePricing();
