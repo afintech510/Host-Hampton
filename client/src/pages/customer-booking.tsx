@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar, Clock, Users, MapPin, CreditCard, User, Phone, Mail, Palette, Sparkles, DollarSign, Star } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, CreditCard, User, Phone, Mail, Palette, Sparkles, DollarSign, Star, Plus, Minus } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
 
 // Helper function to get ordinal suffix
@@ -854,9 +854,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 }
                                                 handleRealTimeUpdate('selectedFoodAddons', updated);
                                               }}
-                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
                                             >
-                                              -
+                                              <Minus className="w-4 h-4 text-gray-600" />
                                             </button>
                                             <span className="w-8 text-center text-sm">{quantity}</span>
                                             <button
@@ -864,9 +864,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 const updated = { ...currentFoodAddons, [addon.name]: quantity + 1 };
                                                 handleRealTimeUpdate('selectedFoodAddons', updated);
                                               }}
-                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
                                             >
-                                              +
+                                              <Plus className="w-4 h-4 text-gray-600" />
                                             </button>
                                           </div>
                                         </div>
@@ -933,9 +933,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 }
                                                 handleRealTimeUpdate('selectedSweetAddons', updated);
                                               }}
-                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
                                             >
-                                              -
+                                              <Minus className="w-4 h-4 text-gray-600" />
                                             </button>
                                             <span className="w-8 text-center text-sm">{quantity}</span>
                                             <button
@@ -943,9 +943,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 const updated = { ...currentSweetAddons, [addon.name]: quantity + 1 };
                                                 handleRealTimeUpdate('selectedSweetAddons', updated);
                                               }}
-                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
                                             >
-                                              +
+                                              <Plus className="w-4 h-4 text-gray-600" />
                                             </button>
                                           </div>
                                         </div>
@@ -1002,9 +1002,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 }
                                                 handleRealTimeUpdate('selectedDrinkAddons', updated);
                                               }}
-                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
                                             >
-                                              -
+                                              <Minus className="w-4 h-4 text-gray-600" />
                                             </button>
                                             <span className="w-8 text-center text-sm">{quantity}</span>
                                             <button
@@ -1012,9 +1012,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 const updated = { ...currentDrinkAddons, [addon.name]: quantity + 1 };
                                                 handleRealTimeUpdate('selectedDrinkAddons', updated);
                                               }}
-                                              className="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
                                             >
-                                              +
+                                              <Plus className="w-4 h-4 text-gray-600" />
                                             </button>
                                           </div>
                                         </div>
