@@ -658,7 +658,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {selectedPackage.premiumActivities > 0 && (
                                 <div className="border-2 border-gray-200 p-4">
                                   <h4 className="font-medium text-gray-800 mb-2">
-                                    Select Premium Activities ({currentPremiumActivities.length}/{selectedPackage.premiumActivities})
+                                    Premium Activities {selectedPackage.premiumActivities}/{selectedPackage.premiumActivities}
                                   </h4>
                                   
                                   {premiumQuotaReached ? (
@@ -690,10 +690,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       })}
                                     </div>
                                   ) : (
-                                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                                    <div className="grid grid-cols-2 gap-2">
                                       {premiumActivitiesData.map((addon: any) => {
                                         const isSelected = currentPremiumActivities.includes(addon.name);
-                                        const addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
                                         
                                         return (
                                           <div
@@ -713,15 +712,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 : 'border-gray-200 bg-white hover:border-purple-300'
                                             }`}
                                           >
-                                            <div className="flex justify-between items-center">
-                                              <div className="flex items-center gap-2">
-                                                <span className="text-lg">{addon.icon}</span>
-                                                <span className="font-medium">{addon.name}</span>
-                                              </div>
-                                              <span className="text-purple-600 font-semibold">
-                                                {formatPrice(addonPrice)}
-                                                {addon.per_guest && '/guest'}
-                                              </span>
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-lg">{addon.icon}</span>
+                                              <span className="font-medium">{addon.name}</span>
                                             </div>
                                           </div>
                                         );
@@ -735,7 +728,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {selectedPackage.standardActivities > 0 && (
                                 <div className="border-2 border-gray-200 p-4">
                                   <h4 className="font-medium text-gray-800 mb-2">
-                                    Select Standard Activities ({currentStandardActivities.length}/{selectedPackage.standardActivities})
+                                    Activities {selectedPackage.standardActivities}/{selectedPackage.standardActivities}
                                   </h4>
                                   
                                   {standardQuotaReached ? (
@@ -767,10 +760,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       })}
                                     </div>
                                   ) : (
-                                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                                    <div className="grid grid-cols-2 gap-2">
                                       {standardActivitiesData.map((addon: any) => {
                                         const isSelected = currentStandardActivities.includes(addon.name);
-                                        const addonPrice = addon.per_guest ? (addon.price_per_guest * (booking.guestCount || 10)) : addon.price;
                                         
                                         return (
                                           <div
@@ -790,15 +782,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 : 'border-gray-200 bg-white hover:border-purple-300'
                                             }`}
                                           >
-                                            <div className="flex justify-between items-center">
-                                              <div className="flex items-center gap-2">
-                                                <span className="text-lg">{addon.icon}</span>
-                                                <span className="font-medium">{addon.name}</span>
-                                              </div>
-                                              <span className="text-purple-600 font-semibold">
-                                                {formatPrice(addonPrice)}
-                                                {addon.per_guest && '/guest'}
-                                              </span>
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-lg">{addon.icon}</span>
+                                              <span className="font-medium">{addon.name}</span>
                                             </div>
                                           </div>
                                         );
@@ -810,42 +796,38 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                               {/* Food Selection */}
                               <div className="border-2 border-gray-200 p-4">
-                                <h4 className="font-medium text-gray-800 mb-3">Select Food</h4>
-                                <div className="space-y-3">
-                                  {/* Base Food Options */}
-                                  <div className="space-y-2">
-                                    <p className="text-sm text-gray-600">Choose your base meal:</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                      {['pizza', 'bagels'].map((food) => (
-                                        <div
-                                          key={food}
-                                          onClick={() => handleRealTimeUpdate('selectedFood', food)}
-                                          className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
-                                            currentFood === food 
-                                              ? 'border-purple-500 bg-purple-50' 
-                                              : 'border-gray-200 bg-white hover:border-purple-300'
-                                          }`}
-                                        >
-                                          <div className="font-medium capitalize">{food}</div>
-                                        </div>
-                                      ))}
-                                    </div>
+                                <div className="grid grid-cols-1 gap-3">
+                                  <div
+                                    onClick={() => handleRealTimeUpdate('selectedFood', 'pizza')}
+                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                      currentFood === 'pizza'
+                                        ? 'border-purple-500 bg-purple-50' 
+                                        : 'border-gray-200 bg-white hover:border-purple-300'
+                                    }`}
+                                  >
+                                    <div className="font-medium">🍕 Pizza</div>
                                   </div>
-                                  
-                                  {/* Chicken Upgrade Option */}
-                                  <div className="border-t pt-3">
-                                    <div
-                                      onClick={() => handleRealTimeUpdate('hasChickenUpgrade', !hasChickenUpgrade)}
-                                      className={`border-2 p-3 cursor-pointer transition-all text-sm ${
-                                        hasChickenUpgrade 
-                                          ? 'border-purple-500 bg-purple-50' 
-                                          : 'border-gray-200 bg-white hover:border-purple-300'
-                                      }`}
-                                    >
-                                      <div className="flex justify-between items-center">
-                                        <span className="font-medium">🍗 Upgrade to Chicken Fingers & French Fries</span>
-                                        <span className="text-purple-600 font-semibold">+$100</span>
-                                      </div>
+                                  <div
+                                    onClick={() => handleRealTimeUpdate('selectedFood', 'bagels')}
+                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                      currentFood === 'bagels'
+                                        ? 'border-purple-500 bg-purple-50' 
+                                        : 'border-gray-200 bg-white hover:border-purple-300'
+                                    }`}
+                                  >
+                                    <div className="font-medium">🥯 Bagels</div>
+                                  </div>
+                                  <div
+                                    onClick={() => handleRealTimeUpdate('hasChickenUpgrade', !hasChickenUpgrade)}
+                                    className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                      hasChickenUpgrade 
+                                        ? 'border-purple-500 bg-purple-50' 
+                                        : 'border-gray-200 bg-white hover:border-purple-300'
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-medium">🍗 Upgrade to Chicken Fingers & French Fries</span>
+                                      <span className="text-purple-600 font-semibold">+$100</span>
                                     </div>
                                   </div>
                                 </div>
@@ -853,7 +835,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                               {/* Cupcake Flavor Selection */}
                               <div className="border-2 border-gray-200 p-4">
-                                <h4 className="font-medium text-gray-800 mb-3">Select Cupcake Flavor</h4>
                                 <div className="grid grid-cols-2 gap-3">
                                   {['vanilla', 'chocolate'].map((flavor) => (
                                     <div
