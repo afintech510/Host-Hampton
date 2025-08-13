@@ -40,7 +40,7 @@ function getAutoSelectedItemsForPackage(packageName: string, allAddons: any[]) {
 
   switch (packageName) {
     case '⭐ Base Package':
-      // 1 star: either "1 premium + 2 standard" or "3 standard"
+      // Base package - no inclusions, just the base party
       result.activityAllowances = {
         premiumCount: 1,
         standardCount: 2,
@@ -49,21 +49,20 @@ function getAutoSelectedItemsForPackage(packageName: string, allAddons: any[]) {
       break;
 
     case '⭐⭐ Enhanced Package':
-      // 2 star: Goody Bags, Photo Booth, 3 Extra Guests + upgrade to 2nd premium activity or add another standard activity
-      result.selectedAddons = ['Photo Booth'];
-      result.lockedAddons = ['Photo Booth'];
+      // Level 1: $350 - Goody Bags, Photo Booth, 3 Extra Guests
+      result.selectedAddons = ['Goodie Bags', 'Photo Booth'];
+      result.lockedAddons = ['Goodie Bags', 'Photo Booth'];
       result.activityAllowances = {
         premiumCount: 1,
         standardCount: 2,
-        canUpgradeToPremium: true
+        canUpgradeToPremium: false
       };
       break;
 
     case '⭐⭐⭐ Premium Package':
-      // 3 star: Goody Bags, Photo Booth, 4 Extra Guests, $200 Balloons, & Curated Birthday Gift Basket + upgrade option
-      result.selectedAddons = ['Photo Booth'];
-      result.lockedAddons = ['Photo Booth'];
-      result.balloonBudget = 20000; // $200 in cents
+      // Level 2: $695 - Upgrade to Premium Activity or add Standard, Goody Bags, Balloon Tower, Photo Booth, 4 Extra Guests, Birthday Gift Basket
+      result.selectedAddons = ['Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Birthday Gift Basket'];
+      result.lockedAddons = ['Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Birthday Gift Basket'];
       result.activityAllowances = {
         premiumCount: 1,
         standardCount: 2,
@@ -72,10 +71,9 @@ function getAutoSelectedItemsForPackage(packageName: string, allAddons: any[]) {
       break;
 
     case '⭐⭐⭐⭐ Deluxe Package':
-      // 4 star: Premium Goody Bags, Photo Booth, 5 Extra Guests, $300 Balloons, & Curated Birthday Gift Basket, Bubbles Drink Package, Custom Treats 1pp + upgrade option
-      result.selectedAddons = ['Photo Booth', 'Bubbles Drink Package'];
-      result.lockedAddons = ['Photo Booth', 'Bubbles Drink Package'];
-      result.balloonBudget = 30000; // $300 in cents
+      // Level 3: $925 - Upgrade to Premium Activity or add Standard, Premium Goody Bags, Balloon Tower, Photo Booth, Balloon Custom Stack, 5 Extra Guests, Birthday Gift Basket, Bubbles Drink Package
+      result.selectedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Custom Stack', 'Birthday Gift Basket', 'Bubbles Drink Package'];
+      result.lockedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Custom Stack', 'Birthday Gift Basket', 'Bubbles Drink Package'];
       result.activityAllowances = {
         premiumCount: 1,
         standardCount: 2,
@@ -84,11 +82,10 @@ function getAutoSelectedItemsForPackage(packageName: string, allAddons: any[]) {
       break;
 
     case '⭐⭐⭐⭐⭐ Ultimate Package':
-      // 5 star: Premium Goody Bags, Photo Booth, 6 Extra Guests, $400 Balloons, & Curated Birthday Gift Basket, Bubbles Drink Package, $150 in Food Add-ons, Custom Treat Table 3pp + upgrade option
-      result.selectedAddons = ['Photo Booth', 'Bubbles Drink Package'];
-      result.lockedAddons = ['Photo Booth', 'Bubbles Drink Package'];
-      result.balloonBudget = 40000; // $400 in cents
-      result.foodBudget = 15000; // $150 in cents
+      // Level 4: $1,375 - Upgrade to Premium Activity or add Standard, Premium Goody Bags, Balloon Tower, Photo Booth, Balloon Garland, 6 Extra Guests, Birthday Gift Basket, Themed Custom Treat Table, Bubbles Drink Package, Up to $150 in Food Add-ons
+      result.selectedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Garland', 'Birthday Gift Basket', 'Themed Custom Treat Table', 'Bubbles Drink Package'];
+      result.lockedAddons = ['Premium Goodie Bags', 'Balloon Tower', 'Photo Booth', 'Balloon Garland', 'Birthday Gift Basket', 'Themed Custom Treat Table', 'Bubbles Drink Package'];
+      result.foodBudget = 15000; // $150 in cents for food add-ons
       result.activityAllowances = {
         premiumCount: 1,
         standardCount: 2,
