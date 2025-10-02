@@ -109,7 +109,7 @@ export default function PrivacyPolicy() {
                 <li>Request a copy of the data we hold about you</li>
               </ul>
               <p className="text-gray-600 mt-4">
-                To exercise these rights, please contact us at privacy@hosthampton.com or (555) 123-PARTY.
+                To exercise these rights, please contact us at hosthampton295@gmail.com or 631-998-9325.
               </p>
             </CardContent>
           </Card>
@@ -123,9 +123,9 @@ export default function PrivacyPolicy() {
                 If you have any questions about this Privacy Policy, please contact us:
               </p>
               <div className="mt-4 space-y-2 text-gray-600">
-                <p><strong>Email:</strong> privacy@hosthampton.com</p>
-                <p><strong>Phone:</strong> (555) 123-PARTY</p>
-                <p><strong>Address:</strong> 123 Party Lane, Hampton, NY 11946</p>
+                <p><strong>Email:</strong> hosthampton295@gmail.com</p>
+                <p><strong>Phone:</strong> 631-998-9325</p>
+                <p><strong>Address:</strong> 295 Montauk Hwy, Speonk, NY 11972</p>
               </div>
               <p className="text-gray-500 text-sm mt-4">
                 Last updated: {new Date().toLocaleDateString()}

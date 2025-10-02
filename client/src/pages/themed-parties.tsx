@@ -988,7 +988,7 @@ export default function ThemedParties() {
                     size="lg"
                     className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-bold text-lg px-8 py-4 rounded-full"
                   >
-                    Call Us: (555) 123-PARTY
+                    Call Us: 631-998-9325
                   </Button>
                 </div>
               )}

@@ -242,7 +242,7 @@ export default function FAQ() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button className="bg-mauve-rose hover:bg-mauve-rose/90">
-                Call (555) 123-PARTY
+                Call 631-998-9325
               </Button>
               <Button variant="outline" className="border-mauve-rose text-mauve-rose hover:bg-mauve-rose hover:text-white">
                 Email Us
