@@ -2019,6 +2019,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const product = await storage.createProduct(validation.data);
+      
+      // For single-session products (hasMultipleSessions = false), create an event record
+      if (!product.hasMultipleSessions && product.eventDate) {
+        const eventTypeId = getEventTypeIdFromService(product.category || 'general');
+        
+        await storage.createEvent({
+          eventTypeId,
+          customerId: 1, // System customer for product-based events
+          eventDate: product.eventDate,
+          startTime: null,
+          endTime: null,
+          guestCount: product.maxTickets || 0,
+          status: "confirmed",
+          notes: product.name,
+          estimatedCost: product.price,
+        });
+      }
+      
       res.status(201).json(product);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -2065,6 +2083,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const session = await storage.createProductSession(validation.data);
+      
+      // Get the product to determine category and create event record
+      const product = await storage.getProduct(session.productId);
+      if (product && session.sessionDate) {
+        const eventTypeId = getEventTypeIdFromService(product.category || 'general');
+        
+        await storage.createEvent({
+          eventTypeId,
+          customerId: 1, // System customer for product-based events
+          eventDate: session.sessionDate,
+          startTime: session.sessionTime || null,
+          endTime: null,
+          guestCount: session.maxTickets || 0,
+          status: "confirmed",
+          notes: `${product.name} - ${session.sessionName}`,
+          estimatedCost: session.priceOverride || product.price,
+        });
+      }
+      
       res.status(201).json({ success: true, session });
     } catch (error) {
       console.error("Error creating product session:", error);
