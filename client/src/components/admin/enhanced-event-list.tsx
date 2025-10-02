@@ -230,6 +230,11 @@ export default function EnhancedEventList() {
 
   // Filter and sort public events
   const filteredPublicEvents = publicEvents
+    .filter((event: any) => {
+      if (statusFilter !== "all" && event.status !== statusFilter) return false;
+      if (eventTypeFilter !== "all" && eventTypeFilter !== "public") return false;
+      return true;
+    })
     .sort((a: any, b: any) => {
       // Sort by date descending (newest first)
       return new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime();
