@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eye, Users, Calendar, DollarSign, Mail, RotateCcw } from "lucide-react";
+import EventDetailsDialog from "./event-details-dialog";
 
 interface PublicEvent {
   id: number;
@@ -58,9 +58,8 @@ interface EventAttendee {
 export default function EnhancedEventList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
-  const [selectedEventType, setSelectedEventType] = useState<"public" | "private">("public");
   
   const queryClient = useQueryClient();
   
@@ -304,9 +303,8 @@ export default function EnhancedEventList() {
     }
   };
 
-  const handleViewEvent = (event: any, isPublic: boolean) => {
-    setSelectedEvent(event);
-    setSelectedEventType(isPublic ? "public" : "private");
+  const handleViewEvent = (event: any) => {
+    setSelectedEventId(event.id);
     setShowEventModal(true);
   };
 
@@ -392,7 +390,8 @@ export default function EnhancedEventList() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleViewEvent(event, true)}
+                      onClick={() => handleViewEvent(event)}
+                      data-testid={`button-view-event-${event.id}`}
                     >
                       <Eye className="w-3 h-3 mr-1" />
                       View
@@ -442,7 +441,8 @@ export default function EnhancedEventList() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleViewEvent(event, false)}
+                      onClick={() => handleViewEvent(event)}
+                      data-testid={`button-view-event-${event.id}`}
                     >
                       <Eye className="w-3 h-3 mr-1" />
                       View
@@ -527,7 +527,8 @@ export default function EnhancedEventList() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => handleViewEvent(event, true)}
+                          onClick={() => handleViewEvent(event)}
+                          data-testid={`button-view-event-${event.id}`}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
@@ -578,7 +579,8 @@ export default function EnhancedEventList() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => handleViewEvent(event, false)}
+                          onClick={() => handleViewEvent(event)}
+                          data-testid={`button-view-event-${event.id}`}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
@@ -601,135 +603,15 @@ export default function EnhancedEventList() {
       </Card>
 
       {/* Event Details Modal */}
-      <Dialog open={showEventModal} onOpenChange={setShowEventModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedEventType === "public" ? "Host Hampton Event Details" : "Private Event Details"}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedEvent && selectedEventType === "public" && (
-            <PublicEventDetails 
-              event={selectedEvent} 
-              attendeeCount={getEventAttendeeCount(selectedEvent.id, selectedEvent.notes || "")}
-              onSendEmail={() => handleSendEventEmail(selectedEvent)}
-            />
-          )}
-          
-          {selectedEvent && selectedEventType === "private" && (
-            <PrivateEventDetails 
-              event={selectedEvent}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <EventDetailsDialog 
+        eventId={selectedEventId}
+        isOpen={showEventModal}
+        onClose={() => {
+          setShowEventModal(false);
+          setSelectedEventId(null);
+        }}
+        mode="view"
+      />
     </div>
   );
-}
-
-// Component for Public Event Details
-function PublicEventDetails({ event, attendeeCount, onSendEmail }: { 
-  event: PublicEvent; 
-  attendeeCount: number; 
-  onSendEmail: () => void; 
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Event Information</h3>
-          <div className="space-y-2">
-            <p><strong>Name:</strong> {event.name}</p>
-            <p><strong>Date:</strong> {event.eventDate ? new Date(event.eventDate).toLocaleDateString() : "Multiple Sessions"}</p>
-            <p><strong>Location:</strong> {event.location || "Host Hampton"}</p>
-            <p><strong>Price:</strong> ${(event.price / 100).toFixed(2)}</p>
-            <p><strong>Category:</strong> {event.category || "Workshop"}</p>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Attendance</h3>
-          <div className="space-y-2">
-            <p><strong>Signed Up:</strong> {attendeeCount}</p>
-            <p><strong>Available:</strong> {event.availableTickets || "Unlimited"}</p>
-            <p><strong>Max Capacity:</strong> {event.maxTickets || "Unlimited"}</p>
-            <p><strong>Revenue:</strong> ${(attendeeCount * (event.price / 100)).toFixed(2)}</p>
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <h3 className="font-semibold text-lg mb-3">Attendee List</h3>
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <p className="text-sm text-gray-600 mb-2">Print attendee list for check-in:</p>
-          <Button variant="outline" size="sm">
-            Print Attendee List
-          </Button>
-        </div>
-      </div>
-      
-      <div className="flex gap-3 pt-4 border-t">
-        <Button onClick={onSendEmail} className="flex items-center gap-2">
-          <Mail className="w-4 h-4" />
-          Send Update Email
-        </Button>
-        <Button variant="outline" onClick={onSendEmail} className="flex items-center gap-2">
-          <Mail className="w-4 h-4" />
-          Send Reminder Email
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// Component for Private Event Details
-function PrivateEventDetails({ event }: { event: PrivateEvent }) {
-  const handleOpenQuote = () => {
-    // Open quote in new tab
-    window.open(`/admin-dashboard?tab=quotes&event=${event.id}`, '_blank');
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Event Information</h3>
-          <div className="space-y-2">
-            <p><strong>Customer:</strong> {event.customerName || "Unknown"}</p>
-            <p><strong>Event Type:</strong> {event.eventTypeName || event.eventType || "Private Event"}</p>
-            <p><strong>Date:</strong> {new Date(event.eventDate).toLocaleDateString()}</p>
-            <p><strong>Time:</strong> {event.startTime} - {event.endTime}</p>
-            <p><strong>Guest Count:</strong> {event.guestCount}</p>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Financial Details</h3>
-          <div className="space-y-2">
-            <p><strong>Status:</strong> 
-              <Badge className={`ml-2 ${event.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                {event.status}
-              </Badge>
-            </p>
-            <p><strong>Estimated Cost:</strong> ${((event.estimatedCost || 0) / 100).toFixed(2)}</p>
-          </div>
-        </div>
-      </div>
-      
-      {event.notes && (
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Notes</h3>
-          <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{event.notes}</p>
-        </div>
-      )}
-      
-      <div className="flex gap-3 pt-4 border-t">
-        <Button onClick={handleOpenQuote} className="flex items-center gap-2">
-          <Eye className="w-4 h-4" />
-          Edit Quote
-        </Button>
-      </div>
-    </div>
-  );
-}
+} 

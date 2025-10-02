@@ -57,7 +57,7 @@ interface EventDetailsDialogProps {
   mode: "view" | "edit";
 }
 
-export default function EventDetailsDialog({ eventId, isOpen, onClose }: EventDetailsDialogProps) {
+export default function EventDetailsDialog({ eventId, isOpen, onClose, mode }: EventDetailsDialogProps) {
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
 
