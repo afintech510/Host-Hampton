@@ -56,7 +56,7 @@ interface EventAttendee {
 }
 
 export default function EnhancedEventList() {
-  const [statusFilter, setStatusFilter] = useState("confirmed");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showEventModal, setShowEventModal] = useState(false);
@@ -218,14 +218,23 @@ export default function EnhancedEventList() {
   };
 
   // Filter events based on status and type
-  const filteredPrivateEvents = privateEvents.filter((event: PrivateEvent) => {
-    if (statusFilter !== "all" && event.status !== statusFilter) return false;
-    if (eventTypeFilter !== "all" && eventTypeFilter !== "private") return false;
-    return true;
-  });
+  const filteredPrivateEvents = privateEvents
+    .filter((event: PrivateEvent) => {
+      if (statusFilter !== "all" && event.status !== statusFilter) return false;
+      if (eventTypeFilter !== "all" && eventTypeFilter !== "private") return false;
+      return true;
+    })
+    .sort((a: PrivateEvent, b: PrivateEvent) => {
+      // Sort by date descending (newest first)
+      return new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime();
+    });
 
-  // Temporary: Show all public events to debug filtering issue
-  const filteredPublicEvents = publicEvents; // Show all public events temporarily
+  // Filter and sort public events
+  const filteredPublicEvents = publicEvents
+    .sort((a: any, b: any) => {
+      // Sort by date descending (newest first)
+      return new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime();
+    });
   
   // Debug logging to see what's happening with filtering
   console.log("Debug Event Filtering:");
