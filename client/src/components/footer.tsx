@@ -73,7 +73,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-mauve-rose" />
-                <span>Hampton, NY</span>
+                <span>295 Montauk Hwy, Speonk, NY 11972</span>
               </div>
             </div>
 

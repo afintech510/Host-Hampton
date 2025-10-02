@@ -116,7 +116,7 @@ export default function Contact() {
                   <Phone className="h-5 w-5 text-mauve-rose" />
                   <div>
                     <p className="font-medium">Phone</p>
-                    <p className="text-gray-600">(555) 123-PARTY</p>
+                    <p className="text-gray-600">631-998-9325</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -130,7 +130,7 @@ export default function Contact() {
                   <MapPin className="h-5 w-5 text-mauve-rose" />
                   <div>
                     <p className="font-medium">Location</p>
-                    <p className="text-gray-600">123 Party Lane<br />Hampton, NY 11946</p>
+                    <p className="text-gray-600">295 Montauk Hwy<br />Speonk, NY 11972</p>
                   </div>
                 </div>
               </CardContent>
