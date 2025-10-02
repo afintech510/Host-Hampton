@@ -2398,6 +2398,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } catch (businessEmailError) {
             console.error("Error sending business notification email:", businessEmailError);
           }
+
+          // Create events from order items so they appear in customer's /my-events
+          try {
+            // Find or create customer record
+            let customer = await storage.getCustomerByEmail(updatedOrder.customerEmail);
+            
+            if (!customer) {
+              // Create new customer from order data
+              customer = await storage.createCustomer({
+                name: updatedOrder.customerName || "Customer",
+                email: updatedOrder.customerEmail,
+                phone: updatedOrder.customerPhone || "",
+                billingAddress: updatedOrder.billingAddress ? {
+                  address: updatedOrder.billingAddress,
+                  city: updatedOrder.billingCity,
+                  state: updatedOrder.billingState,
+                  zip: updatedOrder.billingZip
+                } : null
+              });
+              console.log(`Created new customer #${customer.id} for order #${orderId}`);
+            }
+
+            // Get or create "Shop Event" event type
+            let eventTypes = await storage.getEventTypes();
+            let shopEventType = eventTypes.find(et => et.name === "Shop Event");
+            
+            if (!shopEventType) {
+              shopEventType = await storage.createEventType({
+                name: "Shop Event",
+                description: "Events purchased through the online shop",
+                active: true
+              });
+              console.log("Created Shop Event type");
+            }
+
+            // Create an event for each order item
+            for (const item of orderItems) {
+              const product = await storage.getProduct(item.productId!);
+              
+              if (product && item.productSessionId) {
+                const session = await storage.getProductSession(item.productSessionId);
+                
+                if (session) {
+                  // Create event record for this purchase
+                  const event = await storage.createEvent({
+                    customerId: customer.id,
+                    eventTypeId: shopEventType.id,
+                    eventDate: session.sessionDate,
+                    startTime: session.sessionTime || "",
+                    endTime: "",
+                    guestCount: item.quantity,
+                    status: "confirmed", // They've paid, so it's confirmed
+                    estimatedCost: item.price * item.quantity,
+                    notes: `Purchased via order #${orderId} - ${product.name}${session.sessionName ? ` - ${session.sessionName}` : ''}`,
+                    inquirySource: "website",
+                    leadScore: "hot"
+                  });
+                  
+                  console.log(`Created event #${event.id} for customer #${customer.id} - ${product.name}`);
+                }
+              }
+            }
+            
+            console.log(`Successfully created events for order #${orderId}`);
+          } catch (eventCreationError) {
+            console.error("Error creating events from order:", eventCreationError);
+          }
         } catch (emailError) {
           console.error("Error sending order confirmation email:", emailError);
         }
