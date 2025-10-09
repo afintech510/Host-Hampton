@@ -296,6 +296,21 @@ export const leads = pgTable("leads", {
   lockedBy: text("locked_by"), // Username/ID of person who locked the quote
   lockedAt: timestamp("locked_at"), // When the quote was locked
   
+  // My Theme Party specific fields for /my-theme-party booking flow
+  firstName: text("first_name"), // Customer first name
+  lastName: text("last_name"), // Customer last name
+  partyType: text("party_type"), // "diy" or "full-service"
+  selectedStars: integer("selected_stars"), // 1-5 star package level
+  selectedPremiumActivities: json("selected_premium_activities").default([]).notNull(), // Array of activity names
+  selectedStandardActivities: json("selected_standard_activities").default([]).notNull(), // Array of activity names
+  selectedFood: text("selected_food"), // "pizza" or "bagels"
+  selectedFoodAddons: json("selected_food_addons").default({}).notNull(), // {addonName: quantity}
+  selectedCupcakeFlavor: text("selected_cupcake_flavor"), // "vanilla" or "chocolate"
+  selectedSweetAddons: json("selected_sweet_addons").default({}).notNull(), // {addonName: quantity}
+  selectedDrinkAddons: json("selected_drink_addons").default({}).notNull(), // {addonName: quantity}
+  selectedAllergies: json("selected_allergies").default([]).notNull(), // Array of allergy types
+  agreedToCommunications: boolean("agreed_to_communications").default(false).notNull(), // User agreed to receive communications
+  
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
