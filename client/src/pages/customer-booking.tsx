@@ -1447,8 +1447,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               const addon = allAddons.find((a: any) => a.name === name);
                               if (!addon) return null;
                               const itemPrice = addon.per_guest 
-                                ? addon.price * (booking.guestCount || 10) * Number(qty)
-                                : addon.price * Number(qty);
+                                ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                : (addon.price * Number(qty)) / 100;
                               return (
                                 <div key={name} className="flex justify-between">
                                   <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
@@ -1462,8 +1462,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               const addon = allAddons.find((a: any) => a.name === name);
                               if (!addon) return null;
                               const itemPrice = addon.per_guest 
-                                ? addon.price * (booking.guestCount || 10) * Number(qty)
-                                : addon.price * Number(qty);
+                                ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                : (addon.price * Number(qty)) / 100;
                               return (
                                 <div key={name} className="flex justify-between">
                                   <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
@@ -1477,8 +1477,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               const addon = allAddons.find((a: any) => a.name === name);
                               if (!addon) return null;
                               const itemPrice = addon.per_guest 
-                                ? addon.price * (booking.guestCount || 10) * Number(qty)
-                                : addon.price * Number(qty);
+                                ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                : (addon.price * Number(qty)) / 100;
                               return (
                                 <div key={name} className="flex justify-between">
                                   <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
