@@ -328,6 +328,25 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       });
     }
 
+    // Party Extras add-ons
+    const partyExtrasPrices = {
+      'Goodie Bags': 8,
+      'Premium Goodie Bags': 15,
+      'Balloon Tower': 95,
+      'Balloon Garland 6ft': 95,
+      'Balloon Arch': 195,
+      'Marquee Number': 50,
+      'Curated Birthday Gift': 25
+    };
+    if (booking.selectedPartyExtras) {
+      Object.entries(booking.selectedPartyExtras).forEach(([name, quantity]) => {
+        const qty = Number(quantity);
+        if (qty > 0 && partyExtrasPrices[name as keyof typeof partyExtrasPrices]) {
+          addonsTotal += partyExtrasPrices[name as keyof typeof partyExtrasPrices] * qty;
+        }
+      });
+    }
+
     // Legacy selectedAddons - DISABLED to prevent massive pricing issues
     // The new system uses selectedFoodAddons, selectedSweetAddons, selectedDrinkAddons instead
 
@@ -890,6 +909,59 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   )}
                                 </div>
                               )}
+
+                              {/* Party Extras */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
+                                <div className="space-y-2">
+                                  {[
+                                    { name: 'Goodie Bags', icon: '🎁' },
+                                    { name: 'Premium Goodie Bags', icon: '🎀' },
+                                    { name: 'Balloon Tower', icon: '🎈' },
+                                    { name: 'Balloon Garland 6ft', icon: '🎈' },
+                                    { name: 'Balloon Arch', icon: '🎈' },
+                                    { name: 'Marquee Number', icon: '✨' },
+                                    { name: 'Curated Birthday Gift', icon: '🎁' }
+                                  ].map((extra) => {
+                                    const currentPartyExtras = booking.selectedPartyExtras || {};
+                                    const quantity = currentPartyExtras[extra.name] || 0;
+                                    
+                                    return (
+                                      <div key={extra.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-lg">{extra.icon}</span>
+                                          <span className="text-sm font-medium">{extra.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <button
+                                            onClick={() => {
+                                              const updated = { ...currentPartyExtras };
+                                              if (quantity > 0) {
+                                                updated[extra.name] = quantity - 1;
+                                                if (updated[extra.name] === 0) delete updated[extra.name];
+                                              }
+                                              handleRealTimeUpdate('selectedPartyExtras', updated);
+                                            }}
+                                            className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
+                                          >
+                                            <Minus className="w-4 h-4 text-gray-600" />
+                                          </button>
+                                          <span className="w-8 text-center text-sm">{quantity}</span>
+                                          <button
+                                            onClick={() => {
+                                              const updated = { ...currentPartyExtras, [extra.name]: quantity + 1 };
+                                              handleRealTimeUpdate('selectedPartyExtras', updated);
+                                            }}
+                                            className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
+                                          >
+                                            <Plus className="w-4 h-4 text-gray-600" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
 
                               {/* Food Selection */}
                               <div className="border-2 border-gray-200 p-4">
@@ -1566,6 +1638,33 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                     ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
                                     : (addon.price * Number(qty)) / 100)
                                 : (drinkPrices[name] || 0) * Number(qty);
+                              
+                              return (
+                                <div key={name} className="flex justify-between">
+                                  <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
+                                  <span className="font-semibold">+{formatPrice(itemPrice)}</span>
+                                </div>
+                              );
+                            })}
+                          {booking.selectedPartyExtras && Object.entries(booking.selectedPartyExtras)
+                            .filter(([name, qty]) => Number(qty) > 0)
+                            .map(([name, qty]) => {
+                              const partyExtrasPrices: Record<string, number> = {
+                                'Goodie Bags': 8,
+                                'Premium Goodie Bags': 15,
+                                'Balloon Tower': 95,
+                                'Balloon Garland 6ft': 95,
+                                'Balloon Arch': 195,
+                                'Marquee Number': 50,
+                                'Curated Birthday Gift': 25
+                              };
+                              
+                              const addon = allAddons.find((a: any) => a.name === name);
+                              const itemPrice = addon 
+                                ? (addon.per_guest 
+                                    ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                    : (addon.price * Number(qty)) / 100)
+                                : (partyExtrasPrices[name] || 0) * Number(qty);
                               
                               return (
                                 <div key={name} className="flex justify-between">
