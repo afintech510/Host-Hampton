@@ -1502,11 +1502,22 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
                             .filter(([name, qty]) => Number(qty) > 0)
                             .map(([name, qty]) => {
+                              const foodPrices: Record<string, number> = {
+                                'Fruit Tray': 45,
+                                'Tray of Chicken Fingers': 65, 
+                                'Tray of French Fries': 35,
+                                'Regular Pizza (Adults)': 28,
+                                'Specialty Pizza': 35,
+                                'Popcorn Bar': 75
+                              };
+                              
                               const addon = allAddons.find((a: any) => a.name === name);
-                              if (!addon) return null;
-                              const itemPrice = addon.per_guest 
-                                ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
-                                : (addon.price * Number(qty)) / 100;
+                              const itemPrice = addon 
+                                ? (addon.per_guest 
+                                    ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                    : (addon.price * Number(qty)) / 100)
+                                : (foodPrices[name] || 0) * Number(qty);
+                              
                               return (
                                 <div key={name} className="flex justify-between">
                                   <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
@@ -1517,11 +1528,22 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
                             .filter(([name, qty]) => Number(qty) > 0)
                             .map(([name, qty]) => {
+                              const sweetPrices: Record<string, number> = {
+                                'Macarons': 24,
+                                'Chocolate Covered Pretzels': 18,
+                                'Chocolate Covered Rice Krispies': 20, 
+                                'Decorated Sugar Cookies': 30,
+                                'Candy Wall': 200,
+                                'Custom Treat Table': 150
+                              };
+                              
                               const addon = allAddons.find((a: any) => a.name === name);
-                              if (!addon) return null;
-                              const itemPrice = addon.per_guest 
-                                ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
-                                : (addon.price * Number(qty)) / 100;
+                              const itemPrice = addon 
+                                ? (addon.per_guest 
+                                    ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                    : (addon.price * Number(qty)) / 100)
+                                : (sweetPrices[name] || 0) * Number(qty);
+                              
                               return (
                                 <div key={name} className="flex justify-between">
                                   <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
@@ -1532,11 +1554,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
                             .filter(([name, qty]) => Number(qty) > 0)
                             .map(([name, qty]) => {
+                              const drinkPrices: Record<string, number> = {
+                                'Soda & Seltzers Package': 75,
+                                'Bubbles Drink Package': 75,
+                                'Coffee Bar': 75
+                              };
+                              
                               const addon = allAddons.find((a: any) => a.name === name);
-                              if (!addon) return null;
-                              const itemPrice = addon.per_guest 
-                                ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
-                                : (addon.price * Number(qty)) / 100;
+                              const itemPrice = addon 
+                                ? (addon.per_guest 
+                                    ? (addon.price * (booking.guestCount || 10) * Number(qty)) / 100
+                                    : (addon.price * Number(qty)) / 100)
+                                : (drinkPrices[name] || 0) * Number(qty);
+                              
                               return (
                                 <div key={name} className="flex justify-between">
                                   <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
