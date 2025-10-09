@@ -315,9 +315,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
     // Drink add-ons
     const drinkPrices = {
-      'Bubbles Drink Package': 75,
-      'Coffee Bar': 75,
-      'Drinks Package': 50
+      'Soda & Seltzers Package': 75,
+      'Bubbles Drink Package': 75, // Legacy support
+      'Coffee Bar': 75
     };
     if (booking.selectedDrinkAddons) {
       Object.entries(booking.selectedDrinkAddons).forEach(([name, quantity]) => {
@@ -896,7 +896,17 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 <h4 className="font-medium text-gray-800 mb-3">Food Selection</h4>
                                 
                                 {/* Base Food Selection */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                                  <div
+                                    onClick={() => handleRealTimeUpdate('selectedFood', 'none')}
+                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                      currentFood === 'none'
+                                        ? 'border-purple-500 bg-purple-50' 
+                                        : 'border-gray-200 bg-white hover:border-purple-300'
+                                    }`}
+                                  >
+                                    <div className="font-medium">🚫 None</div>
+                                  </div>
                                   <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'pizza')}
                                     className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
@@ -928,8 +938,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       { name: 'Tray of Chicken Fingers', icon: '🍗' },
                                       { name: 'Tray of French Fries', icon: '🍟' },
                                       { name: 'Regular Pizza (Adults)', icon: '🍕' },
-                                      { name: 'Specialty Pizza', icon: '🍕' },
-                                      { name: 'Popcorn Bar', icon: '🍿' }
+                                      { name: 'Specialty Pizza', icon: '🍕' }
                                     ].map((addon) => {
                                       const currentFoodAddons = booking.selectedFoodAddons || {};
                                       const quantity = currentFoodAddons[addon.name] || 0;
@@ -979,8 +988,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 {/* Base Cupcakes (Included) */}
                                 <div className="mb-4">
                                   <p className="text-xs text-gray-600 mb-2">Included:</p>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {['vanilla', 'chocolate'].map((flavor) => (
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {['none', 'vanilla', 'chocolate'].map((flavor) => (
                                       <div
                                         key={flavor}
                                         onClick={() => handleRealTimeUpdate('selectedCupcakeFlavor', flavor)}
@@ -991,7 +1000,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                         }`}
                                       >
                                         <div className="font-medium">
-                                          {flavor === 'vanilla' ? '🧁' : '🍫'} {flavor.charAt(0).toUpperCase() + flavor.slice(1)} Cupcakes
+                                          {flavor === 'none' ? '🚫 None' : 
+                                           flavor === 'vanilla' ? '🧁 Vanilla Cupcakes' : '🍫 Chocolate Cupcakes'}
                                         </div>
                                       </div>
                                     ))}
@@ -1000,15 +1010,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                                 {/* Sweet Add-ons */}
                                 <div className="border-t pt-3">
-                                  <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
+                                  <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons (per dozen):</h5>
                                   <div className="space-y-2">
                                     {[
                                       { name: 'Macarons', icon: '🧡' },
                                       { name: 'Chocolate Covered Pretzels', icon: '🥨' },
                                       { name: 'Chocolate Covered Rice Krispies', icon: '🍚' },
-                                      { name: 'Decorated Sugar Cookies', icon: '🍪' },
-                                      { name: 'Candy Wall', icon: '🍭' },
-                                      { name: 'Custom Treat Table', icon: '🍰' }
+                                      { name: 'Decorated Sugar Cookies', icon: '🍪' }
                                     ].map((addon) => {
                                       const currentSweetAddons = booking.selectedSweetAddons || {};
                                       const quantity = currentSweetAddons[addon.name] || 0;
@@ -1051,6 +1059,59 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 </div>
                               </div>
 
+                              {/* Specialty Items */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Specialty Items</h4>
+                                <div className="space-y-2">
+                                  {[
+                                    { name: 'Popcorn Bar', icon: '🍿' },
+                                    { name: 'Candy Wall', icon: '🍭' },
+                                    { name: 'Custom Treat Table', icon: '🍰' }
+                                  ].map((item) => {
+                                    const currentFoodAddons = booking.selectedFoodAddons || {};
+                                    const currentSweetAddons = booking.selectedSweetAddons || {};
+                                    const isSelected = (item.name === 'Popcorn Bar' && currentFoodAddons[item.name]) || 
+                                                     ((item.name === 'Candy Wall' || item.name === 'Custom Treat Table') && currentSweetAddons[item.name]);
+                                    
+                                    return (
+                                      <div
+                                        key={item.name}
+                                        onClick={() => {
+                                          if (item.name === 'Popcorn Bar') {
+                                            const updated = { ...currentFoodAddons };
+                                            if (isSelected) {
+                                              delete updated[item.name];
+                                            } else {
+                                              updated[item.name] = 1;
+                                            }
+                                            handleRealTimeUpdate('selectedFoodAddons', updated);
+                                          } else {
+                                            const updated = { ...currentSweetAddons };
+                                            if (isSelected) {
+                                              delete updated[item.name];
+                                            } else {
+                                              updated[item.name] = 1;
+                                            }
+                                            handleRealTimeUpdate('selectedSweetAddons', updated);
+                                          }
+                                        }}
+                                        className={`border-2 p-3 cursor-pointer transition-all ${
+                                          isSelected
+                                            ? 'border-purple-500 bg-purple-50' 
+                                            : 'border-gray-200 bg-white hover:border-purple-300'
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-lg">{item.icon}</span>
+                                          <span className="text-sm font-medium">{item.name}</span>
+                                          {isSelected && <span className="ml-auto text-purple-600">✓</span>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
                               {/* Drinks Module */}
                               <div className="border-2 border-gray-200 p-4">
                                 <h4 className="font-medium text-gray-800 mb-3">Drinks</h4>
@@ -1075,43 +1136,40 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   <h5 className="text-sm font-semibold text-gray-700 mb-2">Add-ons:</h5>
                                   <div className="space-y-2">
                                     {[
-                                      { name: 'Bubbles Drink Package', icon: '🫧' },
-                                      { name: 'Coffee Bar', icon: '☕' },
-                                      { name: 'Drinks Package', icon: '💧' }
+                                      { name: 'Soda & Seltzers Package', icon: '🥤', oldName: 'Bubbles Drink Package' },
+                                      { name: 'Coffee Bar', icon: '☕' }
                                     ].map((addon) => {
                                       const currentDrinkAddons = booking.selectedDrinkAddons || {};
-                                      const quantity = currentDrinkAddons[addon.name] || 0;
+                                      // Check both new and old name for backwards compatibility
+                                      const isSelected = currentDrinkAddons[addon.name] || (addon.oldName && currentDrinkAddons[addon.oldName]);
                                       
                                       return (
-                                        <div key={addon.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                        <div
+                                          key={addon.name}
+                                          onClick={() => {
+                                            const updated = { ...currentDrinkAddons };
+                                            // Remove old name if exists
+                                            if (addon.oldName && updated[addon.oldName]) {
+                                              delete updated[addon.oldName];
+                                            }
+                                            // Toggle new name
+                                            if (isSelected) {
+                                              delete updated[addon.name];
+                                            } else {
+                                              updated[addon.name] = 1;
+                                            }
+                                            handleRealTimeUpdate('selectedDrinkAddons', updated);
+                                          }}
+                                          className={`border-2 p-3 cursor-pointer transition-all ${
+                                            isSelected
+                                              ? 'border-purple-500 bg-purple-50' 
+                                              : 'border-gray-200 bg-white hover:border-purple-300'
+                                          }`}
+                                        >
                                           <div className="flex items-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
                                             <span className="text-sm font-medium">{addon.name}</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <button
-                                              onClick={() => {
-                                                const updated = { ...currentDrinkAddons };
-                                                if (quantity > 0) {
-                                                  updated[addon.name] = quantity - 1;
-                                                  if (updated[addon.name] === 0) delete updated[addon.name];
-                                                }
-                                                handleRealTimeUpdate('selectedDrinkAddons', updated);
-                                              }}
-                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
-                                            >
-                                              <Minus className="w-4 h-4 text-gray-600" />
-                                            </button>
-                                            <span className="w-8 text-center text-sm">{quantity}</span>
-                                            <button
-                                              onClick={() => {
-                                                const updated = { ...currentDrinkAddons, [addon.name]: quantity + 1 };
-                                                handleRealTimeUpdate('selectedDrinkAddons', updated);
-                                              }}
-                                              className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 hover:border-purple-400 transition-colors"
-                                            >
-                                              <Plus className="w-4 h-4 text-gray-600" />
-                                            </button>
+                                            {isSelected && <span className="ml-auto text-purple-600">✓</span>}
                                           </div>
                                         </div>
                                       );
