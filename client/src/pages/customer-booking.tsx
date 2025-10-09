@@ -244,26 +244,35 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   const calculatePricing = () => {
     if (!booking) return { basePrice: 850, packagePrice: 0, addonsTotal: 0, total: 850 };
 
-    // Star-level pricing structure
-    const isCustom = booking.partyTheme === 'custom';
-    const starPrices = {
-      1: isCustom ? 950 : 850,
-      2: isCustom ? 1350 : 1250,
-      3: isCustom ? 1650 : 1550,
-      4: isCustom ? 1900 : 1800,
-      5: isCustom ? 2325 : 2225
-    };
+    // Check if DIY (Studio Rental) or Full Service
+    const isDIY = booking.partyType === 'diy';
+    let basePrice = 0;
 
-    // Get star level from package selection
-    const packageKey = booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
-    let starLevel = 1; // Default
-    if (packageKey.includes('1star') || packageKey.includes('star1')) starLevel = 1;
-    else if (packageKey.includes('2star') || packageKey.includes('star2')) starLevel = 2;
-    else if (packageKey.includes('3star') || packageKey.includes('star3')) starLevel = 3;
-    else if (packageKey.includes('4star') || packageKey.includes('star4')) starLevel = 4;
-    else if (packageKey.includes('5star') || packageKey.includes('star5')) starLevel = 5;
-    
-    const basePrice = starPrices[starLevel as keyof typeof starPrices];
+    if (!isDIY) {
+      // Full Service - Star-level pricing structure
+      const isCustom = booking.partyTheme === 'custom';
+      const starPrices = {
+        1: isCustom ? 950 : 850,
+        2: isCustom ? 1350 : 1250,
+        3: isCustom ? 1650 : 1550,
+        4: isCustom ? 1900 : 1800,
+        5: isCustom ? 2325 : 2225
+      };
+
+      // Get star level from package selection
+      const packageKey = booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+      let starLevel = 1; // Default
+      if (packageKey.includes('1star') || packageKey.includes('star1')) starLevel = 1;
+      else if (packageKey.includes('2star') || packageKey.includes('star2')) starLevel = 2;
+      else if (packageKey.includes('3star') || packageKey.includes('star3')) starLevel = 3;
+      else if (packageKey.includes('4star') || packageKey.includes('star4')) starLevel = 4;
+      else if (packageKey.includes('5star') || packageKey.includes('star5')) starLevel = 5;
+      
+      basePrice = starPrices[starLevel as keyof typeof starPrices];
+    } else {
+      // DIY (Studio Rental) - base price is 0, only add-ons
+      basePrice = 0;
+    }
 
     // Calculate add-ons total from new structure
     let addonsTotal = 0;
@@ -1237,73 +1246,120 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                     <Separator />
 
-                    {/* Package Details */}
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-purple-700">⭐ {selectedStars}-Star Package (up to 12 guests)</h4>
-                      
-                      {/* Included Items */}
-                      <div className="bg-green-50 p-2 rounded">
-                        <p className="text-xs font-medium text-green-800 mb-1">✓ Included:</p>
-                        <ul className="text-xs text-green-700 space-y-0.5">
-                          <li>• 2-hour party celebration</li>
-                          <li>• Dedicated party host</li>
-                          <li>• All party supplies & decorations</li>
-                          <li>• Themed activities & games</li>
-                          {selectedStars >= 2 && <li>• Photo booth with props</li>}
-                          {selectedStars >= 3 && <li>• Professional face painting</li>}
-                          {selectedStars >= 4 && <li>• Character visit</li>}
-                          {selectedStars >= 5 && <li>• DJ & sound system</li>}
-                        </ul>
-                      </div>
-
-                      {/* Selected Activities */}
-                      {(booking.selectedStandardActivities?.length > 0 || booking.selectedPremiumActivities?.length > 0) && (
+                    {/* Package/Service Details */}
+                    {booking.partyType === 'diy' ? (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-purple-700">🎨 DIY Studio Rental</h4>
+                        
+                        {/* DIY Info */}
                         <div className="bg-blue-50 p-2 rounded">
-                          <p className="text-xs font-medium text-blue-800 mb-1">🎨 Selected Activities:</p>
+                          <p className="text-xs font-medium text-blue-800 mb-1">Studio Access:</p>
                           <ul className="text-xs text-blue-700 space-y-0.5">
-                            {booking.selectedPremiumActivities?.map((activity: string) => (
-                              <li key={activity}>• {activity} (Premium)</li>
-                            ))}
-                            {booking.selectedStandardActivities?.map((activity: string) => (
-                              <li key={activity}>• {activity}</li>
-                            ))}
+                            <li>• Private studio space</li>
+                            <li>• Bring your own decorations & activities</li>
+                            <li>• Add food & drinks below</li>
                           </ul>
                         </div>
-                      )}
 
-                      {/* Extra Add-ons */}
-                      {(booking.selectedFoodAddons || booking.selectedSweetAddons || booking.selectedDrinkAddons) && (
-                        <div className="bg-amber-50 p-2 rounded">
-                          <p className="text-xs font-medium text-amber-800 mb-1">+ Extra Items:</p>
-                          <ul className="text-xs text-amber-700 space-y-0.5">
-                            {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
-                              .filter(([name, qty]) => Number(qty) > 0)
-                              .map(([name, qty]) => (
-                                <li key={name}>• {name} (×{qty})</li>
-                              ))}
-                            {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
-                              .filter(([name, qty]) => Number(qty) > 0)
-                              .map(([name, qty]) => (
-                                <li key={name}>• {name} (×{qty})</li>
-                              ))}
-                            {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
-                              .filter(([name, qty]) => Number(qty) > 0)
-                              .map(([name, qty]) => (
-                                <li key={name}>• {name} (×{qty})</li>
-                              ))}
+                        {/* DIY Add-ons */}
+                        {(booking.selectedFoodAddons || booking.selectedSweetAddons || booking.selectedDrinkAddons) && (
+                          <div className="bg-amber-50 p-2 rounded">
+                            <p className="text-xs font-medium text-amber-800 mb-1">+ Selected Items:</p>
+                            <ul className="text-xs text-amber-700 space-y-0.5">
+                              {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
+                                .filter(([name, qty]) => Number(qty) > 0)
+                                .map(([name, qty]) => (
+                                  <li key={name}>• {name} (×{qty})</li>
+                                ))}
+                              {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
+                                .filter(([name, qty]) => Number(qty) > 0)
+                                .map(([name, qty]) => (
+                                  <li key={name}>• {name} (×{qty})</li>
+                                ))}
+                              {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
+                                .filter(([name, qty]) => Number(qty) > 0)
+                                .map(([name, qty]) => (
+                                  <li key={name}>• {name} (×{qty})</li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-purple-700">⭐ {selectedStars}-Star Package (up to 12 guests)</h4>
+                        
+                        {/* Included Items */}
+                        <div className="bg-green-50 p-2 rounded">
+                          <p className="text-xs font-medium text-green-800 mb-1">✓ Included:</p>
+                          <ul className="text-xs text-green-700 space-y-0.5">
+                            <li>• 2-hour party celebration</li>
+                            <li>• Dedicated party host</li>
+                            <li>• All party supplies & decorations</li>
+                            <li>• Themed activities & games</li>
+                            {selectedStars >= 2 && <li>• Photo booth with props</li>}
+                            {selectedStars >= 3 && <li>• Professional face painting</li>}
+                            {selectedStars >= 4 && <li>• Character visit</li>}
+                            {selectedStars >= 5 && <li>• DJ & sound system</li>}
                           </ul>
                         </div>
-                      )}
-                    </div>
+
+                        {/* Selected Activities */}
+                        {(booking.selectedStandardActivities?.length > 0 || booking.selectedPremiumActivities?.length > 0) && (
+                          <div className="bg-blue-50 p-2 rounded">
+                            <p className="text-xs font-medium text-blue-800 mb-1">🎨 Selected Activities:</p>
+                            <ul className="text-xs text-blue-700 space-y-0.5">
+                              {booking.selectedPremiumActivities?.map((activity: string) => (
+                                <li key={activity}>• {activity} (Premium)</li>
+                              ))}
+                              {booking.selectedStandardActivities?.map((activity: string) => (
+                                <li key={activity}>• {activity}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Extra Add-ons */}
+                        {(booking.selectedFoodAddons || booking.selectedSweetAddons || booking.selectedDrinkAddons) && (
+                          <div className="bg-amber-50 p-2 rounded">
+                            <p className="text-xs font-medium text-amber-800 mb-1">+ Extra Items:</p>
+                            <ul className="text-xs text-amber-700 space-y-0.5">
+                              {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
+                                .filter(([name, qty]) => Number(qty) > 0)
+                                .map(([name, qty]) => (
+                                  <li key={name}>• {name} (×{qty})</li>
+                                ))}
+                              {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
+                                .filter(([name, qty]) => Number(qty) > 0)
+                                .map(([name, qty]) => (
+                                  <li key={name}>• {name} (×{qty})</li>
+                                ))}
+                              {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
+                                .filter(([name, qty]) => Number(qty) > 0)
+                                .map(([name, qty]) => (
+                                  <li key={name}>• {name} (×{qty})</li>
+                                ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <Separator />
 
                     {/* Pricing Breakdown */}
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{selectedStars}-Star Package</span>
-                        <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
-                      </div>
+                      {booking.partyType === 'diy' ? (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">DIY Studio Rental</span>
+                          <span className="font-semibold">Contact for pricing</span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{selectedStars}-Star Package</span>
+                          <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
+                        </div>
+                      )}
                       
                       {(booking.guestCount && booking.guestCount > 12) && (
                         <div className="flex justify-between">
