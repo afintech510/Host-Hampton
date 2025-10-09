@@ -1178,23 +1178,95 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
           {/* Right Column - Quotation & Billing */}
           <div className="space-y-6 order-2">
-            {/* Customer Info Card - Shows when contact info provided */}
-            {billingData.firstName && billingData.lastName && (
-              <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-purple-800">
-                    <User className="w-4 h-4" />
-                    Contact Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1 text-sm">
-                  <p className="font-semibold text-gray-800">
-                    {billingData.firstName} {billingData.lastName}
-                  </p>
-                  <p className="text-gray-600">{billingData.email}</p>
-                </CardContent>
-              </Card>
-            )}
+            {/* Contact Information Module */}
+            <Card className="bg-white border-purple-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-purple-800">
+                  <User className="w-5 h-5" />
+                  Contact Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="contactFirstName" className="text-sm">First Name *</Label>
+                    <Input
+                      id="contactFirstName"
+                      data-testid="input-first-name"
+                      value={billingData.firstName}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setBillingData({...billingData, firstName: value});
+                        handleTextInputUpdate('firstName', value);
+                      }}
+                      className="mt-1"
+                      placeholder="First name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactLastName" className="text-sm">Last Name *</Label>
+                    <Input
+                      id="contactLastName"
+                      data-testid="input-last-name"
+                      value={billingData.lastName}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setBillingData({...billingData, lastName: value});
+                        handleTextInputUpdate('lastName', value);
+                      }}
+                      className="mt-1"
+                      placeholder="Last name"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="contactEmail" className="text-sm">Email Address *</Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    value={billingData.email}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setBillingData({...billingData, email: value});
+                      handleTextInputUpdate('email', value);
+                    }}
+                    className="mt-1"
+                    placeholder="your@email.com"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="contactPhone" className="text-sm">Phone *</Label>
+                  <Input
+                    id="contactPhone"
+                    type="tel"
+                    value={billingData.phone}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setBillingData({...billingData, phone: value});
+                      handleTextInputUpdate('phone', value);
+                    }}
+                    className="mt-1"
+                    placeholder="(555) 555-5555"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox
+                    id="contactCommunications"
+                    checked={billingData.agreeToCommunications}
+                    onCheckedChange={(checked) => {
+                      setBillingData({...billingData, agreeToCommunications: checked as boolean});
+                      handleRealTimeUpdate('agreeToCommunications', checked);
+                    }}
+                  />
+                  <Label htmlFor="contactCommunications" className="text-sm cursor-pointer">
+                    I agree to receive communications about my event *
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
             
             {/* Pricing Summary - Sticky */}
             <div className="lg:sticky lg:top-4 z-10">
@@ -1206,49 +1278,47 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {billingData.email && billingData.agreeToCommunications && billingData.firstName && billingData.lastName ? (
-                  <div className="space-y-4">
-                    {/* Party Details Header */}
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <h3 className="text-lg font-bold text-purple-800">
-                        {booking.childName || 'Child'} turning {booking.childAge || 'Age'} Birthday Party! 🎉
-                      </h3>
+                {/* Party Details Header */}
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <h3 className="text-lg font-bold text-purple-800">
+                    {booking.childName || 'Child'} turning {booking.childAge || 'Age'} Birthday Party! 🎉
+                  </h3>
+                </div>
+
+                {/* Party Information */}
+                <div className="space-y-2 text-sm">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-gray-600">Date:</span>
+                      <p className="font-medium">{booking.partyDate || 'To be scheduled'}</p>
                     </div>
-
-                    {/* Party Information */}
-                    <div className="space-y-2 text-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <span className="text-gray-600">Date:</span>
-                          <p className="font-medium">{booking.partyDate || 'To be scheduled'}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Time:</span>
-                          <p className="font-medium">{booking.partyTime || 'To be scheduled'}</p>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <span className="text-gray-600">Location:</span>
-                        <p className="font-medium">{booking.eventLocation === 'studio' ? 'Host Hampton Studio' : 'Mobile Service'}</p>
-                      </div>
-                      
-                      <div>
-                        <span className="text-gray-600">Theme:</span>
-                        <p className="font-medium">{selectedTheme || booking.partyTheme || 'To be selected'}</p>
-                      </div>
-                      
-                      <div>
-                        <span className="text-gray-600">Expected Guests:</span>
-                        <p className="font-medium">{booking.guestCount || 10} children</p>
-                      </div>
+                    <div>
+                      <span className="text-gray-600">Time:</span>
+                      <p className="font-medium">{booking.partyTime || 'To be scheduled'}</p>
                     </div>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-600">Location:</span>
+                    <p className="font-medium">{booking.eventLocation === 'studio' ? 'Host Hampton Studio' : 'Mobile Service'}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-600">Theme:</span>
+                    <p className="font-medium">{selectedTheme || booking.partyTheme || 'To be selected'}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-600">Expected Guests:</span>
+                    <p className="font-medium">{booking.guestCount || 10} children</p>
+                  </div>
+                </div>
 
-                    <Separator />
+                <Separator />
 
-                    {/* Package/Service Details */}
-                    {booking.partyType === 'diy' ? (
-                      <div className="space-y-2">
+                {/* Package/Service Details */}
+                {booking.partyType === 'diy' ? (
+                  <div className="space-y-2">
                         <h4 className="font-semibold text-purple-700">🎨 DIY Studio Rental</h4>
                         
                         {/* DIY Info */}
