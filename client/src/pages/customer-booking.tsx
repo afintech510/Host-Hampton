@@ -1274,7 +1274,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
-                  Quotation
+                  Summary
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1438,11 +1438,55 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         </div>
                       )}
                       
-                      {pricing.addonsTotal > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Extra Items & Activities</span>
-                          <span className="font-semibold">+{formatPrice(pricing.addonsTotal)}</span>
-                        </div>
+                      {/* Individual Add-on Pricing */}
+                      {allAddons && (
+                        <>
+                          {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
+                            .filter(([name, qty]) => Number(qty) > 0)
+                            .map(([name, qty]) => {
+                              const addon = allAddons.find((a: any) => a.name === name);
+                              if (!addon) return null;
+                              const itemPrice = addon.per_guest 
+                                ? addon.price * (booking.guestCount || 10) * Number(qty)
+                                : addon.price * Number(qty);
+                              return (
+                                <div key={name} className="flex justify-between">
+                                  <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
+                                  <span className="font-semibold">+{formatPrice(itemPrice)}</span>
+                                </div>
+                              );
+                            })}
+                          {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
+                            .filter(([name, qty]) => Number(qty) > 0)
+                            .map(([name, qty]) => {
+                              const addon = allAddons.find((a: any) => a.name === name);
+                              if (!addon) return null;
+                              const itemPrice = addon.per_guest 
+                                ? addon.price * (booking.guestCount || 10) * Number(qty)
+                                : addon.price * Number(qty);
+                              return (
+                                <div key={name} className="flex justify-between">
+                                  <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
+                                  <span className="font-semibold">+{formatPrice(itemPrice)}</span>
+                                </div>
+                              );
+                            })}
+                          {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
+                            .filter(([name, qty]) => Number(qty) > 0)
+                            .map(([name, qty]) => {
+                              const addon = allAddons.find((a: any) => a.name === name);
+                              if (!addon) return null;
+                              const itemPrice = addon.per_guest 
+                                ? addon.price * (booking.guestCount || 10) * Number(qty)
+                                : addon.price * Number(qty);
+                              return (
+                                <div key={name} className="flex justify-between">
+                                  <span className="text-gray-600">{name} {Number(qty) > 1 ? `(×${qty})` : ''}</span>
+                                  <span className="font-semibold">+{formatPrice(itemPrice)}</span>
+                                </div>
+                              );
+                            })}
+                        </>
                       )}
                       
                       <Separator />
