@@ -1348,8 +1348,47 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </div>
                 </div>
                 
-                {/* Show/Hide Additional Billing Checkbox */}
+                {/* Contact Info - Show when email & communications agreed */}
                 {billingData.email && billingData.agreeToCommunications && (
+                  <div className="border-t pt-4 space-y-3">
+                    <p className="text-sm font-medium text-gray-700">Contact Information</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="contactFirstName" className="text-sm">First Name *</Label>
+                        <Input
+                          id="contactFirstName"
+                          data-testid="input-first-name"
+                          value={billingData.firstName}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setBillingData({...billingData, firstName: value});
+                            handleTextInputUpdate('firstName', value);
+                          }}
+                          className="mt-1"
+                          placeholder="First name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contactLastName" className="text-sm">Last Name *</Label>
+                        <Input
+                          id="contactLastName"
+                          data-testid="input-last-name"
+                          value={billingData.lastName}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setBillingData({...billingData, lastName: value});
+                            handleTextInputUpdate('lastName', value);
+                          }}
+                          className="mt-1"
+                          placeholder="Last name"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show/Hide Additional Billing Checkbox */}
+                {billingData.email && billingData.agreeToCommunications && billingData.firstName && billingData.lastName && (
                   <div className="border-t pt-3">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
