@@ -541,12 +541,54 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   )}
                 </div>
 
+                {/* DIY vs Full Service Choice */}
+                <div className="space-y-4 border-t-2 border-gray-200 pt-6">
+                  <h3 className="font-semibold text-gray-800 text-lg">Choose Your Party Style</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div
+                      onClick={() => handleRealTimeUpdate('partyType', 'diy')}
+                      className={`border-2 p-4 cursor-pointer transition-all ${
+                        booking.partyType === 'diy'
+                          ? 'border-purple-500 bg-purple-50' 
+                          : 'border-gray-200 bg-white hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">🎨</div>
+                        <h4 className="font-semibold text-gray-800 mb-1">DIY (Studio Rental)</h4>
+                        <p className="text-xs text-gray-600">You handle the activities & setup</p>
+                      </div>
+                    </div>
+                    <div
+                      onClick={() => handleRealTimeUpdate('partyType', 'full-service')}
+                      className={`border-2 p-4 cursor-pointer transition-all ${
+                        booking.partyType === 'full-service'
+                          ? 'border-purple-500 bg-purple-50' 
+                          : 'border-gray-200 bg-white hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">✨</div>
+                        <h4 className="font-semibold text-gray-800 mb-1">Let Us Handle It!</h4>
+                        <p className="text-xs text-gray-600">Full-service party with activities</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Theme Selection */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-gray-800 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-purple-600" />
                     Party Theme
                   </h3>
+                  
+                  {/* DIY decor option text */}
+                  {booking.partyType === 'diy' && (
+                    <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
+                      Want us to decorate? Select a theme and we'll set it up for you!
+                    </p>
+                  )}
                   
                   {!selectedTheme ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -612,7 +654,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   )}
                 </div>
 
-                {/* 5-Star Package Selection */}
+                {/* 5-Star Package Selection - Only for Full Service */}
+                {booking.partyType === 'full-service' && (
                 <div className="space-y-4">
                   <h3 className="font-semibold text-gray-800">Package Level</h3>
                   
@@ -1119,6 +1162,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     </div>
                   )}
                 </div>
+                )}
               </CardContent>
             </Card>
           </div>
