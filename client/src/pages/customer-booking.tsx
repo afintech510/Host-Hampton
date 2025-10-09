@@ -1169,6 +1169,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
           {/* Right Column - Quotation & Billing */}
           <div className="space-y-6 order-2">
+            {/* Customer Info Card - Shows when contact info provided */}
+            {billingData.firstName && billingData.lastName && (
+              <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-purple-800">
+                    <User className="w-4 h-4" />
+                    Contact Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1 text-sm">
+                  <p className="font-semibold text-gray-800">
+                    {billingData.firstName} {billingData.lastName}
+                  </p>
+                  <p className="text-gray-600">{billingData.email}</p>
+                </CardContent>
+              </Card>
+            )}
+            
             {/* Pricing Summary - Sticky */}
             <div className="lg:sticky lg:top-4 z-10">
               <Card className="bg-white shadow-lg">
@@ -1179,7 +1197,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {billingData.email && billingData.agreeToCommunications ? (
+                {billingData.email && billingData.agreeToCommunications && billingData.firstName && billingData.lastName ? (
                   <div className="space-y-4">
                     {/* Party Details Header */}
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
@@ -1317,7 +1335,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <DollarSign className="w-10 h-10 mx-auto mb-3 text-gray-400" />
                     <p className="text-lg font-semibold mb-2">Get Your Quote</p>
                     <p className="text-sm mb-4">
-                      Please provide your email and accept communications to see pricing details.
+                      Please provide your contact information below to see pricing details.
                     </p>
                   </div>
                 )}
