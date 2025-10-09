@@ -1451,100 +1451,31 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <span className="text-purple-600">{formatPrice(pricing.total)}</span>
                       </div>
                       
-                      <div className="text-center text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                        <strong>Deposit to Secure Date:</strong> $200
+                    </div>
+
+                    {/* Secure Your Reservation Section */}
+                    <div className="bg-purple-50 p-4 rounded-lg mt-4">
+                      <h4 className="font-semibold text-purple-900 mb-2">Secure Your Reservation</h4>
+                      <p className="text-sm text-purple-700 mb-4">
+                        Pay a {formatPrice(depositAmount)} deposit to lock in your party date. The remaining balance will be due on the day of your event.
+                      </p>
+                      <Button 
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        onClick={handleDepositPayment}
+                        disabled={depositMutation.isPending}
+                        data-testid="button-pay-deposit"
+                      >
+                        {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(depositAmount)} Deposit`}
+                      </Button>
+                      <p className="text-xs text-gray-600 text-center mt-3">
+                        * All billing details and agreements are required to proceed
+                      </p>
+                      <div className="text-xs text-gray-500 text-center mt-3 space-y-1">
+                        <p>• Deposits are fully refundable up to 48 hours before your event</p>
+                        <p>• You can modify party details after booking</p>
+                        <p>• Need help? Contact us at hosthampton295@gmail.com</p>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-6 text-gray-600">
-                    <DollarSign className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-                    <p className="text-lg font-semibold mb-2">Get Your Quote</p>
-                    <p className="text-sm mb-4">
-                      Please provide your contact information below to see pricing details.
-                    </p>
-                  </div>
-                )}
-                
-                {/* Email and Communications - Always visible */}
-                <div className="border-t pt-4 space-y-3">
-                  <div>
-                    <Label htmlFor="quoteEmail" className="text-sm font-medium">Email Address *</Label>
-                    <Input
-                      id="quoteEmail"
-                      type="email"
-                      value={billingData.email}
-                      onChange={(e) => setBillingData({...billingData, email: e.target.value})}
-                      className="mt-1"
-                      placeholder="Enter your email"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="quoteCommunications"
-                      checked={billingData.agreeToCommunications}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
-                    />
-                    <Label htmlFor="quoteCommunications" className="text-sm">
-                      I agree to receive communications about my event *
-                    </Label>
-                  </div>
-                </div>
-                
-                {/* Contact Info - Show when email & communications agreed */}
-                {billingData.email && billingData.agreeToCommunications && (
-                  <div className="border-t pt-4 space-y-3">
-                    <p className="text-sm font-medium text-gray-700">Contact Information</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="contactFirstName" className="text-sm">First Name *</Label>
-                        <Input
-                          id="contactFirstName"
-                          data-testid="input-first-name"
-                          value={billingData.firstName}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setBillingData({...billingData, firstName: value});
-                            handleTextInputUpdate('firstName', value);
-                          }}
-                          className="mt-1"
-                          placeholder="First name"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="contactLastName" className="text-sm">Last Name *</Label>
-                        <Input
-                          id="contactLastName"
-                          data-testid="input-last-name"
-                          value={billingData.lastName}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setBillingData({...billingData, lastName: value});
-                            handleTextInputUpdate('lastName', value);
-                          }}
-                          className="mt-1"
-                          placeholder="Last name"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Show/Hide Additional Billing Checkbox */}
-                {billingData.email && billingData.agreeToCommunications && billingData.firstName && billingData.lastName && (
-                  <div className="border-t pt-3">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showBillingInfo}
-                        onChange={(e) => setShowBillingInfo(e.target.checked)}
-                        className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                      />
-                      <span className="text-sm text-gray-600">Show additional billing information</span>
-                    </label>
-                  </div>
-                )}
               </CardContent>
               </Card>
             </div>
