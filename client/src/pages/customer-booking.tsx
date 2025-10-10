@@ -177,46 +177,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     }
   });
 
-  // Auto-create booking mutation
-  const createBookingMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/leads/legacy`, {
-        source: "party-booking",
-        status: "draft",
-        partyType: "full-service",
-        customerName: "",
-        email: "",
-        phone: "",
-        eventDate: null,
-        guestCount: 12,
-        childAge: null,
-        childFirstName: "",
-        partyTheme: null,
-        packageSelection: null,
-        selectedPremiumActivities: [],
-        selectedStandardActivities: [],
-        selectedFood: "pizza",
-        selectedFoodAddons: {},
-        selectedCupcakeFlavor: "vanilla",
-        selectedSweetAddons: {},
-        selectedDrinkAddons: {},
-        selectedPartyExtras: {},
-        selectedAllergies: [],
-        customRequests: ""
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/leads", effectiveLeadId] });
-    }
-  });
-
-  // Auto-create booking if not found
-  useEffect(() => {
-    if (!isLoading && !booking && !createBookingMutation.isPending && !createBookingMutation.isSuccess) {
-      createBookingMutation.mutate();
-    }
-  }, [booking, isLoading]);
 
   // Separate timeout refs for different fields to prevent interference
   const timeoutRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
