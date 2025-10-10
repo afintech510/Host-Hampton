@@ -672,6 +672,21 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   
                   {!selectedTheme ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* No Thanks option - DIY only */}
+                      {booking.partyType === 'diy' && (
+                        <div 
+                          className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gray-50 hover:bg-gray-100 min-h-[60px] flex items-center"
+                          onClick={() => {
+                            setSelectedTheme('no-thanks');
+                            handleRealTimeUpdate('partyTheme', 'no-thanks');
+                          }}
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="text-2xl">👎</div>
+                            <div className="text-sm font-medium text-gray-700 flex-1">No Thanks</div>
+                          </div>
+                        </div>
+                      )}
                       {allThemes?.map((theme: any) => (
                         <div
                           key={theme.id}
@@ -705,11 +720,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div className="text-2xl">
-                            {selectedTheme === 'custom' ? '✨' : allThemes?.find((t: any) => t.name === selectedTheme)?.icon}
+                            {selectedTheme === 'custom' ? '✨' : 
+                             selectedTheme === 'no-thanks' ? '👎' :
+                             allThemes?.find((t: any) => t.name === selectedTheme)?.icon}
                           </div>
                           <div>
                             <div className="font-medium text-gray-800">
-                              {selectedTheme === 'custom' ? 'Custom Theme' : selectedTheme}
+                              {selectedTheme === 'custom' ? 'Custom Theme' : 
+                               selectedTheme === 'no-thanks' ? 'No Thanks' :
+                               selectedTheme}
                             </div>
                             {selectedTheme === 'custom' && (
                               <Input
