@@ -230,6 +230,8 @@ export const leads = pgTable("leads", {
   eventDate: timestamp("event_date"),
   isDateUnsure: boolean("is_date_unsure").default(false).notNull(),
   timeSlot: text("time_slot"), // "10am-12pm", "1pm-3pm", "4pm-6pm"
+  arrivalTime: text("arrival_time"), // For DIY rentals
+  rentalDuration: text("rental_duration"), // "3", "4", "5", "6", "all-day" for DIY rentals
   guestCount: integer("guest_count"),
   
   // Party Details (for Theme Parties)

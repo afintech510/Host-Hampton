@@ -498,32 +498,34 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </div>
                 </div>
 
-                {/* Child Details */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-700">Child's First Name</Label>
-                      <Input
-                        value={booking.childName || ''}
-                        onChange={(e) => handleTextInputUpdate('childName', e.target.value)}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
-                        placeholder="Enter child's name"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm font-semibold text-gray-700">Age</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="18"
-                        value={booking.childAge || ''}
-                        onChange={(e) => handleRealTimeUpdate('childAge', parseInt(e.target.value))}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
-                        placeholder="Age"
-                      />
+                {/* Child Details - Only for Full Service */}
+                {booking.partyType === 'full-service' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-700">Child's First Name</Label>
+                        <Input
+                          value={booking.childName || ''}
+                          onChange={(e) => handleTextInputUpdate('childName', e.target.value)}
+                          className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
+                          placeholder="Enter child's name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-700">Age</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          max="18"
+                          value={booking.childAge || ''}
+                          onChange={(e) => handleRealTimeUpdate('childAge', parseInt(e.target.value))}
+                          className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
+                          placeholder="Age"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Date & Time */}
                 <div className="space-y-4">
@@ -542,20 +544,73 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       />
                     </div>
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Time Slot</Label>
-                      <Select value={booking.timeSlot || ''} onValueChange={(value) => handleRealTimeUpdate('timeSlot', value)}>
-                        <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-none">
-                          <SelectItem value="10am-12pm">10am - 12pm</SelectItem>
-                          <SelectItem value="1pm-3pm">1pm - 3pm</SelectItem>
-                          <SelectItem value="4pm-6pm">4pm - 6pm</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {booking.partyType === 'diy' ? (
+                        <>
+                          <Label className="text-sm font-semibold text-gray-700">Arrival Time</Label>
+                          <Select value={booking.arrivalTime || ''} onValueChange={(value) => handleRealTimeUpdate('arrivalTime', value)}>
+                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
+                              <SelectValue placeholder="Select arrival time" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-none">
+                              <SelectItem value="9:00am">9:00am</SelectItem>
+                              <SelectItem value="10:00am">10:00am</SelectItem>
+                              <SelectItem value="11:00am">11:00am</SelectItem>
+                              <SelectItem value="12:00pm">12:00pm</SelectItem>
+                              <SelectItem value="1:00pm">1:00pm</SelectItem>
+                              <SelectItem value="2:00pm">2:00pm</SelectItem>
+                              <SelectItem value="3:00pm">3:00pm</SelectItem>
+                              <SelectItem value="4:00pm">4:00pm</SelectItem>
+                              <SelectItem value="5:00pm">5:00pm</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </>
+                      ) : (
+                        <>
+                          <Label className="text-sm font-semibold text-gray-700">Time Slot</Label>
+                          <Select value={booking.timeSlot || ''} onValueChange={(value) => handleRealTimeUpdate('timeSlot', value)}>
+                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
+                              <SelectValue placeholder="Select time" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-none">
+                              <SelectItem value="10am-12pm">10am - 12pm</SelectItem>
+                              <SelectItem value="1pm-3pm">1pm - 3pm</SelectItem>
+                              <SelectItem value="4pm-6pm">4pm - 6pm</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
+
+                {/* Rental Duration - DIY Only */}
+                {booking.partyType === 'diy' && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-gray-800">Rental Duration</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">
+                          {booking.rentalDuration === 'all-day' ? 'All Day' : `${booking.rentalDuration || '3'} Hours`}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        {['3', '4', '5', '6', 'all-day'].map((duration) => (
+                          <button
+                            key={duration}
+                            onClick={() => handleRealTimeUpdate('rentalDuration', duration)}
+                            className={`flex-1 py-2 px-3 border-2 transition-all text-sm font-medium ${
+                              (booking.rentalDuration || '3') === duration
+                                ? 'border-purple-500 bg-purple-50 text-purple-700'
+                                : 'border-gray-200 bg-white text-gray-700 hover:border-purple-300'
+                            }`}
+                          >
+                            {duration === 'all-day' ? 'All Day' : `${duration}h`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Guest Count & Location */}
                 <div className="space-y-4">
@@ -1405,12 +1460,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Party Details Header */}
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <h3 className="text-lg font-bold text-purple-800">
-                    {booking.childName || 'Child'} turning {booking.childAge || 'Age'} Birthday Party! 🎉
-                  </h3>
-                </div>
+                {/* Party Details Header - Only for Full Service */}
+                {booking.partyType === 'full-service' && (
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <h3 className="text-lg font-bold text-purple-800">
+                      {booking.childName || 'Child'} turning {booking.childAge || 'Age'} Birthday Party! 🎉
+                    </h3>
+                  </div>
+                )}
 
                 {/* Party Information */}
                 <div className="space-y-2 text-sm">
