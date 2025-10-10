@@ -177,6 +177,47 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     }
   });
 
+  // Auto-create booking mutation
+  const createBookingMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/legacy`, {
+        source: "party-booking",
+        status: "draft",
+        partyType: "full-service",
+        customerName: "",
+        email: "",
+        phone: "",
+        eventDate: null,
+        guestCount: 12,
+        childAge: null,
+        childFirstName: "",
+        partyTheme: null,
+        packageSelection: null,
+        selectedPremiumActivities: [],
+        selectedStandardActivities: [],
+        selectedFood: "pizza",
+        selectedFoodAddons: {},
+        selectedCupcakeFlavor: "vanilla",
+        selectedSweetAddons: {},
+        selectedDrinkAddons: {},
+        selectedPartyExtras: {},
+        selectedAllergies: [],
+        customRequests: ""
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/leads", effectiveLeadId] });
+    }
+  });
+
+  // Auto-create booking if not found
+  useEffect(() => {
+    if (!isLoading && !booking && !createBookingMutation.isPending && !createBookingMutation.isSuccess) {
+      createBookingMutation.mutate();
+    }
+  }, [booking, isLoading]);
+
   // Separate timeout refs for different fields to prevent interference
   const timeoutRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
   
@@ -433,14 +474,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   if (!booking) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="text-center p-6">
-            <p className="text-gray-600">Booking not found.</p>
-            <Button className="mt-4" onClick={() => window.location.href = '/get-quote'}>
-              Create New Quote
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Setting up your party booking...</p>
+        </div>
       </div>
     );
   }
