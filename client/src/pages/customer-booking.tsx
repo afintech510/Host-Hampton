@@ -463,6 +463,41 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 p-6">
+                {/* DIY vs Full Service Choice */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-800 text-lg">Choose Your Party Style</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div
+                      onClick={() => handleRealTimeUpdate('partyType', 'diy')}
+                      className={`border-2 p-4 cursor-pointer transition-all ${
+                        booking.partyType === 'diy'
+                          ? 'border-purple-500 bg-purple-50' 
+                          : 'border-gray-200 bg-white hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">🎨</div>
+                        <h4 className="font-semibold text-gray-800 mb-1">DIY (Studio Rental)</h4>
+                        <p className="text-xs text-gray-600">You handle the activities & setup</p>
+                      </div>
+                    </div>
+                    <div
+                      onClick={() => handleRealTimeUpdate('partyType', 'full-service')}
+                      className={`border-2 p-4 cursor-pointer transition-all ${
+                        booking.partyType === 'full-service'
+                          ? 'border-purple-500 bg-purple-50' 
+                          : 'border-gray-200 bg-white hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">✨</div>
+                        <h4 className="font-semibold text-gray-800 mb-1">Let Us Handle It!</h4>
+                        <p className="text-xs text-gray-600">Full-service party with activities</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Child Details */}
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -564,41 +599,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       />
                     </div>
                   )}
-                </div>
-
-                {/* DIY vs Full Service Choice */}
-                <div className="space-y-4 border-t-2 border-gray-200 pt-6">
-                  <h3 className="font-semibold text-gray-800 text-lg">Choose Your Party Style</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div
-                      onClick={() => handleRealTimeUpdate('partyType', 'diy')}
-                      className={`border-2 p-4 cursor-pointer transition-all ${
-                        booking.partyType === 'diy'
-                          ? 'border-purple-500 bg-purple-50' 
-                          : 'border-gray-200 bg-white hover:border-purple-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-3xl mb-2">🎨</div>
-                        <h4 className="font-semibold text-gray-800 mb-1">DIY (Studio Rental)</h4>
-                        <p className="text-xs text-gray-600">You handle the activities & setup</p>
-                      </div>
-                    </div>
-                    <div
-                      onClick={() => handleRealTimeUpdate('partyType', 'full-service')}
-                      className={`border-2 p-4 cursor-pointer transition-all ${
-                        booking.partyType === 'full-service'
-                          ? 'border-purple-500 bg-purple-50' 
-                          : 'border-gray-200 bg-white hover:border-purple-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-3xl mb-2">✨</div>
-                        <h4 className="font-semibold text-gray-800 mb-1">Let Us Handle It!</h4>
-                        <p className="text-xs text-gray-600">Full-service party with activities</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Theme Selection */}
