@@ -271,8 +271,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       
       basePrice = starPrices[starLevel as keyof typeof starPrices];
     } else {
-      // DIY (Studio Rental) - base price is 0, only add-ons
-      basePrice = 0;
+      // DIY (Studio Rental) - charge based on rental duration only, no per-guest fees
+      const rentalPrices = {
+        '3': 200,
+        '4': 250,
+        '5': 300,
+        '6': 350,
+        'all-day': 500
+      };
+      const duration = booking.rentalDuration || '3';
+      basePrice = rentalPrices[duration as keyof typeof rentalPrices] || 200;
     }
 
     // Calculate add-ons total from new structure
@@ -1493,13 +1501,34 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <span className="text-gray-600">Date:</span>
-                      <p className="font-medium">{booking.partyDate || 'To be scheduled'}</p>
+                      <p className="font-medium">
+                        {booking.eventDate 
+                          ? new Date(booking.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                          : 'To be scheduled'}
+                      </p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Time:</span>
-                      <p className="font-medium">{booking.partyTime || 'To be scheduled'}</p>
+                      <span className="text-gray-600">
+                        {booking.partyType === 'diy' ? 'Arrival:' : 'Time:'}
+                      </span>
+                      <p className="font-medium">
+                        {booking.partyType === 'diy' 
+                          ? (booking.arrivalTime || 'To be scheduled')
+                          : (booking.timeSlot || 'To be scheduled')}
+                      </p>
                     </div>
                   </div>
+                  
+                  {booking.partyType === 'diy' && (
+                    <div>
+                      <span className="text-gray-600">Duration:</span>
+                      <p className="font-medium">
+                        {booking.rentalDuration === 'all-day' 
+                          ? 'All Day' 
+                          : `${booking.rentalDuration || '3'} Hours`}
+                      </p>
+                    </div>
+                  )}
                   
                   <div>
                     <span className="text-gray-600">Location:</span>
@@ -1508,12 +1537,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   
                   <div>
                     <span className="text-gray-600">Theme:</span>
-                    <p className="font-medium">{selectedTheme || booking.partyTheme || 'To be selected'}</p>
+                    <p className="font-medium">
+                      {selectedTheme === 'no-thanks' ? 'No Thanks' : 
+                       selectedTheme === 'custom' ? (booking.customTheme || 'Custom Theme') :
+                       selectedTheme || booking.partyTheme || 'To be selected'}
+                    </p>
                   </div>
                   
                   <div>
                     <span className="text-gray-600">Expected Guests:</span>
-                    <p className="font-medium">{booking.guestCount || 10} children</p>
+                    <p className="font-medium">{booking.guestCount || 10} {booking.partyType === 'diy' ? 'guests' : 'children'}</p>
                   </div>
                 </div>
 
@@ -1624,21 +1657,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <div className="space-y-2 text-sm">
                       {booking.partyType === 'diy' ? (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">DIY Studio Rental</span>
-                          <span className="font-semibold">Contact for pricing</span>
-                        </div>
-                      ) : (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">{selectedStars}-Star Package</span>
+                          <span className="text-gray-600">
+                            Studio Rental ({booking.rentalDuration === 'all-day' ? 'All Day' : `${booking.rentalDuration || '3'} hrs`})
+                          </span>
                           <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
                         </div>
-                      )}
-                      
-                      {(booking.guestCount && booking.guestCount > 12) && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Additional guests ({booking.guestCount - 12})</span>
-                          <span className="font-semibold">+{formatPrice((booking.guestCount - 12) * 25)}</span>
-                        </div>
+                      ) : (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">{selectedStars}-Star Package</span>
+                            <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
+                          </div>
+                          {(booking.guestCount && booking.guestCount > 12) && (
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Additional guests ({booking.guestCount - 12})</span>
+                              <span className="font-semibold">+{formatPrice((booking.guestCount - 12) * 25)}</span>
+                            </div>
+                          )}
+                        </>
                       )}
                       
                       {/* Individual Add-on Pricing */}
