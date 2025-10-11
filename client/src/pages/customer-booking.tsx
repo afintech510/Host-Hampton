@@ -550,7 +550,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div
                       onClick={() => handleRealTimeUpdate('partyType', 'diy')}
-                      className={`border-2 p-4 cursor-pointer transition-all ${
+                      className={`border-2 p-4 cursor-pointer transition-all rounded-2xl ${
                         booking.partyType === 'diy'
                           ? 'border-purple-500 bg-purple-50' 
                           : 'border-gray-200 bg-white hover:border-purple-300'
@@ -564,7 +564,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     </div>
                     <div
                       onClick={() => handleRealTimeUpdate('partyType', 'full-service')}
-                      className={`border-2 p-4 cursor-pointer transition-all ${
+                      className={`border-2 p-4 cursor-pointer transition-all rounded-2xl ${
                         booking.partyType === 'full-service'
                           ? 'border-purple-500 bg-purple-50' 
                           : 'border-gray-200 bg-white hover:border-purple-300'
@@ -588,7 +588,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <Input
                           value={booking.childName || ''}
                           onChange={(e) => handleTextInputUpdate('childName', e.target.value)}
-                          className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
+                          className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-sm"
                           placeholder="Enter child's name"
                         />
                       </div>
@@ -600,7 +600,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           max="18"
                           value={booking.childAge || ''}
                           onChange={(e) => handleRealTimeUpdate('childAge', parseInt(e.target.value))}
-                          className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500 text-sm"
+                          className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-sm"
                           placeholder="Age"
                         />
                       </div>
@@ -621,7 +621,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         type="date"
                         value={booking.eventDate ? booking.eventDate.split('T')[0] : ''}
                         onChange={(e) => handleRealTimeUpdate('eventDate', e.target.value)}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                        className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500"
                       />
                     </div>
                     <div>
@@ -629,10 +629,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <>
                           <Label className="text-sm font-semibold text-gray-700">Arrival Time</Label>
                           <Select value={booking.arrivalTime || ''} onValueChange={(value) => handleRealTimeUpdate('arrivalTime', value)}>
-                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
+                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
                               <SelectValue placeholder="Select arrival time" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-none">
+                            <SelectContent className="rounded-2xl">
                               <SelectItem value="7:00am">7:00am</SelectItem>
                               <SelectItem value="8:00am">8:00am</SelectItem>
                               <SelectItem value="9:00am">9:00am</SelectItem>
@@ -653,10 +653,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <>
                           <Label className="text-sm font-semibold text-gray-700">Time Slot</Label>
                           <Select value={booking.timeSlot || ''} onValueChange={(value) => handleRealTimeUpdate('timeSlot', value)}>
-                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
+                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
                               <SelectValue placeholder="Select time" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-none">
+                            <SelectContent className="rounded-2xl">
                               <SelectItem value="10am-12pm">10am - 12pm</SelectItem>
                               <SelectItem value="1pm-3pm">1pm - 3pm</SelectItem>
                               <SelectItem value="4pm-6pm">4pm - 6pm</SelectItem>
@@ -716,7 +716,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           <button
                             key={duration}
                             onClick={() => handleRealTimeUpdate('rentalDuration', duration)}
-                            className={`flex-1 py-2 px-3 border-2 transition-all text-sm font-medium ${
+                            className={`flex-1 py-2 px-3 border-2 transition-all text-sm font-medium rounded-full ${
                               (booking.rentalDuration || '3') === duration
                                 ? 'border-purple-500 bg-purple-50 text-purple-700'
                                 : 'border-gray-200 bg-white text-gray-700 hover:border-purple-300'
@@ -745,7 +745,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         min="1"
                         value={booking.guestCount || ''}
                         onChange={(e) => handleRealTimeUpdate('guestCount', parseInt(e.target.value))}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                        className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500"
                         placeholder="Number of guests"
                       />
                       <p className="text-xs text-gray-600 mt-1 italic">* do not include birthday child</p>
@@ -789,7 +789,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           // Update server only on blur to prevent lag
                           updateMutation.mutate({ mobileAddress: e.target.value });
                         }}
-                        className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                        className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500"
                         placeholder="Enter your full address"
                       />
                     </div>
@@ -815,7 +815,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       {/* No Thanks option - DIY only */}
                       {booking.partyType === 'diy' && (
                         <div 
-                          className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gray-50 hover:bg-gray-100 min-h-[60px] flex items-center"
+                          className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gray-50 hover:bg-gray-100 min-h-[60px] flex items-center rounded-2xl"
                           onClick={() => {
                             setSelectedTheme('no-thanks');
                             handleRealTimeUpdate('partyTheme', 'no-thanks');
@@ -834,7 +834,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             setSelectedTheme(theme.name);
                             handleRealTimeUpdate('partyTheme', theme.name);
                           }}
-                          className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-white hover:bg-gray-50 min-h-[60px] flex items-center"
+                          className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-white hover:bg-gray-50 min-h-[60px] flex items-center rounded-2xl"
                         >
                           <div className="flex items-center gap-3 w-full">
                             <div className="text-2xl">{theme.icon}</div>
@@ -843,7 +843,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         </div>
                       ))}
                       <div 
-                        className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 min-h-[60px] flex items-center"
+                        className="border-2 border-gray-200 p-3 cursor-pointer transition-all hover:border-purple-400 bg-gradient-to-r from-purple-50 to-blue-50 min-h-[60px] flex items-center rounded-2xl"
                         onClick={() => {
                           setSelectedTheme('custom');
                           handleRealTimeUpdate('partyTheme', 'custom');
@@ -856,7 +856,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       </div>
                     </div>
                   ) : (
-                    <div className="border-2 border-purple-500 bg-purple-50 p-4">
+                    <div className="border-2 border-purple-500 bg-purple-50 p-4 rounded-2xl">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div className="text-2xl">
@@ -874,7 +874,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               <Input
                                 value={booking.customTheme || ''}
                                 onChange={(e) => handleTextInputUpdate('customTheme', e.target.value)}
-                                className="mt-2 border-2 border-gray-200 rounded-none focus:border-purple-500"
+                                className="mt-2 border-2 border-gray-200 rounded-full focus:border-purple-500"
                                 placeholder="Describe your custom theme..."
                               />
                             )}
@@ -927,7 +927,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   {selectedStars > 0 && selectedStars <= 5 && (
                     <div className="space-y-4">
                       {/* Package Summary */}
-                      <div className="border-2 border-purple-500 bg-purple-50 p-4">
+                      <div className="border-2 border-purple-500 bg-purple-50 p-4 rounded-2xl">
                         {(() => {
                           const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
                           const selectedPackageKey = starKeys[selectedStars - 1];
@@ -1645,7 +1645,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         setContactData({...contactData, firstName: value});
                         handleTextInputUpdate('firstName', value);
                       }}
-                      className="mt-1"
+                      className="mt-1 rounded-full"
                       placeholder="First name"
                     />
                   </div>
@@ -1660,7 +1660,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         setContactData({...contactData, lastName: value});
                         handleTextInputUpdate('lastName', value);
                       }}
-                      className="mt-1"
+                      className="mt-1 rounded-full"
                       placeholder="Last name"
                     />
                   </div>
@@ -1678,7 +1678,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       setContactData({...contactData, email: value});
                       handleTextInputUpdate('email', value);
                     }}
-                    className="mt-1"
+                    className="mt-1 rounded-full"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -1695,7 +1695,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       setContactData({...contactData, phone: value});
                       handleTextInputUpdate('phone', value);
                     }}
-                    className="mt-1"
+                    className="mt-1 rounded-full"
                     placeholder="(555) 555-5555"
                   />
                 </div>
