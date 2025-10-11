@@ -1,8 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
 export interface DIYAddon {
   id: number;
@@ -31,31 +29,43 @@ interface DIYAddonsProps {
   hasBirthdayGiftBasket: boolean;
 }
 
-const DIY_FOOD_ADDONS: DIYAddon[] = [
-  { id: 1001, name: "Pizza Pies", price: 28, category: "food", icon: "🍕" },
-  { id: 1002, name: "French Fries", price: 50, category: "food", icon: "🍟" },
-  { id: 1003, name: "Chicken Fingers", price: 50, category: "food", icon: "🍗" },
-  { id: 1004, name: "Bagels", price: 30, category: "food", icon: "🥯" },
-  { id: 1005, name: "Fruit Platter", price: 35, category: "food", icon: "🍇" },
-  { id: 1006, name: "Veggie Platter", price: 35, category: "food", icon: "🥕" },
-  { id: 1007, name: "Cupcakes (12)", price: 48, category: "food", icon: "🧁" },
-  { id: 1008, name: "Macarons (12)", price: 60, category: "food", icon: "🍪" },
-  { id: 1009, name: "Candy Wall", price: 200, category: "food", icon: "🍬" },
-  { id: 1010, name: "Charcuterie Board", price: 75, category: "food", icon: "🧀" },
+// Food items with quantity counters
+const FOOD_ITEMS = [
+  { id: 1001, name: "Fruit Tray", icon: "🍓", price: 35 },
+  { id: 1002, name: "Tray of Chicken Fingers", icon: "🍗", price: 50 },
+  { id: 1003, name: "Tray of French Fries", icon: "🍟", price: 50 },
+  { id: 1004, name: "Regular Pizza (Adults)", icon: "🍕", price: 28 },
+  { id: 1005, name: "Specialty Pizza", icon: "🍕", price: 35 },
+  { id: 1006, name: "Charcuterie Board", icon: "🧀", price: 75 },
 ];
 
-const DIY_DRINK_ADDONS: DIYAddon[] = [
-  { id: 2001, name: "Juice Boxes (12)", price: 15, category: "drink", icon: "🧃" },
-  { id: 2002, name: "Water Bottles (12)", price: 12, category: "drink", icon: "💧" },
-  { id: 2003, name: "Soda Bottles (6)", price: 18, category: "drink", icon: "🥤" },
-  { id: 2004, name: "Coffee Bar", price: 75, category: "drink", icon: "☕" },
+// Treats items with quantity counters (per dozen)
+const TREATS_ITEMS = [
+  { id: 2001, name: "Macarons", icon: "❤️", price: 60 },
+  { id: 2002, name: "Chocolate Covered Pretzels", icon: "🥨", price: 45 },
+  { id: 2003, name: "Chocolate Covered Rice Krispies", icon: "🍚", price: 40 },
+  { id: 2004, name: "Decorated Sugar Cookies", icon: "🍪", price: 48 },
 ];
 
-const DIY_EXTRA_ADDONS: DIYAddon[] = [
-  { id: 3001, name: "Balloon Bouquet", price: 95, category: "extra", icon: "🎈" },
-  { id: 3002, name: "Balloon Arch", price: 195, category: "extra", icon: "🎪" },
-  { id: 3003, name: "Photo Booth", price: 150, category: "extra", icon: "📸" },
-  { id: 3004, name: "Confetti Cannons (4)", price: 40, category: "extra", icon: "🎊" },
+// Specialty Items - selectable buttons
+const SPECIALTY_ITEMS = [
+  { id: 3001, name: "Popcorn Bar", icon: "🍿", price: 150 },
+  { id: 3002, name: "Candy Wall", icon: "🍭", price: 200 },
+  { id: 3003, name: "Custom Treat Table", icon: "🧁", price: 250 },
+];
+
+// Drinks - selectable buttons
+const DRINK_ITEMS = [
+  { id: 4001, name: "Soda & Seltzers Package", icon: "🥤", price: 50 },
+  { id: 4002, name: "Coffee Bar", icon: "☕", price: 75 },
+];
+
+// Decor items - selectable buttons
+const DECOR_ITEMS = [
+  { id: 5001, name: "Balloon Bouquet", icon: "🎈", price: 95 },
+  { id: 5002, name: "Balloon Arch", icon: "🎪", price: 195 },
+  { id: 5003, name: "Photo Booth", icon: "📸", price: 150 },
+  { id: 5004, name: "Confetti Cannons (4)", icon: "🎊", price: 40 },
 ];
 
 export function DIYAddons({
@@ -75,250 +85,221 @@ export function DIYAddons({
   premiumGoodieBagQuantity,
   hasBirthdayGiftBasket,
 }: DIYAddonsProps) {
+  
+  const getItemQuantity = (itemId: number, list: DIYAddon[]) => {
+    return list.filter(item => item.id === itemId).length;
+  };
+
+  const handleQuantityChange = (item: any, delta: number, currentList: DIYAddon[], onAdd: (addon: DIYAddon) => void, onRemove: (id: number) => void) => {
+    const currentQty = getItemQuantity(item.id, currentList);
+    const newQty = currentQty + delta;
+    
+    if (newQty < 0) return;
+    
+    if (delta > 0) {
+      onAdd({ id: item.id, name: item.name, price: item.price, category: 'food', icon: item.icon });
+    } else if (delta < 0 && currentQty > 0) {
+      const itemToRemove = currentList.find(i => i.id === item.id);
+      if (itemToRemove) onRemove(itemToRemove.id);
+    }
+  };
+
+  const isItemSelected = (itemId: number, list: DIYAddon[]) => {
+    return list.some(item => item.id === itemId);
+  };
+
+  const toggleItem = (item: any, list: DIYAddon[], onAdd: (addon: DIYAddon) => void, onRemove: (id: number) => void, category: string) => {
+    if (isItemSelected(item.id, list)) {
+      const itemToRemove = list.find(i => i.id === item.id);
+      if (itemToRemove) onRemove(itemToRemove.id);
+    } else {
+      onAdd({ id: item.id, name: item.name, price: item.price, category, icon: item.icon });
+    }
+  };
+
   return (
     <div className="space-y-6" data-testid="diy-addons-section">
-      {/* Food Section */}
+      
+      {/* Decor Add-ons */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🍕 Food & Sweets
-          </CardTitle>
-          <CardDescription>
-            Add food items to your DIY party
-          </CardDescription>
+          <CardTitle className="text-lg font-semibold text-gray-900">🎨 Decor Add-ons</CardTitle>
+          <CardDescription className="text-sm text-gray-600">Add decorations to your party</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {selectedFood.length > 0 && (
-            <div className="space-y-2">
-              {selectedFood.map((addon) => (
-                <div
-                  key={addon.id}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                  data-testid={`selected-food-${addon.id}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{addon.icon}</span>
-                    <span className="font-medium">{addon.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary">${addon.price}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onRemoveFood(addon.id)}
-                      data-testid={`remove-food-${addon.id}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <Select onValueChange={(value) => {
-            const addon = DIY_FOOD_ADDONS.find(a => a.id.toString() === value);
-            if (addon && !selectedFood.find(f => f.id === addon.id)) {
-              onAddFood(addon);
-            }
-          }}>
-            <SelectTrigger data-testid="select-food-addon">
-              <SelectValue placeholder="Add food item..." />
-            </SelectTrigger>
-            <SelectContent>
-              {DIY_FOOD_ADDONS.filter(addon => !selectedFood.find(f => f.id === addon.id)).map((addon) => (
-                <SelectItem key={addon.id} value={addon.id.toString()}>
-                  <div className="flex items-center gap-2">
-                    <span>{addon.icon}</span>
-                    <span>{addon.name}</span>
-                    <span className="text-muted-foreground ml-2">${addon.price}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <CardContent className="space-y-2">
+          {DECOR_ITEMS.map((item) => (
+            <Button
+              key={item.id}
+              variant={isItemSelected(item.id, selectedExtras) ? "default" : "outline"}
+              className={`w-full justify-start h-auto py-3 ${
+                isItemSelected(item.id, selectedExtras)
+                  ? 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
+                  : 'border-gray-200 hover:border-purple-300'
+              }`}
+              onClick={() => toggleItem(item, selectedExtras, onAddExtra, onRemoveExtra, 'decor')}
+              data-testid={`decor-item-${item.id}`}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <span className="text-2xl">{item.icon}</span>
+                <span className="flex-1 text-left">{item.name}</span>
+                {isItemSelected(item.id, selectedExtras) && (
+                  <span className="text-sm font-medium">${item.price}</span>
+                )}
+              </div>
+            </Button>
+          ))}
         </CardContent>
       </Card>
 
-      {/* Drinks Section */}
+      {/* Food Add-ons */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🥤 Drinks
-          </CardTitle>
-          <CardDescription>
-            Add beverages to your DIY party
-          </CardDescription>
+          <CardTitle className="text-lg font-semibold text-gray-900">Food Add-ons</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {selectedDrinks.length > 0 && (
-            <div className="space-y-2">
-              {selectedDrinks.map((addon) => (
-                <div
-                  key={addon.id}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                  data-testid={`selected-drink-${addon.id}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{addon.icon}</span>
-                    <span className="font-medium">{addon.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary">${addon.price}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onRemoveDrink(addon.id)}
-                      data-testid={`remove-drink-${addon.id}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
+        <CardContent className="space-y-3">
+          {FOOD_ITEMS.map((item) => {
+            const qty = getItemQuantity(item.id, selectedFood);
+            return (
+              <div
+                key={item.id}
+                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                data-testid={`food-item-${item.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-gray-700">{item.name}</span>
                 </div>
-              ))}
-            </div>
-          )}
-          
-          <Select onValueChange={(value) => {
-            const addon = DIY_DRINK_ADDONS.find(a => a.id.toString() === value);
-            if (addon && !selectedDrinks.find(d => d.id === addon.id)) {
-              onAddDrink(addon);
-            }
-          }}>
-            <SelectTrigger data-testid="select-drink-addon">
-              <SelectValue placeholder="Add drink..." />
-            </SelectTrigger>
-            <SelectContent>
-              {DIY_DRINK_ADDONS.filter(addon => !selectedDrinks.find(d => d.id === addon.id)).map((addon) => (
-                <SelectItem key={addon.id} value={addon.id.toString()}>
-                  <div className="flex items-center gap-2">
-                    <span>{addon.icon}</span>
-                    <span>{addon.name}</span>
-                    <span className="text-muted-foreground ml-2">${addon.price}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 rounded-full p-0"
+                    onClick={() => handleQuantityChange(item, -1, selectedFood, onAddFood, onRemoveFood)}
+                    disabled={qty === 0}
+                    data-testid={`food-minus-${item.id}`}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center font-medium" data-testid={`food-qty-${item.id}`}>{qty}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 rounded-full p-0"
+                    onClick={() => handleQuantityChange(item, 1, selectedFood, onAddFood, onRemoveFood)}
+                    data-testid={`food-plus-${item.id}`}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 
-      {/* Party Extras Section */}
+      {/* Treats Add-ons */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🎁 Party Extras
-          </CardTitle>
-          <CardDescription>
-            Add decorations and party favors
-          </CardDescription>
+          <CardTitle className="text-lg font-semibold text-gray-900">Add-ons (per dozen):</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {selectedExtras.length > 0 && (
-            <div className="space-y-2">
-              {selectedExtras.map((addon) => (
-                <div
-                  key={addon.id}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                  data-testid={`selected-extra-${addon.id}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{addon.icon}</span>
-                    <span className="font-medium">{addon.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary">${addon.price}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onRemoveExtra(addon.id)}
-                      data-testid={`remove-extra-${addon.id}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
+        <CardContent className="space-y-3">
+          {TREATS_ITEMS.map((item) => {
+            const qty = getItemQuantity(item.id, selectedFood);
+            return (
+              <div
+                key={item.id}
+                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                data-testid={`treats-item-${item.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-gray-700">{item.name}</span>
                 </div>
-              ))}
-            </div>
-          )}
-          
-          <Select onValueChange={(value) => {
-            const addon = DIY_EXTRA_ADDONS.find(a => a.id.toString() === value);
-            if (addon && !selectedExtras.find(e => e.id === addon.id)) {
-              onAddExtra(addon);
-            }
-          }}>
-            <SelectTrigger data-testid="select-extra-addon">
-              <SelectValue placeholder="Add party extra..." />
-            </SelectTrigger>
-            <SelectContent>
-              {DIY_EXTRA_ADDONS.filter(addon => !selectedExtras.find(e => e.id === addon.id)).map((addon) => (
-                <SelectItem key={addon.id} value={addon.id.toString()}>
-                  <div className="flex items-center gap-2">
-                    <span>{addon.icon}</span>
-                    <span>{addon.name}</span>
-                    <span className="text-muted-foreground ml-2">${addon.price}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 rounded-full p-0"
+                    onClick={() => handleQuantityChange(item, -1, selectedFood, onAddFood, onRemoveFood)}
+                    disabled={qty === 0}
+                    data-testid={`treats-minus-${item.id}`}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center font-medium" data-testid={`treats-qty-${item.id}`}>{qty}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 rounded-full p-0"
+                    onClick={() => handleQuantityChange(item, 1, selectedFood, onAddFood, onRemoveFood)}
+                    data-testid={`treats-plus-${item.id}`}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
-          <div className="border-t pt-4 mt-4 space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Goodie Bags ($8 per bag)</label>
-              <Select
-                value={goodieBagQuantity.toString()}
-                onValueChange={(value) => onUpdateGoodieBagQuantity(parseInt(value))}
-              >
-                <SelectTrigger data-testid="select-goodie-bags">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 21 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
-                      {i === 0 ? "None" : `${i} bag${i > 1 ? 's' : ''} - $${i * 8}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Specialty Items */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">Specialty Items</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {SPECIALTY_ITEMS.map((item) => (
+            <Button
+              key={item.id}
+              variant={isItemSelected(item.id, selectedExtras) ? "default" : "outline"}
+              className={`w-full justify-start h-auto py-3 ${
+                isItemSelected(item.id, selectedExtras)
+                  ? 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
+                  : 'border-gray-200 hover:border-purple-300'
+              }`}
+              onClick={() => toggleItem(item, selectedExtras, onAddExtra, onRemoveExtra, 'specialty')}
+              data-testid={`specialty-item-${item.id}`}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <span className="text-2xl">{item.icon}</span>
+                <span className="flex-1 text-left">{item.name}</span>
+                {isItemSelected(item.id, selectedExtras) && (
+                  <span className="text-sm font-medium">${item.price}</span>
+                )}
+              </div>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Premium Goodie Bags ($15 per bag)</label>
-              <Select
-                value={premiumGoodieBagQuantity.toString()}
-                onValueChange={(value) => onUpdatePremiumGoodieBagQuantity(parseInt(value))}
-              >
-                <SelectTrigger data-testid="select-premium-goodie-bags">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 21 }, (_, i) => (
-                    <SelectItem key={i} value={i.toString()}>
-                      {i === 0 ? "None" : `${i} bag${i > 1 ? 's' : ''} - $${i * 15}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Birthday Gift Basket ($25)</label>
-              <Select
-                value={hasBirthdayGiftBasket ? "1" : "0"}
-                onValueChange={(value) => onUpdateBirthdayGiftBasket(value === "1")}
-              >
-                <SelectTrigger data-testid="select-birthday-gift-basket">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">No</SelectItem>
-                  <SelectItem value="1">Yes - $25</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      {/* Drinks */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">Add-ons:</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {DRINK_ITEMS.map((item) => (
+            <Button
+              key={item.id}
+              variant={isItemSelected(item.id, selectedDrinks) ? "default" : "outline"}
+              className={`w-full justify-start h-auto py-3 ${
+                isItemSelected(item.id, selectedDrinks)
+                  ? 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
+                  : 'border-gray-200 hover:border-purple-300'
+              }`}
+              onClick={() => toggleItem(item, selectedDrinks, onAddDrink, onRemoveDrink, 'drink')}
+              data-testid={`drink-item-${item.id}`}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <span className="text-2xl">{item.icon}</span>
+                <span className="flex-1 text-left">{item.name}</span>
+                {isItemSelected(item.id, selectedDrinks) && (
+                  <span className="text-sm font-medium">${item.price}</span>
+                )}
+              </div>
+            </Button>
+          ))}
         </CardContent>
       </Card>
     </div>
