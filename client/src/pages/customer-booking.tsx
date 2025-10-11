@@ -739,7 +739,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Guest Count</Label>
+                      <Label className="text-sm font-semibold text-gray-700">Guest Count *</Label>
                       <Input
                         type="number"
                         min="1"
@@ -748,6 +748,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
                         placeholder="Number of guests"
                       />
+                      <p className="text-xs text-gray-600 mt-1 italic">* do not include birthday child</p>
                     </div>
                     <div>
                       <Label className="text-sm font-semibold text-gray-700">Location</Label>
