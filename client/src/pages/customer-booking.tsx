@@ -1066,16 +1066,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 {/* Base Food Selection */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                                   <div
-                                    onClick={() => handleRealTimeUpdate('selectedFood', 'none')}
-                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
-                                      currentFood === 'none'
-                                        ? 'border-purple-500 bg-purple-50' 
-                                        : 'border-gray-200 bg-white hover:border-purple-300'
-                                    }`}
-                                  >
-                                    <div className="font-medium">🚫 None</div>
-                                  </div>
-                                  <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'pizza')}
                                     className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
                                       currentFood === 'pizza'
@@ -1094,6 +1084,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                     }`}
                                   >
                                     <div className="font-medium">🥯 Bagels</div>
+                                  </div>
+                                  <div
+                                    onClick={() => handleRealTimeUpdate('selectedFood', 'none')}
+                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                      currentFood === 'none'
+                                        ? 'border-purple-500 bg-purple-50' 
+                                        : 'border-gray-200 bg-white hover:border-purple-300'
+                                    }`}
+                                  >
+                                    <div className="font-medium">🚫 None</div>
                                   </div>
                                 </div>
 
@@ -1157,7 +1157,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 <div className="mb-4">
                                   <p className="text-xs text-gray-600 mb-2">Included:</p>
                                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    {['none', 'vanilla', 'chocolate'].map((flavor) => (
+                                    {['vanilla', 'chocolate', 'none'].map((flavor) => (
                                       <div
                                         key={flavor}
                                         onClick={() => handleRealTimeUpdate('selectedCupcakeFlavor', flavor)}
