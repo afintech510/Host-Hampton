@@ -709,7 +709,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         })()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 italic">Include setup and clean time in the Rental Duration.</p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">
@@ -731,6 +730,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           </button>
                         ))}
                       </div>
+                      <p className="text-sm text-gray-600 italic">*Include setup and clean time in the Rental Duration.</p>
                     </div>
                   </div>
                 )}
