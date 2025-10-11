@@ -181,9 +181,26 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
   // Separate timeout refs for different fields to prevent interference
   const timeoutRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
   
-  // Immediate update for non-text fields
+  // Optimized update with debouncing for all fields to prevent lag
   const handleRealTimeUpdate = (field: string, value: any) => {
-    updateMutation.mutate({ [field]: value });
+    // Update local cache immediately for UI responsiveness
+    queryClient.setQueryData(["/api/leads", effectiveLeadId], (oldData: any) => {
+      if (oldData) {
+        return { ...oldData, [field]: value };
+      }
+      return oldData;
+    });
+    
+    // Clear existing timeout for this specific field
+    if (timeoutRefs.current[field]) {
+      clearTimeout(timeoutRefs.current[field]!);
+    }
+    
+    // Set new timeout for server sync with shorter debounce
+    timeoutRefs.current[field] = setTimeout(() => {
+      updateMutation.mutate({ [field]: value });
+      timeoutRefs.current[field] = null;
+    }, 300); // 300ms debounce for responsive feel
   };
   
   // Debounced update for text inputs with local state update for immediate UI feedback
@@ -205,7 +222,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     timeoutRefs.current[field] = setTimeout(() => {
       updateMutation.mutate({ [field]: value });
       timeoutRefs.current[field] = null;
-    }, 2000); // 2 second debounce for text inputs
+    }, 500); // 500ms debounce for text inputs
   };
 
   // Cleanup effect to clear all timeouts on unmount
@@ -1461,18 +1478,29 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   />
                 </div>
 
-                <div className="flex items-center space-x-2 pt-2">
-                  <Checkbox
-                    id="contactCommunications"
-                    checked={billingData.agreeToCommunications}
-                    onCheckedChange={(checked) => {
-                      setBillingData({...billingData, agreeToCommunications: checked as boolean});
-                      handleRealTimeUpdate('agreeToCommunications', checked);
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    variant={billingData.agreeToCommunications ? "default" : "outline"}
+                    className={`w-full justify-start text-left h-auto py-3 ${
+                      billingData.agreeToCommunications 
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                        : 'border-2 border-gray-300 hover:border-purple-500'
+                    }`}
+                    onClick={() => {
+                      const newValue = !billingData.agreeToCommunications;
+                      setBillingData({...billingData, agreeToCommunications: newValue});
+                      handleRealTimeUpdate('agreeToCommunications', newValue);
                     }}
-                  />
-                  <Label htmlFor="contactCommunications" className="text-sm cursor-pointer">
-                    I agree to receive communications about my event *
-                  </Label>
+                    data-testid="button-agree-communications"
+                  >
+                    <div className="flex items-center gap-2">
+                      {billingData.agreeToCommunications && (
+                        <span className="text-white">✓</span>
+                      )}
+                      <span className="text-sm">I agree to receive communications about my event *</span>
+                    </div>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1653,6 +1681,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                     <Separator />
 
+                    {/* Conditional Pricing Display - Hidden until agreements accepted */}
+                    {!billingData.agreeToTerms || !billingData.agreeToCommunications ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-600 text-sm">
+                          Fill out contact info and accept terms below to see final pricing
+                        </p>
+                      </div>
+                    ) : (
+                      <>
                     {/* Pricing Breakdown */}
                     <div className="space-y-2 text-sm">
                       {booking.partyType === 'diy' ? (
@@ -1816,6 +1853,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <p>• Need help? Contact us at hosthampton295@gmail.com</p>
                       </div>
                     </div>
+                    </>
+                    )}
               </CardContent>
               </Card>
             </div>
@@ -1904,16 +1943,28 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="agreeToTerms"
-                      checked={billingData.agreeToTerms}
-                      onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: checked as boolean})}
-                    />
-                    <Label htmlFor="agreeToTerms" className="text-sm">
-                      I agree to the terms and conditions *
-                    </Label>
-                  </div>
+                  <Button
+                    type="button"
+                    variant={billingData.agreeToTerms ? "default" : "outline"}
+                    className={`w-full justify-start text-left h-auto py-3 ${
+                      billingData.agreeToTerms 
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                        : 'border-2 border-gray-300 hover:border-purple-500'
+                    }`}
+                    onClick={() => {
+                      const newValue = !billingData.agreeToTerms;
+                      setBillingData({...billingData, agreeToTerms: newValue});
+                      handleRealTimeUpdate('agreeToTerms', newValue);
+                    }}
+                    data-testid="button-agree-terms"
+                  >
+                    <div className="flex items-center gap-2">
+                      {billingData.agreeToTerms && (
+                        <span className="text-white">✓</span>
+                      )}
+                      <span className="text-sm">I agree to the terms and conditions *</span>
+                    </div>
+                  </Button>
                 </div>
 
                 <div className="bg-purple-50 p-4 rounded-lg">
