@@ -31,6 +31,7 @@ import MyThemeParty from "./pages/my-theme-party";
 import MyTruckerHat from "./pages/my-trucker-hat";
 import MyStudioRental from "./pages/my-studio-rental";
 import MyPermanentJewelry from "./pages/my-permanent-jewelry";
+import BookingConfirmation from "./pages/booking-confirmation";
 import TermsAndConditions from "./pages/terms-and-conditions";
 import CommunicationsAgreement from "./pages/communications-agreement";
 import PrivacyPolicy from "./pages/privacy-policy";
@@ -70,6 +71,7 @@ function Router() {
           <Route path="/my-trucker-hat/:id?" component={MyTruckerHat} />
           <Route path="/my-studio-rental/:id?" component={MyStudioRental} />
           <Route path="/my-permanent-jewelry/:id?" component={MyPermanentJewelry} />
+          <Route path="/booking-confirmation" component={BookingConfirmation} />
           <Route path="/terms-and-conditions" component={TermsAndConditions} />
           <Route path="/communications-agreement" component={CommunicationsAgreement} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />

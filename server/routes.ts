@@ -1345,6 +1345,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get the lead to access customer information
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({
+          success: false,
+          error: "Lead not found"
+        });
+      }
+
+      // Create or get customer from lead email
+      const customerEmail = lead.email || bookingData?.customerEmail || '';
+      if (!customerEmail) {
+        return res.status(400).json({
+          success: false,
+          error: "Email is required to create booking"
+        });
+      }
+
+      let customer = await storage.getCustomerByEmail(customerEmail);
+      if (!customer) {
+        customer = await storage.createCustomer({
+          name: lead.name || bookingData?.customerName || '',
+          email: customerEmail,
+          phone: lead.phone || bookingData?.customerPhone || '',
+          billingAddress: null
+        });
+        console.log(`Created new customer #${customer.id} for lead #${leadId}`);
+      }
+
+      // Create event from the lead NOW (before payment)
+      const eventTypes = await storage.getEventTypes();
+      let birthdayEventType = eventTypes.find(et => et.name === "Birthday Party");
+      if (!birthdayEventType) {
+        birthdayEventType = await storage.createEventType({
+          name: "Birthday Party",
+          description: "Children's birthday party",
+          active: true
+        });
+      }
+
+      const event = await storage.createEvent({
+        customerId: customer.id,
+        eventTypeId: birthdayEventType.id,
+        eventDate: lead.eventDate || new Date(),
+        startTime: lead.timeSlot || "",
+        endTime: "",
+        guestCount: lead.guestCount || 12,
+        status: "pending_deposit", // Status will be updated after payment
+        estimatedCost: lead.budget || 0,
+        notes: `Theme: ${lead.partyTheme || 'Not specified'}. ${lead.notes || ''}`,
+        inquirySource: lead.source || "website",
+        leadScore: "hot"
+      });
+
+      console.log(`Created event #${event.id} for customer #${customer.id} - awaiting deposit payment`);
+
       // Create a payment link for the deposit
       const paymentLink = await stripe.paymentLinks.create({
         line_items: [{
@@ -1360,19 +1416,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }],
         metadata: {
           leadId: leadId.toString(),
+          eventId: event.id.toString(),
+          customerId: customer.id.toString(),
           type: 'deposit'
         },
         after_completion: {
           type: 'redirect',
           redirect: {
-            url: `${process.env.DOMAIN || 'http://localhost:5000'}/payment-success?leadId=${leadId}`
+            url: `${process.env.DOMAIN || 'http://localhost:5000'}/booking-confirmation?eventId=${event.id}`
           }
         }
       });
 
       res.json({
         success: true,
-        paymentUrl: paymentLink.url
+        paymentUrl: paymentLink.url,
+        eventId: event.id
       });
     } catch (error) {
       console.error("Error creating deposit payment:", error);
