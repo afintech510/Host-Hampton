@@ -1121,9 +1121,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 {/* Gift Items - Boolean Select Buttons */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
                                   {[
-                                    { name: 'Goodie Bags', icon: '🎁', label: 'Goodie Bags (per guest)' },
-                                    { name: 'Premium Goodie Bags', icon: '🎀', label: 'Premium Goodie Bags (per guest)' },
-                                    { name: 'Curated Birthday Gift', icon: '🎁', label: 'Curated Birthday Gift' }
+                                    { name: 'Goodie Bags', icon: '🎁', label: 'Goodie Bags' },
+                                    { name: 'Premium Goodie Bags', icon: '🎀', label: 'Premium Goodie Bags' },
+                                    { name: 'Curated Birthday Gift', icon: '🎁', label: 'Personalized Birthday Gift Basket' }
                                   ].map((item) => {
                                     const currentPartyExtras = booking.selectedPartyExtras || {};
                                     const isSelected = !!currentPartyExtras[item.name] && Number(currentPartyExtras[item.name]) > 0;
@@ -1136,6 +1136,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           if (isSelected) {
                                             delete updated[item.name];
                                           } else {
+                                            // If selecting Goodie Bags, remove Premium Goodie Bags
+                                            if (item.name === 'Goodie Bags' && updated['Premium Goodie Bags']) {
+                                              delete updated['Premium Goodie Bags'];
+                                            }
+                                            // If selecting Premium Goodie Bags, remove Goodie Bags
+                                            if (item.name === 'Premium Goodie Bags' && updated['Goodie Bags']) {
+                                              delete updated['Goodie Bags'];
+                                            }
                                             updated[item.name] = 1;
                                           }
                                           handleRealTimeUpdate('selectedPartyExtras', updated);
