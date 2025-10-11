@@ -1737,8 +1737,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
               <Card className="bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5" />
-                  Summary
+                  <span className="text-xl">🎉</span>
+                  Party Summary
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1746,7 +1746,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 {booking.partyType === 'full-service' && (
                   <div className="text-center p-3 bg-purple-50 rounded-lg">
                     <h3 className="text-lg font-bold text-purple-800">
-                      {booking.childName || 'Child'} turning {booking.childAge || 'Age'} Birthday Party! 🎉
+                      {booking.childName || 'Child'} turning {booking.childAge || 'Age'}! 🥳
                     </h3>
                   </div>
                 )}
