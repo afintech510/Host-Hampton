@@ -994,7 +994,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             <>
                               {/* Premium Activities Section */}
                               {selectedPackage.premiumActivities > 0 && (
-                                <div className="border-2 border-gray-200 p-4">
+                                <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                   <h4 className="font-medium text-gray-800 mb-2">
                                     Select Premium Activities ({currentPremiumActivities.length}/{selectedPackage.premiumActivities})
                                   </h4>
@@ -1044,13 +1044,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 handleRealTimeUpdate('selectedPremiumActivities', updated);
                                               }
                                             }}
-                                            className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                            className={`border-2 p-3 cursor-pointer transition-all text-base rounded-full ${
                                               isSelected 
                                                 ? 'border-purple-500 bg-purple-50' 
                                                 : 'border-gray-200 bg-white hover:border-purple-300'
                                             }`}
                                           >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center justify-center gap-2">
                                               <span className="text-lg">{addon.icon}</span>
                                               <span className="font-medium">{addon.name}</span>
                                             </div>
@@ -1064,7 +1064,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                               {/* Standard Activities Section */}
                               {selectedPackage.standardActivities > 0 && (
-                                <div className="border-2 border-gray-200 p-4">
+                                <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                   <h4 className="font-medium text-gray-800 mb-2">
                                     Select Standard Activities ({currentStandardActivities.length}/{selectedPackage.standardActivities})
                                   </h4>
@@ -1114,13 +1114,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 handleRealTimeUpdate('selectedStandardActivities', updated);
                                               }
                                             }}
-                                            className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                            className={`border-2 p-3 cursor-pointer transition-all text-base rounded-full ${
                                               isSelected 
                                                 ? 'border-purple-500 bg-purple-50' 
                                                 : 'border-gray-200 bg-white hover:border-purple-300'
                                             }`}
                                           >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center justify-center gap-2">
                                               <span className="text-lg">{addon.icon}</span>
                                               <span className="font-medium">{addon.name}</span>
                                             </div>
@@ -1133,7 +1133,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               )}
 
                               {/* Party Extras */}
-                              <div className="border-2 border-gray-200 p-4">
+                              <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                 <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
                                 
                                 {/* Gift Items - Boolean Select Buttons */}
@@ -1166,14 +1166,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           }
                                           handleRealTimeUpdate('selectedPartyExtras', updated);
                                         }}
-                                        className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                        className={`border-2 p-3 cursor-pointer transition-all text-base rounded-full ${
                                           isSelected 
                                             ? 'border-purple-500 bg-purple-50' 
                                             : 'border-gray-200 bg-white hover:border-purple-300'
                                         }`}
                                         data-testid={`party-extra-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                                       >
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center justify-center gap-2">
                                           <span className="text-lg">{item.icon}</span>
                                           <span className="font-medium">{item.label}</span>
                                         </div>
@@ -1231,14 +1231,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               </div>
 
                               {/* Food Selection */}
-                              <div className="border-2 border-gray-200 p-4">
+                              <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                 <h4 className="font-medium text-gray-800 mb-3">Food Selection</h4>
                                 
                                 {/* Base Food Selection */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                                   <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'pizza')}
-                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                    className={`border-2 p-3 cursor-pointer transition-all text-base text-center rounded-full ${
                                       currentFood === 'pizza'
                                         ? 'border-purple-500 bg-purple-50' 
                                         : 'border-gray-200 bg-white hover:border-purple-300'
@@ -1248,7 +1248,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   </div>
                                   <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'bagels')}
-                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                    className={`border-2 p-3 cursor-pointer transition-all text-base text-center rounded-full ${
                                       currentFood === 'bagels'
                                         ? 'border-purple-500 bg-purple-50' 
                                         : 'border-gray-200 bg-white hover:border-purple-300'
@@ -1258,7 +1258,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   </div>
                                   <div
                                     onClick={() => handleRealTimeUpdate('selectedFood', 'none')}
-                                    className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                    className={`border-2 p-3 cursor-pointer transition-all text-base text-center rounded-full ${
                                       currentFood === 'none'
                                         ? 'border-purple-500 bg-purple-50' 
                                         : 'border-gray-200 bg-white hover:border-purple-300'
@@ -1322,7 +1322,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               </div>
 
                               {/* Sweets & Treats */}
-                              <div className="border-2 border-gray-200 p-4">
+                              <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                 <h4 className="font-medium text-gray-800 mb-3">Sweets & Treats</h4>
                                 
                                 {/* Base Cupcakes (Included) */}
@@ -1333,7 +1333,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       <div
                                         key={flavor}
                                         onClick={() => handleRealTimeUpdate('selectedCupcakeFlavor', flavor)}
-                                        className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                        className={`border-2 p-3 cursor-pointer transition-all text-base text-center rounded-full ${
                                           currentCupcakeFlavor === flavor 
                                             ? 'border-purple-500 bg-purple-50' 
                                             : 'border-gray-200 bg-white hover:border-purple-300'
@@ -1400,7 +1400,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               </div>
 
                               {/* Specialty Items */}
-                              <div className="border-2 border-gray-200 p-4">
+                              <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                 <h4 className="font-medium text-gray-800 mb-3">Specialty Items</h4>
                                 <div className="space-y-2">
                                   {[
@@ -1435,15 +1435,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             handleRealTimeUpdate('selectedSweetAddons', updated);
                                           }
                                         }}
-                                        className={`border-2 p-3 cursor-pointer transition-all ${
+                                        className={`border-2 p-3 cursor-pointer transition-all text-base rounded-full ${
                                           isSelected
                                             ? 'border-purple-500 bg-purple-50' 
                                             : 'border-gray-200 bg-white hover:border-purple-300'
                                         }`}
                                       >
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center justify-center gap-2">
                                           <span className="text-lg">{item.icon}</span>
-                                          <span className="text-sm font-medium">{item.name}</span>
+                                          <span className="font-medium">{item.name}</span>
                                           {isSelected && <span className="ml-auto text-purple-600">✓</span>}
                                         </div>
                                       </div>
@@ -1453,7 +1453,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               </div>
 
                               {/* Drinks Module */}
-                              <div className="border-2 border-gray-200 p-4">
+                              <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                 <h4 className="font-medium text-gray-800 mb-3">Drinks</h4>
                                 
                                 {/* Included Drinks */}
@@ -1500,15 +1500,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             }
                                             handleRealTimeUpdate('selectedDrinkAddons', updated);
                                           }}
-                                          className={`border-2 p-3 cursor-pointer transition-all ${
+                                          className={`border-2 p-3 cursor-pointer transition-all text-base rounded-full ${
                                             isSelected
                                               ? 'border-purple-500 bg-purple-50' 
                                               : 'border-gray-200 bg-white hover:border-purple-300'
                                           }`}
                                         >
-                                          <div className="flex items-center gap-2">
+                                          <div className="flex items-center justify-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
-                                            <span className="text-sm font-medium">{addon.name}</span>
+                                            <span className="font-medium">{addon.name}</span>
                                             {isSelected && <span className="ml-auto text-purple-600">✓</span>}
                                           </div>
                                         </div>
@@ -1519,7 +1519,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               </div>
 
                               {/* Allergy Module */}
-                              <div className="border-2 border-gray-200 p-4">
+                              <div className="border-2 border-gray-200 p-4 rounded-2xl">
                                 <h4 className="font-medium text-gray-800 mb-3">Allergies & Dietary Restrictions</h4>
                                 <div className="space-y-3">
                                   {['Gluten-Free', 'Dairy-Free', 'Nut Allergy'].map((allergy) => {
@@ -1535,7 +1535,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             : [...currentAllergies, allergy];
                                           handleRealTimeUpdate('selectedAllergies', updated);
                                         }}
-                                        className={`border-2 p-3 cursor-pointer transition-all text-sm text-center ${
+                                        className={`border-2 p-3 cursor-pointer transition-all text-base text-center rounded-full ${
                                           isSelected
                                             ? 'border-red-500 bg-red-50' 
                                             : 'border-gray-200 bg-white hover:border-red-300'
