@@ -229,6 +229,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     };
   }, []);
 
+  // Auto-set location to studio when DIY is selected
+  useEffect(() => {
+    if (booking?.partyType === 'diy' && booking?.eventLocation !== 'studio') {
+      handleRealTimeUpdate('eventLocation', 'studio');
+    }
+  }, [booking?.partyType]);
+
   // Stripe deposit payment mutation
   const depositMutation = useMutation({
     mutationFn: async (bookingData: any) => {
@@ -744,23 +751,43 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     </div>
                     <div>
                       <Label className="text-sm font-semibold text-gray-700">Location</Label>
-                      <Select value={booking.eventLocation || 'studio'} onValueChange={(value) => handleRealTimeUpdate('eventLocation', value)}>
-                        <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
-                          <SelectValue placeholder="Choose location" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-none">
-                          <SelectItem value="studio">Host Hampton Studio</SelectItem>
-                          <SelectItem value="mobile">Mobile (Your Address)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {booking.partyType === 'diy' ? (
+                        <Input
+                          value="Host Hampton Studio"
+                          disabled
+                          className="mt-1 border-2 border-gray-200 rounded-none bg-gray-50 text-gray-600"
+                        />
+                      ) : (
+                        <Select value={booking.eventLocation || 'studio'} onValueChange={(value) => handleRealTimeUpdate('eventLocation', value)}>
+                          <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500">
+                            <SelectValue placeholder="Choose location" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-none">
+                            <SelectItem value="studio">Host Hampton Studio</SelectItem>
+                            <SelectItem value="mobile">Mobile (Your Address)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   </div>
-                  {booking.eventLocation === 'mobile' && (
+                  {booking.eventLocation === 'mobile' && booking.partyType !== 'diy' && (
                     <div className="mt-2">
                       <Label className="text-sm font-semibold text-gray-700">Mobile Address</Label>
                       <Input
                         value={booking.mobileAddress || ''}
-                        onChange={(e) => handleTextInputUpdate('mobileAddress', e.target.value)}
+                        onChange={(e) => {
+                          // Update local cache immediately for UI responsiveness
+                          queryClient.setQueryData(["/api/leads", effectiveLeadId], (oldData: any) => {
+                            if (oldData) {
+                              return { ...oldData, mobileAddress: e.target.value };
+                            }
+                            return oldData;
+                          });
+                        }}
+                        onBlur={(e) => {
+                          // Update server only on blur to prevent lag
+                          updateMutation.mutate({ mobileAddress: e.target.value });
+                        }}
                         className="mt-1 border-2 border-gray-200 rounded-none focus:border-purple-500"
                         placeholder="Enter your full address"
                       />
@@ -1759,7 +1786,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   
                   <div>
                     <span className="text-gray-600">Location:</span>
-                    <p className="font-medium">{booking.eventLocation === 'studio' ? 'Host Hampton Studio' : 'Mobile Service'}</p>
+                    <p className="font-medium">
+                      {(booking.eventLocation || 'studio') === 'studio' ? 'Host Hampton Studio' : 'Mobile Service'}
+                    </p>
                   </div>
                   
                   <div>
