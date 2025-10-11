@@ -1063,44 +1063,39 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               <div className="border-2 border-gray-200 p-4">
                                 <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
                                 
-                                {/* Gift Items - Select Boxes */}
-                                <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+                                {/* Gift Items - Boolean Select Buttons */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200">
                                   {[
-                                    { name: 'Goodie Bags', icon: '🎁', label: 'Goodie Bags (per guest)', max: 20 },
-                                    { name: 'Premium Goodie Bags', icon: '🎀', label: 'Premium Goodie Bags (per guest)', max: 20 },
-                                    { name: 'Curated Birthday Gift', icon: '🎁', label: 'Curated Birthday Gift', max: 1 }
+                                    { name: 'Goodie Bags', icon: '🎁', label: 'Goodie Bags (per guest)' },
+                                    { name: 'Premium Goodie Bags', icon: '🎀', label: 'Premium Goodie Bags (per guest)' },
+                                    { name: 'Curated Birthday Gift', icon: '🎁', label: 'Curated Birthday Gift' }
                                   ].map((item) => {
                                     const currentPartyExtras = booking.selectedPartyExtras || {};
-                                    const quantity = Number(currentPartyExtras[item.name] || 0);
+                                    const isSelected = !!currentPartyExtras[item.name] && Number(currentPartyExtras[item.name]) > 0;
                                     
                                     return (
-                                      <div key={item.name} className="flex items-center justify-between">
+                                      <div
+                                        key={item.name}
+                                        onClick={() => {
+                                          const updated = { ...currentPartyExtras };
+                                          if (isSelected) {
+                                            delete updated[item.name];
+                                          } else {
+                                            updated[item.name] = 1;
+                                          }
+                                          handleRealTimeUpdate('selectedPartyExtras', updated);
+                                        }}
+                                        className={`border-2 p-3 cursor-pointer transition-all text-sm ${
+                                          isSelected 
+                                            ? 'border-purple-500 bg-purple-50' 
+                                            : 'border-gray-200 bg-white hover:border-purple-300'
+                                        }`}
+                                        data-testid={`party-extra-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                      >
                                         <div className="flex items-center gap-2">
                                           <span className="text-lg">{item.icon}</span>
-                                          <span className="text-sm font-medium">{item.label}</span>
+                                          <span className="font-medium">{item.label}</span>
                                         </div>
-                                        <Select
-                                          value={quantity.toString()}
-                                          onValueChange={(value) => {
-                                            const updated = { ...currentPartyExtras };
-                                            const qty = parseInt(value, 10) || 0;
-                                            if (qty === 0) {
-                                              delete updated[item.name];
-                                            } else {
-                                              updated[item.name] = qty;
-                                            }
-                                            handleRealTimeUpdate('selectedPartyExtras', updated);
-                                          }}
-                                        >
-                                          <SelectTrigger className="w-20 border-2 border-gray-200 rounded-none focus:border-purple-500">
-                                            <SelectValue placeholder="0">{quantity}</SelectValue>
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {Array.from({ length: item.max + 1 }, (_, i) => i).map((num) => (
-                                              <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
                                       </div>
                                     );
                                   })}
