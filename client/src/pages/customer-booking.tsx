@@ -35,7 +35,7 @@ function formatPrice(amount: number): string {
 const packageDefinitions = {
   star1: {
     name: "1-Star Package",
-    price: 0, // Base pricing is handled separately ($875/$950)
+    price: 0, // Base pricing is handled separately ($650/$750)
     maxGuests: 10,
     premiumActivities: 1,
     standardActivities: 2, // Can choose 1 premium + 1 standard OR 3 standard
@@ -260,7 +260,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
   // Calculate pricing
   const calculatePricing = () => {
-    if (!booking) return { basePrice: 850, packagePrice: 0, addonsTotal: 0, total: 850 };
+    if (!booking) return { basePrice: 650, packagePrice: 0, addonsTotal: 0, total: 650 };
 
     // Check if DIY (Studio Rental) or Full Service
     const isDIY = booking.partyType === 'diy';
@@ -269,12 +269,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     if (!isDIY) {
       // Full Service - Star-level pricing structure
       const isCustom = booking.partyTheme === 'custom';
+      const starBase = isCustom ? 750 : 650;
       const starPrices = {
-        1: isCustom ? 950 : 850,
-        2: isCustom ? 1350 : 1250,
-        3: isCustom ? 1650 : 1550,
-        4: isCustom ? 1900 : 1800,
-        5: isCustom ? 2325 : 2225
+        1: starBase,
+        2: starBase + 350,
+        3: starBase + 695,
+        4: starBase + 925,
+        5: starBase + 1375
       };
 
       // Get star level from package selection
@@ -832,8 +833,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 {selectedPackage.standardActivities > 0 && ` • ${selectedPackage.standardActivities} standard activities`}
                                 {selectedPackage.foodBudget && ` • $${selectedPackage.foodBudget} food budget`}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 mb-3">
                                 {selectedPackage.description}
+                              </div>
+                              <div className="border-t border-purple-200 pt-3 mt-3">
+                                <div className="text-xs font-semibold text-gray-700 mb-2">Package Includes:</div>
+                                <ul className="text-xs text-gray-600 space-y-1">
+                                  {selectedPackage.includes.map((item: string, index: number) => (
+                                    <li key={index} className="flex items-start gap-2">
+                                      <span className="text-purple-500 mt-0.5">✓</span>
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
                               </div>
                             </div>
                           );
