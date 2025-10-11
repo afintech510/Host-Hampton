@@ -1,0 +1,24 @@
+On the /my-theme-party page:
+-	Fix issue: laggy action when clicking the check box (the worst), buttons, text fields
+o	Change the check box to a select box 
+	Make the agreement confirmation a selectable button similar to all the others on this page. Once this button is selected a database entry should be made with new quote. This does not need to lock any fields. The   summary module should be partially hidden until the user agrees to receive communications & terms of service. Have it hide the price table and below (button and terms ). Have it show a statement ~ Fill out contact info in order to see final price 
+o	the changing of party option – select box, qty +/- buttons, typing Childs name and age, guest count – all these actions seem to be laggy, I think because the auto summary update. This needs to be improved. Give me options. Maybe Have a delay in update frequency. 
+-	Package Level 
+o	List out all the items included for each package in this module
+o	Showing the price for each package (not as + amount)
+	Use $650 for base package 
+o	Where are the packages listed in full detail in the code – or database?
+-	Party Extras
+o	Goodie Bags, Premium Goodie bags, and Curated Bday gift should all be select boxes, not qty +/- ;  group them at the top of this section, with small vertical space between the other ballon options. 
+-	Food Section
+o	Move the None option to 3rd position (Pizza, Bagels, None)
+-	Sweets & Treats Section
+o	Move the None option to 3rd position (Vanilla, Chocolate, None)
+-	DIY 
+o	Arrival time : add options from 7am to 7pm	
+o	Rental duration: add 1h and 2h options; show pricing for each hourly option when selected
+o	Add party addons- 
+	Food(qty): Pizza, Specialty Pizza, Chicken Fingers, French Fries
+	Sweets & Treats (per dozen): Macarons, Chocolate Covered Pretzels, Chocolate Covered Rice Krispies, Decorated Sugar Cookies
+	Specialty Items(select):  Popcorn Bar, Candy Wall, Custom Treat Table, Coffee Bar, Charcuterie Board
+-	Add Charcuterie Board option to the full service party / Food / addons module
