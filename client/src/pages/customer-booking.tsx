@@ -292,14 +292,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     } else {
       // DIY (Studio Rental) - charge based on rental duration only, no per-guest fees
       const rentalPrices = {
-        '3': 200,
-        '4': 250,
-        '5': 300,
-        '6': 350,
-        'all-day': 500
+        '1': 100,
+        '2': 150,
+        '3': 300,
+        '4': 350,
+        '5': 400,
+        '6': 450,
+        'all-day': 600
       };
       const duration = booking.rentalDuration || '3';
-      basePrice = rentalPrices[duration as keyof typeof rentalPrices] || 200;
+      basePrice = rentalPrices[duration as keyof typeof rentalPrices] || 300;
     }
 
     // Calculate add-ons total from new structure
@@ -619,6 +621,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               <SelectValue placeholder="Select arrival time" />
                             </SelectTrigger>
                             <SelectContent className="rounded-none">
+                              <SelectItem value="7:00am">7:00am</SelectItem>
+                              <SelectItem value="8:00am">8:00am</SelectItem>
                               <SelectItem value="9:00am">9:00am</SelectItem>
                               <SelectItem value="10:00am">10:00am</SelectItem>
                               <SelectItem value="11:00am">11:00am</SelectItem>
@@ -628,6 +632,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               <SelectItem value="3:00pm">3:00pm</SelectItem>
                               <SelectItem value="4:00pm">4:00pm</SelectItem>
                               <SelectItem value="5:00pm">5:00pm</SelectItem>
+                              <SelectItem value="6:00pm">6:00pm</SelectItem>
+                              <SelectItem value="7:00pm">7:00pm</SelectItem>
                             </SelectContent>
                           </Select>
                         </>
@@ -653,7 +659,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 {/* Rental Duration - DIY Only */}
                 {booking.partyType === 'diy' && (
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-gray-800">Rental Duration</h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-800">Rental Duration</h3>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {(() => {
+                          const rentalPrices: Record<string, number> = {
+                            '1': 100,
+                            '2': 150,
+                            '3': 300,
+                            '4': 350,
+                            '5': 400,
+                            '6': 450,
+                            'all-day': 600
+                          };
+                          const duration = booking.rentalDuration || '3';
+                          return `$${rentalPrices[duration] || 300}`;
+                        })()}
+                      </span>
+                    </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">
@@ -661,7 +684,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         </span>
                       </div>
                       <div className="flex gap-2">
-                        {['3', '4', '5', '6', 'all-day'].map((duration) => (
+                        {['1', '2', '3', '4', '5', '6', 'all-day'].map((duration) => (
                           <button
                             key={duration}
                             onClick={() => handleRealTimeUpdate('rentalDuration', duration)}
