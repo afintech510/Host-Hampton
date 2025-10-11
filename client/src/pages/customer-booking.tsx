@@ -291,8 +291,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     } else {
       // DIY (Studio Rental) - charge based on rental duration only, no per-guest fees
       const rentalPrices = {
-        '1': 100, // Placeholder rate - user to provide actual rate
-        '2': 150, // Placeholder rate - user to provide actual rate
         '3': 200,
         '4': 250,
         '5': 300,
@@ -581,8 +579,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               <SelectValue placeholder="Select arrival time" />
                             </SelectTrigger>
                             <SelectContent className="rounded-none">
-                              <SelectItem value="7:00am">7:00am</SelectItem>
-                              <SelectItem value="8:00am">8:00am</SelectItem>
                               <SelectItem value="9:00am">9:00am</SelectItem>
                               <SelectItem value="10:00am">10:00am</SelectItem>
                               <SelectItem value="11:00am">11:00am</SelectItem>
@@ -592,8 +588,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               <SelectItem value="3:00pm">3:00pm</SelectItem>
                               <SelectItem value="4:00pm">4:00pm</SelectItem>
                               <SelectItem value="5:00pm">5:00pm</SelectItem>
-                              <SelectItem value="6:00pm">6:00pm</SelectItem>
-                              <SelectItem value="7:00pm">7:00pm</SelectItem>
                             </SelectContent>
                           </Select>
                         </>
@@ -626,12 +620,12 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           {booking.rentalDuration === 'all-day' ? 'All Day' : `${booking.rentalDuration || '3'} Hours`}
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                        {['1', '2', '3', '4', '5', '6', 'all-day'].map((duration) => (
+                      <div className="flex gap-2">
+                        {['3', '4', '5', '6', 'all-day'].map((duration) => (
                           <button
                             key={duration}
                             onClick={() => handleRealTimeUpdate('rentalDuration', duration)}
-                            className={`py-2 px-3 border-2 transition-all text-sm font-medium ${
+                            className={`flex-1 py-2 px-3 border-2 transition-all text-sm font-medium ${
                               (booking.rentalDuration || '3') === duration
                                 ? 'border-purple-500 bg-purple-50 text-purple-700'
                                 : 'border-gray-200 bg-white text-gray-700 hover:border-purple-300'
@@ -817,10 +811,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   </div>
 
                   {/* Package Details & Add-ons Below Stars */}
-                  {((selectedStars > 0 && selectedStars <= 5) || booking.partyType === 'diy') && (
+                  {selectedStars > 0 && selectedStars <= 5 && (
                     <div className="space-y-4">
-                      {/* Package Summary - Only for Full Service */}
-                      {booking.partyType === 'full-service' && (
+                      {/* Package Summary */}
                       <div className="border-2 border-purple-500 bg-purple-50 p-4">
                         {(() => {
                           const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
@@ -858,10 +851,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           );
                         })()}
                       </div>
-                      )}
 
-                      {/* Structured Activity & Food Selection - Only for Full Service */}
-                      {booking.partyType === 'full-service' && (
+                      {/* Structured Activity & Food Selection */}
                       <div className="space-y-4">
                         {(() => {
                           const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
@@ -1027,13 +1018,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   )}
                                 </div>
                               )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                      )}
 
-                              {/* Party Extras - Available for both Full Service and DIY */}
+                              {/* Party Extras */}
                               <div className="border-2 border-gray-200 p-4">
                                 <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
                                 
@@ -1464,15 +1450,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           );
                         })()}
                       </div>
-                      )}
-
-                              {/* Party Extras - Available for both Full Service and DIY */}
-                              <div className="border-2 border-gray-200 p-4">
-                                <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
-                                <p className="text-sm text-gray-600">Party extras content will go here</p>
-                              </div>
                     </div>
                   )}
+                </div>
+                )}
               </CardContent>
             </Card>
           </div>
