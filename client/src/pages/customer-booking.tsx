@@ -1194,7 +1194,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                     const quantity = currentPartyExtras[extra.name] || 0;
                                     
                                     return (
-                                      <div key={extra.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                      <div key={extra.name} className="flex items-center justify-between p-3">
                                         <div className="flex items-center gap-2">
                                           <span className="text-lg">{extra.icon}</span>
                                           <span className="text-sm font-medium">{extra.name}</span>
@@ -1284,7 +1284,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       const quantity = currentFoodAddons[addon.name] || 0;
                                       
                                       return (
-                                        <div key={addon.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                        <div key={addon.name} className="flex items-center justify-between p-3">
                                           <div className="flex items-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
                                             <span className="text-sm font-medium">{addon.name}</span>
@@ -1362,7 +1362,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       const quantity = currentSweetAddons[addon.name] || 0;
                                       
                                       return (
-                                        <div key={addon.name} className="flex items-center justify-between border-2 border-gray-200 p-2">
+                                        <div key={addon.name} className="flex items-center justify-between p-3">
                                           <div className="flex items-center gap-2">
                                             <span className="text-lg">{addon.icon}</span>
                                             <span className="text-sm font-medium">{addon.name}</span>
