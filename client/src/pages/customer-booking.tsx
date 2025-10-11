@@ -98,17 +98,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
   const [selectedStars, setSelectedStars] = useState(1);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [showBillingInfo, setShowBillingInfo] = useState(false);
-  const [billingData, setBillingData] = useState({
+  const [contactData, setContactData] = useState({
     firstName: '',
     lastName: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
     phone: '',
     email: '',
-    agreeToTerms: false,
     agreeToCommunications: false
   });
 
@@ -460,49 +454,44 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       else if (packageKey.includes('5star') || packageKey.includes('star5')) setSelectedStars(5);
       else setSelectedStars(1); // Default to 1-star
       
-      setBillingData({
+      setContactData({
         firstName: booking.firstName || booking.name?.split(' ')[0] || '',
         lastName: booking.lastName || booking.name?.split(' ').slice(1).join(' ') || '',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
         phone: booking.phone || '',
         email: booking.email || '',
-        agreeToTerms: booking.agreeToTerms || false,
         agreeToCommunications: booking.agreeToCommunications || false
       });
     }
   }, [booking]);
 
-  // Validation function
-  const validateRequiredFields = () => {
-    const missingFields: string[] = [];
-    if (!billingData.firstName.trim()) missingFields.push('firstName');
-    if (!billingData.lastName.trim()) missingFields.push('lastName');
-    if (!billingData.address.trim()) missingFields.push('address');
-    if (!billingData.city.trim()) missingFields.push('city');
-    if (!billingData.state.trim()) missingFields.push('state');
-    if (!billingData.zipCode.trim()) missingFields.push('zipCode');
-    if (!billingData.phone.trim()) missingFields.push('phone');
-    if (!billingData.email.trim()) missingFields.push('email');
-    if (!billingData.agreeToTerms) missingFields.push('agreeToTerms');
-    if (!billingData.agreeToCommunications) missingFields.push('agreeToCommunications');
-    return missingFields;
+  // Check if contact info is complete (for enabling the agreement button)
+  const isContactInfoComplete = () => {
+    return contactData.firstName.trim() !== '' &&
+           contactData.lastName.trim() !== '' &&
+           contactData.phone.trim() !== '' &&
+           contactData.email.trim() !== '';
   };
 
   const handleDepositPayment = () => {
-    const missingFields = validateRequiredFields();
-    if (missingFields.length > 0) {
+    if (!isContactInfoComplete()) {
       toast({
         title: "Missing Information",
-        description: `Please fill in all required fields: ${missingFields.join(', ')}`,
+        description: "Please fill in all contact information",
         variant: "destructive",
       });
       return;
     }
 
-    depositMutation.mutate(billingData);
+    if (!contactData.agreeToCommunications) {
+      toast({
+        title: "Agreement Required",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    depositMutation.mutate(contactData);
   };
 
   if (isLoading) {
@@ -1622,10 +1611,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <Input
                       id="contactFirstName"
                       data-testid="input-first-name"
-                      value={billingData.firstName}
+                      value={contactData.firstName}
                       onChange={(e) => {
                         const value = e.target.value;
-                        setBillingData({...billingData, firstName: value});
+                        setContactData({...contactData, firstName: value});
                         handleTextInputUpdate('firstName', value);
                       }}
                       className="mt-1"
@@ -1637,10 +1626,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     <Input
                       id="contactLastName"
                       data-testid="input-last-name"
-                      value={billingData.lastName}
+                      value={contactData.lastName}
                       onChange={(e) => {
                         const value = e.target.value;
-                        setBillingData({...billingData, lastName: value});
+                        setContactData({...contactData, lastName: value});
                         handleTextInputUpdate('lastName', value);
                       }}
                       className="mt-1"
@@ -1654,10 +1643,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   <Input
                     id="contactEmail"
                     type="email"
-                    value={billingData.email}
+                    data-testid="input-email"
+                    value={contactData.email}
                     onChange={(e) => {
                       const value = e.target.value;
-                      setBillingData({...billingData, email: value});
+                      setContactData({...contactData, email: value});
                       handleTextInputUpdate('email', value);
                     }}
                     className="mt-1"
@@ -1670,10 +1660,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   <Input
                     id="contactPhone"
                     type="tel"
-                    value={billingData.phone}
+                    data-testid="input-phone"
+                    value={contactData.phone}
                     onChange={(e) => {
                       const value = e.target.value;
-                      setBillingData({...billingData, phone: value});
+                      setContactData({...contactData, phone: value});
                       handleTextInputUpdate('phone', value);
                     }}
                     className="mt-1"
@@ -1684,24 +1675,29 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                 <div className="pt-2">
                   <Button
                     type="button"
-                    variant={billingData.agreeToCommunications ? "default" : "outline"}
+                    disabled={!isContactInfoComplete()}
+                    variant={contactData.agreeToCommunications ? "default" : "outline"}
                     className={`w-full justify-start text-left h-auto py-3 ${
-                      billingData.agreeToCommunications 
+                      contactData.agreeToCommunications 
                         ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                        : 'border-2 border-gray-300 hover:border-purple-500'
+                        : isContactInfoComplete()
+                        ? 'border-2 border-gray-300 hover:border-purple-500'
+                        : 'border-2 border-gray-200 opacity-50 cursor-not-allowed'
                     }`}
                     onClick={() => {
-                      const newValue = !billingData.agreeToCommunications;
-                      setBillingData({...billingData, agreeToCommunications: newValue});
-                      handleRealTimeUpdate('agreeToCommunications', newValue);
+                      if (isContactInfoComplete()) {
+                        const newValue = !contactData.agreeToCommunications;
+                        setContactData({...contactData, agreeToCommunications: newValue});
+                        handleRealTimeUpdate('agreeToCommunications', newValue);
+                      }
                     }}
-                    data-testid="button-agree-communications"
+                    data-testid="button-agree-terms"
                   >
                     <div className="flex items-center gap-2">
-                      {billingData.agreeToCommunications && (
+                      {contactData.agreeToCommunications && (
                         <span className="text-white">✓</span>
                       )}
-                      <span className="text-sm">I agree to receive communications about my event *</span>
+                      <span className="text-sm">I agree to the terms and conditions *</span>
                     </div>
                   </Button>
                 </div>
@@ -1884,8 +1880,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
                     <Separator />
 
-                    {/* Conditional Pricing Display - Hidden until agreements accepted */}
-                    {!billingData.agreeToTerms || !billingData.agreeToCommunications ? (
+                    {/* Conditional Pricing Display - Hidden until agreement accepted */}
+                    {!contactData.agreeToCommunications ? (
                       <div className="text-center py-8">
                         <p className="text-gray-600 text-sm">
                           Fill out contact info and accept terms below to see final pricing
@@ -2062,141 +2058,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
               </CardContent>
               </Card>
             </div>
-
-            {/* Billing Information - Conditional */}
-            {showBillingInfo && (
-              <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  Billing Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="firstName">First Name *</Label>
-                    <Input
-                      id="firstName"
-                      value={billingData.firstName}
-                      onChange={(e) => setBillingData({...billingData, firstName: e.target.value})}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="lastName">Last Name *</Label>
-                    <Input
-                      id="lastName"
-                      value={billingData.lastName}
-                      onChange={(e) => setBillingData({...billingData, lastName: e.target.value})}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="address">Address *</Label>
-                  <Input
-                    id="address"
-                    value={billingData.address}
-                    onChange={(e) => setBillingData({...billingData, address: e.target.value})}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      value={billingData.city}
-                      onChange={(e) => setBillingData({...billingData, city: e.target.value})}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="state">State *</Label>
-                    <Input
-                      id="state"
-                      value={billingData.state}
-                      onChange={(e) => setBillingData({...billingData, state: e.target.value})}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="zipCode">ZIP Code *</Label>
-                    <Input
-                      id="zipCode"
-                      value={billingData.zipCode}
-                      onChange={(e) => setBillingData({...billingData, zipCode: e.target.value})}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone *</Label>
-                    <Input
-                      id="phone"
-                      value={billingData.phone}
-                      onChange={(e) => setBillingData({...billingData, phone: e.target.value})}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Button
-                    type="button"
-                    variant={billingData.agreeToTerms ? "default" : "outline"}
-                    className={`w-full justify-start text-left h-auto py-3 ${
-                      billingData.agreeToTerms 
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                        : 'border-2 border-gray-300 hover:border-purple-500'
-                    }`}
-                    onClick={() => {
-                      const newValue = !billingData.agreeToTerms;
-                      setBillingData({...billingData, agreeToTerms: newValue});
-                      handleRealTimeUpdate('agreeToTerms', newValue);
-                    }}
-                    data-testid="button-agree-terms"
-                  >
-                    <div className="flex items-center gap-2">
-                      {billingData.agreeToTerms && (
-                        <span className="text-white">✓</span>
-                      )}
-                      <span className="text-sm">I agree to the terms and conditions *</span>
-                    </div>
-                  </Button>
-                </div>
-
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-purple-900 mb-2">Secure Your Reservation</h4>
-                  <p className="text-sm text-purple-700 mb-4">
-                    Pay a {formatPrice(depositAmount)} deposit to lock in your party date. 
-                    The remaining balance will be due on the day of your event.
-                  </p>
-                  <Button 
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                    onClick={handleDepositPayment}
-                    disabled={depositMutation.isPending}
-                  >
-                    {depositMutation.isPending ? 'Processing...' : <>Pay {formatPrice(depositAmount)} Deposit</>}
-                  </Button>
-                  <p className="text-xs text-gray-600 text-center mt-2">
-                    * All billing details and agreements are required to proceed
-                  </p>
-                </div>
-
-                <div className="text-xs text-gray-500 text-center">
-                  <p>• Deposits are fully refundable up to 48 hours before your event</p>
-                  <p>• You can modify party details after booking</p>
-                  <p>• Need help? Contact us at hosthampton295@gmail.com</p>
-                </div>
-              </CardContent>
-            </Card>
-            )}
           </div>
         </div>
       </div>
