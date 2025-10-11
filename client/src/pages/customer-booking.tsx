@@ -1922,12 +1922,44 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     {/* Pricing Breakdown */}
                     <div className="space-y-2 text-sm">
                       {booking.partyType === 'diy' ? (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">
-                            Studio Rental ({booking.rentalDuration === 'all-day' ? 'All Day' : `${booking.rentalDuration || '3'} hrs`})
-                          </span>
-                          <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
-                        </div>
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">
+                              Studio Rental ({booking.rentalDuration === 'all-day' ? 'All Day' : `${booking.rentalDuration || '3'} hrs`})
+                            </span>
+                            <span className="font-semibold">{formatPrice(pricing.basePrice)}</span>
+                          </div>
+                          
+                          {/* DIY Food Add-ons */}
+                          {booking.selectedDIYFood && Array.isArray(booking.selectedDIYFood) && 
+                            booking.selectedDIYFood.map((addon: DIYAddon, index: number) => (
+                              <div key={`food-${index}`} className="flex justify-between">
+                                <span className="text-gray-600">{addon.icon} {addon.name}</span>
+                                <span className="font-semibold">+{formatPrice(addon.price)}</span>
+                              </div>
+                            ))
+                          }
+                          
+                          {/* DIY Drink Add-ons */}
+                          {booking.selectedDIYDrinks && Array.isArray(booking.selectedDIYDrinks) && 
+                            booking.selectedDIYDrinks.map((addon: DIYAddon, index: number) => (
+                              <div key={`drink-${index}`} className="flex justify-between">
+                                <span className="text-gray-600">{addon.icon} {addon.name}</span>
+                                <span className="font-semibold">+{formatPrice(addon.price)}</span>
+                              </div>
+                            ))
+                          }
+                          
+                          {/* DIY Extra Add-ons */}
+                          {booking.selectedDIYExtras && Array.isArray(booking.selectedDIYExtras) && 
+                            booking.selectedDIYExtras.map((addon: DIYAddon, index: number) => (
+                              <div key={`extra-${index}`} className="flex justify-between">
+                                <span className="text-gray-600">{addon.icon} {addon.name}</span>
+                                <span className="font-semibold">+{formatPrice(addon.price)}</span>
+                              </div>
+                            ))
+                          }
+                        </>
                       ) : (
                         <>
                           <div className="flex justify-between">
@@ -2053,9 +2085,32 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       )}
                       
                       <Separator />
+                      
+                      {/* Subtotal */}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Subtotal</span>
+                        <span className="font-semibold">{formatPrice(pricing.total)}</span>
+                      </div>
+                      
+                      {/* Sales Tax (8.625% for NY) */}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Sales Tax (8.625%)</span>
+                        <span className="font-semibold">+{formatPrice(pricing.total * 0.08625)}</span>
+                      </div>
+                      
+                      {/* Security Deposit (DIY only) */}
+                      {booking.partyType === 'diy' && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Security Deposit <span className="text-xs">* fully refundable</span></span>
+                          <span className="font-semibold">+{formatPrice(200)}</span>
+                        </div>
+                      )}
+                      
+                      <Separator />
+                      
                       <div className="flex justify-between text-lg font-bold">
                         <span>Total Party Cost</span>
-                        <span className="text-purple-600">{formatPrice(pricing.total)}</span>
+                        <span className="text-purple-600">{formatPrice(pricing.total + (pricing.total * 0.08625) + (booking.partyType === 'diy' ? 200 : 0))}</span>
                       </div>
                       
                     </div>
