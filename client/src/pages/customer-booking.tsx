@@ -1747,17 +1747,17 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
                                 .filter(([name, qty]) => Number(qty) > 0)
                                 .map(([name, qty]) => (
-                                  <li key={name}>• {name} (×{qty})</li>
+                                  <li key={name}>• {name} (×{String(qty)})</li>
                                 ))}
                               {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
                                 .filter(([name, qty]) => Number(qty) > 0)
                                 .map(([name, qty]) => (
-                                  <li key={name}>• {name} (×{qty})</li>
+                                  <li key={name}>• {name} (×{String(qty)})</li>
                                 ))}
                               {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
                                 .filter(([name, qty]) => Number(qty) > 0)
                                 .map(([name, qty]) => (
-                                  <li key={name}>• {name} (×{qty})</li>
+                                  <li key={name}>• {name} (×{String(qty)})</li>
                                 ))}
                             </ul>
                           </div>
@@ -1805,17 +1805,17 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {booking.selectedFoodAddons && Object.entries(booking.selectedFoodAddons)
                                 .filter(([name, qty]) => Number(qty) > 0)
                                 .map(([name, qty]) => (
-                                  <li key={name}>• {name} (×{qty})</li>
+                                  <li key={name}>• {name} (×{String(qty)})</li>
                                 ))}
                               {booking.selectedSweetAddons && Object.entries(booking.selectedSweetAddons)
                                 .filter(([name, qty]) => Number(qty) > 0)
                                 .map(([name, qty]) => (
-                                  <li key={name}>• {name} (×{qty})</li>
+                                  <li key={name}>• {name} (×{String(qty)})</li>
                                 ))}
                               {booking.selectedDrinkAddons && Object.entries(booking.selectedDrinkAddons)
                                 .filter(([name, qty]) => Number(qty) > 0)
                                 .map(([name, qty]) => (
-                                  <li key={name}>• {name} (×{qty})</li>
+                                  <li key={name}>• {name} (×{String(qty)})</li>
                                 ))}
                             </ul>
                           </div>
