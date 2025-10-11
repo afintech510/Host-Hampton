@@ -310,7 +310,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       'Tray of French Fries': 35,
       'Regular Pizza (Adults)': 28,
       'Specialty Pizza': 35,
-      'Popcorn Bar': 75
+      'Popcorn Bar': 75,
+      'Charcuterie Board': 75
     };
     if (booking.selectedFoodAddons) {
       Object.entries(booking.selectedFoodAddons).forEach(([name, quantity]) => {
@@ -1106,7 +1107,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       { name: 'Tray of Chicken Fingers', icon: '🍗' },
                                       { name: 'Tray of French Fries', icon: '🍟' },
                                       { name: 'Regular Pizza (Adults)', icon: '🍕' },
-                                      { name: 'Specialty Pizza', icon: '🍕' }
+                                      { name: 'Specialty Pizza', icon: '🍕' },
+                                      { name: 'Charcuterie Board', icon: '🧀' }
                                     ].map((addon) => {
                                       const currentFoodAddons = booking.selectedFoodAddons || {};
                                       const quantity = currentFoodAddons[addon.name] || 0;
@@ -1726,7 +1728,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                 'Tray of French Fries': 35,
                                 'Regular Pizza (Adults)': 28,
                                 'Specialty Pizza': 35,
-                                'Popcorn Bar': 75
+                                'Popcorn Bar': 75,
+                                'Charcuterie Board': 75
                               };
                               
                               const addon = allAddons.find((a: any) => a.name === name);
