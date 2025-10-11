@@ -197,11 +197,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       clearTimeout(timeoutRefs.current[field]!);
     }
     
-    // Set new timeout for server sync with shorter debounce
+    // Set new timeout for server sync
     timeoutRefs.current[field] = setTimeout(() => {
       updateMutation.mutate({ [field]: value });
       timeoutRefs.current[field] = null;
-    }, 300); // 300ms debounce for responsive feel
+    }, 500); // 500ms debounce to reduce server calls
   };
   
   // Debounced update for text inputs with local state update for immediate UI feedback
@@ -461,16 +461,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       else setSelectedStars(1); // Default to 1-star
       
       setBillingData({
-        firstName: booking.name?.split(' ')[0] || '',
-        lastName: booking.name?.split(' ').slice(1).join(' ') || '',
+        firstName: booking.firstName || booking.name?.split(' ')[0] || '',
+        lastName: booking.lastName || booking.name?.split(' ').slice(1).join(' ') || '',
         address: '',
         city: '',
         state: '',
         zipCode: '',
         phone: booking.phone || '',
         email: booking.email || '',
-        agreeToTerms: false,
-        agreeToCommunications: false
+        agreeToTerms: booking.agreeToTerms || false,
+        agreeToCommunications: booking.agreeToCommunications || false
       });
     }
   }, [booking]);
