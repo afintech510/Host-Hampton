@@ -819,9 +819,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   {/* Package Details & Add-ons Below Stars */}
                   {((selectedStars > 0 && selectedStars <= 5) || booking.partyType === 'diy') && (
                     <div className="space-y-4">
-                      {/* Package Summary & Activities - Only for Full Service */}
+                      {/* Package Summary - Only for Full Service */}
                       {booking.partyType === 'full-service' && (
-                      <>
                       <div className="border-2 border-purple-500 bg-purple-50 p-4">
                         {(() => {
                           const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
@@ -859,8 +858,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           );
                         })()}
                       </div>
+                      )}
 
-                      {/* Structured Activity & Food Selection */}
+                      {/* Structured Activity & Food Selection - Only for Full Service */}
+                      {booking.partyType === 'full-service' && (
                       <div className="space-y-4">
                         {(() => {
                           const starKeys = ['star1', 'star2', 'star3', 'star4', 'star5'];
@@ -1030,7 +1031,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           );
                         })()}
                       </div>
-                      </>
                       )}
 
                               {/* Party Extras - Available for both Full Service and DIY */}
@@ -1464,10 +1464,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           );
                         })()}
                       </div>
+                      )}
+
+                              {/* Party Extras - Available for both Full Service and DIY */}
+                              <div className="border-2 border-gray-200 p-4">
+                                <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
+                                <p className="text-sm text-gray-600">Party extras content will go here</p>
+                              </div>
                     </div>
                   )}
-                </div>
-                )}
               </CardContent>
             </Card>
           </div>
