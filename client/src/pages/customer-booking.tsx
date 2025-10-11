@@ -290,18 +290,34 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       
       basePrice = starPrices[starLevel as keyof typeof starPrices];
     } else {
-      // DIY (Studio Rental) - charge based on rental duration only, no per-guest fees
-      const rentalPrices = {
-        '1': 100,
-        '2': 150,
-        '3': 300,
-        '4': 350,
-        '5': 400,
-        '6': 450,
-        'all-day': 600
-      };
+      // DIY (Studio Rental) - charge based on rental duration and day of week
       const duration = booking.rentalDuration || '3';
-      basePrice = rentalPrices[duration as keyof typeof rentalPrices] || 300;
+      const eventDate = booking.eventDate;
+      
+      // Determine if weekend (Fri, Sat, Sun)
+      let isWeekend = false;
+      if (eventDate) {
+        const date = new Date(eventDate);
+        const dayOfWeek = date.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
+        isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+      }
+      
+      const weekendPrices: Record<string, number> = {
+        '3': 500,
+        '4': 600,
+        '5': 700,
+        'all-day': 800
+      };
+      
+      const weekdayPrices: Record<string, number> = {
+        '3': 400,
+        '4': 475,
+        '5': 550,
+        'all-day': 625
+      };
+      
+      const prices = isWeekend ? weekendPrices : weekdayPrices;
+      basePrice = prices[duration as keyof typeof prices] || (isWeekend ? 500 : 400);
     }
 
     // Calculate add-ons total from new structure
@@ -663,17 +679,33 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       <h3 className="font-semibold text-gray-800">Rental Duration</h3>
                       <span className="text-sm font-semibold text-gray-800">
                         {(() => {
-                          const rentalPrices: Record<string, number> = {
-                            '1': 100,
-                            '2': 150,
-                            '3': 300,
-                            '4': 350,
-                            '5': 400,
-                            '6': 450,
-                            'all-day': 600
-                          };
                           const duration = booking.rentalDuration || '3';
-                          return `$${rentalPrices[duration] || 300}`;
+                          const eventDate = booking.eventDate;
+                          
+                          // Determine if weekend (Fri, Sat, Sun)
+                          let isWeekend = false;
+                          if (eventDate) {
+                            const date = new Date(eventDate);
+                            const dayOfWeek = date.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
+                            isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+                          }
+                          
+                          const weekendPrices: Record<string, number> = {
+                            '3': 500,
+                            '4': 600,
+                            '5': 700,
+                            'all-day': 800
+                          };
+                          
+                          const weekdayPrices: Record<string, number> = {
+                            '3': 400,
+                            '4': 475,
+                            '5': 550,
+                            'all-day': 625
+                          };
+                          
+                          const prices = isWeekend ? weekendPrices : weekdayPrices;
+                          return `$${prices[duration] || (isWeekend ? 500 : 400)}`;
                         })()}
                       </span>
                     </div>
@@ -684,7 +716,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         </span>
                       </div>
                       <div className="flex gap-2">
-                        {['1', '2', '3', '4', '5', '6', 'all-day'].map((duration) => (
+                        {['3', '4', '5', 'all-day'].map((duration) => (
                           <button
                             key={duration}
                             onClick={() => handleRealTimeUpdate('rentalDuration', duration)}
