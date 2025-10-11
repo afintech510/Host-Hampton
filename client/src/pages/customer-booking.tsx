@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Calendar, Clock, Users, MapPin, CreditCard, User, Phone, Mail, Palette, Sparkles, DollarSign, Star, Plus, Minus } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
+import { DIYAddons, type DIYAddon } from "@/components/diy-addons";
 
 // Helper function to get ordinal suffix
 function getOrdinalSuffix(num: number): string {
@@ -377,6 +378,45 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
     // Legacy selectedAddons - DISABLED to prevent massive pricing issues
     // The new system uses selectedFoodAddons, selectedSweetAddons, selectedDrinkAddons instead
+
+    // DIY Add-ons (separate from full-service)
+    if (isDIY) {
+      // DIY Food add-ons
+      if (booking.selectedDIYFood && Array.isArray(booking.selectedDIYFood)) {
+        booking.selectedDIYFood.forEach((addon: DIYAddon) => {
+          addonsTotal += addon.price;
+        });
+      }
+      
+      // DIY Drink add-ons
+      if (booking.selectedDIYDrinks && Array.isArray(booking.selectedDIYDrinks)) {
+        booking.selectedDIYDrinks.forEach((addon: DIYAddon) => {
+          addonsTotal += addon.price;
+        });
+      }
+      
+      // DIY Extra add-ons
+      if (booking.selectedDIYExtras && Array.isArray(booking.selectedDIYExtras)) {
+        booking.selectedDIYExtras.forEach((addon: DIYAddon) => {
+          addonsTotal += addon.price;
+        });
+      }
+      
+      // DIY Goodie Bags
+      if (booking.diyGoodieBagQty) {
+        addonsTotal += booking.diyGoodieBagQty * 8;
+      }
+      
+      // DIY Premium Goodie Bags
+      if (booking.diyPremiumGoodieBagQty) {
+        addonsTotal += booking.diyPremiumGoodieBagQty * 15;
+      }
+      
+      // DIY Birthday Gift Basket
+      if (booking.diyBirthdayGiftBasket) {
+        addonsTotal += 25;
+      }
+    }
 
     const total = basePrice + addonsTotal;
 
@@ -1453,6 +1493,54 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                     </div>
                   )}
                 </div>
+                )}
+                
+                {/* DIY Add-ons Section */}
+                {booking.partyType === 'diy' && (
+                  <div className="p-6 space-y-6">
+                    <h3 className="text-xl font-semibold text-gray-800">Party Add-ons</h3>
+                    <DIYAddons
+                      selectedFood={booking.selectedDIYFood || []}
+                      selectedDrinks={booking.selectedDIYDrinks || []}
+                      selectedExtras={booking.selectedDIYExtras || []}
+                      onAddFood={(addon) => {
+                        const current = booking.selectedDIYFood || [];
+                        handleRealTimeUpdate('selectedDIYFood', [...current, addon]);
+                      }}
+                      onRemoveFood={(addonId) => {
+                        const current = booking.selectedDIYFood || [];
+                        handleRealTimeUpdate('selectedDIYFood', current.filter((a: DIYAddon) => a.id !== addonId));
+                      }}
+                      onAddDrink={(addon) => {
+                        const current = booking.selectedDIYDrinks || [];
+                        handleRealTimeUpdate('selectedDIYDrinks', [...current, addon]);
+                      }}
+                      onRemoveDrink={(addonId) => {
+                        const current = booking.selectedDIYDrinks || [];
+                        handleRealTimeUpdate('selectedDIYDrinks', current.filter((a: DIYAddon) => a.id !== addonId));
+                      }}
+                      onAddExtra={(addon) => {
+                        const current = booking.selectedDIYExtras || [];
+                        handleRealTimeUpdate('selectedDIYExtras', [...current, addon]);
+                      }}
+                      onRemoveExtra={(addonId) => {
+                        const current = booking.selectedDIYExtras || [];
+                        handleRealTimeUpdate('selectedDIYExtras', current.filter((a: DIYAddon) => a.id !== addonId));
+                      }}
+                      onUpdateGoodieBagQuantity={(quantity) => {
+                        handleRealTimeUpdate('diyGoodieBagQty', quantity);
+                      }}
+                      onUpdatePremiumGoodieBagQuantity={(quantity) => {
+                        handleRealTimeUpdate('diyPremiumGoodieBagQty', quantity);
+                      }}
+                      onUpdateBirthdayGiftBasket={(hasBasket) => {
+                        handleRealTimeUpdate('diyBirthdayGiftBasket', hasBasket);
+                      }}
+                      goodieBagQuantity={booking.diyGoodieBagQty || 0}
+                      premiumGoodieBagQuantity={booking.diyPremiumGoodieBagQty || 0}
+                      hasBirthdayGiftBasket={booking.diyBirthdayGiftBasket || false}
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
