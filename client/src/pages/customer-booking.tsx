@@ -1022,15 +1022,57 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {/* Party Extras */}
                               <div className="border-2 border-gray-200 p-4">
                                 <h4 className="font-medium text-gray-800 mb-3">Party Extras</h4>
+                                
+                                {/* Gift Items - Select Boxes */}
+                                <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+                                  {[
+                                    { name: 'Goodie Bags', icon: '🎁', label: 'Goodie Bags (per guest)', max: 20 },
+                                    { name: 'Premium Goodie Bags', icon: '🎀', label: 'Premium Goodie Bags (per guest)', max: 20 },
+                                    { name: 'Curated Birthday Gift', icon: '🎁', label: 'Curated Birthday Gift', max: 1 }
+                                  ].map((item) => {
+                                    const currentPartyExtras = booking.selectedPartyExtras || {};
+                                    const quantity = Number(currentPartyExtras[item.name] || 0);
+                                    
+                                    return (
+                                      <div key={item.name} className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-lg">{item.icon}</span>
+                                          <span className="text-sm font-medium">{item.label}</span>
+                                        </div>
+                                        <Select
+                                          value={quantity.toString()}
+                                          onValueChange={(value) => {
+                                            const updated = { ...currentPartyExtras };
+                                            const qty = parseInt(value, 10) || 0;
+                                            if (qty === 0) {
+                                              delete updated[item.name];
+                                            } else {
+                                              updated[item.name] = qty;
+                                            }
+                                            handleRealTimeUpdate('selectedPartyExtras', updated);
+                                          }}
+                                        >
+                                          <SelectTrigger className="w-20 border-2 border-gray-200 rounded-none focus:border-purple-500">
+                                            <SelectValue placeholder="0">{quantity}</SelectValue>
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {Array.from({ length: item.max + 1 }, (_, i) => i).map((num) => (
+                                              <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Balloon & Decor Items - +/- Selectors */}
                                 <div className="space-y-2">
                                   {[
-                                    { name: 'Goodie Bags', icon: '🎁' },
-                                    { name: 'Premium Goodie Bags', icon: '🎀' },
                                     { name: 'Balloon Tower', icon: '🎈' },
                                     { name: 'Balloon Garland 6ft', icon: '🎈' },
                                     { name: 'Balloon Arch', icon: '🎈' },
-                                    { name: 'Marquee Number', icon: '✨' },
-                                    { name: 'Curated Birthday Gift', icon: '🎁' }
+                                    { name: 'Marquee Number', icon: '✨' }
                                   ].map((extra) => {
                                     const currentPartyExtras = booking.selectedPartyExtras || {};
                                     const quantity = currentPartyExtras[extra.name] || 0;
