@@ -217,6 +217,12 @@ export default function PermanentJewelryReservation({
   const estimatedCost = booking.estimatedCost || 0;
   const jewelryPieces = formData.jewelryPieces || editData.jewelryPieces || 1;
   const attendeeCount = formData.attendeeCount || editData.attendeeCount || 1;
+  
+  // Get selected jewelry pieces as array and format with commas
+  const selectedJewelryPieces = booking.jewelryPieces || [];
+  const jewelryPiecesDisplay = Array.isArray(selectedJewelryPieces) 
+    ? selectedJewelryPieces.join(", ") 
+    : selectedJewelryPieces;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-amber-50">
@@ -383,14 +389,14 @@ export default function PermanentJewelryReservation({
                       <div>
                         <p className="text-sm text-gray-600">Jewelry Pieces</p>
                         <p className="font-medium">
-                          {jewelryPieces} piece{jewelryPieces !== 1 ? "s" : ""}
+                          {jewelryPiecesDisplay || `${jewelryPieces} piece${jewelryPieces !== 1 ? "s" : ""}`}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5 text-yellow-600" />
                       <div>
-                        <p className="text-sm text-gray-600">People Count</p>
+                        <p className="text-sm text-gray-600">Attendees</p>
                         <p className="font-medium">
                           {attendeeCount} person{attendeeCount !== 1 ? "s" : ""}
                         </p>
@@ -412,7 +418,7 @@ export default function PermanentJewelryReservation({
                       <div>
                         <p className="text-sm text-gray-600">Preferred Time</p>
                         <p className="font-medium">
-                          {booking.startTime || "To be scheduled"}
+                          {booking.timeSlot || booking.startTime || "To be scheduled"}
                         </p>
                       </div>
                     </div>
@@ -562,7 +568,15 @@ export default function PermanentJewelryReservation({
                       }
                     />
                     <label htmlFor="terms" className="text-sm">
-                      I agree to the terms and conditions *
+                      I agree to the{" "}
+                      <a 
+                        href="/terms-and-conditions" 
+                        target="_blank"
+                        className="text-yellow-600 hover:underline"
+                      >
+                        terms and conditions
+                      </a>{" "}
+                      *
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -577,7 +591,15 @@ export default function PermanentJewelryReservation({
                       }
                     />
                     <label htmlFor="communications" className="text-sm">
-                      I agree to receive communications about my session
+                      I agree to receive{" "}
+                      <a 
+                        href="/communications-agreement" 
+                        target="_blank"
+                        className="text-yellow-600 hover:underline"
+                      >
+                        communications
+                      </a>{" "}
+                      about my session
                     </label>
                   </div>
                 </div>
@@ -596,19 +618,17 @@ export default function PermanentJewelryReservation({
                   <h3 className="font-medium mb-2">
                     Permanent Jewelry Session
                   </h3>
+                  {jewelryPiecesDisplay && (
+                    <p className="text-sm text-gray-600 mb-3">
+                      {jewelryPiecesDisplay}
+                    </p>
+                  )}
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>
-                        {jewelryPieces} jewelry piece
-                        {jewelryPieces !== 1 ? "s" : ""}
-                      </span>
-                      <span>${(jewelryPieces * 75).toFixed(2)}</span>
-                    </div>
                     <div className="flex justify-between">
                       <span>
                         {attendeeCount} person{attendeeCount !== 1 ? "s" : ""}
                       </span>
-                      <span>${(attendeeCount * 25).toFixed(2)}</span>
+                      <span>${200.00.toFixed(2)}</span>
                     </div>
                     {booking.eventLocation === "mobile" && (
                       <div className="flex justify-between">
