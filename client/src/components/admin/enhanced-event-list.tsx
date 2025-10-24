@@ -38,6 +38,7 @@ interface PrivateEvent {
   eventDate: string;
   startTime: string;
   endTime: string;
+  duration?: string;
   status: string;
   guestCount: number;
   estimatedCost?: number;
@@ -639,6 +640,11 @@ export default function EnhancedEventList() {
                         {event.endTime && (
                           <div className="text-gray-500">
                             - {formatTime(event.endTime)}
+                          </div>
+                        )}
+                        {event.duration && (
+                          <div className="text-xs text-purple-600 font-medium mt-1">
+                            {event.duration}hr party
                           </div>
                         )}
                       </td>
