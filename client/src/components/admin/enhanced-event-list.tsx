@@ -410,7 +410,28 @@ export default function EnhancedEventList() {
         
         {filteredPrivateEvents.map((event: any) => {
           const revenue = calculateRevenue(event, false);
-          const eventName = event.notes || `Event #${event.id}`;
+          const eventName = event.customerName || event.notes || `Event #${event.id}`;
+          
+          // Generate booking link if event has leadId
+          const getBookingLink = () => {
+            if (!event.leadId) return null;
+            
+            const eventTypeName = (event.eventTypeName || '').toLowerCase();
+            const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            if (eventTypeName.includes('birthday') || eventTypeName.includes('party')) {
+              return `/my-theme-party/${randomId}?leadId=${event.leadId}`;
+            } else if (eventTypeName.includes('jewelry')) {
+              return `/my-permanent-jewelry/${randomId}?leadId=${event.leadId}`;
+            } else if (eventTypeName.includes('studio') || eventTypeName.includes('rental')) {
+              return `/my-studio-rental/${randomId}?leadId=${event.leadId}`;
+            } else if (eventTypeName.includes('trucker') || eventTypeName.includes('hat')) {
+              return `/my-trucker-hat/${randomId}?leadId=${event.leadId}`;
+            }
+            return null;
+          };
+          
+          const bookingLink = getBookingLink();
           
           return (
             <Card key={`mobile-private-${event.id}`}>
@@ -418,9 +439,24 @@ export default function EnhancedEventList() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">{eventName}</h3>
+                      <h3 className="text-sm font-medium text-gray-900 truncate flex items-center gap-2">
+                        {eventName}
+                        {bookingLink && (
+                          <a 
+                            href={bookingLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800"
+                            title="View booking page"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        )}
+                      </h3>
                       <div className="text-xs text-gray-500 mt-1">
-                        Private Event
+                        {event.eventTypeName || "Private Event"}
                       </div>
                     </div>
                     <Badge className={getStatusColor(event.status)}>
@@ -436,7 +472,7 @@ export default function EnhancedEventList() {
                   <div className="flex justify-between items-center">
                     <div className="space-y-1">
                       <Badge className="bg-blue-100 text-blue-800 text-xs">
-                        Private Event
+                        {event.eventTypeName || "Private Event"}
                       </Badge>
                       <div className="text-xs font-medium text-gray-900">
                         Revenue: ${revenue.toFixed(2)}
@@ -543,17 +579,56 @@ export default function EnhancedEventList() {
                 })}
 
                 {/* Private Events */}
-                {filteredPrivateEvents.map((event: PrivateEvent) => {
+                {filteredPrivateEvents.map((event: any) => {
                   const revenue = calculateRevenue(event, false);
+                  
+                  // Generate booking link if event has leadId
+                  const getBookingLink = () => {
+                    if (!event.leadId) return null;
+                    
+                    const eventTypeName = (event.eventTypeName || '').toLowerCase();
+                    const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    
+                    if (eventTypeName.includes('birthday') || eventTypeName.includes('party')) {
+                      return `/my-theme-party/${randomId}?leadId=${event.leadId}`;
+                    } else if (eventTypeName.includes('jewelry')) {
+                      return `/my-permanent-jewelry/${randomId}?leadId=${event.leadId}`;
+                    } else if (eventTypeName.includes('studio') || eventTypeName.includes('rental')) {
+                      return `/my-studio-rental/${randomId}?leadId=${event.leadId}`;
+                    } else if (eventTypeName.includes('trucker') || eventTypeName.includes('hat')) {
+                      return `/my-trucker-hat/${randomId}?leadId=${event.leadId}`;
+                    }
+                    return null;
+                  };
+                  
+                  const bookingLink = getBookingLink();
                   
                   return (
                     <tr key={`private-${event.id}`} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
                             {event.customerName || `Event #${event.id}`}
+                            {bookingLink && (
+                              <a 
+                                href={bookingLink} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                                title="View booking page"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </a>
+                            )}
                           </div>
                           <div className="text-sm text-gray-500 flex items-center gap-1">
+                            {event.eventTypeName && (
+                              <span className="text-xs font-medium text-gray-600 mr-2">
+                                {event.eventTypeName}
+                              </span>
+                            )}
                             <Users className="w-4 h-4" />
                             {event.guestCount} guests
                           </div>

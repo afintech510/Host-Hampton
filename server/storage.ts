@@ -1009,8 +1009,32 @@ export class DatabaseStorage implements IStorage {
     return theme;
   }
 
-  async getEvents(): Promise<Event[]> {
-    return await db.select().from(events).orderBy(events.eventDate);
+  async getEvents(): Promise<any[]> {
+    // Join events with customers and event_types to provide full data for admin dashboard
+    const results = await db
+      .select({
+        id: events.id,
+        leadId: events.leadId,
+        eventTypeId: events.eventTypeId,
+        customerId: events.customerId,
+        eventDate: events.eventDate,
+        startTime: events.startTime,
+        endTime: events.endTime,
+        guestCount: events.guestCount,
+        status: events.status,
+        estimatedCost: events.estimatedCost,
+        notes: events.notes,
+        customerName: customers.name,
+        eventTypeName: eventTypes.name,
+        createdAt: events.createdAt,
+        updatedAt: events.updatedAt,
+      })
+      .from(events)
+      .leftJoin(customers, eq(events.customerId, customers.id))
+      .leftJoin(eventTypes, eq(events.eventTypeId, eventTypes.id))
+      .orderBy(events.eventDate);
+    
+    return results;
   }
 
   async createEvent(event: InsertEvent): Promise<Event> {
