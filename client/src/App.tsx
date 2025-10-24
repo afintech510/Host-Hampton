@@ -42,6 +42,7 @@ import Gallery from "./pages/gallery";
 import GalleryManagement from "./pages/admin/gallery-management";
 import About from "./pages/about";
 import Contact from "./pages/contact";
+import Pricing from "./pages/pricing";
 import Footer from "@/components/footer";
 import FloatingCheckoutButton from "@/components/floating-checkout-button";
 
@@ -82,6 +83,7 @@ function Router() {
           <Route path="/admin/gallery" component={GalleryManagement} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
+          <Route path="/pricing" component={Pricing} />
           <Route path="/payment" component={Payment} />
           <Route path="/shop-events" component={ShopEvents} />
           <Route path="/upcoming-events" component={UpcomingEvents} />

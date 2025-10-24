@@ -82,9 +82,9 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
           {/* Buttons Row */}
           <div className="px-4 pb-3">
             <div className="flex space-x-2 mb-3">
-              <Link href="/get-quote" className="flex-1">
+              <Link href="/pricing" className="flex-1">
                 <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-3 w-full">
-                  Instant Quote
+                  Pricing
                 </Button>
               </Link>
 
@@ -168,11 +168,11 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
             </Link>
           </div>
 
-          {/* Right side - Instant Quote, Upcoming Events Button, Cart Icon and Menu Button */}
+          {/* Right side - Pricing, Upcoming Events Button, Cart Icon and Menu Button */}
           <div className="flex items-center space-x-4">
-            <Link href="/get-quote">
+            <Link href="/pricing">
               <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-2">
-                Instant Quote
+                Pricing
               </Button>
             </Link>
 
