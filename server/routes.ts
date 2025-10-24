@@ -1425,14 +1425,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId: customer.id,
         eventTypeId: eventType.id,
         eventDate: lead.eventDate || new Date(),
-        startTime: lead.timeSlot || "",
+        startTime: lead.arrivalTime || lead.timeSlot || "",
         endTime: "",
         guestCount: lead.guestCount || lead.attendeeCount || 1,
         status: "pending_deposit", // Status will be updated after payment
         estimatedCost: lead.budget || lead.estimatedCost || 0,
         notes: eventNotes.trim(),
         inquirySource: lead.source || "website",
-        leadScore: "hot"
+        leadScore: "hot",
+        duration: lead.partyDuration || null
       });
 
       console.log(`Created ${bookingType} event #${event.id} for customer #${customer.id} - awaiting deposit payment`);
