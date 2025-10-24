@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar, MapPin, Clock, Users, CreditCard, Camera, Palette, Music, Coffee } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, CreditCard, Camera, Palette, Music, Coffee, Plus, Minus } from "lucide-react";
 
 interface BillingData {
   firstName: string;
@@ -46,12 +46,11 @@ export default function StudioRentalReservationPage() {
 
   // Studio rental specific data
   const [studioData, setStudioData] = useState({
-    rentalDuration: 2, // hours
-    guestCount: 10,
+    rentalDuration: 3, // hours
+    guestCount: 11,
     eventDate: '',
-    startTime: '10:00',
+    startTime: '12:00 PM',
     studioUsage: '',
-    specialRequirements: [] as string[],
     addOns: [] as string[],
   });
 
@@ -75,53 +74,92 @@ export default function StudioRentalReservationPage() {
 
       setStudioData(prev => ({
         ...prev,
-        guestCount: leadData.guestCount || leadData.attendeeCount || 10,
+        guestCount: leadData.guestCount || leadData.attendeeCount || 11,
         eventDate: leadData.eventDate ? new Date(leadData.eventDate).toISOString().split('T')[0] : '',
-        startTime: leadData.startTime || '10:00',
-        studioUsage: leadData.studioUsage || '',
-        specialRequirements: leadData.specialRequirements || [],
+        startTime: leadData.startTime || leadData.arrivalTime || '12:00 PM',
+        studioUsage: leadData.studioUsage || leadData.notes || '',
+        rentalDuration: leadData.rentalDuration ? parseInt(leadData.rentalDuration) : 3,
       }));
     }
   }, [lead]);
 
-  // Pricing calculations
+  // Auto-save quote when communications checkbox is checked
+  const saveQuoteMutation = useMutation({
+    mutationFn: async (quoteData: any) => {
+      const response = await apiRequest("POST", "/api/leads/legacy", quoteData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Quote Saved",
+        description: "Your studio rental quote has been saved.",
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (billingData.agreeToCommunications && billingData.email && studioData.eventDate) {
+      // Auto-save quote when communications agreement is checked and basic info is filled
+      const quoteData = {
+        source: "website",
+        name: `${billingData.firstName} ${billingData.lastName}`.trim(),
+        email: billingData.email,
+        phone: billingData.phone,
+        eventType: "Studio Rental",
+        eventDate: new Date(studioData.eventDate),
+        arrivalTime: studioData.startTime,
+        rentalDuration: studioData.rentalDuration.toString(),
+        guestCount: studioData.guestCount,
+        budget: Math.round(totalWithTax * 100),
+        estimatedCost: Math.round(totalWithTax * 100),
+        status: "quote_requested",
+        notes: `Studio Usage: ${studioData.studioUsage || 'Not specified'}. Add-ons: ${studioData.addOns.join(', ') || 'None'}`,
+        agreeToCommunications: true
+      };
+      
+      saveQuoteMutation.mutate(quoteData);
+    }
+  }, [billingData.agreeToCommunications]);
+
+  // Pricing calculations - Updated add-ons
   const hourlyRate = 150; // $150/hour for studio rental
   const basePrice = studioData.rentalDuration * hourlyRate;
   
-  // Add-on pricing
+  // Updated add-on pricing per requirements
   const addOnPrices = {
-    'Photography Package': 200,
-    'Backdrop Setup': 100,
-    'Sound System': 75,
-    'Lighting Package': 125,
-    'Refreshment Setup': 50,
-    'Equipment Cleaning': 25,
+    'Photobooth': 75,
+    'Soft Play': 300,
+    'Coffee Bar Setup': 75,
+    'Popcorn Bar': 125,
+    'Candy Wall': 200,
+    'Party Helper': 75, // Per hour
   };
 
+  const equipmentCleaning = 25; // Always included
   const addOnTotal = studioData.addOns.reduce((sum, addOn) => sum + (addOnPrices[addOn as keyof typeof addOnPrices] || 0), 0);
-  const subtotal = basePrice + addOnTotal;
+  const subtotal = basePrice + addOnTotal + equipmentCleaning;
   const salesTax = subtotal * 0.0875; // 8.75% tax
   const totalWithTax = subtotal + salesTax;
   const bookingFeeAmount = 50; // $50 booking fee
   const remainingBalance = totalWithTax - bookingFeeAmount;
 
-  const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+  const formatPrice = (amount: number) => {
+    return `$${amount.toFixed(2)}`;
   };
 
   // Payment mutation
   const depositMutation = useMutation({
     mutationFn: async () => {
       const paymentData = {
-        leadId: parseInt(leadId!),
+        leadId: leadId ? parseInt(leadId) : null,
         bookingType: 'studio-rental',
-        amount: bookingFeeAmount * 100, // Convert to cents
+        amount: Math.round(bookingFeeAmount * 100), // Convert to cents
         billingData,
         studioData: {
           ...studioData,
-          basePrice: basePrice * 100,
-          addOnTotal: addOnTotal * 100,
-          totalWithTax: totalWithTax * 100,
+          basePrice: Math.round(basePrice * 100),
+          addOnTotal: Math.round(addOnTotal * 100),
+          totalWithTax: Math.round(totalWithTax * 100),
         }
       };
       
@@ -168,6 +206,21 @@ export default function StudioRentalReservationPage() {
     }));
   };
 
+  // Helper functions for +/- buttons
+  const adjustRentalDuration = (delta: number) => {
+    setStudioData(prev => ({
+      ...prev,
+      rentalDuration: Math.max(1, Math.min(12, prev.rentalDuration + delta))
+    }));
+  };
+
+  const adjustGuestCount = (delta: number) => {
+    setStudioData(prev => ({
+      ...prev,
+      guestCount: Math.max(1, Math.min(50, prev.guestCount + delta))
+    }));
+  };
+
   if (leadLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
@@ -205,27 +258,78 @@ export default function StudioRentalReservationPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
+                  {/* Rental Duration with +/- buttons */}
                   <div>
                     <Label htmlFor="rentalDuration">Rental Duration (Hours)</Label>
-                    <Input
-                      id="rentalDuration"
-                      type="number"
-                      min="1"
-                      max="12"
-                      value={studioData.rentalDuration}
-                      onChange={(e) => setStudioData(prev => ({...prev, rentalDuration: parseInt(e.target.value) || 1}))}
-                    />
+                    <div className="flex items-center gap-2 mt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-10 w-10 rounded-full shrink-0"
+                        onClick={() => adjustRentalDuration(-1)}
+                        data-testid="button-decrease-duration"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        id="rentalDuration"
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={studioData.rentalDuration}
+                        onChange={(e) => setStudioData(prev => ({...prev, rentalDuration: parseInt(e.target.value) || 1}))}
+                        className="text-center"
+                        data-testid="input-rental-duration"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-10 w-10 rounded-full shrink-0"
+                        onClick={() => adjustRentalDuration(1)}
+                        data-testid="button-increase-duration"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
+
+                  {/* Guest Count with +/- buttons */}
                   <div>
                     <Label htmlFor="guestCount">Guest Count</Label>
-                    <Input
-                      id="guestCount"
-                      type="number"
-                      min="1"
-                      max="50"
-                      value={studioData.guestCount}
-                      onChange={(e) => setStudioData(prev => ({...prev, guestCount: parseInt(e.target.value) || 1}))}
-                    />
+                    <div className="flex items-center gap-2 mt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-10 w-10 rounded-full shrink-0"
+                        onClick={() => adjustGuestCount(-1)}
+                        data-testid="button-decrease-guests"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        id="guestCount"
+                        type="number"
+                        min="1"
+                        max="50"
+                        value={studioData.guestCount}
+                        onChange={(e) => setStudioData(prev => ({...prev, guestCount: parseInt(e.target.value) || 1}))}
+                        className="text-center"
+                        data-testid="input-guest-count"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-10 w-10 rounded-full shrink-0"
+                        onClick={() => adjustGuestCount(1)}
+                        data-testid="button-increase-guests"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -237,6 +341,7 @@ export default function StudioRentalReservationPage() {
                       type="date"
                       value={studioData.eventDate}
                       onChange={(e) => setStudioData(prev => ({...prev, eventDate: e.target.value}))}
+                      data-testid="input-event-date"
                     />
                   </div>
                   <div>
@@ -246,16 +351,19 @@ export default function StudioRentalReservationPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="09:00">9:00 AM</SelectItem>
-                        <SelectItem value="10:00">10:00 AM</SelectItem>
-                        <SelectItem value="11:00">11:00 AM</SelectItem>
-                        <SelectItem value="12:00">12:00 PM</SelectItem>
-                        <SelectItem value="13:00">1:00 PM</SelectItem>
-                        <SelectItem value="14:00">2:00 PM</SelectItem>
-                        <SelectItem value="15:00">3:00 PM</SelectItem>
-                        <SelectItem value="16:00">4:00 PM</SelectItem>
-                        <SelectItem value="17:00">5:00 PM</SelectItem>
-                        <SelectItem value="18:00">6:00 PM</SelectItem>
+                        <SelectItem value="7:00 AM">7:00 AM</SelectItem>
+                        <SelectItem value="8:00 AM">8:00 AM</SelectItem>
+                        <SelectItem value="9:00 AM">9:00 AM</SelectItem>
+                        <SelectItem value="10:00 AM">10:00 AM</SelectItem>
+                        <SelectItem value="11:00 AM">11:00 AM</SelectItem>
+                        <SelectItem value="12:00 PM">12:00 PM</SelectItem>
+                        <SelectItem value="1:00 PM">1:00 PM</SelectItem>
+                        <SelectItem value="2:00 PM">2:00 PM</SelectItem>
+                        <SelectItem value="3:00 PM">3:00 PM</SelectItem>
+                        <SelectItem value="4:00 PM">4:00 PM</SelectItem>
+                        <SelectItem value="5:00 PM">5:00 PM</SelectItem>
+                        <SelectItem value="6:00 PM">6:00 PM</SelectItem>
+                        <SelectItem value="7:00 PM">7:00 PM</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -265,7 +373,7 @@ export default function StudioRentalReservationPage() {
                   <Label htmlFor="studioUsage">Studio Usage Description</Label>
                   <Textarea
                     id="studioUsage"
-                    placeholder="Describe what you'll be using the studio for (photoshoot, filming, workshop, etc.)"
+                    placeholder="private-event"
                     value={studioData.studioUsage}
                     onChange={(e) => setStudioData(prev => ({...prev, studioUsage: e.target.value}))}
                     className="min-h-[80px]"
@@ -293,7 +401,9 @@ export default function StudioRentalReservationPage() {
                       />
                       <Label htmlFor={addOn} className="flex-1 cursor-pointer">
                         <div className="font-medium">{addOn}</div>
-                        <div className="text-sm text-gray-600">{formatPrice(price * 100)}</div>
+                        <div className="text-sm text-gray-600">
+                          {addOn === 'Party Helper' ? `${formatPrice(price)}/hr` : formatPrice(price)}
+                        </div>
                       </Label>
                     </div>
                   ))}
@@ -385,7 +495,7 @@ export default function StudioRentalReservationPage() {
             </Card>
           </div>
 
-          {/* Quote Summary */}
+          {/* Pricing Summary */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -397,34 +507,43 @@ export default function StudioRentalReservationPage() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Studio Rental ({studioData.rentalDuration} hrs × $150/hr)</span>
-                  <span>{formatPrice(basePrice * 100)}</span>
+                  <span>{formatPrice(basePrice)}</span>
                 </div>
+                
+                <div className="flex justify-between text-sm">
+                  <span>Equipment Cleaning</span>
+                  <span>{formatPrice(equipmentCleaning)}</span>
+                </div>
+                
                 {studioData.addOns.length > 0 && studioData.addOns.map(addOn => (
                   <div key={addOn} className="flex justify-between text-sm">
                     <span>{addOn}</span>
-                    <span>{formatPrice((addOnPrices[addOn as keyof typeof addOnPrices] || 0) * 100)}</span>
+                    <span>{formatPrice(addOnPrices[addOn as keyof typeof addOnPrices] || 0)}</span>
                   </div>
                 ))}
+                
+                <Separator />
+                
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>{formatPrice(subtotal * 100)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Sales Tax (8.75%)</span>
-                  <span>{formatPrice(salesTax * 100)}</span>
+                  <span>{formatPrice(salesTax)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total Amount</span>
-                  <span>{formatPrice(totalWithTax * 100)}</span>
+                  <span>{formatPrice(totalWithTax)}</span>
                 </div>
                 <div className="flex justify-between text-blue-600">
                   <span>Booking Fee (Non-refundable)</span>
-                  <span>{formatPrice(bookingFeeAmount * 100)}</span>
+                  <span>{formatPrice(bookingFeeAmount)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Remaining Balance</span>
-                  <span>{formatPrice(remainingBalance * 100)}</span>
+                  <span>{formatPrice(remainingBalance)}</span>
                 </div>
               </div>
 
@@ -476,15 +595,16 @@ export default function StudioRentalReservationPage() {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-900 mb-2">Secure Your Reservation</h4>
                 <p className="text-sm text-blue-700 mb-4">
-                  Pay a {formatPrice(bookingFeeAmount * 100)} non-refundable booking fee to secure your studio rental. 
+                  Pay a {formatPrice(bookingFeeAmount)} non-refundable booking fee to secure your studio rental. 
                   The remaining balance will be due on the day of your event.
                 </p>
                 <Button 
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   onClick={handleBookingFeePayment}
                   disabled={depositMutation.isPending}
+                  data-testid="button-pay-booking-fee"
                 >
-                  {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(bookingFeeAmount * 100)} Booking Fee`}
+                  {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(bookingFeeAmount)} Booking Fee`}
                 </Button>
                 <p className="text-xs text-gray-600 text-center mt-2">
                   * All billing details and agreements are required to proceed

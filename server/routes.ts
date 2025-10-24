@@ -1484,6 +1484,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Studio rental booking payment endpoint
+  app.post("/api/studio-booking-payment", async (req, res) => {
+    try {
+      const { leadId, bookingType, amount, billingData, studioData } = req.body;
+
+      if (!leadId) {
+        return res.status(400).json({
+          success: false,
+          error: "Lead ID is required"
+        });
+      }
+
+      // Get or create lead
+      let lead;
+      try {
+        lead = await storage.getLead(leadId);
+      } catch (error) {
+        // Lead doesn't exist, create a new one
+        lead = await storage.createLead({
+          source: "website",
+          name: `${billingData.firstName} ${billingData.lastName}`,
+          email: billingData.email,
+          phone: billingData.phone,
+          eventType: "Studio Rental",
+          eventDate: new Date(studioData.eventDate),
+          arrivalTime: studioData.startTime,
+          rentalDuration: studioData.rentalDuration.toString(),
+          guestCount: studioData.guestCount,
+          budget: studioData.totalWithTax,
+          estimatedCost: studioData.totalWithTax,
+          status: "quote_requested",
+          notes: `Studio Usage: ${studioData.studioUsage || 'Not specified'}. Add-ons: ${studioData.addOns.join(', ') || 'None'}`
+        });
+      }
+
+      // Update lead with latest information if it exists
+      if (lead) {
+        await storage.updateLead(lead.id, {
+          email: billingData.email,
+          phone: billingData.phone,
+          name: `${billingData.firstName} ${billingData.lastName}`,
+          eventDate: new Date(studioData.eventDate),
+          arrivalTime: studioData.startTime,
+          rentalDuration: studioData.rentalDuration.toString(),
+          guestCount: studioData.guestCount,
+          budget: studioData.totalWithTax,
+          estimatedCost: studioData.totalWithTax,
+          status: "quote_sent",
+        });
+      }
+
+      // Get the correct domain
+      const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+      const baseUrl = replitDomain ? `https://${replitDomain}` : 'http://localhost:5000';
+
+      // Create Stripe payment link
+      const paymentLink = await stripe.paymentLinks.create({
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Studio Rental Booking Fee',
+              description: `Booking fee for ${studioData.rentalDuration}-hour studio rental on ${studioData.eventDate}`,
+            },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          leadId: lead.id.toString(),
+          type: 'studio_rental_booking_fee',
+          bookingType: 'studio-rental'
+        },
+        after_completion: {
+          type: 'redirect',
+          redirect: {
+            url: `${baseUrl}/booking-confirmation?leadId=${lead.id}&type=studio-rental`
+          }
+        }
+      });
+
+      res.json({
+        success: true,
+        sessionUrl: paymentLink.url,
+        leadId: lead.id
+      });
+    } catch (error) {
+      console.error("Error creating studio booking payment:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to create payment link"
+      });
+    }
+  });
+
   app.get("/api/packages", async (req, res) => {
     try {
       const { eventTypeId } = req.query;
