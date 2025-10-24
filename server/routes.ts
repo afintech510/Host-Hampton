@@ -1438,6 +1438,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Created ${bookingType} event #${event.id} for customer #${customer.id} - awaiting deposit payment`);
 
       // Create a payment link for the deposit
+      // Get the correct domain - use REPLIT_DOMAINS in production, fallback to localhost in dev
+      const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+      const baseUrl = replitDomain ? `https://${replitDomain}` : 'http://localhost:5000';
+      
       const paymentLink = await stripe.paymentLinks.create({
         line_items: [{
           price_data: {
@@ -1460,7 +1464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         after_completion: {
           type: 'redirect',
           redirect: {
-            url: `${process.env.DOMAIN || 'http://localhost:5000'}/booking-confirmation?eventId=${event.id}`
+            url: `${baseUrl}/booking-confirmation?eventId=${event.id}`
           }
         }
       });
