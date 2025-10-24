@@ -28,6 +28,7 @@ import {
   User,
 } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
+import Navigation from "@/components/navigation";
 
 // Helper function to get ordinal suffix
 function getOrdinalSuffix(num: number): string {
@@ -316,6 +317,7 @@ export default function TruckerHatReservation({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">

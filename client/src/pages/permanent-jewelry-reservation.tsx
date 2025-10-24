@@ -29,6 +29,7 @@ import {
   Gem,
 } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
+import Navigation from "@/components/navigation";
 
 // Helper function to get ordinal suffix
 function getOrdinalSuffix(num: number): string {
@@ -226,6 +227,7 @@ export default function PermanentJewelryReservation({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-amber-50">
+      <Navigation />
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-6 py-4">

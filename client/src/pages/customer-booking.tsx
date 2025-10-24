@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Calendar, Clock, Users, MapPin, CreditCard, User, Phone, Mail, Palette, Sparkles, DollarSign, Star, Plus, Minus } from "lucide-react";
 import hostHamptonLogo from "@assets/host-hampton-logo_300_1754200191740.png";
 import { DIYAddons, type DIYAddon } from "@/components/diy-addons";
+import Navigation from "@/components/navigation";
 
 // Helper function to get ordinal suffix
 function getOrdinalSuffix(num: number): string {
@@ -537,6 +538,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <Navigation />
       <div className="container mx-auto p-4 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-8">

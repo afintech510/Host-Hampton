@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Calendar, MapPin, Clock, Users, CreditCard, Camera, Palette, Music, Coffee, Plus, Minus } from "lucide-react";
+import Navigation from "@/components/navigation";
 
 interface BillingData {
   firstName: string;
@@ -234,6 +235,7 @@ export default function StudioRentalReservationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8">
+      <Navigation />
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
