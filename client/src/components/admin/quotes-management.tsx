@@ -124,13 +124,16 @@ export default function QuotesManagement() {
   const getQuoteType = (quote: Quote) => {
     const formData = quote.formData || {};
     
-    if (formData.eventType === 'birthday-party' || quote.eventType === 'kids-party') {
+    // Check formData.eventType (primary) and formData.serviceType (fallback) and quote.eventType (legacy)
+    const eventType = formData.eventType || formData.serviceType || quote.eventType || '';
+    
+    if (eventType === 'birthday-party' || eventType === 'kids-party' || eventType === 'theme-party') {
       return 'theme';
-    } else if (formData.eventType === 'trucker-hat-party' || quote.eventType === 'trucker-hat') {
+    } else if (eventType === 'trucker-hat' || eventType === 'trucker-hat-party') {
       return 'hat';
-    } else if (formData.eventType === 'studio-rental' || quote.eventType === 'studio-rental') {
+    } else if (eventType === 'studio-rental') {
       return 'studio';
-    } else if (formData.eventType === 'permanent-jewelry' || quote.eventType === 'permanent-jewelry') {
+    } else if (eventType === 'permanent-jewelry') {
       return 'jewelry';
     }
     return 'other';
