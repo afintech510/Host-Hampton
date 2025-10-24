@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Calendar, Mail } from "lucide-react";
 import Navigation from "@/components/navigation";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
@@ -14,6 +15,15 @@ export default function BookingConfirmation() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('eventId');
     setEventId(id);
+    
+    // Update event status to deposit_paid
+    if (id) {
+      apiRequest("PATCH", `/api/events/${id}/status`, {
+        status: "deposit_paid"
+      }).catch(error => {
+        console.error("Failed to update event status:", error);
+      });
+    }
   }, []);
 
   return (
