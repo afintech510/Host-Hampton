@@ -1058,8 +1058,7 @@ export class DatabaseStorage implements IStorage {
   async updateEventStatus(id: number, status: string, changedBy: string = "system", notes?: string): Promise<Event | undefined> {
     const [updated] = await db.update(events).set({ 
       status,
-      updatedAt: new Date(),
-      statusHistory: db.select().from(events).where(eq(events.id, id))
+      updatedAt: new Date()
     }).where(eq(events.id, id)).returning();
     
     // Create status history record

@@ -1374,32 +1374,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Created new customer #${customer.id} for lead #${leadId}`);
       }
 
-      // Create event from the lead NOW (before payment)
+      // Map booking types to event type names and get the correct event type
+      const bookingType = bookingData?.bookingType || lead.eventType || 'birthday-party';
+      const eventTypeMapping: { [key: string]: string } = {
+        'permanent-jewelry': 'Permanent Jewelry Party',
+        'studio-rental': 'Studio Rental',
+        'trucker-hat': 'Birthday Party', // Using Birthday Party as fallback for now
+        'birthday-party': 'Birthday Party',
+        'kids-party': 'Birthday Party',
+        'theme-party': 'Birthday Party',
+        'workshop': 'Adult Workshop/Classes',
+        'adult-class': 'Adult Workshop/Classes'
+      };
+
+      const eventTypeName = eventTypeMapping[bookingType] || 'Birthday Party';
+      
+      // Get or create the event type
       const eventTypes = await storage.getEventTypes();
-      let birthdayEventType = eventTypes.find(et => et.name === "Birthday Party");
-      if (!birthdayEventType) {
-        birthdayEventType = await storage.createEventType({
-          name: "Birthday Party",
-          description: "Children's birthday party",
+      let eventType = eventTypes.find(et => et.name === eventTypeName);
+      if (!eventType) {
+        eventType = await storage.createEventType({
+          name: eventTypeName,
+          description: `Booking for ${eventTypeName}`,
           active: true
         });
       }
 
+      // Build event notes based on booking type
+      let eventNotes = '';
+      let productName = '';
+      const formData: any = lead.formData || {};
+      
+      if (bookingType === 'permanent-jewelry') {
+        const jewelryPieces = lead.jewelryPieces || [];
+        productName = 'Permanent Jewelry Session';
+        eventNotes = `Jewelry pieces: ${Array.isArray(jewelryPieces) ? jewelryPieces.join(', ') : jewelryPieces}. ${lead.notes || ''}`;
+      } else if (bookingType === 'studio-rental') {
+        productName = 'Studio Rental';
+        eventNotes = `Rental type: ${formData.studioSubType || 'Not specified'}. ${formData.studioDescription || ''}. ${lead.notes || ''}`;
+      } else if (bookingType === 'trucker-hat') {
+        productName = 'Trucker Hat Bar';
+        eventNotes = `Hat customization event. ${lead.notes || ''}`;
+      } else {
+        // Birthday/theme party
+        productName = 'Party Booking';
+        eventNotes = `Theme: ${lead.partyTheme || 'Not specified'}. ${lead.notes || ''}`;
+      }
+
       const event = await storage.createEvent({
         customerId: customer.id,
-        eventTypeId: birthdayEventType.id,
+        eventTypeId: eventType.id,
         eventDate: lead.eventDate || new Date(),
         startTime: lead.timeSlot || "",
         endTime: "",
-        guestCount: lead.guestCount || 12,
+        guestCount: lead.guestCount || lead.attendeeCount || 1,
         status: "pending_deposit", // Status will be updated after payment
-        estimatedCost: lead.budget || 0,
-        notes: `Theme: ${lead.partyTheme || 'Not specified'}. ${lead.notes || ''}`,
+        estimatedCost: lead.budget || lead.estimatedCost || 0,
+        notes: eventNotes.trim(),
         inquirySource: lead.source || "website",
         leadScore: "hot"
       });
 
-      console.log(`Created event #${event.id} for customer #${customer.id} - awaiting deposit payment`);
+      console.log(`Created ${bookingType} event #${event.id} for customer #${customer.id} - awaiting deposit payment`);
 
       // Create a payment link for the deposit
       const paymentLink = await stripe.paymentLinks.create({
@@ -1407,8 +1443,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Party Booking Deposit',
-              description: `Deposit for ${bookingData?.partyTheme || 'party'} booking`,
+              name: `${productName} Deposit`,
+              description: `Deposit for ${productName}`,
             },
             unit_amount: amount,
           },
@@ -1418,7 +1454,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           leadId: leadId.toString(),
           eventId: event.id.toString(),
           customerId: customer.id.toString(),
-          type: 'deposit'
+          type: 'deposit',
+          bookingType: bookingType
         },
         after_completion: {
           type: 'redirect',
