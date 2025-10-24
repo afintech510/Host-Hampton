@@ -95,6 +95,11 @@ export default function GetQuote() {
 
   const { formData, updateFormData, resetForm, clearFormData } = usePartyForm();
 
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Clear form data when component mounts to ensure fresh start
   useEffect(() => {
     clearFormData();
