@@ -1500,6 +1500,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let lead;
       try {
         lead = await storage.getLead(leadId);
+        
+        // Update lead with latest information
+        await storage.updateLead(lead.id, {
+          email: billingData.email,
+          phone: billingData.phone,
+          name: `${billingData.firstName} ${billingData.lastName}`,
+          eventDate: new Date(studioData.eventDate),
+          arrivalTime: studioData.startTime,
+          rentalDuration: studioData.rentalDuration.toString(),
+          guestCount: studioData.guestCount,
+          budget: studioData.totalWithTax,
+          estimatedCost: studioData.totalWithTax,
+          status: "quote_sent",
+        });
       } catch (error) {
         // Lead doesn't exist, create a new one
         lead = await storage.createLead({
@@ -1516,22 +1530,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           estimatedCost: studioData.totalWithTax,
           status: "quote_requested",
           notes: `Studio Usage: ${studioData.studioUsage || 'Not specified'}. Add-ons: ${studioData.addOns.join(', ') || 'None'}`
-        });
-      }
-
-      // Update lead with latest information if it exists
-      if (lead) {
-        await storage.updateLead(lead.id, {
-          email: billingData.email,
-          phone: billingData.phone,
-          name: `${billingData.firstName} ${billingData.lastName}`,
-          eventDate: new Date(studioData.eventDate),
-          arrivalTime: studioData.startTime,
-          rentalDuration: studioData.rentalDuration.toString(),
-          guestCount: studioData.guestCount,
-          budget: studioData.totalWithTax,
-          estimatedCost: studioData.totalWithTax,
-          status: "quote_sent",
         });
       }
 
