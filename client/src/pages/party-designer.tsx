@@ -93,7 +93,7 @@ const PartyDesigner = () => {
                 billing info, and payment processing.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/book-event">
+                <Link href="/get-quote">
                   <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                     Use Current Booking Form
                   </Button>
