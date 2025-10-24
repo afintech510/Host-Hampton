@@ -437,9 +437,21 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       }
     }
 
-    const total = basePrice + addonsTotal;
+    // Party Duration fee (full-service parties only)
+    let durationFee = 0;
+    if (!isDIY) {
+      const partyDuration = booking.partyDuration || '2';
+      const durationFees: Record<string, number> = {
+        '2': 0,
+        '2.5': 50,
+        '3': 100
+      };
+      durationFee = durationFees[partyDuration] || 0;
+    }
 
-    return { basePrice: basePrice, packagePrice: 0, addonsTotal, total };
+    const total = basePrice + addonsTotal + durationFee;
+
+    return { basePrice: basePrice, packagePrice: 0, addonsTotal, total, durationFee };
   };
 
   const pricing = calculatePricing();
@@ -651,17 +663,48 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         </>
                       ) : (
                         <>
-                          <Label className="text-sm font-semibold text-gray-700">Time Slot</Label>
-                          <Select value={booking.timeSlot || ''} onValueChange={(value) => handleRealTimeUpdate('timeSlot', value)}>
-                            <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
-                              <SelectValue placeholder="Select time" />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl">
-                              <SelectItem value="10am-12pm">10am - 12pm</SelectItem>
-                              <SelectItem value="1pm-3pm">1pm - 3pm</SelectItem>
-                              <SelectItem value="4pm-6pm">4pm - 6pm</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Label className="text-sm font-semibold text-gray-700">Party Start Time</Label>
+                          {(() => {
+                            // Check if weekend (Saturday or Sunday only)
+                            const isWeekend = booking.eventDate ? (() => {
+                              const date = new Date(booking.eventDate);
+                              const dayOfWeek = date.getDay();
+                              return dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+                            })() : false;
+
+                            return isWeekend ? (
+                              // Weekend: Only 10am, 1pm, 4pm options
+                              <Select value={booking.arrivalTime || ''} onValueChange={(value) => handleRealTimeUpdate('arrivalTime', value)}>
+                                <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
+                                  <SelectValue placeholder="Select start time" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-2xl">
+                                  <SelectItem value="10:00am">10:00 AM</SelectItem>
+                                  <SelectItem value="1:00pm">1:00 PM</SelectItem>
+                                  <SelectItem value="4:00pm">4:00 PM</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              // Weekday: Custom time selection
+                              <Select value={booking.arrivalTime || ''} onValueChange={(value) => handleRealTimeUpdate('arrivalTime', value)}>
+                                <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
+                                  <SelectValue placeholder="Select start time" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-2xl">
+                                  <SelectItem value="9:00am">9:00 AM</SelectItem>
+                                  <SelectItem value="10:00am">10:00 AM</SelectItem>
+                                  <SelectItem value="11:00am">11:00 AM</SelectItem>
+                                  <SelectItem value="12:00pm">12:00 PM</SelectItem>
+                                  <SelectItem value="1:00pm">1:00 PM</SelectItem>
+                                  <SelectItem value="2:00pm">2:00 PM</SelectItem>
+                                  <SelectItem value="3:00pm">3:00 PM</SelectItem>
+                                  <SelectItem value="4:00pm">4:00 PM</SelectItem>
+                                  <SelectItem value="5:00pm">5:00 PM</SelectItem>
+                                  <SelectItem value="6:00pm">6:00 PM</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            );
+                          })()}
                         </>
                       )}
                     </div>
@@ -727,6 +770,64 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         ))}
                       </div>
                       <p className="text-sm text-gray-600 italic">*Include setup and clean time in the Rental Duration.</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Party Duration - Full Service Only */}
+                {booking.partyType !== 'diy' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-purple-600" />
+                        Party Duration
+                      </h3>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {(() => {
+                          const duration = booking.partyDuration || '2';
+                          const fees: Record<string, number> = {
+                            '2': 0,
+                            '2.5': 50,
+                            '3': 100
+                          };
+                          const fee = fees[duration] || 0;
+                          return fee > 0 ? `+$${fee}` : 'Included';
+                        })()}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        {[
+                          { value: '2', label: '2 Hours', subtitle: 'Standard' },
+                          { value: '2.5', label: '2.5 Hours', subtitle: '+$50' },
+                          { value: '3', label: '3 Hours', subtitle: '+$100' }
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => handleRealTimeUpdate('partyDuration', option.value)}
+                            className={`flex-1 py-3 px-3 border-2 transition-all rounded-2xl ${
+                              (booking.partyDuration || '2') === option.value
+                                ? 'border-purple-500 bg-purple-50'
+                                : 'border-gray-200 bg-white hover:border-purple-300'
+                            }`}
+                            data-testid={`button-duration-${option.value}`}
+                          >
+                            <div className="text-center">
+                              <div className={`text-sm font-semibold ${
+                                (booking.partyDuration || '2') === option.value ? 'text-purple-700' : 'text-gray-800'
+                              }`}>
+                                {option.label}
+                              </div>
+                              <div className={`text-xs ${
+                                (booking.partyDuration || '2') === option.value ? 'text-purple-600' : 'text-gray-500'
+                              }`}>
+                                {option.subtitle}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-600 italic">Party time includes activities, food, and celebration.</p>
                     </div>
                   </div>
                 )}

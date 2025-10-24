@@ -82,8 +82,9 @@ export const events = pgTable("events", {
   eventTypeId: integer("event_type_id").notNull(),
   customerId: integer("customer_id").notNull(),
   eventDate: timestamp("event_date"),
-  startTime: text("start_time"), // "14:00"
-  endTime: text("end_time"), // "18:00"
+  startTime: text("start_time"), // "14:00" or "10:00 AM"
+  endTime: text("end_time"), // "18:00" or "6:00 PM"
+  duration: text("duration"), // "2", "2.5", "3" (hours) for party duration
   guestCount: integer("guest_count"),
   status: text("status").default("inquiry").notNull(), // inquiry, quote_requested, quote_sent, follow_up, deposit_paid, confirmed, planning, completed, follow_up_sent, reviewed, cancelled
   inquirySource: text("inquiry_source").default("website").notNull(), // website, phone, referral, social, campaign
@@ -229,9 +230,10 @@ export const leads = pgTable("leads", {
   eventType: text("event_type"), // "Theme Party", "Room Rental", "Appointment", "HH Event"
   eventDate: timestamp("event_date"),
   isDateUnsure: boolean("is_date_unsure").default(false).notNull(),
-  timeSlot: text("time_slot"), // "10am-12pm", "1pm-3pm", "4pm-6pm"
-  arrivalTime: text("arrival_time"), // For DIY rentals
+  timeSlot: text("time_slot"), // "10am-12pm", "1pm-3pm", "4pm-6pm" (deprecated for theme parties)
+  arrivalTime: text("arrival_time"), // For DIY rentals and party start time
   rentalDuration: text("rental_duration"), // "3", "4", "5", "6", "all-day" for DIY rentals
+  partyDuration: text("party_duration"), // "2", "2.5", "3" (hours) for theme party duration
   guestCount: integer("guest_count"),
   
   // Party Details (for Theme Parties)
