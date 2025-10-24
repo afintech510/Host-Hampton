@@ -438,6 +438,17 @@ export default function GetQuote() {
             />
           );
         }
+        // Permanent Jewelry: Contact (final step)
+        if (isJewelryFlow(eventType)) {
+          return (
+            <JewelryContactStep
+              formData={formData}
+              updateFormData={updateFormData}
+              onNext={handleSubmitQuote}
+              onBack={handlePreviousStep}
+            />
+          );
+        }
         break;
       case 7:
         // Kids Themed Party: Contact (final step)
