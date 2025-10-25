@@ -44,6 +44,8 @@ import About from "./pages/about";
 import Contact from "./pages/contact";
 import Pricing from "./pages/pricing";
 import OurSpace from "./pages/our-space";
+import Bakery from "./pages/bakery";
+import Shop from "./pages/shop";
 import Footer from "@/components/footer";
 import FloatingCheckoutButton from "@/components/floating-checkout-button";
 
@@ -86,6 +88,8 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/our-space" component={OurSpace} />
+          <Route path="/bakery" component={Bakery} />
+          <Route path="/shop" component={Shop} />
           <Route path="/payment" component={Payment} />
           <Route path="/shop-events" component={ShopEvents} />
           <Route path="/upcoming-events" component={UpcomingEvents} />
