@@ -57,16 +57,29 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Mobile Layout: Stacked with logo centered above buttons */}
+        {/* Mobile Layout: Cart, Logo, Menu in one row */}
         <div className="block sm:hidden">
-          {/* Logo Row */}
-          <div className="flex justify-center py-3">
+          {/* Top Row: Cart Icon | Logo | Hamburger Menu */}
+          <div className="flex items-center justify-between py-3 px-2">
+            {/* Cart Icon - Left */}
+            <Link href="/cart">
+              <div className="relative cursor-pointer p-2" data-testid="link-cart-mobile">
+                <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
+                {actualCartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {actualCartCount}
+                  </span>
+                )}
+              </div>
+            </Link>
+
+            {/* Logo - Center */}
             <Link href="/">
               <div className="flex items-center cursor-pointer">
                 <img
                   src="/images/host-hampton-logo.png"
                   alt="Host Hampton"
-                  className="h-12 w-auto object-contain max-w-[200px]"
+                  className="h-10 w-auto object-contain max-w-[160px]"
                   onError={(e) => {
                     console.log("Logo failed to load from public path");
                     e.currentTarget.style.display = "none";
@@ -77,71 +90,59 @@ export default function Navigation({ cartItemCount }: NavigationProps) {
                 />
               </div>
             </Link>
+
+            {/* Hamburger Menu - Right */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2"
+                data-testid="button-menu-mobile"
+              >
+                {isMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </Button>
+              
+              {/* Mobile Navigation Menu - dropdown from hamburger button */}
+              <div className={`absolute top-full right-0 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
+                isMenuOpen 
+                  ? 'opacity-100 scale-100 translate-y-0' 
+                  : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+              }`}>
+                <div className="py-2">
+                  {menuItems.map((item) => (
+                    <Link key={item.name} href={item.href}>
+                      <span
+                        className="text-gray-600 hover:text-pink-600 hover:bg-gray-50 block px-4 py-2 text-base font-medium cursor-pointer text-right transition-colors duration-150"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Buttons Row */}
           <div className="px-4 pb-3">
-            <div className="flex space-x-2 mb-3">
+            <div className="flex space-x-2">
               <Link href="/pricing" className="flex-1">
-                <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-3 w-full">
+                <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-2.5 w-full">
                   Pricing
                 </Button>
               </Link>
 
               <Link href="/upcoming-events" className="flex-1">
-                <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-3 w-full">
+                <Button className="bg-black hover:bg-gray-800 text-white rounded-full text-sm px-4 py-2.5 w-full">
                   Upcoming Events
                 </Button>
               </Link>
-            </div>
-
-            <div className="flex justify-center items-center space-x-4">
-              {/* Shopping Cart Icon */}
-              <Link href="/cart">
-                <div className="relative cursor-pointer">
-                  <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-pink-600" />
-                  {actualCartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {actualCartCount}
-                    </span>
-                  )}
-                </div>
-              </Link>
-
-              {/* Menu button with relative container */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
-                  {isMenuOpen ? (
-                    <X className="h-6 w-6" />
-                  ) : (
-                    <Menu className="h-6 w-6" />
-                  )}
-                </Button>
-                
-                {/* Mobile Navigation Menu - dropdown from hamburger button */}
-                <div className={`absolute top-full right-0 z-40 bg-white border border-gray-200 shadow-lg rounded-lg min-w-48 transition-all duration-300 ease-out transform ${
-                  isMenuOpen 
-                    ? 'opacity-100 scale-100 translate-y-0' 
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-                }`}>
-                  <div className="py-2">
-                    {menuItems.map((item) => (
-                      <Link key={item.name} href={item.href}>
-                        <span
-                          className="text-gray-600 hover:text-pink-600 hover:bg-gray-50 block px-4 py-2 text-base font-medium cursor-pointer text-right transition-colors duration-150"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {item.name}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
