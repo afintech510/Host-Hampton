@@ -86,22 +86,17 @@ export default function FloatingCheckoutButton() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <Button
+      <button
         onClick={handleCheckout}
-        size="lg"
-        className="bg-dusty-blue hover:opacity-90 text-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3 transition-all duration-200 hover:scale-105 border-2 border-black"
+        className="relative bg-white hover:bg-gray-50 text-gray-800 shadow-2xl rounded-full p-4 transition-all duration-200 hover:scale-110 border-2 border-gray-200"
+        data-testid="button-floating-cart"
+        aria-label="View cart"
       >
-        <div className="relative">
-          <ShoppingCart className="w-7 h-7" />
-          <Badge
-            variant="destructive"
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center p-0 text-xs font-bold"
-          >
-            {totalItems}
-          </Badge>
-        </div>
-        <span className="text-sm font-medium">Proceed to Checkout</span>
-      </Button>
+        <ShoppingCart className="w-8 h-8" />
+        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
+          {totalItems}
+        </span>
+      </button>
     </div>
   );
 }
