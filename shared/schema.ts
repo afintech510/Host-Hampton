@@ -724,6 +724,8 @@ export const cartItems = pgTable("cart_items", {
   sessionId: text("session_id").notNull(),
   productId: integer("product_id").references(() => products.id),
   productSessionId: integer("product_session_id").references(() => productSessions.id), // For events with multiple sessions
+  productDropId: integer("product_drop_id"), // For bread drops - references productDrops table
+  productVariantId: integer("product_variant_id"), // For retail with size/color variants
   quantity: integer("quantity").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -752,8 +754,54 @@ export const orderItems = pgTable("order_items", {
   orderId: integer("order_id").references(() => orders.id),
   productId: integer("product_id").references(() => products.id),
   productSessionId: integer("product_session_id").references(() => productSessions.id), // For events with multiple sessions
+  productDropId: integer("product_drop_id"), // For bread drops - will reference productDrops table
+  productVariantId: integer("product_variant_id"), // For retail with size/color variants
   quantity: integer("quantity").notNull(),
   price: integer("price").notNull(), // Price in cents at time of purchase
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Sourdough Bread Drops - presale model with specific pickup windows
+export const productDrops = pgTable("product_drops", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  dropName: text("drop_name").notNull(), // e.g., "Sourdough Saturday Drop #12"
+  pickupDate: timestamp("pickup_date").notNull(),
+  pickupWindowStart: text("pickup_window_start").notNull(), // e.g., "10:00 AM"
+  pickupWindowEnd: text("pickup_window_end").notNull(), // e.g., "2:00 PM"
+  totalInventory: integer("total_inventory").notNull(), // Total loaves available
+  remainingInventory: integer("remaining_inventory").notNull(), // Decrements with sales
+  perCustomerLimit: integer("per_customer_limit").default(4), // Max per customer
+  status: text("status").default("upcoming").notNull(), // "upcoming", "active", "sold_out", "completed", "cancelled"
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Retail Product Inventory - for gifts, clothes, seasonal items
+export const retailInventory = pgTable("retail_inventory", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  sku: text("sku"), // Stock keeping unit
+  quantityOnHand: integer("quantity_on_hand").default(0).notNull(),
+  lowStockThreshold: integer("low_stock_threshold").default(5),
+  allowBackorder: boolean("allow_backorder").default(false),
+  fulfillmentType: text("fulfillment_type").default("pickup").notNull(), // "pickup", "shipping", "both"
+  weight: integer("weight"), // Weight in ounces for shipping calculations
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Product Variants (sizes, colors, etc.) for retail items
+export const productVariants = pgTable("product_variants", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  variantName: text("variant_name").notNull(), // e.g., "Small - Red", "Medium - Blue"
+  size: text("size"), // e.g., "S", "M", "L", "XL"
+  color: text("color"), // e.g., "Red", "Blue", "Green"
+  sku: text("sku"),
+  priceModifier: integer("price_modifier").default(0), // Additional cost in cents
+  quantityOnHand: integer("quantity_on_hand").default(0).notNull(),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -772,6 +820,12 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
+export type ProductDrop = typeof productDrops.$inferSelect;
+export type InsertProductDrop = typeof productDrops.$inferInsert;
+export type RetailInventory = typeof retailInventory.$inferSelect;
+export type InsertRetailInventory = typeof retailInventory.$inferInsert;
+export type ProductVariant = typeof productVariants.$inferSelect;
+export type InsertProductVariant = typeof productVariants.$inferInsert;
 
 // Enhanced order item type with product and session information for admin display
 export type EnhancedOrderItem = OrderItem & {
@@ -813,6 +867,21 @@ export const insertProductOptionSchema = createInsertSchema(productOptions).omit
 });
 
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProductDropSchema = createInsertSchema(productDrops).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRetailInventorySchema = createInsertSchema(retailInventory).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertProductVariantSchema = createInsertSchema(productVariants).omit({
   id: true,
   createdAt: true,
 });
