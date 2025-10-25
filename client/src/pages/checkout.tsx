@@ -203,6 +203,11 @@ export default function Checkout() {
     },
   });
 
+  // Scroll to top when checkout page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
   useEffect(() => {
     const storedSessionId = localStorage.getItem('shop_session_id');
     if (!storedSessionId) {
