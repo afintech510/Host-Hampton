@@ -9,6 +9,8 @@ export default function Footer() {
     { name: "Trucker Hat Bar", href: "/trucker-hat-bar" },
     { name: "Permanent Jewelry", href: "/permanent-jewelry" },
     { name: "Our Venue", href: "/our-space" },
+    { name: "Sourdough Bakery", href: "/bakery" },
+    { name: "Retail Shop", href: "/shop" },
     { name: "Shop Events", href: "/shop-events" },
     { name: "My Events", href: "/my-events" },
   ];
