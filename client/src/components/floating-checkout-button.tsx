@@ -81,6 +81,7 @@ export default function FloatingCheckoutButton() {
   );
 
   const handleCheckout = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setLocation("/checkout");
   };
 
