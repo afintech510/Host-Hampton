@@ -164,16 +164,16 @@ export default function Cart() {
       
       <div className="container mx-auto px-4 py-8 pt-24">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
           <Link href="/upcoming-events">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" data-testid="button-back-shop">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Shop
             </Button>
           </Link>
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-6 w-6" />
-            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Shopping Cart</h1>
           </div>
         </div>
 
@@ -199,107 +199,120 @@ export default function Cart() {
 
                 return (
                   <Card key={item.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        {product.imageUrl && (
-                          <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                            <img
-                              src={product.imageUrl}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-                        
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                            {product.name}
-                          </h3>
-                          
-                          {/* Session Badge */}
-                          {session && (
-                            <div className="mb-2">
-                              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700">
-                                <Calendar className="w-3 h-3 mr-1" />
-                                {session.sessionName} - {new Date(session.sessionDate).toLocaleDateString()} at {session.sessionTime}
-                              </Badge>
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                        {/* Image and Title Row for Mobile */}
+                        <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
+                          {product.imageUrl && (
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                              <img
+                                src={product.imageUrl}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
                             </div>
                           )}
                           
-                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                            {product.description}
-                          </p>
-                          <div className="flex items-center gap-4">
-                            <div className="text-lg font-bold text-black">
-                              {formatPrice(session?.priceOverride || product.price)} per ticket
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {product.hasSiblingDiscount && product.siblingPrice && (
-                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                                  {formatPrice(product.price - product.siblingPrice)} sibling discount
-                                </span>
-                              )}
-                              {product.category && (
-                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
-                                  {product.category}
-                                </span>
-                              )}
-                            </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-1">
+                              {product.name}
+                            </h3>
+                            
+                            {/* Session Badge */}
+                            {session && (
+                              <div className="mb-2">
+                                <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700 text-xs">
+                                  <Calendar className="w-3 h-3 mr-1" />
+                                  <span className="hidden sm:inline">{session.sessionName} - </span>
+                                  {new Date(session.sessionDate).toLocaleDateString()}
+                                  <span className="hidden sm:inline"> at {session.sessionTime}</span>
+                                </Badge>
+                              </div>
+                            )}
+                            
+                            <p className="text-gray-600 text-sm mb-2 line-clamp-2 hidden sm:block">
+                              {product.description}
+                            </p>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-3">
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateQuantityMutation.mutate({
-                                cartItemId: item.id,
-                                quantity: Math.max(1, item.quantity - 1)
-                              })}
-                              disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            
-                            <Input
-                              type="number"
-                              min="1"
-                              value={item.quantity}
-                              onChange={(e) => updateQuantityMutation.mutate({
-                                cartItemId: item.id,
-                                quantity: Math.max(1, parseInt(e.target.value) || 1)
-                              })}
-                              className="w-16 text-center quantity-input"
-                              style={{ textAlign: 'center' }}
-                              disabled={updateQuantityMutation.isPending}
-                            />
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updateQuantityMutation.mutate({
-                                cartItemId: item.id,
-                                quantity: item.quantity + 1
-                              })}
-                              disabled={updateQuantityMutation.isPending}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
+                      {/* Price and Tags Row */}
+                      <div className="mt-3 flex flex-col gap-2">
+                        <div className="text-base sm:text-lg font-bold text-black">
+                          {formatPrice(session?.priceOverride || product.price)} per ticket
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {product.hasSiblingDiscount && product.siblingPrice && (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                              {formatPrice(product.price - product.siblingPrice)} sibling discount
+                            </span>
+                          )}
+                          {product.category && (
+                            <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+                              {product.category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                          {/* Remove Button */}
+                      {/* Quantity Controls Row - Full Width on Mobile */}
+                      <div className="mt-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => removeItemMutation.mutate(item.id)}
-                            disabled={removeItemMutation.isPending}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => updateQuantityMutation.mutate({
+                              cartItemId: item.id,
+                              quantity: Math.max(1, item.quantity - 1)
+                            })}
+                            disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
+                            className="h-8 w-8 p-0"
+                            data-testid={`button-decrease-${item.id}`}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateQuantityMutation.mutate({
+                              cartItemId: item.id,
+                              quantity: Math.max(1, parseInt(e.target.value) || 1)
+                            })}
+                            className="w-14 sm:w-16 text-center"
+                            disabled={updateQuantityMutation.isPending}
+                            data-testid={`input-quantity-${item.id}`}
+                          />
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateQuantityMutation.mutate({
+                              cartItemId: item.id,
+                              quantity: item.quantity + 1
+                            })}
+                            disabled={updateQuantityMutation.isPending}
+                            className="h-8 w-8 p-0"
+                            data-testid={`button-increase-${item.id}`}
+                          >
+                            <Plus className="h-3 w-3" />
                           </Button>
                         </div>
+
+                        {/* Remove Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeItemMutation.mutate(item.id)}
+                          disabled={removeItemMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          data-testid={`button-remove-${item.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="ml-1 hidden sm:inline">Remove</span>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -313,6 +326,7 @@ export default function Cart() {
                   onClick={() => clearCartMutation.mutate()}
                   disabled={clearCartMutation.isPending}
                   className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+                  data-testid="button-clear-cart"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Clear Cart
