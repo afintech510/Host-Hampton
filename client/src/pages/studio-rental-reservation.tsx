@@ -247,7 +247,7 @@ export default function StudioRentalReservationPage() {
   const adjustGuestCount = (delta: number) => {
     setStudioData(prev => ({
       ...prev,
-      guestCount: Math.max(1, Math.min(50, prev.guestCount + delta))
+      guestCount: Math.max(1, Math.min(85, prev.guestCount + delta))
     }));
   };
 
@@ -381,7 +381,7 @@ export default function StudioRentalReservationPage() {
                         id="guestCount"
                         type="number"
                         min="1"
-                        max="50"
+                        max="85"
                         value={studioData.guestCount}
                         onChange={(e) => setStudioData(prev => ({...prev, guestCount: parseInt(e.target.value) || 1}))}
                         className="text-center"
