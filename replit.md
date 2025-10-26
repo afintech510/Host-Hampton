@@ -152,3 +152,12 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - ✅ Enhanced event modals with attendee management and quote editing
 - ✅ Added "Not Miss Rachel" product with $30/$20 sibling pricing structure
 - ✅ Created individual events for all product sessions: Kids Summer Classes (6 sessions), Open Soft Play (Tuesday 10am-12pm), Advanced Beginner Mahjong (4 September sessions 6-8pm), plus single events for Sourdough, Spirit Medium, and Not Miss Rachel
+
+**Studio Rental Page Improvements (October 26, 2025):**
+- ✅ Reordered form fields: Event Date and Start Time now appear BEFORE Rental Duration and Guest Count
+- ✅ Implemented weekend vs weekday pricing logic: $175/hr (Fri-Sun) vs $150/hr (Mon-Thu)
+- ✅ Pricing summary hidden until event date is selected with helpful message
+- ✅ Changed "Booking Fee" to "Security Deposit" ($200) throughout the page
+- ✅ Added weekend pricing indicator in pricing breakdown
+- ✅ Updated pricing information box with clear weekday/weekend rate breakdown
+- ✅ Fixed page layout: removed top padding offset to align Navigation properly at top

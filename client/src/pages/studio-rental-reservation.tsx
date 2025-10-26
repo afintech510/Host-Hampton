@@ -122,9 +122,19 @@ export default function StudioRentalReservationPage() {
     }
   }, [billingData.agreeToCommunications]);
 
-  // Pricing calculations - Updated add-ons
-  const hourlyRate = 150; // $150/hour for studio rental
-  const basePrice = studioData.rentalDuration * hourlyRate;
+  // Check if date is selected and determine if it's a weekend
+  const isDateSelected = !!studioData.eventDate;
+  const isWeekend = isDateSelected ? (() => {
+    const date = new Date(studioData.eventDate);
+    const day = date.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
+    return day === 0 || day === 5 || day === 6;
+  })() : false;
+
+  // Pricing calculations - Weekend vs Weekday
+  const weekdayHourlyRate = 150; // Mon-Thu
+  const weekendHourlyRate = 175; // Fri-Sat-Sun
+  const hourlyRate = isWeekend ? weekendHourlyRate : weekdayHourlyRate;
+  const basePrice = isDateSelected ? studioData.rentalDuration * hourlyRate : 0;
   
   // Updated add-on pricing per requirements
   const addOnPrices = {
@@ -138,11 +148,11 @@ export default function StudioRentalReservationPage() {
 
   const equipmentCleaning = 25; // Always included
   const addOnTotal = studioData.addOns.reduce((sum, addOn) => sum + (addOnPrices[addOn as keyof typeof addOnPrices] || 0), 0);
-  const subtotal = basePrice + addOnTotal + equipmentCleaning;
+  const subtotal = isDateSelected ? basePrice + addOnTotal + equipmentCleaning : 0;
   const salesTax = subtotal * 0.0875; // 8.75% tax
   const totalWithTax = subtotal + salesTax;
-  const bookingFeeAmount = 50; // $50 booking fee
-  const remainingBalance = totalWithTax - bookingFeeAmount;
+  const securityDepositAmount = 200; // $200 security deposit
+  const remainingBalance = totalWithTax - securityDepositAmount;
 
   const formatPrice = (amount: number) => {
     return `$${amount.toFixed(2)}`;
@@ -154,7 +164,7 @@ export default function StudioRentalReservationPage() {
       const paymentData = {
         leadId: leadId ? parseInt(leadId) : null,
         bookingType: 'studio-rental',
-        amount: Math.round(bookingFeeAmount * 100), // Convert to cents
+        amount: Math.round(securityDepositAmount * 100), // Convert to cents
         billingData,
         studioData: {
           ...studioData,
@@ -260,6 +270,42 @@ export default function StudioRentalReservationPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="eventDate">Event Date</Label>
+                    <Input
+                      id="eventDate"
+                      type="date"
+                      value={studioData.eventDate}
+                      onChange={(e) => setStudioData(prev => ({...prev, eventDate: e.target.value}))}
+                      data-testid="input-event-date"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="startTime">Start Time</Label>
+                    <Select value={studioData.startTime} onValueChange={(value) => setStudioData(prev => ({...prev, startTime: value}))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="7:00 AM">7:00 AM</SelectItem>
+                        <SelectItem value="8:00 AM">8:00 AM</SelectItem>
+                        <SelectItem value="9:00 AM">9:00 AM</SelectItem>
+                        <SelectItem value="10:00 AM">10:00 AM</SelectItem>
+                        <SelectItem value="11:00 AM">11:00 AM</SelectItem>
+                        <SelectItem value="12:00 PM">12:00 PM</SelectItem>
+                        <SelectItem value="1:00 PM">1:00 PM</SelectItem>
+                        <SelectItem value="2:00 PM">2:00 PM</SelectItem>
+                        <SelectItem value="3:00 PM">3:00 PM</SelectItem>
+                        <SelectItem value="4:00 PM">4:00 PM</SelectItem>
+                        <SelectItem value="5:00 PM">5:00 PM</SelectItem>
+                        <SelectItem value="6:00 PM">6:00 PM</SelectItem>
+                        <SelectItem value="7:00 PM">7:00 PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
                   {/* Rental Duration with +/- buttons */}
                   <div>
                     <Label htmlFor="rentalDuration">Rental Duration (Hours)</Label>
@@ -332,42 +378,6 @@ export default function StudioRentalReservationPage() {
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="eventDate">Event Date</Label>
-                    <Input
-                      id="eventDate"
-                      type="date"
-                      value={studioData.eventDate}
-                      onChange={(e) => setStudioData(prev => ({...prev, eventDate: e.target.value}))}
-                      data-testid="input-event-date"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="startTime">Start Time</Label>
-                    <Select value={studioData.startTime} onValueChange={(value) => setStudioData(prev => ({...prev, startTime: value}))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="7:00 AM">7:00 AM</SelectItem>
-                        <SelectItem value="8:00 AM">8:00 AM</SelectItem>
-                        <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                        <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                        <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                        <SelectItem value="12:00 PM">12:00 PM</SelectItem>
-                        <SelectItem value="1:00 PM">1:00 PM</SelectItem>
-                        <SelectItem value="2:00 PM">2:00 PM</SelectItem>
-                        <SelectItem value="3:00 PM">3:00 PM</SelectItem>
-                        <SelectItem value="4:00 PM">4:00 PM</SelectItem>
-                        <SelectItem value="5:00 PM">5:00 PM</SelectItem>
-                        <SelectItem value="6:00 PM">6:00 PM</SelectItem>
-                        <SelectItem value="7:00 PM">7:00 PM</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
 
@@ -506,57 +516,73 @@ export default function StudioRentalReservationPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>Studio Rental ({studioData.rentalDuration} hrs × $150/hr)</span>
-                  <span>{formatPrice(basePrice)}</span>
+              {!isDateSelected ? (
+                <div className="bg-yellow-50 p-6 rounded-lg text-center">
+                  <Calendar className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
+                  <h4 className="font-semibold text-yellow-900 mb-2">Select Event Date</h4>
+                  <p className="text-sm text-yellow-800">
+                    Please select your event date to view pricing. Weekend rates (Fri-Sun) differ from weekday rates (Mon-Thu).
+                  </p>
                 </div>
-                
-                <div className="flex justify-between text-sm">
-                  <span>Equipment Cleaning</span>
-                  <span>{formatPrice(equipmentCleaning)}</span>
-                </div>
-                
-                {studioData.addOns.length > 0 && studioData.addOns.map(addOn => (
-                  <div key={addOn} className="flex justify-between text-sm">
-                    <span>{addOn}</span>
-                    <span>{formatPrice(addOnPrices[addOn as keyof typeof addOnPrices] || 0)}</span>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Studio Rental ({studioData.rentalDuration} hrs × ${hourlyRate}/hr)</span>
+                    <span>{formatPrice(basePrice)}</span>
                   </div>
-                ))}
-                
-                <Separator />
-                
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  {isWeekend && (
+                    <div className="text-xs text-orange-600 -mt-2">
+                      Weekend pricing (Fri-Sun)
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between text-sm">
+                    <span>Equipment Cleaning</span>
+                    <span>{formatPrice(equipmentCleaning)}</span>
+                  </div>
+                  
+                  {studioData.addOns.length > 0 && studioData.addOns.map(addOn => (
+                    <div key={addOn} className="flex justify-between text-sm">
+                      <span>{addOn}</span>
+                      <span>{formatPrice(addOnPrices[addOn as keyof typeof addOnPrices] || 0)}</span>
+                    </div>
+                  ))}
+                  
+                  <Separator />
+                  
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Sales Tax (8.75%)</span>
+                    <span>{formatPrice(salesTax)}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-semibold">
+                    <span>Total Amount</span>
+                    <span>{formatPrice(totalWithTax)}</span>
+                  </div>
+                  <div className="flex justify-between text-blue-600">
+                    <span>Security Deposit</span>
+                    <span>{formatPrice(securityDepositAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Remaining Balance</span>
+                    <span>{formatPrice(remainingBalance)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Sales Tax (8.75%)</span>
-                  <span>{formatPrice(salesTax)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between font-semibold">
-                  <span>Total Amount</span>
-                  <span>{formatPrice(totalWithTax)}</span>
-                </div>
-                <div className="flex justify-between text-blue-600">
-                  <span>Booking Fee (Non-refundable)</span>
-                  <span>{formatPrice(bookingFeeAmount)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Remaining Balance</span>
-                  <span>{formatPrice(remainingBalance)}</span>
-                </div>
-              </div>
+              )}
 
               {/* Pricing Details */}
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-900 mb-2">Studio Rental Information</h4>
                 <div className="text-sm text-blue-800 space-y-1">
-                  <p>• Professional studio space: $150/hour</p>
+                  <p>• Weekday (Mon-Thu): $150/hour</p>
+                  <p>• Weekend (Fri-Sun): $175/hour</p>
                   <p>• Minimum 1-hour rental, maximum 12 hours</p>
                   <p>• Includes basic lighting and backdrops</p>
-                  <p>• Booking fee is $50 and non-refundable</p>
+                  <p>• Security deposit is $200</p>
                 </div>
               </div>
 
@@ -597,16 +623,16 @@ export default function StudioRentalReservationPage() {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-900 mb-2">Secure Your Reservation</h4>
                 <p className="text-sm text-blue-700 mb-4">
-                  Pay a {formatPrice(bookingFeeAmount)} non-refundable booking fee to secure your studio rental. 
+                  Pay a {formatPrice(securityDepositAmount)} security deposit to secure your studio rental. 
                   The remaining balance will be due on the day of your event.
                 </p>
                 <Button 
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   onClick={handleBookingFeePayment}
                   disabled={depositMutation.isPending}
-                  data-testid="button-pay-booking-fee"
+                  data-testid="button-pay-security-deposit"
                 >
-                  {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(bookingFeeAmount)} Booking Fee`}
+                  {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(securityDepositAmount)} Security Deposit`}
                 </Button>
                 <p className="text-xs text-gray-600 text-center mt-2">
                   * All billing details and agreements are required to proceed
@@ -614,7 +640,7 @@ export default function StudioRentalReservationPage() {
               </div>
 
               <div className="text-xs text-gray-500 text-center">
-                <p>• Booking fee is non-refundable</p>
+                <p>• Security deposit: $200</p>
                 <p>• You can modify reservation details after booking</p>
                 <p>• Need help? Contact us at hosthampton295@gmail.com</p>
               </div>
