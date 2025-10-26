@@ -1750,8 +1750,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           }}
                                           className={`border-2 p-3 cursor-pointer transition-all text-sm rounded-full ${
                                             isSelected
-                                              ? "border-purple-500 bg-purple-50"
-                                              : "border-gray-200 bg-white hover:border-purple-300"
+                                              ? "border-green-500 bg-green-50"
+                                              : "border-gray-200 bg-white hover:border-green-300"
                                           }`}
                                           data-testid={`party-extra-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
                                         >
@@ -1762,6 +1762,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             <span className="font-medium">
                                               {item.label}
                                             </span>
+                                            {isSelected && (
+                                              <span className="ml-auto text-green-600">
+                                                ✓
+                                              </span>
+                                            )}
                                           </div>
                                         </div>
                                       );
@@ -1860,12 +1865,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       }
                                       className={`border-2 p-3 cursor-pointer transition-all text-sm text-center rounded-full ${
                                         currentFood === "pizza"
-                                          ? "border-purple-500 bg-purple-50"
-                                          : "border-gray-200 bg-white hover:border-purple-300"
+                                          ? "border-green-500 bg-green-50"
+                                          : "border-gray-200 bg-white hover:border-green-300"
                                       }`}
                                     >
-                                      <div className="font-medium">
+                                      <div className="font-medium flex items-center justify-center gap-2">
                                         🍕 Pizza
+                                        {currentFood === "pizza" && (
+                                          <span className="text-green-600">✓</span>
+                                        )}
                                       </div>
                                     </div>
                                     <div
@@ -1877,12 +1885,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       }
                                       className={`border-2 p-3 cursor-pointer transition-all text-sm text-center rounded-full ${
                                         currentFood === "bagels"
-                                          ? "border-purple-500 bg-purple-50"
-                                          : "border-gray-200 bg-white hover:border-purple-300"
+                                          ? "border-green-500 bg-green-50"
+                                          : "border-gray-200 bg-white hover:border-green-300"
                                       }`}
                                     >
-                                      <div className="font-medium">
+                                      <div className="font-medium flex items-center justify-center gap-2">
                                         🥯 Bagels
+                                        {currentFood === "bagels" && (
+                                          <span className="text-green-600">✓</span>
+                                        )}
                                       </div>
                                     </div>
                                     <div
@@ -1894,11 +1905,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       }
                                       className={`border-2 p-3 cursor-pointer transition-all text-sm text-center rounded-full ${
                                         currentFood === "none"
-                                          ? "border-purple-500 bg-purple-50"
-                                          : "border-gray-200 bg-white hover:border-purple-300"
+                                          ? "border-green-500 bg-green-50"
+                                          : "border-gray-200 bg-white hover:border-green-300"
                                       }`}
                                     >
-                                      <div className="font-medium">🚫 None</div>
+                                      <div className="font-medium flex items-center justify-center gap-2">
+                                        🚫 None
+                                        {currentFood === "none" && (
+                                          <span className="text-green-600">✓</span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
 
@@ -2021,16 +2037,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             }
                                             className={`border-2 p-3 cursor-pointer transition-all text-sm text-center rounded-full ${
                                               currentCupcakeFlavor === flavor
-                                                ? "border-purple-500 bg-purple-50"
-                                                : "border-gray-200 bg-white hover:border-purple-300"
+                                                ? "border-green-500 bg-green-50"
+                                                : "border-gray-200 bg-white hover:border-green-300"
                                             }`}
                                           >
-                                            <div className="font-medium">
+                                            <div className="font-medium flex items-center justify-center gap-2">
                                               {flavor === "none"
                                                 ? "🚫 None"
                                                 : flavor === "vanilla"
                                                   ? "🧁 Vanilla Cupcakes"
                                                   : "🍫 Chocolate Cupcakes"}
+                                              {currentCupcakeFlavor === flavor && (
+                                                <span className="text-green-600">✓</span>
+                                              )}
                                             </div>
                                           </div>
                                         ),
@@ -2187,8 +2206,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                           }}
                                           className={`border-2 p-3 cursor-pointer transition-all text-sm rounded-full ${
                                             isSelected
-                                              ? "border-purple-500 bg-purple-50"
-                                              : "border-gray-200 bg-white hover:border-purple-300"
+                                              ? "border-green-500 bg-green-50"
+                                              : "border-gray-200 bg-white hover:border-green-300"
                                           }`}
                                         >
                                           <div className="flex items-center gap-2">
@@ -2199,7 +2218,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                               {item.name}
                                             </span>
                                             {isSelected && (
-                                              <span className="ml-auto text-purple-600">
+                                              <span className="ml-auto text-green-600">
                                                 ✓
                                               </span>
                                             )}
@@ -2286,8 +2305,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             }}
                                             className={`border-2 p-3 cursor-pointer transition-all text-sm rounded-full ${
                                               isSelected
-                                                ? "border-purple-500 bg-purple-50"
-                                                : "border-gray-200 bg-white hover:border-purple-300"
+                                                ? "border-green-500 bg-green-50"
+                                                : "border-gray-200 bg-white hover:border-green-300"
                                             }`}
                                           >
                                             <div className="flex items-center gap-2">
@@ -2298,7 +2317,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 {addon.name}
                                               </span>
                                               {isSelected && (
-                                                <span className="ml-auto text-purple-600">
+                                                <span className="ml-auto text-green-600">
                                                   ✓
                                                 </span>
                                               )}
