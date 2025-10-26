@@ -50,6 +50,11 @@ export default function StudioRentalReservationPage() {
   const leadId = searchParams.get("leadId");
   const { toast } = useToast();
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [billingData, setBillingData] = useState<BillingData>({
     firstName: "",
     lastName: "",

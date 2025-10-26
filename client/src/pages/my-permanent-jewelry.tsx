@@ -7,6 +7,11 @@ export default function MyPermanentJewelryPage() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     if (!id) {
       // Root route - create new booking with random ID

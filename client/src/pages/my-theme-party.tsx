@@ -11,6 +11,11 @@ export default function MyThemePartyPage() {
   const [leadId, setLeadId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const createBooking = async () => {
       if (!id) {
