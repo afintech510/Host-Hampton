@@ -347,8 +347,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
 
     if (!isDIY) {
       // Full Service - Star-level pricing structure
-      const isCustom = booking.partyTheme === "custom";
-      const starBase = isCustom ? 750 : 650;
+      // Base package prices (without theme markup)
+      const starBase = 650;
       const starPrices = {
         1: starBase,
         2: starBase + 350,
@@ -373,6 +373,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
         starLevel = 5;
 
       basePrice = starPrices[starLevel as keyof typeof starPrices];
+      
+      // Add theme markup if applicable
+      if (booking.partyTheme && booking.partyTheme !== "no-thanks") {
+        const selectedThemeData = allThemes?.find(
+          (t: any) => t.name === booking.partyTheme
+        );
+        const themeMarkup = selectedThemeData?.price || 0;
+        basePrice += themeMarkup;
+      }
     } else {
       // DIY (Studio Rental) - charge based on rental duration and day of week
       const duration = booking.rentalDuration || "3";
@@ -1210,12 +1219,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   )?.icon}
                           </div>
                           <div>
-                            <div className="font-medium text-gray-800">
-                              {selectedTheme === "custom"
-                                ? "Custom Theme"
-                                : selectedTheme === "no-thanks"
-                                  ? "No Thanks"
-                                  : selectedTheme}
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-800">
+                                {selectedTheme === "custom"
+                                  ? "Custom Theme"
+                                  : selectedTheme === "no-thanks"
+                                    ? "No Thanks"
+                                    : selectedTheme}
+                              </span>
+                              {(() => {
+                                const themePrice = allThemes?.find(
+                                  (t: any) => t.name === selectedTheme,
+                                )?.price || 0;
+                                return themePrice > 0 ? (
+                                  <span className="text-sm font-semibold text-purple-600">
+                                    +${themePrice}
+                                  </span>
+                                ) : null;
+                              })()}
                             </div>
                             {selectedTheme === "custom" && (
                               <Input
@@ -1318,7 +1339,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   </div>
                                   <div className="text-lg font-bold text-purple-600">
                                     {selectedPackage.price > 0
-                                      ? `+${formatPrice(selectedPackage.price)}`
+                                      ? `${formatPrice(selectedPackage.price)}`
                                       : "Base Package"}
                                   </div>
                                 </div>
