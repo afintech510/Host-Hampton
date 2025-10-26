@@ -3192,13 +3192,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           </span>
                         </div>
 
-                        {/* Sales Tax (8.625% for NY) */}
+                        {/* Sales Tax (8.75% for NY) */}
                         <div className="flex justify-between">
                           <span className="text-gray-600">
-                            Sales Tax (8.625%)
+                            Sales Tax (8.75%)
                           </span>
                           <span className="font-semibold">
-                            +{formatPrice(pricing.total * 0.08625)}
+                            +{formatPrice(pricing.total * 0.0875)}
                           </span>
                         </div>
 
@@ -3224,10 +3224,48 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           <span className="text-purple-600">
                             {formatPrice(
                               pricing.total +
-                                pricing.total * 0.08625 +
+                                pricing.total * 0.0875 +
                                 (booking.partyType === "diy" ? 200 : 0),
                             )}
                           </span>
+                        </div>
+
+                        {/* Deposit and Balance Due */}
+                        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">
+                              Deposit to Secure Reservation
+                            </span>
+                            <span className="font-semibold text-purple-600">
+                              {formatPrice(200)}
+                            </span>
+                          </div>
+                          
+                          {booking.eventDate && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">
+                                Balance Due by{" "}
+                                {(() => {
+                                  const partyDate = new Date(booking.eventDate);
+                                  const dueDate = new Date(partyDate);
+                                  dueDate.setDate(partyDate.getDate() - 2);
+                                  return dueDate.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  });
+                                })()}
+                              </span>
+                              <span className="font-semibold">
+                                {formatPrice(
+                                  pricing.total +
+                                    pricing.total * 0.0875 +
+                                    (booking.partyType === "diy" ? 200 : 0) -
+                                    200,
+                                )}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
