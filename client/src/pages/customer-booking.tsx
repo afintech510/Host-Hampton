@@ -3241,31 +3241,28 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             </span>
                           </div>
                           
-                          {booking.eventDate && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">
-                                Balance Due by{" "}
-                                {(() => {
-                                  const partyDate = new Date(booking.eventDate);
-                                  const dueDate = new Date(partyDate);
-                                  dueDate.setDate(partyDate.getDate() - 2);
-                                  return dueDate.toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  });
-                                })()}
-                              </span>
-                              <span className="font-semibold">
-                                {formatPrice(
-                                  pricing.total +
-                                    pricing.total * 0.0875 +
-                                    (booking.partyType === "diy" ? 200 : 0) -
-                                    200,
-                                )}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">
+                              Balance Due{booking.eventDate && ` by ${(() => {
+                                const partyDate = new Date(booking.eventDate);
+                                const dueDate = new Date(partyDate);
+                                dueDate.setDate(partyDate.getDate() - 2);
+                                return dueDate.toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                });
+                              })()}`}
+                            </span>
+                            <span className="font-semibold">
+                              {formatPrice(
+                                pricing.total +
+                                  pricing.total * 0.0875 +
+                                  (booking.partyType === "diy" ? 200 : 0) -
+                                  200,
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
