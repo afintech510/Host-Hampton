@@ -7,11 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar, MapPin, Clock, Users, CreditCard, Camera, Palette, Music, Coffee, Plus, Minus } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Users,
+  CreditCard,
+  Camera,
+  Palette,
+  Music,
+  Coffee,
+  Plus,
+  Minus,
+} from "lucide-react";
 import Navigation from "@/components/navigation";
 
 interface BillingData {
@@ -29,18 +47,18 @@ interface BillingData {
 
 export default function StudioRentalReservationPage() {
   const searchParams = new URLSearchParams(window.location.search);
-  const leadId = searchParams.get('leadId');
+  const leadId = searchParams.get("leadId");
   const { toast } = useToast();
-  
+
   const [billingData, setBillingData] = useState<BillingData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    billingAddress: '',
-    city: '',
-    state: '',
-    zipCode: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    billingAddress: "",
+    city: "",
+    state: "",
+    zipCode: "",
     agreeToTerms: false,
     agreeToCommunications: false,
   });
@@ -49,37 +67,41 @@ export default function StudioRentalReservationPage() {
   const [studioData, setStudioData] = useState({
     rentalDuration: 3, // hours
     guestCount: 11,
-    eventDate: '',
-    startTime: '12:00 PM',
-    studioUsage: '',
+    eventDate: "",
+    startTime: "12:00 PM",
+    studioUsage: "",
     addOns: [] as string[],
   });
 
   // Fetch lead data
   const { data: lead, isLoading: leadLoading } = useQuery({
-    queryKey: ['/api/leads', leadId],
+    queryKey: ["/api/leads", leadId],
     enabled: !!leadId,
   });
 
   // Populate form with lead data
   useEffect(() => {
-    if (lead && typeof lead === 'object' && 'lead' in lead) {
+    if (lead && typeof lead === "object" && "lead" in lead) {
       const leadData = (lead as any).lead;
-      setBillingData(prev => ({
+      setBillingData((prev) => ({
         ...prev,
-        firstName: leadData.name?.split(' ')[0] || '',
-        lastName: leadData.name?.split(' ').slice(1).join(' ') || '',
-        email: leadData.email || '',
-        phone: leadData.phone || '',
+        firstName: leadData.name?.split(" ")[0] || "",
+        lastName: leadData.name?.split(" ").slice(1).join(" ") || "",
+        email: leadData.email || "",
+        phone: leadData.phone || "",
       }));
 
-      setStudioData(prev => ({
+      setStudioData((prev) => ({
         ...prev,
         guestCount: leadData.guestCount || leadData.attendeeCount || 11,
-        eventDate: leadData.eventDate ? new Date(leadData.eventDate).toISOString().split('T')[0] : '',
-        startTime: leadData.startTime || leadData.arrivalTime || '12:00 PM',
-        studioUsage: leadData.studioUsage || leadData.notes || '',
-        rentalDuration: leadData.rentalDuration ? parseInt(leadData.rentalDuration) : 3,
+        eventDate: leadData.eventDate
+          ? new Date(leadData.eventDate).toISOString().split("T")[0]
+          : "",
+        startTime: leadData.startTime || leadData.arrivalTime || "12:00 PM",
+        studioUsage: leadData.studioUsage || leadData.notes || "",
+        rentalDuration: leadData.rentalDuration
+          ? parseInt(leadData.rentalDuration)
+          : 3,
       }));
     }
   }, [lead]);
@@ -99,7 +121,11 @@ export default function StudioRentalReservationPage() {
   });
 
   useEffect(() => {
-    if (billingData.agreeToCommunications && billingData.email && studioData.eventDate) {
+    if (
+      billingData.agreeToCommunications &&
+      billingData.email &&
+      studioData.eventDate
+    ) {
       // Auto-save quote when communications agreement is checked and basic info is filled
       const quoteData = {
         source: "website",
@@ -114,26 +140,28 @@ export default function StudioRentalReservationPage() {
         budget: Math.round(totalWithTax * 100),
         estimatedCost: Math.round(totalWithTax * 100),
         status: "quote_requested",
-        notes: `Studio Usage: ${studioData.studioUsage || 'Not specified'}. Add-ons: ${studioData.addOns.join(', ') || 'None'}`,
-        agreeToCommunications: true
+        notes: `Studio Usage: ${studioData.studioUsage || "Not specified"}. Add-ons: ${studioData.addOns.join(", ") || "None"}`,
+        agreeToCommunications: true,
       };
-      
+
       saveQuoteMutation.mutate(quoteData);
     }
   }, [billingData.agreeToCommunications]);
 
   // Check if date is selected and determine if it's a weekend
   const isDateSelected = !!studioData.eventDate;
-  const isWeekend = isDateSelected ? (() => {
-    const date = new Date(studioData.eventDate);
-    const day = date.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
-    return day === 0 || day === 5 || day === 6;
-  })() : false;
+  const isWeekend = isDateSelected
+    ? (() => {
+        const date = new Date(studioData.eventDate);
+        const day = date.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
+        return day === 0 || day === 5 || day === 6;
+      })()
+    : false;
 
   // Tiered pricing based on duration - Weekend vs Weekday
   const getBasePrice = (hours: number, isWeekend: boolean) => {
     if (!isDateSelected) return 0;
-    
+
     if (isWeekend) {
       // Weekend pricing
       if (hours === 3) return 500;
@@ -154,19 +182,22 @@ export default function StudioRentalReservationPage() {
   };
 
   const basePrice = getBasePrice(studioData.rentalDuration, isWeekend);
-  
+
   // Updated add-on pricing per requirements
   const addOnPrices = {
-    'Photobooth': 75,
-    'Soft Play': 300,
-    'Coffee Bar Setup': 75,
-    'Popcorn Bar': 125,
-    'Candy Wall': 200,
-    'Party Helper': 75, // Per hour
+    Photobooth: 75,
+    "Soft Play": 300,
+    "Coffee Bar Setup": 75,
+    "Popcorn Bar": 125,
+    "Candy Wall": 200,
+    "Party Helper": 75, // Per hour
   };
 
   const cleaningFee = 25; // Always included
-  const addOnTotal = studioData.addOns.reduce((sum, addOn) => sum + (addOnPrices[addOn as keyof typeof addOnPrices] || 0), 0);
+  const addOnTotal = studioData.addOns.reduce(
+    (sum, addOn) => sum + (addOnPrices[addOn as keyof typeof addOnPrices] || 0),
+    0,
+  );
   const subtotal = isDateSelected ? basePrice + addOnTotal + cleaningFee : 0;
   const salesTax = subtotal * 0.0875; // 8.75% tax
   const totalWithTax = subtotal + salesTax;
@@ -182,7 +213,7 @@ export default function StudioRentalReservationPage() {
     mutationFn: async () => {
       const paymentData = {
         leadId: leadId ? parseInt(leadId) : null,
-        bookingType: 'studio-rental',
+        bookingType: "studio-rental",
         amount: Math.round(securityDepositAmount * 100), // Convert to cents
         billingData,
         studioData: {
@@ -190,10 +221,14 @@ export default function StudioRentalReservationPage() {
           basePrice: Math.round(basePrice * 100),
           addOnTotal: Math.round(addOnTotal * 100),
           totalWithTax: Math.round(totalWithTax * 100),
-        }
+        },
       };
-      
-      const response = await apiRequest("POST", "/api/studio-booking-payment", paymentData);
+
+      const response = await apiRequest(
+        "POST",
+        "/api/studio-booking-payment",
+        paymentData,
+      );
       return response.json();
     },
     onSuccess: (data) => {
@@ -209,7 +244,8 @@ export default function StudioRentalReservationPage() {
     onError: (error: any) => {
       toast({
         title: "Payment Failed",
-        description: error.message || "Please try again or contact us directly.",
+        description:
+          error.message || "Please try again or contact us directly.",
         variant: "destructive",
       });
     },
@@ -219,7 +255,8 @@ export default function StudioRentalReservationPage() {
     if (!billingData.agreeToTerms || !billingData.agreeToCommunications) {
       toast({
         title: "Required Agreements",
-        description: "Please agree to the terms and communications agreement to proceed.",
+        description:
+          "Please agree to the terms and communications agreement to proceed.",
         variant: "destructive",
       });
       return;
@@ -228,27 +265,34 @@ export default function StudioRentalReservationPage() {
   };
 
   const handleAddOnToggle = (addOn: string) => {
-    setStudioData(prev => ({
+    setStudioData((prev) => ({
       ...prev,
-      addOns: prev.addOns.includes(addOn) 
-        ? prev.addOns.filter(a => a !== addOn)
-        : [...prev.addOns, addOn]
+      addOns: prev.addOns.includes(addOn)
+        ? prev.addOns.filter((a) => a !== addOn)
+        : [...prev.addOns, addOn],
     }));
   };
 
   // Helper functions for +/- buttons
   const adjustRentalDuration = (delta: number) => {
-    setStudioData(prev => ({
+    setStudioData((prev) => ({
       ...prev,
-      rentalDuration: Math.max(1, Math.min(12, prev.rentalDuration + delta))
+      rentalDuration: Math.max(1, Math.min(12, prev.rentalDuration + delta)),
     }));
   };
 
   const adjustGuestCount = (delta: number) => {
-    setStudioData(prev => ({
+    setStudioData((prev) => ({
       ...prev,
-      guestCount: Math.max(1, Math.min(85, prev.guestCount + delta))
+      guestCount: Math.max(1, Math.min(85, prev.guestCount + delta)),
     }));
+  };
+
+  // Get tomorrow's date for min date validation
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
   };
 
   if (leadLoading) {
@@ -270,7 +314,9 @@ export default function StudioRentalReservationPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Camera className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Studio Rental Reservation</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Studio Rental Reservation
+            </h1>
           </div>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Complete your studio rental booking with secure payment processing
@@ -294,15 +340,26 @@ export default function StudioRentalReservationPage() {
                     <Input
                       id="eventDate"
                       type="date"
+                      min={getTomorrowDate()}
                       value={studioData.eventDate}
-                      onChange={(e) => setStudioData(prev => ({...prev, eventDate: e.target.value}))}
+                      onChange={(e) =>
+                        setStudioData((prev) => ({
+                          ...prev,
+                          eventDate: e.target.value,
+                        }))
+                      }
                       className="text-center"
                       data-testid="input-event-date"
                     />
                   </div>
                   <div>
                     <Label htmlFor="startTime">Start Time</Label>
-                    <Select value={studioData.startTime} onValueChange={(value) => setStudioData(prev => ({...prev, startTime: value}))}>
+                    <Select
+                      value={studioData.startTime}
+                      onValueChange={(value) =>
+                        setStudioData((prev) => ({ ...prev, startTime: value }))
+                      }
+                    >
                       <SelectTrigger className="text-center">
                         <SelectValue />
                       </SelectTrigger>
@@ -328,7 +385,9 @@ export default function StudioRentalReservationPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   {/* Rental Duration with +/- buttons */}
                   <div>
-                    <Label htmlFor="rentalDuration">Rental Duration (Hours)</Label>
+                    <Label htmlFor="rentalDuration">
+                      Rental Duration (Hours)
+                    </Label>
                     <div className="flex items-center gap-2 mt-1">
                       <Button
                         type="button"
@@ -346,7 +405,12 @@ export default function StudioRentalReservationPage() {
                         min="1"
                         max="12"
                         value={studioData.rentalDuration}
-                        onChange={(e) => setStudioData(prev => ({...prev, rentalDuration: parseInt(e.target.value) || 1}))}
+                        onChange={(e) =>
+                          setStudioData((prev) => ({
+                            ...prev,
+                            rentalDuration: parseInt(e.target.value) || 1,
+                          }))
+                        }
                         className="text-center"
                         data-testid="input-rental-duration"
                       />
@@ -383,7 +447,12 @@ export default function StudioRentalReservationPage() {
                         min="1"
                         max="85"
                         value={studioData.guestCount}
-                        onChange={(e) => setStudioData(prev => ({...prev, guestCount: parseInt(e.target.value) || 1}))}
+                        onChange={(e) =>
+                          setStudioData((prev) => ({
+                            ...prev,
+                            guestCount: parseInt(e.target.value) || 1,
+                          }))
+                        }
                         className="text-center"
                         data-testid="input-guest-count"
                       />
@@ -407,7 +476,12 @@ export default function StudioRentalReservationPage() {
                     id="studioUsage"
                     placeholder="private-event"
                     value={studioData.studioUsage}
-                    onChange={(e) => setStudioData(prev => ({...prev, studioUsage: e.target.value}))}
+                    onChange={(e) =>
+                      setStudioData((prev) => ({
+                        ...prev,
+                        studioUsage: e.target.value,
+                      }))
+                    }
                     className="min-h-[80px]"
                   />
                 </div>
@@ -425,7 +499,10 @@ export default function StudioRentalReservationPage() {
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {Object.entries(addOnPrices).map(([addOn, price]) => (
-                    <div key={addOn} className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <div
+                      key={addOn}
+                      className="flex items-center space-x-3 p-3 border rounded-lg"
+                    >
                       <Checkbox
                         id={addOn}
                         checked={studioData.addOns.includes(addOn)}
@@ -434,7 +511,9 @@ export default function StudioRentalReservationPage() {
                       <Label htmlFor={addOn} className="flex-1 cursor-pointer">
                         <div className="font-medium">{addOn}</div>
                         <div className="text-sm text-gray-600">
-                          {addOn === 'Party Helper' ? `${formatPrice(price)}/hr` : formatPrice(price)}
+                          {addOn === "Party Helper"
+                            ? `${formatPrice(price)}/hr`
+                            : formatPrice(price)}
                         </div>
                       </Label>
                     </div>
@@ -455,7 +534,12 @@ export default function StudioRentalReservationPage() {
                     <Input
                       id="firstName"
                       value={billingData.firstName}
-                      onChange={(e) => setBillingData({...billingData, firstName: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          firstName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -464,7 +548,12 @@ export default function StudioRentalReservationPage() {
                     <Input
                       id="lastName"
                       value={billingData.lastName}
-                      onChange={(e) => setBillingData({...billingData, lastName: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          lastName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -477,7 +566,12 @@ export default function StudioRentalReservationPage() {
                       id="email"
                       type="email"
                       value={billingData.email}
-                      onChange={(e) => setBillingData({...billingData, email: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          email: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -487,7 +581,12 @@ export default function StudioRentalReservationPage() {
                       id="phone"
                       type="tel"
                       value={billingData.phone}
-                      onChange={(e) => setBillingData({...billingData, phone: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          phone: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -498,7 +597,12 @@ export default function StudioRentalReservationPage() {
                   <Input
                     id="billingAddress"
                     value={billingData.billingAddress}
-                    onChange={(e) => setBillingData({...billingData, billingAddress: e.target.value})}
+                    onChange={(e) =>
+                      setBillingData({
+                        ...billingData,
+                        billingAddress: e.target.value,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -509,7 +613,9 @@ export default function StudioRentalReservationPage() {
                     <Input
                       id="city"
                       value={billingData.city}
-                      onChange={(e) => setBillingData({...billingData, city: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({ ...billingData, city: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -518,7 +624,12 @@ export default function StudioRentalReservationPage() {
                     <Input
                       id="state"
                       value={billingData.state}
-                      onChange={(e) => setBillingData({...billingData, state: e.target.value})}
+                      onChange={(e) =>
+                        setBillingData({
+                          ...billingData,
+                          state: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -539,9 +650,12 @@ export default function StudioRentalReservationPage() {
               {!isDateSelected ? (
                 <div className="bg-yellow-50 p-6 rounded-lg text-center">
                   <Calendar className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-                  <h4 className="font-semibold text-yellow-900 mb-2">Select Event Date</h4>
+                  <h4 className="font-semibold text-yellow-900 mb-2">
+                    Select Event Date
+                  </h4>
                   <p className="text-sm text-yellow-800">
-                    Please select your event date to view pricing. Weekend rates (Fri-Sun) differ from weekday rates (Mon-Thu).
+                    Please select your event date to view pricing. Weekend rates
+                    (Fri-Sun) differ from weekday rates (Mon-Thu).
                   </p>
                 </div>
               ) : (
@@ -555,21 +669,26 @@ export default function StudioRentalReservationPage() {
                       Weekend pricing (Fri-Sun)
                     </div>
                   )}
-                  
+
                   <div className="flex justify-between text-sm">
                     <span>Cleaning Fee</span>
                     <span>{formatPrice(cleaningFee)}</span>
                   </div>
-                  
-                  {studioData.addOns.length > 0 && studioData.addOns.map(addOn => (
-                    <div key={addOn} className="flex justify-between text-sm">
-                      <span>{addOn}</span>
-                      <span>{formatPrice(addOnPrices[addOn as keyof typeof addOnPrices] || 0)}</span>
-                    </div>
-                  ))}
-                  
+
+                  {studioData.addOns.length > 0 &&
+                    studioData.addOns.map((addOn) => (
+                      <div key={addOn} className="flex justify-between text-sm">
+                        <span>{addOn}</span>
+                        <span>
+                          {formatPrice(
+                            addOnPrices[addOn as keyof typeof addOnPrices] || 0,
+                          )}
+                        </span>
+                      </div>
+                    ))}
+
                   <Separator />
-                  
+
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
@@ -596,7 +715,9 @@ export default function StudioRentalReservationPage() {
 
               {/* Pricing Details */}
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Studio Rental Information</h4>
+                <h4 className="font-semibold text-blue-900 mb-2">
+                  Studio Rental Information
+                </h4>
                 <div className="text-sm text-blue-800 space-y-2">
                   <div>
                     <p className="font-semibold">Weekday (Mon-Thu):</p>
@@ -607,8 +728,11 @@ export default function StudioRentalReservationPage() {
                     <p>3hrs: $500 | 4hrs: $600 | 5hrs: $700 | 6-12hrs: $800</p>
                   </div>
                   <p>• Minimum 1-hour rental, maximum 12 hours</p>
-                  <p>• Includes basic lighting and backdrops</p>
-                  <p>• Security deposit is $200</p>
+                  <p>
+                    • Rental duration should include setup and clean-up time.
+                  </p>
+                  <p>• Includes tables, chairs, & bluetooth sound system</p>
+                  <p>• Security deposit is $200 (refundable)</p>
                 </div>
               </div>
 
@@ -618,47 +742,77 @@ export default function StudioRentalReservationPage() {
                   <Checkbox
                     id="agreeToTerms"
                     checked={billingData.agreeToTerms}
-                    onCheckedChange={(checked) => setBillingData({...billingData, agreeToTerms: checked as boolean})}
+                    onCheckedChange={(checked) =>
+                      setBillingData({
+                        ...billingData,
+                        agreeToTerms: checked as boolean,
+                      })
+                    }
                   />
-                  <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
+                  <Label
+                    htmlFor="agreeToTerms"
+                    className="text-sm leading-relaxed"
+                  >
                     I agree to the{" "}
-                    <a href="/terms-and-conditions" target="_blank" className="text-blue-600 hover:underline">
+                    <a
+                      href="/terms-and-conditions"
+                      target="_blank"
+                      className="text-blue-600 hover:underline"
+                    >
                       Terms and Conditions
                     </a>{" "}
                     <span className="text-red-500">*</span>
                   </Label>
                 </div>
-                
+
                 <div className="flex items-start space-x-2">
                   <Checkbox
                     id="agreeToCommunications"
                     checked={billingData.agreeToCommunications}
-                    onCheckedChange={(checked) => setBillingData({...billingData, agreeToCommunications: checked as boolean})}
+                    onCheckedChange={(checked) =>
+                      setBillingData({
+                        ...billingData,
+                        agreeToCommunications: checked as boolean,
+                      })
+                    }
                   />
-                  <Label htmlFor="agreeToCommunications" className="text-sm leading-relaxed">
+                  <Label
+                    htmlFor="agreeToCommunications"
+                    className="text-sm leading-relaxed"
+                  >
                     I agree to the{" "}
-                    <a href="/communications-agreement" target="_blank" className="text-blue-600 hover:underline">
+                    <a
+                      href="/communications-agreement"
+                      target="_blank"
+                      className="text-blue-600 hover:underline"
+                    >
                       Communications Agreement
                     </a>{" "}
-                    (email, phone, and text notifications for booking reminders, updates, and marketing communications){" "}
+                    (email, phone, and text notifications for booking reminders,
+                    updates, and marketing){" "}
                     <span className="text-red-500">*</span>
                   </Label>
                 </div>
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Secure Your Reservation</h4>
+                <h4 className="font-semibold text-blue-900 mb-2">
+                  Secure Your Reservation
+                </h4>
                 <p className="text-sm text-blue-700 mb-4">
-                  Pay a {formatPrice(securityDepositAmount)} security deposit to secure your studio rental. 
-                  The remaining balance will be due on the day of your event.
+                  Pay a {formatPrice(securityDepositAmount)} security deposit to
+                  secure your studio rental. The remaining balance will be due
+                  on the day of your event.
                 </p>
-                <Button 
+                <Button
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   onClick={handleBookingFeePayment}
                   disabled={depositMutation.isPending}
                   data-testid="button-pay-security-deposit"
                 >
-                  {depositMutation.isPending ? 'Processing...' : `Pay ${formatPrice(securityDepositAmount)} Security Deposit`}
+                  {depositMutation.isPending
+                    ? "Processing..."
+                    : `Pay ${formatPrice(securityDepositAmount)} Security Deposit`}
                 </Button>
                 <p className="text-xs text-gray-600 text-center mt-2">
                   * All billing details and agreements are required to proceed
