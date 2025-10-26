@@ -1346,6 +1346,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               packageDefinitions[
                                 selectedPackageKey as keyof typeof packageDefinitions
                               ];
+                            
+                            // Get the database package for pricing
+                            const dbPackage = allPackages?.find((pkg: any) => {
+                              const pkgName = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+                              return pkgName.includes(`${selectedStars}star`) || pkgName.includes(`star${selectedStars}`);
+                            });
+                            const displayPrice = dbPackage?.basePrice || 0;
+                            
                             return (
                               <div>
                                 <div className="flex justify-between items-center mb-3">
@@ -1353,8 +1361,8 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                     {selectedPackage.name}
                                   </div>
                                   <div className="text-lg font-bold text-purple-600">
-                                    {selectedPackage.price > 0
-                                      ? `${formatPrice(selectedPackage.price)}`
+                                    {displayPrice > 0
+                                      ? `${formatPrice(displayPrice)}`
                                       : "Base Package"}
                                   </div>
                                 </div>
@@ -2976,9 +2984,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       {selectedStars}-Star Package
                                     </span>
                                     <span className="font-semibold">
-                                      {formatPrice(packageBasePrice + themePrice)}
+                                      {formatPrice(packageBasePrice)}
                                     </span>
                                   </div>
+                                  {themePrice > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">
+                                        Party Theme
+                                      </span>
+                                      <span className="font-semibold">
+                                        +{formatPrice(themePrice)}
+                                      </span>
+                                    </div>
+                                  )}
                                   {additionalGuests > 0 && (
                                     <div className="flex justify-between">
                                       <span className="text-gray-600">
