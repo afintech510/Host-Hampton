@@ -537,26 +537,13 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       }
     }
 
-    // Party Duration fee (full-service parties only)
-    let durationFee = 0;
-    if (!isDIY) {
-      const partyDuration = booking.partyDuration || "2";
-      const durationFees: Record<string, number> = {
-        "2": 0,
-        "2.5": 50,
-        "3": 100,
-      };
-      durationFee = durationFees[partyDuration] || 0;
-    }
-
-    const total = basePrice + addonsTotal + durationFee;
+    const total = basePrice + addonsTotal;
 
     return {
       basePrice: basePrice,
       packagePrice: 0,
       addonsTotal,
       total,
-      durationFee,
     };
   };
 
@@ -1016,89 +1003,6 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                       </div>
                       <p className="text-sm text-gray-600 italic">
                         *Include setup and clean time in the Rental Duration.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Party Duration - Full Service Only */}
-                {booking.partyType !== "diy" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-purple-600" />
-                        Party Duration
-                      </h3>
-                      <span className="text-sm font-semibold text-gray-800">
-                        {(() => {
-                          const duration = booking.partyDuration || "2";
-                          const fees: Record<string, number> = {
-                            "2": 0,
-                            "2.5": 50,
-                            "3": 100,
-                          };
-                          const fee = fees[duration] || 0;
-                          return fee > 0 ? `+$${fee}` : "Included";
-                        })()}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        {[
-                          {
-                            value: "2",
-                            label: "2 Hours",
-                            subtitle: "Standard",
-                          },
-                          {
-                            value: "2.5",
-                            label: "2.5 Hours",
-                            subtitle: "+$50",
-                          },
-                          { value: "3", label: "3 Hours", subtitle: "+$100" },
-                        ].map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() =>
-                              handleRealTimeUpdate(
-                                "partyDuration",
-                                option.value,
-                              )
-                            }
-                            className={`flex-1 py-3 px-3 border-2 transition-all rounded-2xl ${
-                              (booking.partyDuration || "2") === option.value
-                                ? "border-purple-500 bg-purple-50"
-                                : "border-gray-200 bg-white hover:border-purple-300"
-                            }`}
-                            data-testid={`button-duration-${option.value}`}
-                          >
-                            <div className="text-center">
-                              <div
-                                className={`text-sm font-semibold ${
-                                  (booking.partyDuration || "2") ===
-                                  option.value
-                                    ? "text-purple-700"
-                                    : "text-gray-800"
-                                }`}
-                              >
-                                {option.label}
-                              </div>
-                              <div
-                                className={`text-xs ${
-                                  (booking.partyDuration || "2") ===
-                                  option.value
-                                    ? "text-purple-600"
-                                    : "text-gray-500"
-                                }`}
-                              >
-                                {option.subtitle}
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-600 italic">
-                        Party time includes activities, food, and celebration.
                       </p>
                     </div>
                   </div>
