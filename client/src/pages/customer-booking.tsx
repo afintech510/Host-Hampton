@@ -346,17 +346,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     let basePrice = 0;
 
     if (!isDIY) {
-      // Full Service - Star-level pricing structure
-      // Base package prices (without theme markup)
-      const starBase = 650;
-      const starPrices = {
-        1: starBase,
-        2: starBase + 350,
-        3: starBase + 695,
-        4: starBase + 925,
-        5: starBase + 1375,
-      };
-
+      // Full Service - Use package base_price from database
       // Get star level from package selection
       const packageKey =
         booking.packageSelection?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
@@ -372,7 +362,14 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       else if (packageKey.includes("5star") || packageKey.includes("star5"))
         starLevel = 5;
 
-      basePrice = starPrices[starLevel as keyof typeof starPrices];
+      // Find the package from the database
+      const selectedPackage = allPackages?.find((pkg: any) => {
+        const pkgName = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        return pkgName.includes(`${starLevel}star`) || pkgName.includes(`star${starLevel}`);
+      });
+
+      // Use base_price from database or fallback
+      basePrice = selectedPackage?.basePrice || 0;
       
       // Add theme markup if applicable
       if (booking.partyTheme && booking.partyTheme !== "no-thanks") {
@@ -381,6 +378,24 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
         );
         const themeMarkup = selectedThemeData?.price || 0;
         basePrice += themeMarkup;
+      }
+
+      // Add per-guest pricing for additional guests
+      const guestCount = booking.guestCount || 0;
+      const maxGuests = selectedPackage?.maxGuests || 10;
+      const additionalGuests = Math.max(0, guestCount - maxGuests);
+      
+      if (additionalGuests > 0) {
+        // Per-guest pricing based on star level
+        let perGuestPrice = 35; // Default for 1-2 star
+        if (starLevel === 1 || starLevel === 2) {
+          perGuestPrice = 35;
+        } else if (starLevel === 3 || starLevel === 4) {
+          perGuestPrice = 45;
+        } else if (starLevel === 5) {
+          perGuestPrice = 50;
+        }
+        basePrice += additionalGuests * perGuestPrice;
       }
     } else {
       // DIY (Studio Rental) - charge based on rental duration and day of week
@@ -2904,24 +2919,60 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           </>
                         ) : (
                           <>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                {selectedStars}-Star Package
-                              </span>
-                              <span className="font-semibold">
-                                {formatPrice(pricing.basePrice)}
-                              </span>
-                            </div>
-                            {booking.guestCount && booking.guestCount > 12 && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">
-                                  Additional guests ({booking.guestCount - 12})
-                                </span>
-                                <span className="font-semibold">
-                                  +{formatPrice((booking.guestCount - 12) * 25)}
-                                </span>
-                              </div>
-                            )}
+                            {(() => {
+                              // Find the selected package from database
+                              const selectedPackage = allPackages?.find((pkg: any) => {
+                                const pkgName = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+                                return pkgName.includes(`${selectedStars}star`) || pkgName.includes(`star${selectedStars}`);
+                              });
+                              
+                              const packageBasePrice = selectedPackage?.basePrice || 0;
+                              const maxGuests = selectedPackage?.maxGuests || 10;
+                              const guestCount = booking.guestCount || 0;
+                              const additionalGuests = Math.max(0, guestCount - maxGuests);
+                              
+                              // Calculate per-guest price based on star level
+                              let perGuestPrice = 35;
+                              if (selectedStars === 1 || selectedStars === 2) {
+                                perGuestPrice = 35;
+                              } else if (selectedStars === 3 || selectedStars === 4) {
+                                perGuestPrice = 45;
+                              } else if (selectedStars === 5) {
+                                perGuestPrice = 50;
+                              }
+                              
+                              // Calculate theme price if applicable
+                              let themePrice = 0;
+                              if (booking.partyTheme && booking.partyTheme !== "no-thanks") {
+                                const selectedThemeData = allThemes?.find(
+                                  (t: any) => t.name === booking.partyTheme
+                                );
+                                themePrice = selectedThemeData?.price || 0;
+                              }
+                              
+                              return (
+                                <>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-600">
+                                      {selectedStars}-Star Package
+                                    </span>
+                                    <span className="font-semibold">
+                                      {formatPrice(packageBasePrice + themePrice)}
+                                    </span>
+                                  </div>
+                                  {additionalGuests > 0 && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">
+                                        Additional guests ({additionalGuests})
+                                      </span>
+                                      <span className="font-semibold">
+                                        +{formatPrice(additionalGuests * perGuestPrice)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </>
                         )}
 
