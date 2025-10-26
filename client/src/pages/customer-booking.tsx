@@ -1453,7 +1453,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             return (
                                               <div
                                                 key={activity.id}
-                                                className="border-2 border-green-500 bg-green-50 p-3"
+                                                className="border-2 border-green-500 bg-green-50 p-3 rounded-2xl"
                                               >
                                                 <div className="flex justify-between items-center">
                                                   <div className="flex items-center gap-2">
@@ -1572,7 +1572,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                             return (
                                               <div
                                                 key={activity.id}
-                                                className="border-2 border-green-500 bg-green-50 p-3"
+                                                className="border-2 border-green-500 bg-green-50 p-3 rounded-2xl"
                                               >
                                                 <div className="flex justify-between items-center">
                                                   <div className="flex items-center gap-2">
