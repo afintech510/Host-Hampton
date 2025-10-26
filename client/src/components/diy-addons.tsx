@@ -152,7 +152,7 @@ export function DIYAddons({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">
-            🎀 Decor Add-ons
+            ⚜️Decor Add-ons
           </CardTitle>
           <CardDescription className="text-sm text-gray-600">
             Add decorations to your party
