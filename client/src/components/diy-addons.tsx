@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
 
@@ -85,58 +91,94 @@ export function DIYAddons({
   premiumGoodieBagQuantity,
   hasBirthdayGiftBasket,
 }: DIYAddonsProps) {
-  
   const getItemQuantity = (itemId: number, list: DIYAddon[]) => {
-    return list.filter(item => item.id === itemId).length;
+    return list.filter((item) => item.id === itemId).length;
   };
 
-  const handleQuantityChange = (item: any, delta: number, currentList: DIYAddon[], onAdd: (addon: DIYAddon) => void, onRemove: (id: number) => void) => {
+  const handleQuantityChange = (
+    item: any,
+    delta: number,
+    currentList: DIYAddon[],
+    onAdd: (addon: DIYAddon) => void,
+    onRemove: (id: number) => void,
+  ) => {
     const currentQty = getItemQuantity(item.id, currentList);
     const newQty = currentQty + delta;
-    
+
     if (newQty < 0) return;
-    
+
     if (delta > 0) {
-      onAdd({ id: item.id, name: item.name, price: item.price, category: 'food', icon: item.icon });
+      onAdd({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        category: "food",
+        icon: item.icon,
+      });
     } else if (delta < 0 && currentQty > 0) {
-      const itemToRemove = currentList.find(i => i.id === item.id);
+      const itemToRemove = currentList.find((i) => i.id === item.id);
       if (itemToRemove) onRemove(itemToRemove.id);
     }
   };
 
   const isItemSelected = (itemId: number, list: DIYAddon[]) => {
-    return list.some(item => item.id === itemId);
+    return list.some((item) => item.id === itemId);
   };
 
-  const toggleItem = (item: any, list: DIYAddon[], onAdd: (addon: DIYAddon) => void, onRemove: (id: number) => void, category: string) => {
+  const toggleItem = (
+    item: any,
+    list: DIYAddon[],
+    onAdd: (addon: DIYAddon) => void,
+    onRemove: (id: number) => void,
+    category: string,
+  ) => {
     if (isItemSelected(item.id, list)) {
-      const itemToRemove = list.find(i => i.id === item.id);
+      const itemToRemove = list.find((i) => i.id === item.id);
       if (itemToRemove) onRemove(itemToRemove.id);
     } else {
-      onAdd({ id: item.id, name: item.name, price: item.price, category, icon: item.icon });
+      onAdd({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        category,
+        icon: item.icon,
+      });
     }
   };
 
   return (
     <div className="space-y-6" data-testid="diy-addons-section">
-      
       {/* Decor Add-ons */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">🎨 Decor Add-ons</CardTitle>
-          <CardDescription className="text-sm text-gray-600">Add decorations to your party</CardDescription>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            🎀 Decor Add-ons
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-600">
+            Add decorations to your party
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {DECOR_ITEMS.map((item) => (
             <Button
               key={item.id}
-              variant={isItemSelected(item.id, selectedExtras) ? "default" : "outline"}
+              variant={
+                isItemSelected(item.id, selectedExtras) ? "default" : "outline"
+              }
               className={`w-full justify-start h-auto py-3 ${
                 isItemSelected(item.id, selectedExtras)
-                  ? 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
-                  : 'border-gray-200 hover:border-purple-300'
+                  ? "bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300"
+                  : "border-gray-200 hover:border-purple-300"
               }`}
-              onClick={() => toggleItem(item, selectedExtras, onAddExtra, onRemoveExtra, 'decor')}
+              onClick={() =>
+                toggleItem(
+                  item,
+                  selectedExtras,
+                  onAddExtra,
+                  onRemoveExtra,
+                  "decor",
+                )
+              }
               data-testid={`decor-item-${item.id}`}
             >
               <div className="flex items-center gap-3 w-full">
@@ -154,7 +196,9 @@ export function DIYAddons({
       {/* Food Add-ons */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Food Add-ons</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Food Add-ons
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {FOOD_ITEMS.map((item) => {
@@ -174,18 +218,39 @@ export function DIYAddons({
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 rounded-full p-0"
-                    onClick={() => handleQuantityChange(item, -1, selectedFood, onAddFood, onRemoveFood)}
+                    onClick={() =>
+                      handleQuantityChange(
+                        item,
+                        -1,
+                        selectedFood,
+                        onAddFood,
+                        onRemoveFood,
+                      )
+                    }
                     disabled={qty === 0}
                     data-testid={`food-minus-${item.id}`}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-8 text-center font-medium" data-testid={`food-qty-${item.id}`}>{qty}</span>
+                  <span
+                    className="w-8 text-center font-medium"
+                    data-testid={`food-qty-${item.id}`}
+                  >
+                    {qty}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 rounded-full p-0"
-                    onClick={() => handleQuantityChange(item, 1, selectedFood, onAddFood, onRemoveFood)}
+                    onClick={() =>
+                      handleQuantityChange(
+                        item,
+                        1,
+                        selectedFood,
+                        onAddFood,
+                        onRemoveFood,
+                      )
+                    }
                     data-testid={`food-plus-${item.id}`}
                   >
                     <Plus className="h-4 w-4" />
@@ -200,7 +265,9 @@ export function DIYAddons({
       {/* Treats Add-ons */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Add-ons (per dozen):</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Add-ons (per dozen):
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {TREATS_ITEMS.map((item) => {
@@ -220,18 +287,39 @@ export function DIYAddons({
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 rounded-full p-0"
-                    onClick={() => handleQuantityChange(item, -1, selectedFood, onAddFood, onRemoveFood)}
+                    onClick={() =>
+                      handleQuantityChange(
+                        item,
+                        -1,
+                        selectedFood,
+                        onAddFood,
+                        onRemoveFood,
+                      )
+                    }
                     disabled={qty === 0}
                     data-testid={`treats-minus-${item.id}`}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-8 text-center font-medium" data-testid={`treats-qty-${item.id}`}>{qty}</span>
+                  <span
+                    className="w-8 text-center font-medium"
+                    data-testid={`treats-qty-${item.id}`}
+                  >
+                    {qty}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 rounded-full p-0"
-                    onClick={() => handleQuantityChange(item, 1, selectedFood, onAddFood, onRemoveFood)}
+                    onClick={() =>
+                      handleQuantityChange(
+                        item,
+                        1,
+                        selectedFood,
+                        onAddFood,
+                        onRemoveFood,
+                      )
+                    }
                     data-testid={`treats-plus-${item.id}`}
                   >
                     <Plus className="h-4 w-4" />
@@ -246,19 +334,31 @@ export function DIYAddons({
       {/* Specialty Items */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Specialty Items</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Specialty Items
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {SPECIALTY_ITEMS.map((item) => (
             <Button
               key={item.id}
-              variant={isItemSelected(item.id, selectedExtras) ? "default" : "outline"}
+              variant={
+                isItemSelected(item.id, selectedExtras) ? "default" : "outline"
+              }
               className={`w-full justify-start h-auto py-3 ${
                 isItemSelected(item.id, selectedExtras)
-                  ? 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
-                  : 'border-gray-200 hover:border-purple-300'
+                  ? "bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300"
+                  : "border-gray-200 hover:border-purple-300"
               }`}
-              onClick={() => toggleItem(item, selectedExtras, onAddExtra, onRemoveExtra, 'specialty')}
+              onClick={() =>
+                toggleItem(
+                  item,
+                  selectedExtras,
+                  onAddExtra,
+                  onRemoveExtra,
+                  "specialty",
+                )
+              }
               data-testid={`specialty-item-${item.id}`}
             >
               <div className="flex items-center gap-3 w-full">
@@ -276,19 +376,31 @@ export function DIYAddons({
       {/* Drinks */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Add-ons:</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Add-ons:
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {DRINK_ITEMS.map((item) => (
             <Button
               key={item.id}
-              variant={isItemSelected(item.id, selectedDrinks) ? "default" : "outline"}
+              variant={
+                isItemSelected(item.id, selectedDrinks) ? "default" : "outline"
+              }
               className={`w-full justify-start h-auto py-3 ${
                 isItemSelected(item.id, selectedDrinks)
-                  ? 'bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300'
-                  : 'border-gray-200 hover:border-purple-300'
+                  ? "bg-purple-100 hover:bg-purple-200 text-purple-900 border-purple-300"
+                  : "border-gray-200 hover:border-purple-300"
               }`}
-              onClick={() => toggleItem(item, selectedDrinks, onAddDrink, onRemoveDrink, 'drink')}
+              onClick={() =>
+                toggleItem(
+                  item,
+                  selectedDrinks,
+                  onAddDrink,
+                  onRemoveDrink,
+                  "drink",
+                )
+              }
               data-testid={`drink-item-${item.id}`}
             >
               <div className="flex items-center gap-3 w-full">
