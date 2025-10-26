@@ -750,7 +750,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           onChange={(e) =>
                             handleTextInputUpdate("childName", e.target.value)
                           }
-                          className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-sm"
+                          className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-sm text-center"
                           placeholder="Enter child's name"
                         />
                       </div>
@@ -887,7 +887,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   handleRealTimeUpdate("arrivalTime", value)
                                 }
                               >
-                                <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
+                                <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-center">
                                   <SelectValue placeholder="Select start time" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl">
@@ -910,7 +910,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                   handleRealTimeUpdate("arrivalTime", value)
                                 }
                               >
-                                <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
+                                <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-center">
                                   <SelectValue placeholder="Select start time" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl">
@@ -1094,7 +1094,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <Input
                           value="Host Hampton Studio"
                           disabled
-                          className="mt-1 border-2 border-gray-200 rounded-full bg-gray-50 text-gray-600"
+                          className="mt-1 border-2 border-gray-200 rounded-full bg-gray-50 text-gray-600 text-center"
                         />
                       ) : (
                         <Select
@@ -1103,7 +1103,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             handleRealTimeUpdate("eventLocation", value)
                           }
                         >
-                          <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500">
+                          <SelectTrigger className="mt-1 border-2 border-gray-200 rounded-full focus:border-purple-500 text-center">
                             <SelectValue placeholder="Choose location" />
                           </SelectTrigger>
                           <SelectContent className="rounded-2xl">
