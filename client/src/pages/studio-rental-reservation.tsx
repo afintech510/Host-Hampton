@@ -130,11 +130,30 @@ export default function StudioRentalReservationPage() {
     return day === 0 || day === 5 || day === 6;
   })() : false;
 
-  // Pricing calculations - Weekend vs Weekday
-  const weekdayHourlyRate = 150; // Mon-Thu
-  const weekendHourlyRate = 175; // Fri-Sat-Sun
-  const hourlyRate = isWeekend ? weekendHourlyRate : weekdayHourlyRate;
-  const basePrice = isDateSelected ? studioData.rentalDuration * hourlyRate : 0;
+  // Tiered pricing based on duration - Weekend vs Weekday
+  const getBasePrice = (hours: number, isWeekend: boolean) => {
+    if (!isDateSelected) return 0;
+    
+    if (isWeekend) {
+      // Weekend pricing
+      if (hours === 3) return 500;
+      if (hours === 4) return 600;
+      if (hours === 5) return 700;
+      if (hours >= 6) return 800;
+      // For 1-2 hours, use proportional pricing based on 3hr rate
+      return Math.round((500 / 3) * hours);
+    } else {
+      // Weekday pricing
+      if (hours === 3) return 400;
+      if (hours === 4) return 475;
+      if (hours === 5) return 550;
+      if (hours >= 6) return 625;
+      // For 1-2 hours, use proportional pricing based on 3hr rate
+      return Math.round((400 / 3) * hours);
+    }
+  };
+
+  const basePrice = getBasePrice(studioData.rentalDuration, isWeekend);
   
   // Updated add-on pricing per requirements
   const addOnPrices = {
@@ -146,9 +165,9 @@ export default function StudioRentalReservationPage() {
     'Party Helper': 75, // Per hour
   };
 
-  const equipmentCleaning = 25; // Always included
+  const cleaningFee = 25; // Always included
   const addOnTotal = studioData.addOns.reduce((sum, addOn) => sum + (addOnPrices[addOn as keyof typeof addOnPrices] || 0), 0);
-  const subtotal = isDateSelected ? basePrice + addOnTotal + equipmentCleaning : 0;
+  const subtotal = isDateSelected ? basePrice + addOnTotal + cleaningFee : 0;
   const salesTax = subtotal * 0.0875; // 8.75% tax
   const totalWithTax = subtotal + salesTax;
   const securityDepositAmount = 200; // $200 security deposit
@@ -277,13 +296,14 @@ export default function StudioRentalReservationPage() {
                       type="date"
                       value={studioData.eventDate}
                       onChange={(e) => setStudioData(prev => ({...prev, eventDate: e.target.value}))}
+                      className="text-center"
                       data-testid="input-event-date"
                     />
                   </div>
                   <div>
                     <Label htmlFor="startTime">Start Time</Label>
                     <Select value={studioData.startTime} onValueChange={(value) => setStudioData(prev => ({...prev, startTime: value}))}>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-center">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -527,7 +547,7 @@ export default function StudioRentalReservationPage() {
               ) : (
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span>Studio Rental ({studioData.rentalDuration} hrs × ${hourlyRate}/hr)</span>
+                    <span>Studio Rental ({studioData.rentalDuration} hrs)</span>
                     <span>{formatPrice(basePrice)}</span>
                   </div>
                   {isWeekend && (
@@ -537,8 +557,8 @@ export default function StudioRentalReservationPage() {
                   )}
                   
                   <div className="flex justify-between text-sm">
-                    <span>Equipment Cleaning</span>
-                    <span>{formatPrice(equipmentCleaning)}</span>
+                    <span>Cleaning Fee</span>
+                    <span>{formatPrice(cleaningFee)}</span>
                   </div>
                   
                   {studioData.addOns.length > 0 && studioData.addOns.map(addOn => (
@@ -577,9 +597,15 @@ export default function StudioRentalReservationPage() {
               {/* Pricing Details */}
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-900 mb-2">Studio Rental Information</h4>
-                <div className="text-sm text-blue-800 space-y-1">
-                  <p>• Weekday (Mon-Thu): $150/hour</p>
-                  <p>• Weekend (Fri-Sun): $175/hour</p>
+                <div className="text-sm text-blue-800 space-y-2">
+                  <div>
+                    <p className="font-semibold">Weekday (Mon-Thu):</p>
+                    <p>3hrs: $400 | 4hrs: $475 | 5hrs: $550 | 6-12hrs: $625</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Weekend (Fri-Sun):</p>
+                    <p>3hrs: $500 | 4hrs: $600 | 5hrs: $700 | 6-12hrs: $800</p>
+                  </div>
                   <p>• Minimum 1-hour rental, maximum 12 hours</p>
                   <p>• Includes basic lighting and backdrops</p>
                   <p>• Security deposit is $200</p>

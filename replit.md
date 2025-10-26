@@ -155,9 +155,13 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 
 **Studio Rental Page Improvements (October 26, 2025):**
 - ✅ Reordered form fields: Event Date and Start Time now appear BEFORE Rental Duration and Guest Count
-- ✅ Implemented weekend vs weekday pricing logic: $175/hr (Fri-Sun) vs $150/hr (Mon-Thu)
+- ✅ Centered text content in Event Date and Start Time fields
+- ✅ Implemented tiered pricing structure (replaces hourly rates):
+  - Weekend (Fri-Sun): 3hrs $500 | 4hrs $600 | 5hrs $700 | 6-12hrs $800
+  - Weekday (Mon-Thu): 3hrs $400 | 4hrs $475 | 5hrs $550 | 6-12hrs $625
 - ✅ Pricing summary hidden until event date is selected with helpful message
 - ✅ Changed "Booking Fee" to "Security Deposit" ($200) throughout the page
+- ✅ Changed "Equipment Cleaning" to "Cleaning Fee" ($25)
 - ✅ Added weekend pricing indicator in pricing breakdown
-- ✅ Updated pricing information box with clear weekday/weekend rate breakdown
+- ✅ Updated pricing information box with clear tiered rate structure
 - ✅ Fixed page layout: removed top padding offset to align Navigation properly at top
