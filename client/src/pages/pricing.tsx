@@ -59,7 +59,11 @@ export default function Pricing() {
           {services.map((service) => {
             const Icon = service.icon;
             return (
-              <Link key={service.title} href={service.link}>
+              <Link 
+                key={service.title} 
+                href={service.link}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'auto' })}
+              >
                 <Card 
                   className="group cursor-pointer overflow-hidden border-2 border-gray-200 hover:border-purple-500 transition-all duration-300 hover:shadow-xl h-full"
                   data-testid={`card-${service.title.toLowerCase().replace(/\s+/g, '-')}`}
