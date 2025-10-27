@@ -140,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const customerId = req.session.customerId;
       
-      // Get customer to retrieve their email
+      // Get customer to verify they exist
       const customer = await storage.getCustomer(customerId);
       
       if (!customer) {
@@ -153,8 +153,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get confirmed bookings (events)
       const events = await storage.getCustomerEvents(customerId);
       
-      // Get saved quotes (from leads table using verified customer email)
-      const quotes = await storage.getCustomerQuotes(customer.email);
+      // Get saved quotes (from leads table using customerId)
+      const quotes = await storage.getCustomerQuotes(customerId);
       
       // Get public events (workshops, classes, etc.)
       const publicEvents = await storage.getPublicEvents();
@@ -1170,7 +1170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Save as Quote - Updates lead status to "quote_saved"
+  // Save as Quote - Updates lead status to "quote_saved" and creates/links customer
   app.post("/api/leads/:id/save-quote", async (req, res) => {
     try {
       const { id } = req.params;
@@ -1184,9 +1184,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Update lead status to quote_saved
+      // Create or find customer if email is provided
+      let customerId: number | null = null;
+      if (lead.email) {
+        let customer = await storage.getCustomerByEmail(lead.email);
+        if (!customer) {
+          // Create new customer from lead data
+          customer = await storage.createCustomer({
+            name: lead.name || `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Guest',
+            email: lead.email,
+            phone: lead.phone || '',
+            billingAddress: null
+          });
+        }
+        customerId = customer.id;
+      }
+      
+      // Update lead status to quote_saved and link customer
       const updatedLead = await storage.updateLead(leadId, {
-        status: "quote_saved"
+        status: "quote_saved",
+        convertedCustomerId: customerId
       });
       
       res.json({ 

@@ -18,6 +18,18 @@ export default function MyThemePartyPage() {
 
   useEffect(() => {
     const createBooking = async () => {
+      // Check for leadId query parameter (for admin quote links)
+      const urlParams = new URLSearchParams(window.location.search);
+      const leadIdParam = urlParams.get('leadId');
+      
+      if (leadIdParam) {
+        const parsedLeadId = parseInt(leadIdParam, 10);
+        if (!isNaN(parsedLeadId)) {
+          setLeadId(parsedLeadId);
+          return;
+        }
+      }
+      
       if (!id) {
         // Root route - create new booking
         setIsCreating(true);

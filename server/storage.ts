@@ -118,7 +118,7 @@ export interface IStorage {
   createVerificationCode(email: string, code: string): Promise<void>;
   verifyCode(email: string, code: string): Promise<{ customerId: number } | null>;
   getCustomerEvents(customerId: number): Promise<any[]>;
-  getCustomerQuotes(customerEmail: string): Promise<any[]>;
+  getCustomerQuotes(customerId: number): Promise<any[]>;
   getPublicEvents(): Promise<any[]>;
   
   // Enhanced invoice and lead methods
@@ -317,7 +317,7 @@ export class MemStorage implements IStorage {
     return events.filter(event => event.customerId === customerId);
   }
 
-  async getCustomerQuotes(customerEmail: string): Promise<any[]> {
+  async getCustomerQuotes(customerId: number): Promise<any[]> {
     // Return saved quotes from leads table
     return [];
   }
@@ -1366,14 +1366,14 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getCustomerQuotes(customerEmail: string): Promise<any[]> {
-    // Get customer's saved quotes from leads table
+  async getCustomerQuotes(customerId: number): Promise<any[]> {
+    // Get customer's saved quotes from leads table using convertedCustomerId
     const customerQuotes = await db
       .select()
       .from(leads)
       .where(
         and(
-          eq(leads.email, customerEmail),
+          eq(leads.convertedCustomerId, customerId),
           eq(leads.status, "quote_saved")
         )
       )

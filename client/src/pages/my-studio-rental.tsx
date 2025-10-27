@@ -24,6 +24,7 @@ export default function MyStudioRentalPage() {
   }, [id, setLocation]);
 
   // If we have a valid ID, render the booking page
+  // Note: leadId query parameter is handled inside StudioRentalReservationPage
   if (id && isValidBookingId(id)) {
     return <StudioRentalReservationPage />;
   }
