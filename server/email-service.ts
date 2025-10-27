@@ -1,11 +1,44 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
-if (!process.env.SENDGRID_API_KEY) {
-  console.warn("SENDGRID_API_KEY not found. Email functionality will be disabled.");
+let connectionSettings: any;
+
+async function getCredentials() {
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY 
+    ? 'repl ' + process.env.REPL_IDENTITY 
+    : process.env.WEB_REPL_RENEWAL 
+    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+    : null;
+
+  if (!xReplitToken) {
+    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+  }
+
+  connectionSettings = await fetch(
+    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=resend',
+    {
+      headers: {
+        'Accept': 'application/json',
+        'X_REPLIT_TOKEN': xReplitToken
+      }
+    }
+  ).then(res => res.json()).then(data => data.items?.[0]);
+
+  if (!connectionSettings || (!connectionSettings.settings.api_key)) {
+    throw new Error('Resend not connected');
+  }
+  return {apiKey: connectionSettings.settings.api_key, fromEmail: connectionSettings.settings.from_email};
 }
 
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// WARNING: Never cache this client.
+// Access tokens expire, so a new client must be created each time.
+// Always call this function again to get a fresh client.
+async function getUncachableResendClient() {
+  const {apiKey, fromEmail} = await getCredentials();
+  return {
+    client: new Resend(apiKey),
+    fromEmail: fromEmail || 'hosthampton295@gmail.com'
+  };
 }
 
 interface EmailParams {
@@ -358,52 +391,41 @@ export const EMAIL_TEMPLATES: { [key: string]: EmailTemplate } = {
 
 export async function sendEmail(params: EmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
-    if (!process.env.SENDGRID_API_KEY) {
-      return {
-        success: false,
-        error: "SendGrid API key not configured"
-      };
-    }
+    const { client, fromEmail } = await getUncachableResendClient();
 
-    const msg: any = {
+    const emailData: any = {
+      from: params.from || fromEmail,
       to: params.to,
-      from: {
-        email: params.from || 'hosthampton295@gmail.com',
-        name: 'Host Hampton'
-      },
       subject: params.subject,
     };
 
-    if (params.templateId) {
-      msg.templateId = params.templateId;
-      msg.dynamicTemplateData = params.dynamicTemplateData;
-    } else {
-      if (params.html) {
-        msg.html = params.html;
-      }
-      if (params.text) {
-        msg.text = params.text;
-      }
+    if (params.html) {
+      emailData.html = params.html;
+    }
+    if (params.text) {
+      emailData.text = params.text;
     }
 
-    const [response] = await sgMail.send(msg);
+    const { data, error } = await client.emails.send(emailData);
     
+    if (error) {
+      console.error('Resend email error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send email'
+      };
+    }
+
     return {
       success: true,
-      messageId: response.headers['x-message-id'] as string
+      messageId: data?.id
     };
   } catch (error: any) {
-    console.error('SendGrid email error:', error);
-    
-    // Log more detailed error information
-    if (error.response) {
-      console.error('SendGrid response status:', error.response.status);
-      console.error('SendGrid response body:', error.response.body);
-    }
+    console.error('Resend email error:', error);
     
     return {
       success: false,
-      error: error.response?.body?.errors?.[0]?.message || error.message || 'Failed to send email'
+      error: error.message || 'Failed to send email'
     };
   }
 }
@@ -451,7 +473,7 @@ export async function sendTemplateEmail(
 
   return sendEmail({
     to,
-    from: from || 'hosthampton295@gmail.com',
+    from,
     subject,
     html
   });
