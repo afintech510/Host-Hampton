@@ -1116,6 +1116,192 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save as Quote - Updates lead status to "quote_saved"
+  app.post("/api/leads/:id/save-quote", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const leadId = parseInt(id);
+      
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Lead not found" 
+        });
+      }
+      
+      // Update lead status to quote_saved
+      const updatedLead = await storage.updateLead(leadId, {
+        status: "quote_saved"
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Quote saved successfully",
+        quoteNumber: leadId,
+        lead: updatedLead
+      });
+    } catch (error) {
+      console.error("Error saving quote:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to save quote" 
+      });
+    }
+  });
+
+  // Send quote email to customer
+  app.post("/api/leads/:id/send-quote-email", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const leadId = parseInt(id);
+      
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Lead not found" 
+        });
+      }
+      
+      if (!lead.email) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Lead does not have an email address" 
+        });
+      }
+      
+      // Create quote link based on lead type
+      const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+      const baseUrl = replitDomain ? `https://${replitDomain}` : 'http://localhost:5000';
+      
+      let quoteLink = '';
+      if (lead.eventType === 'kids-party' || lead.partyType === 'full-service') {
+        quoteLink = `${baseUrl}/my-theme-party/${leadId}`;
+      } else if (lead.eventType === 'studio-rental') {
+        quoteLink = `${baseUrl}/my-studio-rental/${leadId}`;
+      } else if (lead.eventType === 'permanent-jewelry') {
+        quoteLink = `${baseUrl}/my-permanent-jewelry/${leadId}`;
+      } else if (lead.eventType === 'trucker-hat') {
+        quoteLink = `${baseUrl}/my-trucker-hat/${leadId}`;
+      }
+      
+      // Send quote email (we'll create the template in a moment)
+      await sendEmail({
+        to: lead.email,
+        subject: `Your Host Hampton Quote #${leadId}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #9333EA;">Your Host Hampton Quote</h1>
+            <p>Hi ${lead.name || 'there'},</p>
+            <p>Thank you for your interest in Host Hampton! Your quote #${leadId} is ready.</p>
+            
+            ${lead.estimatedCost ? `<p><strong>Estimated Total: $${(lead.estimatedCost / 100).toFixed(2)}</strong></p>` : ''}
+            
+            <p>
+              <a href="${quoteLink}" 
+                 style="display: inline-block; background-color: #9333EA; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+                View & Book Your Event
+              </a>
+            </p>
+            
+            <p>Questions? Reply to this email or call us at 631-998-9325</p>
+            
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              Host Hampton<br>
+              hosthampton295@gmail.com<br>
+              631-998-9325
+            </p>
+          </div>
+        `
+      });
+      
+      // Update lead status
+      await storage.updateLead(leadId, {
+        status: "quote_sent",
+        lastContactedAt: new Date()
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Quote email sent successfully"
+      });
+    } catch (error) {
+      console.error("Error sending quote email:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to send quote email" 
+      });
+    }
+  });
+
+  // Get customer quotes by email or phone
+  app.post("/api/customer-quotes", async (req, res) => {
+    try {
+      const { email, phone } = req.body;
+      
+      if (!email && !phone) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email or phone is required" 
+        });
+      }
+      
+      const allLeads = await storage.getLeads();
+      
+      // Filter leads that match customer email/phone and are saved quotes
+      const customerQuotes = allLeads.filter(lead => {
+        const matchesContact = (email && lead.email === email) || (phone && lead.phone === phone);
+        const isQuote = lead.status === "quote_saved" || lead.status === "quote_sent";
+        return matchesContact && isQuote;
+      });
+      
+      res.json({ 
+        success: true, 
+        quotes: customerQuotes 
+      });
+    } catch (error) {
+      console.error("Error fetching customer quotes:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch customer quotes" 
+      });
+    }
+  });
+
+  // Convert quote to booking
+  app.post("/api/leads/:id/convert-to-booking", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const leadId = parseInt(id);
+      
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Lead not found" 
+        });
+      }
+      
+      // Update lead status to confirmed
+      const updatedLead = await storage.updateLead(leadId, {
+        status: "confirmed"
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Quote converted to booking successfully",
+        lead: updatedLead 
+      });
+    } catch (error) {
+      console.error("Error converting quote to booking:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to convert quote to booking" 
+      });
+    }
+  });
+
   // Enhanced lead capture from booking form
   app.post("/api/leads", async (req, res) => {
     try {
@@ -1529,10 +1715,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get or create lead
-      let lead;
-      try {
-        lead = await storage.getLead(leadId);
-        
+      let lead = await storage.getLead(leadId);
+      
+      if (lead) {
         // Update lead with latest information
         await storage.updateLead(lead.id, {
           email: billingData.email,
@@ -1546,7 +1731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           estimatedCost: studioData.totalWithTax,
           status: "quote_sent",
         });
-      } catch (error) {
+      } else {
         // Lead doesn't exist, create a new one
         lead = await storage.createLead({
           source: "website",
