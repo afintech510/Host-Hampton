@@ -144,7 +144,7 @@ export default function OurSpace() {
         </div>
 
         {/* Decorative elements */}
-        <div className="absolute top-20 right-20 text-4xl text-mauve-rose animate-pulse">
+        <div className="absolute top-10 right-10 text-4xl text-mauve-rose animate-pulse">
           ✦
         </div>
         <div className="absolute bottom-20 left-20 text-3xl text-mauve-rose animate-pulse [animation-delay:-1s]">

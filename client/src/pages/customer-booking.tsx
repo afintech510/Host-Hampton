@@ -365,16 +365,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       // Find the package from the database
       const selectedPackage = allPackages?.find((pkg: any) => {
         const pkgName = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-        return pkgName.includes(`${starLevel}star`) || pkgName.includes(`star${starLevel}`);
+        return (
+          pkgName.includes(`${starLevel}star`) ||
+          pkgName.includes(`star${starLevel}`)
+        );
       });
 
       // Use base_price from database or fallback
       basePrice = selectedPackage?.basePrice || 0;
-      
+
       // Add theme markup if applicable
       if (booking.partyTheme && booking.partyTheme !== "no-thanks") {
         const selectedThemeData = allThemes?.find(
-          (t: any) => t.name === booking.partyTheme
+          (t: any) => t.name === booking.partyTheme,
         );
         const themeMarkup = selectedThemeData?.price || 0;
         basePrice += themeMarkup;
@@ -384,7 +387,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
       const guestCount = booking.guestCount || 0;
       const maxGuests = selectedPackage?.maxGuests || 10;
       const additionalGuests = Math.max(0, guestCount - maxGuests);
-      
+
       if (additionalGuests > 0) {
         // Per-guest pricing based on star level
         let perGuestPrice = 35; // Default for 1-2 star
@@ -765,7 +768,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             size="icon"
                             className="h-10 w-10 rounded-full shrink-0"
                             onClick={() => {
-                              const newAge = Math.max(1, (booking.childAge || 1) - 1);
+                              const newAge = Math.max(
+                                1,
+                                (booking.childAge || 1) - 1,
+                              );
                               handleRealTimeUpdate("childAge", newAge);
                             }}
                           >
@@ -791,7 +797,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                             size="icon"
                             className="h-10 w-10 rounded-full shrink-0"
                             onClick={() => {
-                              const newAge = Math.min(18, (booking.childAge || 1) + 1);
+                              const newAge = Math.min(
+                                18,
+                                (booking.childAge || 1) + 1,
+                              );
                               handleRealTimeUpdate("childAge", newAge);
                             }}
                           >
@@ -819,7 +828,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         min={(() => {
                           const tomorrow = new Date();
                           tomorrow.setDate(tomorrow.getDate() + 1);
-                          return tomorrow.toISOString().split('T')[0];
+                          return tomorrow.toISOString().split("T")[0];
                         })()}
                         value={
                           booking.eventDate
@@ -1050,7 +1059,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           size="icon"
                           className="h-10 w-10 rounded-full shrink-0"
                           onClick={() => {
-                            const newCount = Math.max(1, (booking.guestCount || 1) - 1);
+                            const newCount = Math.max(
+                              1,
+                              (booking.guestCount || 1) - 1,
+                            );
                             handleRealTimeUpdate("guestCount", newCount);
                           }}
                         >
@@ -1243,9 +1255,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                     : selectedTheme}
                               </span>
                               {(() => {
-                                const themePrice = allThemes?.find(
-                                  (t: any) => t.name === selectedTheme,
-                                )?.price || 0;
+                                const themePrice =
+                                  allThemes?.find(
+                                    (t: any) => t.name === selectedTheme,
+                                  )?.price || 0;
                                 return themePrice > 0 ? (
                                   <span className="text-sm font-semibold text-purple-600">
                                     +${themePrice}
@@ -1346,14 +1359,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               packageDefinitions[
                                 selectedPackageKey as keyof typeof packageDefinitions
                               ];
-                            
+
                             // Get the database package for pricing
                             const dbPackage = allPackages?.find((pkg: any) => {
-                              const pkgName = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-                              return pkgName.includes(`${selectedStars}star`) || pkgName.includes(`star${selectedStars}`);
+                              const pkgName = pkg.name
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]/g, "");
+                              return (
+                                pkgName.includes(`${selectedStars}star`) ||
+                                pkgName.includes(`star${selectedStars}`)
+                              );
                             });
                             const displayPrice = dbPackage?.basePrice || 0;
-                            
+
                             return (
                               <div>
                                 <div className="flex justify-between items-center mb-3">
@@ -1880,7 +1898,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       <div className="font-medium flex items-center justify-center gap-2">
                                         🍕 Pizza
                                         {currentFood === "pizza" && (
-                                          <span className="text-green-600">✓</span>
+                                          <span className="text-green-600">
+                                            ✓
+                                          </span>
                                         )}
                                       </div>
                                     </div>
@@ -1900,7 +1920,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       <div className="font-medium flex items-center justify-center gap-2">
                                         🥯 Bagels
                                         {currentFood === "bagels" && (
-                                          <span className="text-green-600">✓</span>
+                                          <span className="text-green-600">
+                                            ✓
+                                          </span>
                                         )}
                                       </div>
                                     </div>
@@ -1920,7 +1942,9 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                       <div className="font-medium flex items-center justify-center gap-2">
                                         🚫 None
                                         {currentFood === "none" && (
-                                          <span className="text-green-600">✓</span>
+                                          <span className="text-green-600">
+                                            ✓
+                                          </span>
                                         )}
                                       </div>
                                     </div>
@@ -2055,8 +2079,11 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                                 : flavor === "vanilla"
                                                   ? "🧁 Vanilla Cupcakes"
                                                   : "🍫 Chocolate Cupcakes"}
-                                              {currentCupcakeFlavor === flavor && (
-                                                <span className="text-green-600">✓</span>
+                                              {currentCupcakeFlavor ===
+                                                flavor && (
+                                                <span className="text-green-600">
+                                                  ✓
+                                                </span>
                                               )}
                                             </div>
                                           </div>
@@ -2634,7 +2661,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                   {booking.partyType === "full-service" && (
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <h3 className="text-lg font-bold text-purple-800">
-                        {booking.childName || "Child"} turning{" "}
+                        {booking.childName || "Child"}’s Birthday ⭐ Turning{" "}
                         {booking.childAge || "Age"}! 🥳
                       </h3>
                     </div>
@@ -2948,35 +2975,53 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           <>
                             {(() => {
                               // Find the selected package from database
-                              const selectedPackage = allPackages?.find((pkg: any) => {
-                                const pkgName = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-                                return pkgName.includes(`${selectedStars}star`) || pkgName.includes(`star${selectedStars}`);
-                              });
-                              
-                              const packageBasePrice = selectedPackage?.basePrice || 0;
-                              const maxGuests = selectedPackage?.maxGuests || 10;
+                              const selectedPackage = allPackages?.find(
+                                (pkg: any) => {
+                                  const pkgName = pkg.name
+                                    .toLowerCase()
+                                    .replace(/[^a-z0-9]/g, "");
+                                  return (
+                                    pkgName.includes(`${selectedStars}star`) ||
+                                    pkgName.includes(`star${selectedStars}`)
+                                  );
+                                },
+                              );
+
+                              const packageBasePrice =
+                                selectedPackage?.basePrice || 0;
+                              const maxGuests =
+                                selectedPackage?.maxGuests || 10;
                               const guestCount = booking.guestCount || 0;
-                              const additionalGuests = Math.max(0, guestCount - maxGuests);
-                              
+                              const additionalGuests = Math.max(
+                                0,
+                                guestCount - maxGuests,
+                              );
+
                               // Calculate per-guest price based on star level
                               let perGuestPrice = 35;
                               if (selectedStars === 1 || selectedStars === 2) {
                                 perGuestPrice = 35;
-                              } else if (selectedStars === 3 || selectedStars === 4) {
+                              } else if (
+                                selectedStars === 3 ||
+                                selectedStars === 4
+                              ) {
                                 perGuestPrice = 45;
                               } else if (selectedStars === 5) {
                                 perGuestPrice = 50;
                               }
-                              
+
                               // Calculate theme price if applicable
                               let themePrice = 0;
-                              if (booking.partyTheme && booking.partyTheme !== "no-thanks") {
+                              if (
+                                booking.partyTheme &&
+                                booking.partyTheme !== "no-thanks"
+                              ) {
                                 const selectedThemeData = allThemes?.find(
-                                  (t: any) => t.name === booking.partyTheme
+                                  (t: any) => t.name === booking.partyTheme,
                                 );
                                 themePrice = selectedThemeData?.price || 0;
                               }
-                              
+
                               return (
                                 <>
                                   <div className="flex justify-between">
@@ -3003,7 +3048,10 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                         Additional guests ({additionalGuests})
                                       </span>
                                       <span className="font-semibold">
-                                        +{formatPrice(additionalGuests * perGuestPrice)}
+                                        +
+                                        {formatPrice(
+                                          additionalGuests * perGuestPrice,
+                                        )}
                                       </span>
                                     </div>
                                   )}
@@ -3240,19 +3288,21 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                               {formatPrice(200)}
                             </span>
                           </div>
-                          
+
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">
-                              Balance Due{booking.eventDate && ` by ${(() => {
-                                const partyDate = new Date(booking.eventDate);
-                                const dueDate = new Date(partyDate);
-                                dueDate.setDate(partyDate.getDate() - 2);
-                                return dueDate.toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                });
-                              })()}`}
+                              Balance Due
+                              {booking.eventDate &&
+                                ` by ${(() => {
+                                  const partyDate = new Date(booking.eventDate);
+                                  const dueDate = new Date(partyDate);
+                                  dueDate.setDate(partyDate.getDate() - 2);
+                                  return dueDate.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  });
+                                })()}`}
                             </span>
                             <span className="font-semibold">
                               {formatPrice(
