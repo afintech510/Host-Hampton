@@ -24,14 +24,12 @@ interface CustomerEvent {
 interface AuthState {
   isAuthenticated: boolean;
   customerEmail: string | null;
-  customerId: number | null;
 }
 
 export default function MyEvents() {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     customerEmail: null,
-    customerId: null,
   });
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -70,7 +68,6 @@ export default function MyEvents() {
       setAuthState({
         isAuthenticated: true,
         customerEmail: email,
-        customerId: data.customerId,
       });
       toast({
         title: "Welcome!",
@@ -86,10 +83,33 @@ export default function MyEvents() {
     },
   });
 
-  // Fetch customer events
-  const { data: events, isLoading: eventsLoading } = useQuery({
-    queryKey: ["/api/customer/events", authState.customerId],
-    enabled: authState.isAuthenticated && !!authState.customerId,
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/auth/logout", {});
+      return res.json();
+    },
+    onSuccess: () => {
+      setAuthState({
+        isAuthenticated: false,
+        customerEmail: null,
+      });
+      setEmail("");
+      setVerificationCode("");
+      setShowCodeInput(false);
+    },
+  });
+
+  // Fetch customer events, quotes, and public events (uses session authentication)
+  const { data: customerData, isLoading: eventsLoading } = useQuery({
+    queryKey: ["/api/customer/events"],
+    queryFn: async () => {
+      const response = await fetch("/api/customer/events", {
+        credentials: "include", // Include cookies for session auth
+      });
+      return response.json();
+    },
+    enabled: authState.isAuthenticated,
   });
 
   const handleSendCode = (e: React.FormEvent) => {
@@ -119,14 +139,7 @@ export default function MyEvents() {
   };
 
   const handleLogout = () => {
-    setAuthState({
-      isAuthenticated: false,
-      customerEmail: null,
-      customerId: null,
-    });
-    setEmail("");
-    setVerificationCode("");
-    setShowCodeInput(false);
+    logoutMutation.mutate();
   };
 
   const getStatusColor = (status: string) => {
@@ -246,21 +259,6 @@ export default function MyEvents() {
                       variant="outline"
                       className="w-full mt-2"
                       onClick={() => {
-                        // Skip verification for testing - simulate successful auth
-                        setAuthState({
-                          isAuthenticated: true,
-                          customerEmail: email,
-                          customerId: 1, // Test customer ID
-                        });
-                      }}
-                    >
-                      Skip Verification (Testing)
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
                         setShowCodeInput(false);
                         setVerificationCode("");
                       }}
@@ -295,67 +293,202 @@ export default function MyEvents() {
             {eventsLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A1B5C8' }} />
-                <span className="ml-2 text-gray-600">Loading your events...</span>
-              </div>
-            ) : (events as any)?.events?.length > 0 ? (
-              <div className="space-y-6">
-                {(events as any).events.map((event: CustomerEvent) => (
-                  <Card key={event.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            {event.eventType}
-                          </h3>
-                          <p className="text-gray-600 mb-2">{event.description}</p>
-                          {event.location && (
-                            <p className="text-sm text-gray-500">{event.location}</p>
-                          )}
-                        </div>
-                        <Badge className={getStatusColor(event.status)}>
-                          {getStatusIcon(event.status)}
-                          <span className="ml-1 capitalize">{event.status}</span>
-                        </Badge>
-                      </div>
-                      
-                      <Separator className="my-4" />
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          {new Date(event.eventDate).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <DollarSign className="h-4 w-4 mr-2" />
-                          Total: ${(event.totalAmount / 100).toFixed(2)}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Paid: ${(event.paidAmount / 100).toFixed(2)}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                <span className="ml-2 text-gray-600">Loading your information...</span>
               </div>
             ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No Events Found
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    You don't have any events or bookings yet.
-                  </p>
-                  <Button 
-                    className="text-white rounded-full"
-                    style={{ backgroundColor: '#A1B5C8' }}
-                  >
-                    Book Your First Event
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="space-y-8">
+                {/* Saved Quotes Section */}
+                {customerData?.quotes && customerData.quotes.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Saved Quotes</h2>
+                    <div className="space-y-4">
+                      {customerData.quotes.map((quote: any) => (
+                        <Card key={quote.id} className="hover:shadow-md transition-shadow border-l-4 border-l-yellow-500">
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="text-xl font-semibold text-gray-900">
+                                    {quote.eventType}
+                                  </h3>
+                                  <Badge className="bg-yellow-100 text-yellow-800">
+                                    Quote #{quote.quoteNumber}
+                                  </Badge>
+                                </div>
+                                <p className="text-gray-600 mb-2">{quote.description}</p>
+                                {quote.location && (
+                                  <p className="text-sm text-gray-500">{quote.location}</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <Separator className="my-4" />
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              {quote.eventDate && (
+                                <div className="flex items-center text-gray-600">
+                                  <Calendar className="h-4 w-4 mr-2" />
+                                  {new Date(quote.eventDate).toLocaleDateString()}
+                                </div>
+                              )}
+                              <div className="flex items-center text-gray-600">
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                Estimated: ${(quote.totalAmount / 100).toFixed(2)}
+                              </div>
+                              <div className="flex items-center text-gray-600">
+                                <Clock className="h-4 w-4 mr-2" />
+                                {quote.startTime && quote.endTime ? `${quote.startTime} - ${quote.endTime}` : 'Time TBD'}
+                              </div>
+                            </div>
+                            
+                            <div className="mt-4 flex gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1"
+                                data-testid={`button-view-quote-${quote.id}`}
+                              >
+                                View Details
+                              </Button>
+                              <Button
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                                data-testid={`button-confirm-quote-${quote.id}`}
+                              >
+                                Confirm Booking
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Confirmed Bookings Section */}
+                {customerData?.events && customerData.events.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Confirmed Bookings</h2>
+                    <div className="space-y-4">
+                      {customerData.events.map((event: CustomerEvent) => (
+                        <Card key={event.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                  {event.eventType}
+                                </h3>
+                                <p className="text-gray-600 mb-2">{event.description}</p>
+                                {event.location && (
+                                  <p className="text-sm text-gray-500">{event.location}</p>
+                                )}
+                              </div>
+                              <Badge className={getStatusColor(event.status)}>
+                                {getStatusIcon(event.status)}
+                                <span className="ml-1 capitalize">{event.status}</span>
+                              </Badge>
+                            </div>
+                            
+                            <Separator className="my-4" />
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div className="flex items-center text-gray-600">
+                                <Calendar className="h-4 w-4 mr-2" />
+                                {new Date(event.eventDate).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center text-gray-600">
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                Total: ${(event.totalAmount / 100).toFixed(2)}
+                              </div>
+                              <div className="flex items-center text-gray-600">
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Paid: ${(event.paidAmount / 100).toFixed(2)}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Public Events Section */}
+                {customerData?.publicEvents && customerData.publicEvents.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming Public Events</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {customerData.publicEvents.map((event: any) => (
+                        <Card key={event.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                  {event.eventType}
+                                </h3>
+                                <p className="text-sm text-gray-600 mb-2">{event.description}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center text-gray-600">
+                                <Calendar className="h-4 w-4 mr-2" />
+                                {new Date(event.eventDate).toLocaleDateString()}
+                              </div>
+                              {event.sessionTime && (
+                                <div className="flex items-center text-gray-600">
+                                  <Clock className="h-4 w-4 mr-2" />
+                                  {event.sessionTime}
+                                </div>
+                              )}
+                              <div className="flex items-center text-gray-600">
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                ${(event.price / 100).toFixed(0)}
+                                {event.siblingPrice && ` (Siblings: $${(event.siblingPrice / 100).toFixed(0)})`}
+                              </div>
+                              {event.availableTickets !== null && (
+                                <div className="flex items-center text-gray-600">
+                                  <span className="mr-2">🎟️</span>
+                                  {event.availableTickets} / {event.maxTickets} spots available
+                                </div>
+                              )}
+                            </div>
+                            
+                            <Button
+                              className="w-full mt-4"
+                              style={{ backgroundColor: '#A1B5C8' }}
+                              data-testid={`button-register-${event.id}`}
+                            >
+                              Register Now
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Empty State */}
+                {(!customerData?.quotes || customerData.quotes.length === 0) &&
+                 (!customerData?.events || customerData.events.length === 0) &&
+                 (!customerData?.publicEvents || customerData.publicEvents.length === 0) && (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No Events Found
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        You don't have any quotes, bookings, or public events yet.
+                      </p>
+                      <Button 
+                        className="text-white rounded-full"
+                        style={{ backgroundColor: '#A1B5C8' }}
+                        onClick={() => window.location.href = '/'}
+                      >
+                        Explore Events
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
           </div>
         )}

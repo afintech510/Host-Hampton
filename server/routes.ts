@@ -67,9 +67,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Continue with success response since code is stored in database
       }
       
-      // Also log for debugging
-      console.log(`Verification code for ${email}: ${code}`);
-      
       res.json({
         success: true,
         message: "Verification code sent to your email"
@@ -103,10 +100,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      res.json({
-        success: true,
-        customerId: result.customerId,
-        message: "Authentication successful"
+      // Regenerate session to prevent session fixation attacks
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regeneration error:", err);
+          return res.status(500).json({
+            success: false,
+            message: "Failed to create session"
+          });
+        }
+        
+        // Store customerId in new session for secure authentication
+        req.session.customerId = result.customerId;
+        req.session.customerEmail = email;
+        
+        res.json({
+          success: true,
+          message: "Authentication successful"
+        });
       });
     } catch (error) {
       console.error("Verify code error:", error);
@@ -119,20 +130,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/customer/events", async (req, res) => {
     try {
-      const customerId = parseInt(req.query.customerId as string);
-      
-      if (!customerId) {
-        return res.status(400).json({
+      // Require authenticated session
+      if (!req.session.customerId) {
+        return res.status(401).json({
           success: false,
-          message: "Customer ID is required"
+          message: "Authentication required. Please log in first."
         });
       }
       
+      const customerId = req.session.customerId;
+      
+      // Get customer to retrieve their email
+      const customer = await storage.getCustomer(customerId);
+      
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "Customer not found"
+        });
+      }
+      
+      // Get confirmed bookings (events)
       const events = await storage.getCustomerEvents(customerId);
+      
+      // Get saved quotes (from leads table using verified customer email)
+      const quotes = await storage.getCustomerQuotes(customer.email);
+      
+      // Get public events (workshops, classes, etc.)
+      const publicEvents = await storage.getPublicEvents();
       
       res.json({
         success: true,
-        events
+        events,
+        quotes,
+        publicEvents
       });
     } catch (error) {
       console.error("Get customer events error:", error);
@@ -141,6 +172,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to retrieve events"
       });
     }
+  });
+  
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to logout"
+        });
+      }
+      // Clear cookie with matching options from session config
+      res.clearCookie("connect.sid", {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production"
+      });
+      res.json({
+        success: true,
+        message: "Logged out successfully"
+      });
+    });
   });
   
   // INQUIRY CREATION ENDPOINT - For "Show Price" and contact form submissions

@@ -118,6 +118,8 @@ export interface IStorage {
   createVerificationCode(email: string, code: string): Promise<void>;
   verifyCode(email: string, code: string): Promise<{ customerId: number } | null>;
   getCustomerEvents(customerId: number): Promise<any[]>;
+  getCustomerQuotes(customerEmail: string): Promise<any[]>;
+  getPublicEvents(): Promise<any[]>;
   
   // Enhanced invoice and lead methods
   getInvoiceById(id: number): Promise<any | null>;
@@ -313,6 +315,16 @@ export class MemStorage implements IStorage {
   async getCustomerEvents(customerId: number): Promise<any[]> {
     const events = await this.getEvents();
     return events.filter(event => event.customerId === customerId);
+  }
+
+  async getCustomerQuotes(customerEmail: string): Promise<any[]> {
+    // Return saved quotes from leads table
+    return [];
+  }
+
+  async getPublicEvents(): Promise<any[]> {
+    // Return public events that anyone can attend
+    return [];
   }
 
   async getPackages(): Promise<Package[]> {
@@ -1351,6 +1363,76 @@ export class DatabaseStorage implements IStorage {
       description: event.description || event.notes || "",
       guestCount: event.guestCount,
       location: "Host Hampton" // Default location
+    }));
+  }
+
+  async getCustomerQuotes(customerEmail: string): Promise<any[]> {
+    // Get customer's saved quotes from leads table
+    const customerQuotes = await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          eq(leads.email, customerEmail),
+          eq(leads.status, "quote_saved")
+        )
+      )
+      .orderBy(leads.createdAt);
+    
+    return customerQuotes.map(lead => ({
+      id: lead.id,
+      quoteNumber: lead.id,
+      eventType: lead.eventType,
+      eventDate: lead.eventDate,
+      startTime: lead.startTime,
+      endTime: lead.endTime,
+      totalAmount: lead.estimatedCost || 0,
+      description: lead.notes || "",
+      formData: lead.formData,
+      location: lead.location || "Host Hampton",
+      createdAt: lead.createdAt
+    }));
+  }
+
+  async getPublicEvents(): Promise<any[]> {
+    // Get public events from products with sessions (workshops, classes, etc.)
+    const publicEvents = await db
+      .select({
+        sessionId: productSessions.id,
+        sessionDate: productSessions.sessionDate,
+        sessionTime: productSessions.sessionTime,
+        productId: products.id,
+        productName: products.name,
+        productDescription: products.description,
+        price: products.price,
+        siblingPrice: products.siblingPrice,
+        imageUrl: products.imageUrl,
+        availableTickets: productSessions.availableTickets,
+        maxTickets: productSessions.maxTickets
+      })
+      .from(productSessions)
+      .leftJoin(products, eq(productSessions.productId, products.id))
+      .where(
+        and(
+          eq(products.isActive, true),
+          eq(productSessions.isActive, true)
+        )
+      )
+      .orderBy(productSessions.sessionDate);
+    
+    return publicEvents.map(event => ({
+      id: event.sessionId,
+      productId: event.productId,
+      eventType: event.productName || "Public Event",
+      eventDate: event.sessionDate,
+      sessionTime: event.sessionTime,
+      price: event.price || 0,
+      siblingPrice: event.siblingPrice || null,
+      description: event.productDescription || "",
+      imageUrl: event.imageUrl || null,
+      availableTickets: event.availableTickets,
+      maxTickets: event.maxTickets,
+      location: "Host Hampton"
     }));
   }
 
