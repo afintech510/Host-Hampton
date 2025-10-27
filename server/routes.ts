@@ -196,6 +196,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     });
   });
+
+  // Change request endpoint - for customers to request changes to their bookings
+  app.post("/api/events/change-request", async (req, res) => {
+    try {
+      const { eventId, message, customerEmail } = req.body;
+      
+      if (!eventId || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "Event ID and message are required"
+        });
+      }
+
+      // Create a communication record for the change request
+      await storage.createCommunication({
+        type: "email",
+        direction: "inbound",
+        recipientEmail: "hosthampton295@gmail.com",
+        recipientName: "Host Hampton Team",
+        subject: `Change Request for Event #${eventId}`,
+        content: `Customer Email: ${customerEmail || 'Unknown'}\nEvent ID: ${eventId}\n\nChange Request:\n${message}`,
+        status: "sent",
+        provider: "internal",
+        sentAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        message: "Change request submitted successfully"
+      });
+    } catch (error) {
+      console.error("Change request error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to submit change request"
+      });
+    }
+  });
   
   // INQUIRY CREATION ENDPOINT - For "Show Price" and contact form submissions
   app.post("/api/create-inquiry", async (req, res) => {

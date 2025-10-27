@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Calendar, Clock, DollarSign, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Mail, Calendar, Clock, DollarSign, CheckCircle, XCircle, Loader2, MessageSquare, ChevronDown, ChevronUp, Users, MapPin, AlertCircle } from "lucide-react";
 import Navigation from "@/components/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -19,6 +21,7 @@ interface CustomerEvent {
   paidAmount: number;
   description: string;
   location?: string;
+  guestCount?: number;
 }
 
 interface AuthState {
@@ -34,6 +37,9 @@ export default function MyEvents() {
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [showCodeInput, setShowCodeInput] = useState(false);
+  const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
+  const [changeRequest, setChangeRequest] = useState("");
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Send verification code mutation
@@ -97,6 +103,33 @@ export default function MyEvents() {
       setEmail("");
       setVerificationCode("");
       setShowCodeInput(false);
+    },
+  });
+
+  // Send change request mutation
+  const sendChangeRequestMutation = useMutation({
+    mutationFn: async ({ eventId, message }: { eventId: number; message: string }) => {
+      const res = await apiRequest("POST", "/api/events/change-request", { 
+        eventId, 
+        message,
+        customerEmail: authState.customerEmail 
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Request Sent",
+        description: "Your change request has been sent to our team. We'll contact you soon!",
+      });
+      setChangeRequest("");
+      setSelectedEventId(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send request. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -368,44 +401,204 @@ export default function MyEvents() {
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Confirmed Bookings</h2>
                     <div className="space-y-4">
-                      {customerData.events.map((event: CustomerEvent) => (
-                        <Card key={event.id} className="hover:shadow-md transition-shadow">
-                          <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                              <div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                  {event.eventType}
-                                </h3>
-                                <p className="text-gray-600 mb-2">{event.description}</p>
-                                {event.location && (
-                                  <p className="text-sm text-gray-500">{event.location}</p>
-                                )}
+                      {customerData.events.map((event: CustomerEvent) => {
+                        const remainingBalance = event.totalAmount - event.paidAmount;
+                        const eventDate = new Date(event.eventDate);
+                        const balanceDueDate = new Date(eventDate);
+                        balanceDueDate.setDate(balanceDueDate.getDate() - 7); // Balance due 7 days before event
+                        const isExpanded = expandedEvent === event.id;
+                        
+                        return (
+                          <Card key={event.id} className="hover:shadow-md transition-shadow">
+                            <CardContent className="p-6">
+                              <div className="flex justify-between items-start mb-4">
+                                <div className="flex-1">
+                                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                    {event.eventType}
+                                  </h3>
+                                  <p className="text-gray-600 mb-2">{event.description}</p>
+                                  {event.location && (
+                                    <div className="flex items-center text-sm text-gray-500">
+                                      <MapPin className="h-4 w-4 mr-1" />
+                                      {event.location}
+                                    </div>
+                                  )}
+                                </div>
+                                <Badge className={getStatusColor(event.status)}>
+                                  {getStatusIcon(event.status)}
+                                  <span className="ml-1 capitalize">{event.status}</span>
+                                </Badge>
                               </div>
-                              <Badge className={getStatusColor(event.status)}>
-                                {getStatusIcon(event.status)}
-                                <span className="ml-1 capitalize">{event.status}</span>
-                              </Badge>
-                            </div>
-                            
-                            <Separator className="my-4" />
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                              <div className="flex items-center text-gray-600">
-                                <Calendar className="h-4 w-4 mr-2" />
-                                {new Date(event.eventDate).toLocaleDateString()}
+                              
+                              <Separator className="my-4" />
+                              
+                              {/* Payment Summary */}
+                              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <div className="flex items-center justify-between text-sm mb-2">
+                                      <span className="text-gray-600">Total Amount:</span>
+                                      <span className="font-semibold">${(event.totalAmount / 100).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm mb-2">
+                                      <span className="text-gray-600 flex items-center">
+                                        <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                                        Amount Paid:
+                                      </span>
+                                      <span className="font-semibold text-green-600">${(event.paidAmount / 100).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm pt-2 border-t">
+                                      <span className="text-gray-900 font-medium flex items-center">
+                                        {remainingBalance > 0 ? (
+                                          <>
+                                            <AlertCircle className="h-4 w-4 mr-1 text-orange-600" />
+                                            Remaining Balance:
+                                          </>
+                                        ) : (
+                                          <>
+                                            <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                                            Paid in Full
+                                          </>
+                                        )}
+                                      </span>
+                                      <span className={`font-bold ${remainingBalance > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                                        ${(remainingBalance / 100).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                                      <Calendar className="h-4 w-4 mr-2" />
+                                      <span className="font-medium">Event Date:</span>
+                                      <span className="ml-2">{eventDate.toLocaleDateString()}</span>
+                                    </div>
+                                    {remainingBalance > 0 && (
+                                      <div className="flex items-center text-sm text-orange-600 font-medium">
+                                        <Clock className="h-4 w-4 mr-2" />
+                                        <span>Balance Due:</span>
+                                        <span className="ml-2">{balanceDueDate.toLocaleDateString()}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex items-center text-gray-600">
-                                <DollarSign className="h-4 w-4 mr-2" />
-                                Total: ${(event.totalAmount / 100).toFixed(2)}
-                              </div>
-                              <div className="flex items-center text-gray-600">
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Paid: ${(event.paidAmount / 100).toFixed(2)}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                              
+                              {/* Event Details Toggle */}
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-between mb-2"
+                                onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
+                              >
+                                <span className="font-medium">Party Details</span>
+                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                              </Button>
+                              
+                              {/* Expanded Details */}
+                              {isExpanded && (
+                                <div className="bg-blue-50 rounded-lg p-4 mb-4 space-y-3">
+                                  <h4 className="font-semibold text-gray-900 mb-2">Event Information</h4>
+                                  {event.guestCount && (
+                                    <div className="flex items-center text-sm">
+                                      <Users className="h-4 w-4 mr-2 text-gray-600" />
+                                      <span className="text-gray-700">
+                                        <strong>Guest Count:</strong> {event.guestCount} guests
+                                      </span>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center text-sm">
+                                    <Calendar className="h-4 w-4 mr-2 text-gray-600" />
+                                    <span className="text-gray-700">
+                                      <strong>Date:</strong> {eventDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center text-sm">
+                                    <MapPin className="h-4 w-4 mr-2 text-gray-600" />
+                                    <span className="text-gray-700">
+                                      <strong>Location:</strong> {event.location || 'Host Hampton'}
+                                    </span>
+                                  </div>
+                                  <div className="mt-3 pt-3 border-t border-blue-200">
+                                    <p className="text-sm text-gray-600">
+                                      For any questions about your booking, please contact us at{' '}
+                                      <a href="tel:631-998-9325" className="text-blue-600 hover:underline">631-998-9325</a>
+                                      {' '}or{' '}
+                                      <a href="mailto:hosthampton295@gmail.com" className="text-blue-600 hover:underline">
+                                        hosthampton295@gmail.com
+                                      </a>
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Request Changes Dialog */}
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={() => setSelectedEventId(event.id)}
+                                  >
+                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                    Request Changes
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Request Changes</DialogTitle>
+                                    <DialogDescription>
+                                      Send a message to our team about changes you'd like to make to your booking.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <label htmlFor="change-request" className="text-sm font-medium">
+                                        What would you like to change?
+                                      </label>
+                                      <Textarea
+                                        id="change-request"
+                                        placeholder="e.g., I'd like to add 5 more guests, change the date to March 15th, add extra activities..."
+                                        value={changeRequest}
+                                        onChange={(e) => setChangeRequest(e.target.value)}
+                                        rows={4}
+                                      />
+                                    </div>
+                                  </div>
+                                  <DialogFooter>
+                                    <Button
+                                      onClick={() => {
+                                        if (!changeRequest.trim()) {
+                                          toast({
+                                            title: "Message Required",
+                                            description: "Please describe what you'd like to change.",
+                                            variant: "destructive",
+                                          });
+                                          return;
+                                        }
+                                        sendChangeRequestMutation.mutate({ 
+                                          eventId: event.id, 
+                                          message: changeRequest 
+                                        });
+                                      }}
+                                      disabled={sendChangeRequestMutation.isPending}
+                                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    >
+                                      {sendChangeRequestMutation.isPending ? (
+                                        <>
+                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                          Sending...
+                                        </>
+                                      ) : (
+                                        "Send Request"
+                                      )}
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
