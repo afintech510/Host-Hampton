@@ -336,6 +336,51 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     },
   });
 
+  // Save as Quote mutation
+  const saveQuoteMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/${effectiveLeadId}/save-quote`, {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Quote Saved",
+          description: `Your quote #${data.quoteNumber} has been saved! Check your email for details.`,
+        });
+        // Send quote email
+        sendQuoteEmailMutation.mutate();
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Save Error",
+        description: "Failed to save quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Send quote email mutation
+  const sendQuoteEmailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/${effectiveLeadId}/send-quote-email`, {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Email Sent",
+          description: "Quote details have been sent to your email!",
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to send quote email:", error);
+      // Don't show error to user as the quote was still saved
+    },
+  });
+
   // Calculate pricing
   const calculatePricing = () => {
     if (!booking)
@@ -640,6 +685,19 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
     }
 
     depositMutation.mutate(contactData);
+  };
+
+  const handleSaveQuote = () => {
+    if (!isContactInfoComplete()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all contact information to save your quote",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveQuoteMutation.mutate();
   };
 
   if (isLoading) {
@@ -3326,16 +3384,29 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           your party date. The remaining balance will be due on
                           the day of your event.
                         </p>
-                        <Button
-                          className="w-full bg-purple-600 hover:bg-purple-700"
-                          onClick={handleDepositPayment}
-                          disabled={depositMutation.isPending}
-                          data-testid="button-pay-deposit"
-                        >
-                          {depositMutation.isPending
-                            ? "Processing..."
-                            : `Pay ${formatPrice(depositAmount)} Deposit`}
-                        </Button>
+                        <div className="space-y-2">
+                          <Button
+                            className="w-full bg-purple-600 hover:bg-purple-700"
+                            onClick={handleDepositPayment}
+                            disabled={depositMutation.isPending}
+                            data-testid="button-pay-deposit"
+                          >
+                            {depositMutation.isPending
+                              ? "Processing..."
+                              : `Pay ${formatPrice(depositAmount)} Deposit`}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
+                            onClick={handleSaveQuote}
+                            disabled={saveQuoteMutation.isPending || sendQuoteEmailMutation.isPending}
+                            data-testid="button-save-quote"
+                          >
+                            {saveQuoteMutation.isPending || sendQuoteEmailMutation.isPending
+                              ? "Saving..."
+                              : "Save as Quote"}
+                          </Button>
+                        </div>
                         <p className="text-xs text-gray-600 text-center mt-3">
                           * All billing details and agreements are required to
                           proceed

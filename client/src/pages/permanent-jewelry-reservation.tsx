@@ -101,6 +101,51 @@ export default function PermanentJewelryReservation({
     },
   });
 
+  // Save as Quote mutation
+  const saveQuoteMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/${effectiveLeadId}/save-quote`, {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Quote Saved",
+          description: `Your quote #${data.quoteNumber} has been saved! Check your email for details.`,
+        });
+        // Send quote email
+        sendQuoteEmailMutation.mutate();
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Save Error",
+        description: "Failed to save quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Send quote email mutation
+  const sendQuoteEmailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/${effectiveLeadId}/send-quote-email`, {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Email Sent",
+          description: "Quote details have been sent to your email!",
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to send quote email:", error);
+      // Don't show error to user as the quote was still saved
+    },
+  });
+
   // Update booking mutation
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
@@ -173,6 +218,19 @@ export default function PermanentJewelryReservation({
       leadId: effectiveLeadId,
       bookingType: "permanent-jewelry",
     });
+  };
+
+  const handleSaveQuote = () => {
+    if (!billingData.agreeToTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please agree to the terms and conditions to save your quote.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveQuoteMutation.mutate();
   };
 
   const handleUpdate = () => {
@@ -656,18 +714,31 @@ export default function PermanentJewelryReservation({
 
                 <Separator />
 
-                <Button
-                  onClick={handlePayDeposit}
-                  disabled={
-                    depositMutation.isPending || !billingData.agreeToTerms
-                  }
-                  className="w-full bg-yellow-600 hover:bg-yellow-700"
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  {depositMutation.isPending
-                    ? "Processing..."
-                    : "Pay $50 Booking Fee"}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    onClick={handlePayDeposit}
+                    disabled={
+                      depositMutation.isPending || !billingData.agreeToTerms
+                    }
+                    className="w-full bg-yellow-600 hover:bg-yellow-700"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    {depositMutation.isPending
+                      ? "Processing..."
+                      : "Pay $50 Booking Fee"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                    onClick={handleSaveQuote}
+                    disabled={saveQuoteMutation.isPending || sendQuoteEmailMutation.isPending || !billingData.agreeToTerms}
+                    data-testid="button-save-quote"
+                  >
+                    {saveQuoteMutation.isPending || sendQuoteEmailMutation.isPending
+                      ? "Saving..."
+                      : "Save as Quote"}
+                  </Button>
+                </div>
 
                 <p className="text-xs text-gray-600 text-center">
                   Secure payment via Stripe. Booking fee applied to final total.

@@ -111,48 +111,6 @@ export default function StudioRentalReservationPage() {
     }
   }, [lead]);
 
-  // Auto-save quote when communications checkbox is checked
-  const saveQuoteMutation = useMutation({
-    mutationFn: async (quoteData: any) => {
-      const response = await apiRequest("POST", "/api/leads/legacy", quoteData);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Quote Saved",
-        description: "Your studio rental quote has been saved.",
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (
-      billingData.agreeToCommunications &&
-      billingData.email &&
-      studioData.eventDate
-    ) {
-      // Auto-save quote when communications agreement is checked and basic info is filled
-      const quoteData = {
-        source: "website",
-        name: `${billingData.firstName} ${billingData.lastName}`.trim(),
-        email: billingData.email,
-        phone: billingData.phone,
-        eventType: "Studio Rental",
-        eventDate: new Date(studioData.eventDate),
-        arrivalTime: studioData.startTime,
-        rentalDuration: studioData.rentalDuration.toString(),
-        guestCount: studioData.guestCount,
-        budget: Math.round(totalWithTax * 100),
-        estimatedCost: Math.round(totalWithTax * 100),
-        status: "quote_requested",
-        notes: `Studio Usage: ${studioData.studioUsage || "Not specified"}. Add-ons: ${studioData.addOns.join(", ") || "None"}`,
-        agreeToCommunications: true,
-      };
-
-      saveQuoteMutation.mutate(quoteData);
-    }
-  }, [billingData.agreeToCommunications]);
-
   // Check if date is selected and determine if it's a weekend
   const isDateSelected = !!studioData.eventDate;
   const isWeekend = isDateSelected
@@ -256,6 +214,51 @@ export default function StudioRentalReservationPage() {
     },
   });
 
+  // Save as Quote mutation
+  const saveQuoteMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/${leadId}/save-quote`, {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Quote Saved",
+          description: `Your quote #${data.quoteNumber} has been saved! Check your email for details.`,
+        });
+        // Send quote email
+        sendQuoteEmailMutation.mutate();
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Save Error",
+        description: "Failed to save quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Send quote email mutation
+  const sendQuoteEmailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/leads/${leadId}/send-quote-email`, {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Email Sent",
+          description: "Quote details have been sent to your email!",
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to send quote email:", error);
+      // Don't show error to user as the quote was still saved
+    },
+  });
+
   const handleBookingFeePayment = () => {
     if (!billingData.agreeToTerms || !billingData.agreeToCommunications) {
       toast({
@@ -267,6 +270,19 @@ export default function StudioRentalReservationPage() {
       return;
     }
     depositMutation.mutate();
+  };
+
+  const handleSaveQuote = () => {
+    if (!billingData.agreeToTerms || !billingData.agreeToCommunications) {
+      toast({
+        title: "Required Agreements",
+        description:
+          "Please agree to the terms and communications agreement to save your quote.",
+        variant: "destructive",
+      });
+      return;
+    }
+    saveQuoteMutation.mutate();
   };
 
   const handleAddOnToggle = (addOn: string) => {
@@ -809,16 +825,29 @@ export default function StudioRentalReservationPage() {
                   secure your studio rental. The remaining balance will be due
                   on the day of your event.
                 </p>
-                <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                  onClick={handleBookingFeePayment}
-                  disabled={depositMutation.isPending}
-                  data-testid="button-pay-security-deposit"
-                >
-                  {depositMutation.isPending
-                    ? "Processing..."
-                    : `Pay ${formatPrice(securityDepositAmount)} Security Deposit`}
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={handleBookingFeePayment}
+                    disabled={depositMutation.isPending}
+                    data-testid="button-pay-security-deposit"
+                  >
+                    {depositMutation.isPending
+                      ? "Processing..."
+                      : `Pay ${formatPrice(securityDepositAmount)} Security Deposit`}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                    onClick={handleSaveQuote}
+                    disabled={saveQuoteMutation.isPending || sendQuoteEmailMutation.isPending}
+                    data-testid="button-save-quote"
+                  >
+                    {saveQuoteMutation.isPending || sendQuoteEmailMutation.isPending
+                      ? "Saving..."
+                      : "Save as Quote"}
+                  </Button>
+                </div>
                 <p className="text-xs text-gray-600 text-center mt-2">
                   * All billing details and agreements are required to proceed
                 </p>
