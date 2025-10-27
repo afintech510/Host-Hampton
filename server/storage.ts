@@ -1,7 +1,7 @@
 import { 
   users, reviews, eventTypes, customers, packages, addons, partyThemes, events, invoices, invoiceItems, eventCalendar,
   roomRentalPricing, verificationCodes, leads, eventStatusHistory, products, cartItems, orders, orderItems, productSessions,
-  productOptionCategories, productOptions,
+  productOptionCategories, productOptions, payments,
   type User, type InsertUser, type Review, type InsertReview,
   type EventType, type InsertEventType, type Customer, type InsertCustomer,
   type Package, type InsertPackage, type Addon, type InsertAddon,
@@ -1344,7 +1344,7 @@ export class DatabaseStorage implements IStorage {
         eventType: eventTypes.name,
         guestCount: events.guestCount,
         totalAmount: invoices.total,
-        paidAmount: invoices.deposit,
+        invoiceId: invoices.id,
         description: eventTypes.description
       })
       .from(events)
@@ -1353,17 +1353,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(events.customerId, customerId))
       .orderBy(events.eventDate);
     
-    return customerEvents.map(event => ({
-      id: event.id,
-      eventType: event.eventType || "Unknown Event",
-      eventDate: event.eventDate,
-      status: event.status,
-      totalAmount: event.totalAmount || 0,
-      paidAmount: event.paidAmount || 0,
-      description: event.description || event.notes || "",
-      guestCount: event.guestCount,
-      location: "Host Hampton" // Default location
-    }));
+    // For each event, calculate total paid from payments table
+    const eventsWithPayments = await Promise.all(
+      customerEvents.map(async (event) => {
+        let paidAmount = 0;
+        if (event.invoiceId) {
+          // Sum all completed payments for this invoice
+          const paymentsResult = await db
+            .select({ amount: payments.amount })
+            .from(payments)
+            .where(
+              and(
+                eq(payments.invoiceId, event.invoiceId),
+                eq(payments.status, "completed")
+              )
+            );
+          
+          paidAmount = paymentsResult.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+        }
+        
+        return {
+          id: event.id,
+          eventType: event.eventType || "Unknown Event",
+          eventDate: event.eventDate,
+          status: event.status,
+          totalAmount: event.totalAmount || 0,
+          paidAmount: paidAmount,
+          description: event.description || event.notes || "",
+          guestCount: event.guestCount,
+          location: "Host Hampton" // Default location
+        };
+      })
+    );
+    
+    return eventsWithPayments;
   }
 
   async getCustomerQuotes(customerId: number): Promise<any[]> {

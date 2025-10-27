@@ -2732,14 +2732,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <span className="text-gray-600">Date:</span>
                         <p className="font-medium">
                           {booking.eventDate
-                            ? new Date(booking.eventDate).toLocaleDateString(
-                                "en-US",
-                                {
+                            ? (() => {
+                                // Parse date string to avoid timezone issues
+                                const [month, day, year] = booking.eventDate.split('/').map(Number);
+                                const date = new Date(year, month - 1, day);
+                                return date.toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",
-                                },
-                              )
+                                });
+                              })()
                             : "To be scheduled"}
                         </p>
                       </div>
