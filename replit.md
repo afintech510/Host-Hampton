@@ -165,3 +165,13 @@ The storage layer (`server/storage.ts`) uses an interface-based design for abstr
 - ✅ Added weekend pricing indicator in pricing breakdown
 - ✅ Updated pricing information box with clear tiered rate structure
 - ✅ Fixed page layout: removed top padding offset to align Navigation properly at top
+
+**Quote Management System (October 27, 2025):**
+- ✅ Calendar availability checking: API endpoint checks events/leads tables for date/time conflicts at Host Hampton studio
+- 🚧 Save as Quote functionality: Add "Save as Quote" buttons to 4 booking forms (theme party, studio rental, permanent jewelry, trucker hat)
+- 🚧 Quote numbering system: Auto-generated quote numbers with lead ID structure
+- 🚧 Professional quote emails: Branded email templates with pricing breakdown and booking links
+- 🚧 Enhanced /my-events page: Three sections - Saved Quotes, Confirmed Bookings, Public Events
+- 🚧 Quote-to-booking conversion: Click quote to open pre-filled form with "Confirm Booking" button
+- 🚧 Admin quote management: URL parameter (?adminMode=true) allows admins to edit customer quotes
+- 🚧 Quote API endpoints: save quote, send quote email, get customer quotes, update quote, convert to booking

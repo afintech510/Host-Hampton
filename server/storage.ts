@@ -123,6 +123,9 @@ export interface IStorage {
   getInvoiceById(id: number): Promise<any | null>;
   processInvoicePayment(invoiceId: number, paymentData: any): Promise<any | null>;
   getLeadById(id: number): Promise<any | null>;
+  
+  // Calendar availability checking
+  checkAvailability(date: Date, startTime: string, endTime: string, location: string): Promise<{ available: boolean; conflictingEvents?: any[] }>;
 }
 
 export class MemStorage implements IStorage {
@@ -906,6 +909,11 @@ export class MemStorage implements IStorage {
   async getLeadById(id: number): Promise<any | null> {
     return this.leads.get(id) || null;
   }
+  
+  async checkAvailability(date: Date, startTime: string, endTime: string, location: string): Promise<{ available: boolean; conflictingEvents?: any[] }> {
+    // For in-memory storage, just return available
+    return { available: true };
+  }
 }
 
 // Database Storage Implementation
@@ -1564,6 +1572,152 @@ export class DatabaseStorage implements IStorage {
       .where(eq(leads.id, id));
     
     return lead || null;
+  }
+  
+  async checkAvailability(date: Date, startTime: string, endTime: string, location: string): Promise<{ available: boolean; conflictingEvents?: any[] }> {
+    // Only check availability for Host Hampton studio location
+    if (location.toLowerCase() !== 'studio' && !location.toLowerCase().includes('host hampton')) {
+      return { available: true };
+    }
+    
+    // Convert date to just the date part for comparison
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(checkDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    
+    // Helper function to parse time string to minutes since midnight
+    const parseTime = (timeStr: string): number => {
+      // Handle formats like "14:00", "2:00 PM", "2pm"
+      const cleanTime = timeStr.trim().toUpperCase();
+      let hours = 0;
+      let minutes = 0;
+      
+      if (cleanTime.includes(':')) {
+        const [hourStr, minStr] = cleanTime.split(':');
+        hours = parseInt(hourStr);
+        minutes = parseInt(minStr);
+        
+        if (cleanTime.includes('PM') && hours < 12) {
+          hours += 12;
+        } else if (cleanTime.includes('AM') && hours === 12) {
+          hours = 0;
+        }
+      } else {
+        // Format like "2pm" or "14"
+        hours = parseInt(cleanTime);
+        if (cleanTime.includes('PM') && hours < 12) {
+          hours += 12;
+        } else if (cleanTime.includes('AM') && hours === 12) {
+          hours = 0;
+        }
+      }
+      
+      return hours * 60 + minutes;
+    };
+    
+    const requestStart = parseTime(startTime);
+    const requestEnd = parseTime(endTime);
+    
+    // Check confirmed events
+    const confirmedEvents = await db
+      .select()
+      .from(events)
+      .where(
+        and(
+          gte(events.eventDate, checkDate),
+          eq(events.status, 'confirmed')
+        )
+      );
+    
+    // Check confirmed leads (converted leads)
+    const confirmedLeads = await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          gte(leads.eventDate, checkDate),
+          eq(leads.status, 'converted')
+        )
+      );
+    
+    const conflicting: any[] = [];
+    
+    // Check event conflicts
+    for (const event of confirmedEvents) {
+      if (!event.eventDate || !event.startTime || !event.endTime) continue;
+      
+      const eventDateOnly = new Date(event.eventDate);
+      eventDateOnly.setHours(0, 0, 0, 0);
+      
+      // Must be same day
+      if (eventDateOnly.getTime() !== checkDate.getTime()) continue;
+      
+      const eventStart = parseTime(event.startTime);
+      const eventEnd = parseTime(event.endTime);
+      
+      // Check for overlap: (StartA < EndB) and (EndA > StartB)
+      if (requestStart < eventEnd && requestEnd > eventStart) {
+        conflicting.push({
+          type: 'event',
+          id: event.id,
+          date: event.eventDate,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          status: event.status
+        });
+      }
+    }
+    
+    // Check lead conflicts
+    for (const lead of confirmedLeads) {
+      if (!lead.eventDate || (!lead.startTime && !lead.arrivalTime)) continue;
+      
+      const leadDateOnly = new Date(lead.eventDate);
+      leadDateOnly.setHours(0, 0, 0, 0);
+      
+      // Must be same day
+      if (leadDateOnly.getTime() !== checkDate.getTime()) continue;
+      
+      // Determine lead start and end time
+      const leadStartTime = lead.startTime || lead.arrivalTime;
+      if (!leadStartTime) continue;
+      
+      let leadEndTime = lead.endTime;
+      if (!leadEndTime && lead.partyDuration) {
+        // Calculate end time from duration
+        const startMinutes = parseTime(leadStartTime);
+        const duration = parseFloat(lead.partyDuration);
+        leadEndTime = `${Math.floor((startMinutes + duration * 60) / 60)}:${(startMinutes + duration * 60) % 60}`;
+      } else if (!leadEndTime && lead.rentalDuration) {
+        // Calculate end time from rental duration
+        const startMinutes = parseTime(leadStartTime);
+        const duration = parseFloat(lead.rentalDuration);
+        leadEndTime = `${Math.floor((startMinutes + duration * 60) / 60)}:${(startMinutes + duration * 60) % 60}`;
+      }
+      
+      if (!leadEndTime) continue;
+      
+      const leadStart = parseTime(leadStartTime);
+      const leadEnd = parseTime(leadEndTime);
+      
+      // Check for overlap
+      if (requestStart < leadEnd && requestEnd > leadStart) {
+        conflicting.push({
+          type: 'lead',
+          id: lead.id,
+          date: lead.eventDate,
+          startTime: leadStartTime,
+          endTime: leadEndTime,
+          status: lead.status
+        });
+      }
+    }
+    
+    return {
+      available: conflicting.length === 0,
+      conflictingEvents: conflicting.length > 0 ? conflicting : undefined
+    };
   }
 
   // Product sessions methods

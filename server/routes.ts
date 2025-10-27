@@ -764,6 +764,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Calendar availability check
+  app.post("/api/check-availability", async (req, res) => {
+    try {
+      const { date, startTime, endTime, location } = req.body;
+      
+      if (!date || !startTime || !endTime || !location) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: date, startTime, endTime, location" 
+        });
+      }
+      
+      const availability = await storage.checkAvailability(
+        new Date(date),
+        startTime,
+        endTime,
+        location
+      );
+      
+      res.json({ 
+        success: true, 
+        ...availability 
+      });
+    } catch (error) {
+      console.error("Error checking availability:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to check availability" 
+      });
+    }
+  });
+
   // Leads management
   app.get("/api/leads", async (req, res) => {
     try {
