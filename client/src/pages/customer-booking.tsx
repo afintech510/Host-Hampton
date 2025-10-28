@@ -2757,9 +2757,7 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           {booking.partyType === "diy" ? "Arrival:" : "Time:"}
                         </span>
                         <p className="font-medium">
-                          {booking.partyType === "diy"
-                            ? booking.arrivalTime || "To be scheduled"
-                            : booking.timeSlot || "To be scheduled"}
+                          {booking.arrivalTime || booking.timeSlot || "To be scheduled"}
                         </p>
                       </div>
                     </div>

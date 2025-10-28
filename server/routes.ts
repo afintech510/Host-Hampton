@@ -1481,6 +1481,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return null;
           }
           try {
+            // Handle date string in YYYY-MM-DD format to avoid timezone issues
+            if (typeof rawUpdates.eventDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawUpdates.eventDate)) {
+              // Parse date components to create date at noon local time to avoid timezone shifts
+              const [year, month, day] = rawUpdates.eventDate.split('-').map(Number);
+              const date = new Date(year, month - 1, day, 12, 0, 0);
+              return isNaN(date.getTime()) ? null : date;
+            }
+            // Handle ISO timestamps or other date formats
             const date = new Date(rawUpdates.eventDate);
             return isNaN(date.getTime()) ? null : date;
           } catch (e) {
