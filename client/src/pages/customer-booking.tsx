@@ -2734,20 +2734,25 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                           {booking.eventDate
                             ? (() => {
                                 // Handle both ISO timestamps and MM/DD/YYYY format
-                                let date: Date;
                                 if (typeof booking.eventDate === 'string' && booking.eventDate.includes('/')) {
                                   // MM/DD/YYYY format
                                   const [month, day, year] = booking.eventDate.split('/').map(Number);
-                                  date = new Date(year, month - 1, day);
+                                  const date = new Date(year, month - 1, day);
+                                  return date.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  });
                                 } else {
-                                  // ISO timestamp or other format
-                                  date = new Date(booking.eventDate);
+                                  // ISO timestamp - display in New York timezone
+                                  const date = new Date(booking.eventDate);
+                                  return date.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    timeZone: "America/New_York"
+                                  });
                                 }
-                                return date.toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                });
                               })()
                             : "To be scheduled"}
                         </p>
