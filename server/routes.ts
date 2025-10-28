@@ -1505,10 +1505,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
-    // Create date string in format that represents NY timezone intent
-    // Using local constructor with explicit components avoids UTC conversion issues
-    const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
-    return isNaN(date.getTime()) ? null : date;
+    // Build an ISO-like string that will be interpreted in NY timezone
+    // Format: YYYY-MM-DDTHH:MM:SS
+    const dateTimeStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+    
+    // Parse this as if it's in NY timezone by using toLocaleString
+    // First create a date from the string (will be treated as local/UTC)
+    const tempDate = new Date(dateTimeStr);
+    
+    // Get what this date/time would be in NY timezone
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    
+    // Create a date that represents the desired moment in NY time
+    // by creating an ISO string with explicit offset for NY
+    const nyDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00-05:00`;
+    
+    return new Date(nyDateStr);
   };
 
   // Update lead (for form progress tracking)
