@@ -2744,13 +2744,15 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                                     year: "numeric",
                                   });
                                 } else {
-                                  // ISO timestamp - display in New York timezone
-                                  const date = new Date(booking.eventDate);
+                                  // ISO timestamp - extract date in YYYY-MM-DD format
+                                  // The ISO string format is guaranteed to be YYYY-MM-DDTHH:MM:SS...
+                                  const dateStr = booking.eventDate.split('T')[0];
+                                  const [year, month, day] = dateStr.split('-').map(Number);
+                                  const date = new Date(year, month - 1, day);
                                   return date.toLocaleDateString("en-US", {
                                     month: "short",
                                     day: "numeric",
                                     year: "numeric",
-                                    timeZone: "America/New_York"
                                   });
                                 }
                               })()
