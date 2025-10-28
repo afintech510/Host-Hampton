@@ -2733,9 +2733,16 @@ export default function CustomerBooking({ leadId }: CustomerBookingProps) {
                         <p className="font-medium">
                           {booking.eventDate
                             ? (() => {
-                                // Parse date string to avoid timezone issues
-                                const [month, day, year] = booking.eventDate.split('/').map(Number);
-                                const date = new Date(year, month - 1, day);
+                                // Handle both ISO timestamps and MM/DD/YYYY format
+                                let date: Date;
+                                if (typeof booking.eventDate === 'string' && booking.eventDate.includes('/')) {
+                                  // MM/DD/YYYY format
+                                  const [month, day, year] = booking.eventDate.split('/').map(Number);
+                                  date = new Date(year, month - 1, day);
+                                } else {
+                                  // ISO timestamp or other format
+                                  date = new Date(booking.eventDate);
+                                }
                                 return date.toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
