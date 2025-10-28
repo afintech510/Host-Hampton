@@ -1531,6 +1531,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                           (currentLead.eventDate ? new Date(currentLead.eventDate).toISOString().split('T')[0] : null);
       const finalTimeStr = rawUpdates.arrivalTime !== undefined ? rawUpdates.arrivalTime : currentLead.arrivalTime;
       
+      // DEBUG LOGGING
+      if (rawUpdates.eventDate !== undefined || rawUpdates.arrivalTime !== undefined) {
+        console.log('=== DATE UPDATE DEBUG ===');
+        console.log('Raw eventDate from frontend:', rawUpdates.eventDate);
+        console.log('Raw arrivalTime from frontend:', rawUpdates.arrivalTime);
+        console.log('Current lead eventDate:', currentLead.eventDate);
+        console.log('Current lead arrivalTime:', currentLead.arrivalTime);
+        console.log('Final date string:', finalDateStr);
+        console.log('Final time string:', finalTimeStr);
+      }
+      
       // Preprocess date fields in updates to handle empty strings and invalid dates
       const processedUpdates = {
         ...rawUpdates,
@@ -1540,7 +1551,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return null;
           }
           // Combine date with time in NY timezone
-          return createNYDateTime(finalDateStr, finalTimeStr);
+          const combinedDate = createNYDateTime(finalDateStr, finalTimeStr);
+          if (rawUpdates.eventDate !== undefined || rawUpdates.arrivalTime !== undefined) {
+            console.log('Created combined date:', combinedDate);
+            console.log('Combined date ISO:', combinedDate?.toISOString());
+            console.log('Combined date local string:', combinedDate?.toString());
+          }
+          return combinedDate;
         })(),
         // When arrivalTime changes, also update eventDate if it exists
         ...(rawUpdates.arrivalTime !== undefined && currentLead.eventDate ? {
@@ -1565,6 +1582,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           success: false,
           message: "Lead not found"
         });
+      }
+      
+      // DEBUG: Log what's being returned
+      if (rawUpdates.eventDate !== undefined || rawUpdates.arrivalTime !== undefined) {
+        console.log('Updated lead eventDate:', updatedLead.eventDate);
+        console.log('Updated lead arrivalTime:', updatedLead.arrivalTime);
+        console.log('=========================');
       }
       
       res.json({ success: true, lead: updatedLead });
