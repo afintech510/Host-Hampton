@@ -1466,11 +1466,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to parse time string like "10:00am" to {hours, minutes}
+  const parseTimeString = (timeStr: string): { hours: number; minutes: number } | null => {
+    if (!timeStr) return null;
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+    if (!match) return null;
+    
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const meridiem = match[3].toLowerCase();
+    
+    if (meridiem === 'pm' && hours !== 12) {
+      hours += 12;
+    } else if (meridiem === 'am' && hours === 12) {
+      hours = 0;
+    }
+    
+    return { hours, minutes };
+  };
+
+  // Helper function to create Date in New York timezone
+  const createNYDateTime = (dateStr: string, timeStr: string | null): Date | null => {
+    if (!dateStr) return null;
+    
+    // Parse date components from YYYY-MM-DD format
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    
+    // Parse time or default to noon to avoid timezone shift
+    let hours = 12;
+    let minutes = 0;
+    
+    if (timeStr) {
+      const parsedTime = parseTimeString(timeStr);
+      if (parsedTime) {
+        hours = parsedTime.hours;
+        minutes = parsedTime.minutes;
+      }
+    }
+    
+    // Create date string in format that represents NY timezone intent
+    // Using local constructor with explicit components avoids UTC conversion issues
+    const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
   // Update lead (for form progress tracking)
   app.patch("/api/leads/:id", async (req, res) => {
     try {
       const leadId = parseInt(req.params.id);
       const rawUpdates = req.body;
+      
+      // Get current lead data to access existing date/time values
+      const currentLead = await storage.getLeadById(leadId);
+      if (!currentLead) {
+        return res.status(404).json({
+          success: false,
+          message: "Lead not found"
+        });
+      }
+      
+      // Determine the final date and time values
+      const finalDateStr = rawUpdates.eventDate !== undefined ? rawUpdates.eventDate : 
+                          (currentLead.eventDate ? new Date(currentLead.eventDate).toISOString().split('T')[0] : null);
+      const finalTimeStr = rawUpdates.arrivalTime !== undefined ? rawUpdates.arrivalTime : currentLead.arrivalTime;
       
       // Preprocess date fields in updates to handle empty strings and invalid dates
       const processedUpdates = {
@@ -1480,21 +1539,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!rawUpdates.eventDate || rawUpdates.eventDate === "" || rawUpdates.isDateUnsure) {
             return null;
           }
-          try {
-            // Handle date string in YYYY-MM-DD format to avoid timezone issues
-            if (typeof rawUpdates.eventDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawUpdates.eventDate)) {
-              // Parse date components to create date at noon local time to avoid timezone shifts
-              const [year, month, day] = rawUpdates.eventDate.split('-').map(Number);
-              const date = new Date(year, month - 1, day, 12, 0, 0);
-              return isNaN(date.getTime()) ? null : date;
-            }
-            // Handle ISO timestamps or other date formats
-            const date = new Date(rawUpdates.eventDate);
-            return isNaN(date.getTime()) ? null : date;
-          } catch (e) {
-            return null;
-          }
+          // Combine date with time in NY timezone
+          return createNYDateTime(finalDateStr, finalTimeStr);
         })(),
+        // When arrivalTime changes, also update eventDate if it exists
+        ...(rawUpdates.arrivalTime !== undefined && currentLead.eventDate ? {
+          eventDate: createNYDateTime(
+            finalDateStr || new Date(currentLead.eventDate).toISOString().split('T')[0],
+            rawUpdates.arrivalTime
+          )
+        } : {}),
         // Handle other timestamp fields
         followUpDate: rawUpdates.followUpDate === undefined ? undefined : 
                      (rawUpdates.followUpDate && rawUpdates.followUpDate !== "" ? new Date(rawUpdates.followUpDate) : null),
