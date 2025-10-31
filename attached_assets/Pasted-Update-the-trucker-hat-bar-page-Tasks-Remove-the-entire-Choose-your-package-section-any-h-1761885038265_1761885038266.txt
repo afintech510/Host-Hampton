@@ -1,0 +1,66 @@
+Update the /trucker-hat-bar page
+
+Tasks:
+
+Remove the entire “Choose your package” section (any heading or container with that label or classes like .choose-package, .packages-section, etc.).
+
+Insert in its place:
+
+A Trust Bar — a full-width section spanning edge-to-edge, containing a soft gradient background (Host Hampton palette) and a centered graphic of Long Island (image or SVG) with overlay text.
+
+The overlay should read:
+“Trusted from Manhattan to Montauk”
+Subtext: “We bring the party to you — anywhere across Long Island and beyond.”
+Include subtle motion (parallax or slow float) and ensure it’s responsive.
+
+Below the Trust Bar, add a responsive image gallery showcasing product photos, mood boards, and event inspiration.
+
+4-column on desktop, 2-column tablet, 1-column mobile
+
+Lazy-loading images, rounded corners, subtle shadow
+
+Clicking opens a lightbox (fullscreen viewer with arrows and ESC close).
+
+Above the gallery**, include a trust header block:**
+
+H2: “Inspiration & Proof”
+
+Subtext: “Mobile parties from Manhattan to Montauk. Real hats, real smiles, real events.”
+
+Three trust bullets: “Hundreds of happy hosts,” “Clean, on-time setup,” “Fully insured.”
+
+Use Host Hampton color palette:
+
+Dusty Blue #B9C9D4
+
+Mauve #F5F1ED
+
+Light Gray #F0F0F0
+
+White #FFFFFF
+
+Black for hero text (#000)
+
+Maintain existing global CSS/JS but add scoped styles for the new sections.
+
+Trust Bar Image:
+
+Use a placeholder URL for the Long Island graphic (e.g. /images/long-island-map.png).
+
+Style the image to span full width, softly blended into the gradient background.
+
+Add optional CSS animation for a gentle left-right pan or opacity pulse.
+
+Ensure semantic HTML, accessibility, keyboard navigation for lightbox, and responsive behavior.
+
+Acceptance criteria:
+
+“Choose your package” removed
+
+Full-width Trust Bar with Long Island graphic and text inserted
+
+Trust Header + Image Gallery below
+
+Lightbox working with keyboard and touch
+
+Smooth and consistent Host Hampton visual style

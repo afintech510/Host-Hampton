@@ -1,8 +1,11 @@
+import { useState } from "react";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Truck, Calendar, Users, MapPin, Star, Clock } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Truck, Calendar, Users, MapPin, Star, Clock, X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Link } from "wouter";
 
 export default function TruckHatBar() {
@@ -27,53 +30,44 @@ export default function TruckHatBar() {
     }
   ];
 
-  const packages = [
-    {
-      name: "Basic Mobile Bar",
-      price: "$299",
-      duration: "2 hours",
-      guests: "Up to 15 people",
-      description: "Perfect for small gatherings",
-      features: [
-        "Mobile hat bar setup",
-        "Selection of 20+ hats",
-        "Basic customization supplies",
-        "2-hour event duration"
-      ]
-    },
-    {
-      name: "Premium Experience",
-      price: "$449", 
-      duration: "3 hours",
-      guests: "Up to 25 people",
-      description: "Most popular choice",
-      features: [
-        "Full mobile hat bar",
-        "40+ hat styles",
-        "Premium customization",
-        "Photo booth setup",
-        "Professional styling assistance",
-        "3-hour event duration"
-      ],
-      popular: true
-    },
-    {
-      name: "Deluxe Package",
-      price: "$599",
-      duration: "4 hours", 
-      guests: "Up to 40 people",
-      description: "Ultimate hat bar experience",
-      features: [
-        "Luxury mobile setup",
-        "60+ designer hats",
-        "Custom embroidery on-site",
-        "Professional photographer",
-        "Styling consultant",
-        "Custom take-home boxes",
-        "4-hour event duration"
-      ]
-    }
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Gallery images - using placeholder URLs
+  const galleryImages = [
+    { url: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&h=600&fit=crop", alt: "Trucker hat collection display" },
+    { url: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=800&h=600&fit=crop", alt: "Custom embroidered trucker hats" },
+    { url: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&h=600&fit=crop", alt: "Event setup with hat bar" },
+    { url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=600&fit=crop", alt: "Happy guests at hat bar event" },
+    { url: "https://images.unsplash.com/photo-1529720317453-c8da503f2051?w=800&h=600&fit=crop", alt: "Vintage trucker hat styles" },
+    { url: "https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=800&h=600&fit=crop", alt: "Mobile hat bar truck" },
+    { url: "https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=800&h=600&fit=crop", alt: "Hat customization station" },
+    { url: "https://images.unsplash.com/photo-1514498873326-e2eba0b43a85?w=800&h=600&fit=crop", alt: "Event mood board inspiration" },
   ];
+
+  const openLightbox = (index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
+
+  // Keyboard navigation for lightbox
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'ArrowLeft') prevImage();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
@@ -120,44 +114,140 @@ export default function TruckHatBar() {
           </div>
         </div>
 
-        {/* Packages Section */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-            Choose Your Package
+        {/* Trust Bar - Full Width */}
+        <div 
+          className="relative -mx-4 sm:-mx-6 lg:-mx-8 mb-16 overflow-hidden"
+          style={{
+            background: 'linear-gradient(90deg, #B9C9D4 0%, #B9C9D4 20%, #F5F1ED 40%, #F0F0F0 60%, #B9C9D4 80%, #B9C9D4 100%)'
+          }}
+        >
+          <div className="relative py-20 px-4 sm:px-6 lg:px-8">
+            {/* Long Island Graphic - Placeholder */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-10">
+              <MapPin className="w-96 h-96 text-gray-800 animate-pulse" />
+            </div>
+            
+            {/* Overlay Text */}
+            <div className="relative z-10 text-center max-w-4xl mx-auto">
+              <h2 className="text-4xl md:text-5xl font-bold text-black mb-4 drop-shadow-sm">
+                Trusted from Manhattan to Montauk
+              </h2>
+              <p className="text-lg md:text-xl text-gray-800 max-w-2xl mx-auto">
+                We bring the party to you — anywhere across Long Island and beyond.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Trust Header Block */}
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Inspiration & Proof
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {packages.map((pkg, index) => (
-              <Card key={index} className={`relative ${pkg.popular ? 'ring-2 ring-amber-500' : ''}`}>
-                {pkg.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-500">
-                    Most Popular
-                  </Badge>
-                )}
-                <CardHeader className="text-center">
-                  <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                  <CardDescription>{pkg.description}</CardDescription>
-                  <div className="text-3xl font-bold text-amber-600 mt-4">{pkg.price}</div>
-                  <div className="text-sm text-gray-500">{pkg.duration} • {pkg.guests}</div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {pkg.features.map((feature, idx) => (
-                      <li key={idx} className="text-sm text-gray-600 flex items-center">
-                        <Clock className="w-3 h-3 text-amber-500 mr-2 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/book-event">
-                    <Button className="w-full mt-6 bg-amber-600 hover:bg-amber-700">
-                      Book This Package
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Mobile parties from Manhattan to Montauk. Real hats, real smiles, real events.
+          </p>
+          
+          {/* Trust Bullets */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+              <Check className="w-8 h-8 text-[#B9C9D4] mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">Hundreds of happy hosts</h3>
+              <p className="text-sm text-gray-600">Trusted by families and businesses across Long Island</p>
+            </div>
+            <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+              <Check className="w-8 h-8 text-[#B9C9D4] mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">Clean, on-time setup</h3>
+              <p className="text-sm text-gray-600">Professional service you can count on</p>
+            </div>
+            <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+              <Check className="w-8 h-8 text-[#B9C9D4] mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">Fully insured</h3>
+              <p className="text-sm text-gray-600">Complete peace of mind for your event</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Image Gallery */}
+        <div className="mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {galleryImages.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => openLightbox(index)}
+                className="relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#B9C9D4] focus:ring-offset-2"
+                data-testid={`gallery-image-${index}`}
+                aria-label={`Open ${image.alt} in lightbox`}
+              >
+                <img
+                  src={image.url}
+                  alt={image.alt}
+                  className="w-full h-64 object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity duration-300" />
+              </button>
             ))}
           </div>
         </div>
+
+        {/* Lightbox Dialog */}
+        <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+          <DialogContent 
+            className="max-w-7xl w-full h-full md:h-auto p-0 bg-black/95"
+            onKeyDown={handleKeyDown}
+          >
+            <VisuallyHidden>
+              <DialogTitle>Image Gallery Lightbox</DialogTitle>
+            </VisuallyHidden>
+            
+            <div className="relative w-full h-full flex items-center justify-center p-4">
+              {/* Close Button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                data-testid="lightbox-close"
+                aria-label="Close lightbox"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Previous Button */}
+              <button
+                onClick={prevImage}
+                className="absolute left-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                data-testid="lightbox-prev"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+
+              {/* Image */}
+              <div className="max-w-5xl max-h-[80vh] flex items-center justify-center">
+                <img
+                  src={galleryImages[currentImageIndex].url}
+                  alt={galleryImages[currentImageIndex].alt}
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                />
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={nextImage}
+                className="absolute right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                data-testid="lightbox-next"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+
+              {/* Image Counter */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-full">
+                {currentImageIndex + 1} / {galleryImages.length}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* CTA Section */}
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
