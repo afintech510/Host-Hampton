@@ -98,6 +98,7 @@ export const events = pgTable("events", {
   partyThemeId: integer("party_theme_id"), // For theme parties
   estimatedCost: integer("estimated_cost"), // In cents, calculated from selections
   notes: text("notes"),
+  archived: boolean("archived").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
