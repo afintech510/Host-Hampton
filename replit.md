@@ -29,6 +29,7 @@ Preferred communication style: Simple, everyday language.
 
 ### System Design Choices
 - **Data Flow**: Multi-step forms with Zod validation on the frontend, data submitted to backend API, validation and storage in PostgreSQL, toast notifications for responses.
+- **Date/Time Handling**: All dates stored in UTC in database, converted to America/New_York timezone for display using centralized utilities in `client/src/lib/date-utils.ts`. Ensures consistent date/time display across all event pages.
 - **Database Schema**: Unified PostgreSQL database with tables for `Event Types`, `Customers`, `Packages`, `Addons`, `Events`, `Invoices`, `Invoice Items`, `Time Slots`, `Staff`, `Communications`, `Campaigns`, `Leads`, `Payments`, `Inventory`, `Customer Preferences`, and `Business Metrics`.
 - **API Endpoints**: Comprehensive RESTful API for managing all system aspects including event types, customers, packages, add-ons, events, invoices, product options, and quotes.
 - **Frontend Components**: Marketing Landing Page, Unified Booking System, Party Designer Tool, Admin Dashboard for full management, Customer Portal (`/my-events`). Shared components leverage `shadcn/ui`, custom hooks, and API integration utilities.
@@ -42,6 +43,9 @@ Preferred communication style: Simple, everyday language.
     - **Studio Rental**: Tiered pricing structure (weekday/weekend, duration-based), updated form field order, and clear pricing summaries.
     - **Quote Management**: "Save as Quote" functionality in booking forms, auto-generated quote numbers, professional quote emails with booking links, `my-events` page segregation for quotes and confirmed bookings, calendar availability checks, and admin quote editing capabilities.
     - **Customer Portal (`/my-events`)**: Comprehensive payment tracking (total, paid, balance due), balance due dates, visual payment indicators, expandable party details, "Request Changes" functionality with a backend API for communication, responsive layout, and status badges.
+    - **Permanent Jewelry Page (`/permanent-jewelry`)**: Yellow-themed contact inquiry form with trust bar featuring "Trusted from Manhattan to Montauk", trust bullets (fully insured artists, premium metal options, professional equipment), dusty blue/mauve gradient header matching brand palette.
+    - **Trucker Hat Bar Page (`/trucker-hat-bar`)**: Full-width trust bar with Host Hampton gradient, responsive 4-column image gallery with fullscreen lightbox (keyboard navigation with arrows and ESC), contact inquiry form for event requests below gallery.
+    - **Party Room Rental Page (`/party-room-rental`)**: Dynamic reservation system with date picker, auto-detecting weekday/weekend rates from database pricing, duration selection (2/3/4 hours), $200 deposit checkout, pending confirmation messaging with 24-hour contact promise and cancellation policy disclosure.
 
 ## External Dependencies
 
