@@ -2633,8 +2633,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Convert eventDate string to Date object if present
       const requestData = { ...req.body };
+      
+      // Combine eventDate and eventTime for single-session products
       if (requestData.eventDate && typeof requestData.eventDate === 'string') {
-        requestData.eventDate = new Date(requestData.eventDate);
+        if (requestData.eventTime) {
+          // Combine date and time
+          requestData.eventDate = new Date(`${requestData.eventDate}T${requestData.eventTime}:00`);
+        } else {
+          requestData.eventDate = new Date(requestData.eventDate);
+        }
       }
       
       const validation = insertProductSchema.safeParse(requestData);
@@ -2655,7 +2662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eventTypeId,
           customerId: 1, // System customer for product-based events
           eventDate: product.eventDate,
-          startTime: null,
+          startTime: req.body.eventTime || null,
           endTime: null,
           guestCount: product.maxTickets || 0,
           status: "confirmed",
@@ -2697,8 +2704,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Convert sessionDate string to Date object if present
       const requestData = { ...req.body };
+      
+      // Combine sessionDate and sessionTime
       if (requestData.sessionDate && typeof requestData.sessionDate === 'string') {
-        requestData.sessionDate = new Date(requestData.sessionDate);
+        if (requestData.sessionTime) {
+          // Combine date and time
+          requestData.sessionDate = new Date(`${requestData.sessionDate}T${requestData.sessionTime}:00`);
+        } else {
+          requestData.sessionDate = new Date(requestData.sessionDate);
+        }
       }
       
       const validation = insertProductSessionSchema.safeParse(requestData);
@@ -2720,7 +2734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           eventTypeId,
           customerId: 1, // System customer for product-based events
           eventDate: session.sessionDate,
-          startTime: session.sessionTime || null,
+          startTime: req.body.sessionTime || null,
           endTime: null,
           guestCount: session.maxTickets || 0,
           status: "confirmed",
