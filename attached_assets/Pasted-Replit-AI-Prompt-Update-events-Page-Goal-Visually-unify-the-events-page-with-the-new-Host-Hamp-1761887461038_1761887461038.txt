@@ -1,0 +1,95 @@
+Replit AI Prompt — Update /events Page
+
+Goal: Visually unify the /events page with the new Host Hampton theme (dusty blue + mauve) and remove the outdated purple accents.
+
+🎨 1. Background & Gradient Updates
+
+Replace the current neutral/gray background with a smooth vertical gradient that blends seamlessly from the dusty blue hero into a soft mauve/neutral beige tone.
+
+Gradient example:
+
+background: linear-gradient(
+  180deg,
+  #B9C9D4 0%,     /* Dusty Blue top */
+  #F5F1ED 70%,    /* Mauve base */
+  #FFFFFF 100%    /* Subtle white fade bottom */
+);
+
+
+Ensure the top hero section transitions smoothly into this background — no hard edge or color gap between hero and events grid.
+
+Add subtle depth (optional):
+
+background-attachment: fixed;
+
+🧩 2. Button & Pill Style Overhaul
+
+Replace all purple (#7B61FF) or violet-toned buttons and pills with Host Hampton’s dusty blue aesthetic.
+
+Use these colors:
+
+Primary button / pill background: #B9C9D4
+
+Hover state: #A5BAC8
+
+Text color: #111111
+
+Disabled state: slightly desaturated version #D2DEE5
+
+Example:
+
+button, .pill, .add-to-cart {
+  background-color: #B9C9D4 !important;
+  color: #111 !important;
+  border: none;
+  border-radius: 50px;
+  transition: all 0.25s ease;
+  font-weight: 500;
+}
+button:hover, .pill:hover, .add-to-cart:hover {
+  background-color: #A5BAC8 !important;
+}
+
+🪄 3. Event Card Enhancements
+
+Add slight shadow and card polish to fit the new brand:
+
+.event-card {
+  background: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  border-radius: 16px;
+}
+
+
+Optional: add a faint dusty-blue border on hover to give interactivity:
+
+.event-card:hover {
+  border: 1px solid #B9C9D4;
+}
+
+💬 4. Typography & Icon Updates
+
+Ensure event titles (h3, h4) use serif headline font to match hero (“Upcoming Events”) style.
+
+Keep supporting text (date, location, spots left) in muted gray (#444) for readability.
+
+Icon colors (calendar, map marker, etc.) should use #B9C9D4 to harmonize with buttons.
+
+🧱 5. Overall Layout
+
+Maintain responsive grid, but add slightly more vertical spacing between cards for a lighter, airier feel:
+
+.event-grid {
+  gap: 32px;
+}
+
+
+Add 60px bottom padding to ensure cards don’t butt up against footer.
+
+✅ Deliverables Summary
+
+Hero and main content background blend seamlessly from dusty blue → mauve → white.
+
+All purple elements replaced with Host Hampton’s dusty blue palette.
+
+Event cards and text styled to feel more consistent with the Trucker Hat Bar aesthetic (soft, coastal, modern luxury).

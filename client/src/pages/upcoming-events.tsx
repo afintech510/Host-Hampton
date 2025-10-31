@@ -149,7 +149,12 @@ export default function UpcomingEvents() {
 
   if (productsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+      <div 
+        className="min-h-screen"
+        style={{
+          background: 'linear-gradient(180deg, #B9C9D4 0%, #F5F1ED 70%, #FFFFFF 100%)'
+        }}
+      >
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-8">
@@ -166,7 +171,12 @@ export default function UpcomingEvents() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(180deg, #B9C9D4 0%, #F5F1ED 70%, #FFFFFF 100%)'
+      }}
+    >
       <Navigation />
 
       {/* Hero Section */}
@@ -185,7 +195,7 @@ export default function UpcomingEvents() {
         className="text-black"
       >
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'Georgia, serif' }}>
             Upcoming Events
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
@@ -212,11 +222,12 @@ export default function UpcomingEvents() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style={{ marginBottom: '60px' }}>
             {upcomingEvents.map((event) => (
               <Card
                 key={event.id}
-                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white h-fit"
+                className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white h-fit rounded-2xl hover:border-[#B9C9D4] border border-transparent"
+                style={{ boxShadow: '0 6px 16px rgba(0,0,0,0.06)' }}
               >
                 {/* Large Event Image */}
                 <div className="relative h-96 md:h-[28rem] lg:h-[32rem] overflow-hidden cursor-pointer">
@@ -297,8 +308,8 @@ export default function UpcomingEvents() {
                               className={`${
                                 (event.availableTickets || 0) === 0
                                   ? "bg-gray-400 cursor-not-allowed"
-                                  : "bg-purple-600 hover:bg-purple-700"
-                              } ${loadingCart === event.id ? "bg-purple-700" : ""}`}
+                                  : "bg-[#B9C9D4] hover:bg-[#A5BAC8]"
+                              } ${loadingCart === event.id ? "bg-[#A5BAC8]" : ""} text-black font-medium`}
                               size="lg"
                             >
                               {loadingCart === event.id ? (
@@ -342,13 +353,13 @@ export default function UpcomingEvents() {
                           <div className="flex flex-col gap-1 items-end">
                             <Badge
                               variant="default"
-                              className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
+                              className="bg-[#B9C9D4] text-black font-bold text-lg px-3 py-1 pricing-font"
                             >
                               {pricing.primary}
                             </Badge>
                             <Badge
                               variant="secondary"
-                              className="bg-purple-100 text-purple-700 font-medium text-sm px-2 py-0.5 pricing-font"
+                              className="bg-[#F5F1ED] text-gray-800 font-medium text-sm px-2 py-0.5 pricing-font"
                             >
                               {pricing.secondary}
                             </Badge>
@@ -358,7 +369,7 @@ export default function UpcomingEvents() {
                       return (
                         <Badge
                           variant="default"
-                          className="bg-purple-600 text-white font-bold text-lg px-3 py-1 pricing-font"
+                          className="bg-[#B9C9D4] text-black font-bold text-lg px-3 py-1 pricing-font"
                         >
                           {pricing.primary}
                         </Badge>
@@ -398,7 +409,7 @@ export default function UpcomingEvents() {
                     {/* Date and Time */}
                     {event.eventDate && (
                       <div className="flex items-center gap-2 text-gray-600">
-                        <Calendar className="w-4 h-4 text-purple-500" />
+                        <Calendar className="w-4 h-4 text-[#B9C9D4]" />
                         <div className="text-sm">
                           <div className="font-medium">
                             {formatDate(event.eventDate)}
@@ -412,7 +423,7 @@ export default function UpcomingEvents() {
 
                     {/* Multiple Sessions Badge */}
                     {event.hasMultipleSessions && (
-                      <div className="flex items-center gap-2 text-purple-600">
+                      <div className="flex items-center gap-2 text-[#B9C9D4]">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm font-medium">
                           Multiple sessions available
@@ -423,7 +434,7 @@ export default function UpcomingEvents() {
                     {/* Location */}
                     {event.location && (
                       <div className="flex items-center gap-2 text-gray-600">
-                        <MapPin className="w-4 h-4 text-purple-500" />
+                        <MapPin className="w-4 h-4 text-[#B9C9D4]" />
                         <span className="text-sm">{event.location}</span>
                       </div>
                     )}
@@ -445,8 +456,8 @@ export default function UpcomingEvents() {
                       className={`w-full mt-4 relative ${
                         (event.availableTickets || 0) === 0
                           ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-purple-600 hover:bg-purple-700"
-                      } ${loadingCart === event.id ? "bg-purple-700" : ""}`}
+                          : "bg-[#B9C9D4] hover:bg-[#A5BAC8]"
+                      } ${loadingCart === event.id ? "bg-[#A5BAC8]" : ""} text-black font-medium rounded-full`}
                       size="lg"
                     >
                       {loadingCart === event.id ? (
@@ -486,7 +497,7 @@ export default function UpcomingEvents() {
                 <Button
                   key={session.id}
                   variant="outline"
-                  className="w-full p-4 h-auto flex flex-col items-start gap-2 text-left hover:bg-purple-50"
+                  className="w-full p-4 h-auto flex flex-col items-start gap-2 text-left hover:bg-[#F5F1ED] border-[#B9C9D4]"
                   onClick={() => {
                     if (sessionSelectionProduct) {
                       handleAddToCart(sessionSelectionProduct, session);
@@ -526,7 +537,7 @@ export default function UpcomingEvents() {
             onClick={() => setLocation("/get-quote")}
             variant="outline"
             size="lg"
-            className="border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white"
+            className="border-[#B9C9D4] text-[#B9C9D4] hover:bg-[#B9C9D4] hover:text-black font-medium rounded-full"
           >
             Request Custom Event
           </UnifiedButton>
