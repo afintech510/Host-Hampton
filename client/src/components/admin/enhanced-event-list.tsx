@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Users, Calendar, DollarSign, Mail, RotateCcw } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Eye, Users, Calendar, DollarSign, Mail, RotateCcw, Archive, ArrowUpDown } from "lucide-react";
 import EventDetailsDialog from "./event-details-dialog";
 
 interface PublicEvent {
@@ -61,8 +63,22 @@ export default function EnhancedEventList() {
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc"); // desc = newest first
+  const [showArchived, setShowArchived] = useState(false);
   
   const queryClient = useQueryClient();
+  
+  // Archive mutation
+  const archiveMutation = useMutation({
+    mutationFn: async ({ eventId, archived }: { eventId: number; archived: boolean }) => {
+      const response = await apiRequest("PATCH", `/api/events/${eventId}/archive`, { archived });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+    },
+  });
   
   const handleRefreshData = async () => {
     // Invalidate all relevant queries to refresh data
@@ -101,27 +117,14 @@ export default function EnhancedEventList() {
   console.log("Processed allEvents:", allEvents);
   console.log("allEventsData structure:", allEventsData);
   
-  // Separate public events (from products/sessions) and private events
+  // Separate public events (customerId = 1) and private events
+  // Public events are product-based events created by the system (customerId = 1)
   const publicEvents = allEvents.filter((event: any) => 
-    event.notes && (
-      event.notes.includes("Kids Summer Classes") || 
-      event.notes.includes("Open Soft Play") || 
-      event.notes.includes("Advanced Beginner Mahjong") ||
-      event.notes.includes("Sourdough for Beginners") ||
-      event.notes.includes("Spirit Medium") ||
-      event.notes.includes("Not Miss Rachel")
-    )
+    event.customerId === 1
   );
   
   const privateEvents = allEvents.filter((event: any) => 
-    !event.notes || !(
-      event.notes.includes("Kids Summer Classes") || 
-      event.notes.includes("Open Soft Play") || 
-      event.notes.includes("Advanced Beginner Mahjong") ||
-      event.notes.includes("Sourdough for Beginners") ||
-      event.notes.includes("Spirit Medium") ||
-      event.notes.includes("Not Miss Rachel")
-    )
+    event.customerId !== 1
   );
 
   // Create precise event-to-session mapping based on our database analysis
@@ -217,28 +220,64 @@ export default function EnhancedEventList() {
     return totalAttendees;
   };
 
-  // Filter events based on status and type
+  // Filter events based on status, type, search, and archived state
   const filteredPrivateEvents = privateEvents
     .filter((event: PrivateEvent) => {
+      // Filter by status
       if (statusFilter !== "all" && event.status !== statusFilter) return false;
+      
+      // Filter by event type
       if (eventTypeFilter !== "all" && eventTypeFilter !== "private") return false;
+      
+      // Filter by archived state
+      if (!showArchived && (event as any).archived) return false;
+      if (showArchived && !(event as any).archived) return false;
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = (event.customerName || "").toLowerCase().includes(query);
+        const matchesNotes = (event.notes || "").toLowerCase().includes(query);
+        const matchesEventType = (event.eventTypeName || "").toLowerCase().includes(query);
+        if (!matchesName && !matchesNotes && !matchesEventType) return false;
+      }
+      
       return true;
     })
     .sort((a: PrivateEvent, b: PrivateEvent) => {
-      // Sort by date descending (newest first)
-      return new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime();
+      // Sort by date
+      const dateA = new Date(a.eventDate).getTime();
+      const dateB = new Date(b.eventDate).getTime();
+      return sortDirection === "desc" ? dateB - dateA : dateA - dateB;
     });
 
   // Filter and sort public events
   const filteredPublicEvents = publicEvents
     .filter((event: any) => {
+      // Filter by status
       if (statusFilter !== "all" && event.status !== statusFilter) return false;
+      
+      // Filter by event type
       if (eventTypeFilter !== "all" && eventTypeFilter !== "public") return false;
+      
+      // Filter by archived state
+      if (!showArchived && event.archived) return false;
+      if (showArchived && !event.archived) return false;
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesNotes = (event.notes || "").toLowerCase().includes(query);
+        if (!matchesNotes) return false;
+      }
+      
       return true;
     })
     .sort((a: any, b: any) => {
-      // Sort by date descending (newest first)
-      return new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime();
+      // Sort by date
+      const dateA = new Date(a.eventDate).getTime();
+      const dateB = new Date(b.eventDate).getTime();
+      return sortDirection === "desc" ? dateB - dateA : dateA - dateB;
     });
   
   // Debug logging to see what's happening with filtering
@@ -321,36 +360,82 @@ export default function EnhancedEventList() {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-          <label className="text-sm font-medium whitespace-nowrap">Status:</label>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-              <SelectItem value="all">All Status</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Search and Filters */}
+      <div className="flex flex-col gap-4">
+        {/* Search Box */}
+        <div className="flex gap-2 items-center">
+          <Input
+            type="text"
+            placeholder="Search events by name, notes, or type..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1"
+            data-testid="input-search-events"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSortDirection(sortDirection === "desc" ? "asc" : "desc")}
+            data-testid="button-toggle-sort"
+          >
+            <ArrowUpDown className="w-4 h-4 mr-2" />
+            {sortDirection === "desc" ? "Newest First" : "Oldest First"}
+          </Button>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-          <label className="text-sm font-medium whitespace-nowrap">Event Type:</label>
-          <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Events</SelectItem>
-              <SelectItem value="public">Host Hampton Events</SelectItem>
-              <SelectItem value="private">Private Events</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filters Row */}
+        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+          <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+            <label className="text-sm font-medium whitespace-nowrap">Status:</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+            <label className="text-sm font-medium whitespace-nowrap">Event Type:</label>
+            <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Events</SelectItem>
+                <SelectItem value="public">Host Hampton Events</SelectItem>
+                <SelectItem value="private">Private Events</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="show-archived"
+              checked={showArchived}
+              onCheckedChange={(checked) => setShowArchived(checked as boolean)}
+              data-testid="checkbox-show-archived"
+            />
+            <label htmlFor="show-archived" className="text-sm font-medium cursor-pointer">
+              Show Archived
+            </label>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshData}
+            data-testid="button-refresh-events"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
         </div>
       </div>
 
@@ -393,15 +478,25 @@ export default function EnhancedEventList() {
                       </div>
                     </div>
                     
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewEvent(event)}
-                      data-testid={`button-view-event-${event.id}`}
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewEvent(event)}
+                        data-testid={`button-view-event-${event.id}`}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => archiveMutation.mutate({ eventId: event.id, archived: !event.archived })}
+                        data-testid={`button-archive-event-${event.id}`}
+                      >
+                        <Archive className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -480,15 +575,25 @@ export default function EnhancedEventList() {
                       </div>
                     </div>
                     
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewEvent(event)}
-                      data-testid={`button-view-event-${event.id}`}
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewEvent(event)}
+                        data-testid={`button-view-event-${event.id}`}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => archiveMutation.mutate({ eventId: event.id, archived: !event.archived })}
+                        data-testid={`button-archive-event-${event.id}`}
+                      >
+                        <Archive className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -566,14 +671,24 @@ export default function EnhancedEventList() {
                         ${revenue.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewEvent(event)}
-                          data-testid={`button-view-event-${event.id}`}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewEvent(event)}
+                            data-testid={`button-view-event-${event.id}`}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => archiveMutation.mutate({ eventId: event.id, archived: !event.archived })}
+                            data-testid={`button-archive-event-${event.id}`}
+                          >
+                            <Archive className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -662,14 +777,24 @@ export default function EnhancedEventList() {
                         ${revenue.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewEvent(event)}
-                          data-testid={`button-view-event-${event.id}`}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewEvent(event)}
+                            data-testid={`button-view-event-${event.id}`}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => archiveMutation.mutate({ eventId: event.id, archived: !event.archived })}
+                            data-testid={`button-archive-event-${event.id}`}
+                          >
+                            <Archive className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
