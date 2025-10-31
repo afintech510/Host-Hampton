@@ -1,0 +1,49 @@
+enhanced-event-list.tsx:101 Processed allEvents: (29) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+enhanced-event-list.tsx:102 allEventsData structure: (29) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+enhanced-event-list.tsx:245 Debug Event Filtering:
+enhanced-event-list.tsx:246 - All events count: 29
+enhanced-event-list.tsx:247 - Public events count: 18
+enhanced-event-list.tsx:248 - Private events count: 11
+enhanced-event-list.tsx:249 - Status filter: all
+enhanced-event-list.tsx:250 - Event type filter: all
+enhanced-event-list.tsx:251 - Sample public events: (3) [{…}, {…}, {…}]
+enhanced-event-list.tsx:252 - Events data structure check:
+enhanced-event-list.tsx:254   - Event status: confirmed
+enhanced-event-list.tsx:255   - Event notes: Kids Summer Classes - Canvas Bag Painting
+enhanced-event-list.tsx:256   - Event eventDate: 2025-07-22T17:30:00.000Z
+enhanced-event-list.tsx:181 Debug Attendee Count for Event 43:
+enhanced-event-list.tsx:182 - Event Notes: Kids Summer Classes - Canvas Bag Painting
+enhanced-event-list.tsx:183 - Mapped Product Name: Kids Summer Classes
+enhanced-event-list.tsx:184 - Session ID: 1
+enhanced-event-list.tsx:185 - Total Orders: 28
+enhanced-event-list.tsx:186 - Completed Orders: 27
+enhanced-event-list.tsx:187 - Orders data sample: (2) [{…}, {…}]
+enhanced-event-list.tsx:190 - First completed order items: []
+enhanced-event-list.tsx:214 - Final Attendee Count: 3
+enhanced-event-list.tsx:181 Debug Attendee Count for Event 43:
+enhanced-event-list.tsx:182 - Event Notes: Kids Summer Classes - Canvas Bag Painting
+enhanced-event-list.tsx:183 - Mapped Product Name: Kids Summer Classes
+enhanced-event-list.tsx:184 - Session ID: 1
+enhanced-event-list.tsx:185 - Total Orders: 28
+enhanced-event-list.tsx:186 - Completed Orders: 27
+enhanced-event-list.tsx:187 - Orders data sample: (2) [{…}, {…}]
+enhanced-event-list.tsx:190 - First completed order items: []
+enhanced-event-list.tsx:214 - Final Attendee Count: 3
+enhanced-event-list.tsx:181 Debug Attendee Count for Event 43:
+enhanced-event-list.tsx:182 - Event Notes: Kids Summer Classes - Canvas Bag Painting
+enhanced-event-list.tsx:183 - Mapped Product Name: Kids Summer Classes
+enhanced-event-list.tsx:184 - Session ID: 1
+enhanced-event-list.tsx:185 - Total Orders: 28
+enhanced-event-list.tsx:186 - Completed Orders: 27
+enhanced-event-list.tsx:187 - Orders data sample: (2) [{…}, {…}]
+enhanced-event-list.tsx:190 - First completed order items: []
+enhanced-event-list.tsx:214 - Final Attendee Count: 3
+enhanced-event-list.tsx:181 Debug Attendee Count for Event 43:
+enhanced-event-list.tsx:182 - Event Notes: Kids Summer Classes - Canvas Bag Painting
+enhanced-event-list.tsx:183 - Mapped Product Name: Kids Summer Classes
+enhanced-event-list.tsx:184 - Session ID: 1
+enhanced-event-list.tsx:185 - Total Orders: 28
+enhanced-event-list.tsx:186 - Completed Orders: 27
+enhanced-event-list.tsx:187 - Orders data sample: (2) [{…}, {…}]
+enhanced-event-list.tsx:190 - First completed order items: []
+enhanced-event-list.tsx:214 - Final Attendee Count: 3
