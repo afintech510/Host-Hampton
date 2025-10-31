@@ -4,11 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Truck, Calendar, Users, MapPin, Star, Clock, X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TruckHatBar() {
+  const { toast } = useToast();
+  const [inquiryForm, setInquiryForm] = useState({
+    name: "",
+    email: "",
+    desiredDate: "",
+    groupSize: "",
+    location: "",
+    message: ""
+  });
+  const [isSubmittingInquiry, setIsSubmittingInquiry] = useState(false);
+
   const services = [
     {
       title: "Mobile Hat Bar",
@@ -67,6 +82,39 @@ export default function TruckHatBar() {
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowRight') nextImage();
     if (e.key === 'ArrowLeft') prevImage();
+  };
+
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingInquiry(true);
+
+    try {
+      // TODO: Connect to backend API for inquiry submissions
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+      
+      toast({
+        title: "Inquiry Received!",
+        description: "We'll contact you within 24 hours to discuss your Hat Bar event.",
+      });
+      
+      // Reset form
+      setInquiryForm({
+        name: "",
+        email: "",
+        desiredDate: "",
+        groupSize: "",
+        location: "",
+        message: ""
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingInquiry(false);
+    }
   };
 
   return (
@@ -248,6 +296,105 @@ export default function TruckHatBar() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Contact Inquiry Form */}
+        <div className="mb-16">
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Request Your Hat Bar Event
+              </h2>
+              <p className="text-gray-600">
+                From Manhattan to Montauk — our mobile Hat Bar brings the fun to you.
+              </p>
+            </div>
+
+            <form onSubmit={handleInquirySubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="inquiry-name">Name *</Label>
+                  <Input
+                    id="inquiry-name"
+                    value={inquiryForm.name}
+                    onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
+                    required
+                    data-testid="input-inquiry-name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inquiry-email">Email *</Label>
+                  <Input
+                    id="inquiry-email"
+                    type="email"
+                    value={inquiryForm.email}
+                    onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
+                    required
+                    data-testid="input-inquiry-email"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="inquiry-date">Desired Date *</Label>
+                  <Input
+                    id="inquiry-date"
+                    type="date"
+                    value={inquiryForm.desiredDate}
+                    onChange={(e) => setInquiryForm({ ...inquiryForm, desiredDate: e.target.value })}
+                    required
+                    data-testid="input-inquiry-date"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inquiry-group-size">Group Size *</Label>
+                  <Input
+                    id="inquiry-group-size"
+                    type="number"
+                    min="1"
+                    value={inquiryForm.groupSize}
+                    onChange={(e) => setInquiryForm({ ...inquiryForm, groupSize: e.target.value })}
+                    required
+                    data-testid="input-inquiry-group-size"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="inquiry-location">Location / Venue Name *</Label>
+                <Input
+                  id="inquiry-location"
+                  value={inquiryForm.location}
+                  onChange={(e) => setInquiryForm({ ...inquiryForm, location: e.target.value })}
+                  placeholder="Where should we bring the Hat Bar?"
+                  required
+                  data-testid="input-inquiry-location"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="inquiry-message">Message / Special Requests</Label>
+                <Textarea
+                  id="inquiry-message"
+                  value={inquiryForm.message}
+                  onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
+                  rows={4}
+                  placeholder="Tell us about your event..."
+                  data-testid="textarea-inquiry-message"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white text-lg py-6"
+                disabled={isSubmittingInquiry}
+                data-testid="button-submit-hat-bar-inquiry"
+              >
+                {isSubmittingInquiry ? "Submitting..." : "Submit Inquiry"}
+              </Button>
+            </form>
+          </div>
+        </div>
 
         {/* CTA Section */}
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
