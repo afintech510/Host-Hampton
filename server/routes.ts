@@ -2145,6 +2145,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/events/:id/archive", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { archived } = req.body;
+      const updated = await storage.updateEvent(id, { archived });
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "Event not found" });
+      }
+      res.json({ success: true, event: updated });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to archive event" });
+    }
+  });
+
   // Invoices - Remove duplicate, keep the one with items
 
   app.patch("/api/invoices/:id", async (req, res) => {
