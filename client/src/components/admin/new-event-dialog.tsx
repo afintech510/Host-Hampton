@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -271,6 +271,19 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
   const watchEventType = form.watch("eventType");
   const watchHasSiblingDiscount = form.watch("hasSiblingDiscount");
 
+  // Auto-add a session when multi-session event type is selected
+  useEffect(() => {
+    if ((watchEventType === "multi-session-choose" || watchEventType === "multi-session-series") && sessionFields.length === 0) {
+      appendSession({
+        sessionName: "",
+        sessionDate: "",
+        sessionTime: "",
+        maxTickets: 1,
+        priceOverride: undefined,
+      });
+    }
+  }, [watchEventType, sessionFields.length, appendSession]);
+
   // Fetch event types for the dropdown
   const { data: eventTypes = [] } = useQuery({
     queryKey: ["/api/event-types"],
@@ -428,7 +441,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 3));
+    setCurrentStep(prev => Math.min(prev + 1, 2));
   };
 
   const prevStep = () => {
@@ -468,7 +481,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center space-x-4 mb-6">
-      {[1, 2, 3].map((step) => (
+      {[1, 2].map((step) => (
         <div key={step} className="flex items-center">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -481,7 +494,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
           >
             {step < currentStep ? <Check className="w-4 h-4" /> : step}
           </div>
-          {step < 3 && (
+          {step < 2 && (
             <div
               className={`w-12 h-0.5 ${
                 step < currentStep ? "bg-green-600" : "bg-gray-300"
@@ -595,41 +608,25 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         )}
       />
 
-      {/* Associated Event Type */}
-      <FormField
-        control={form.control}
-        name="associatedEventType"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Associated Event Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Link to event type for booking management" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {eventTypes.map((type: any) => (
-                  <SelectItem key={type.id} value={type.id.toString()}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              This links your product to an existing event type for booking management
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6">
+      {/* Location & Price */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Base Price */}
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Location
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="Host Hampton" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="basePrice"
@@ -653,24 +650,6 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
                   ? "Price for the entire series" 
                   : "Price per person/ticket"}
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Location */}
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Location
-              </FormLabel>
-              <FormControl>
-                <Input placeholder="Host Hampton" {...field} />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -811,113 +790,6 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         </div>
       )}
 
-      {/* Option Categories */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-medium">Workshop Options</h3>
-            <p className="text-sm text-gray-600">
-              Add customizable options like material choices, sizes, or add-ons with different prices
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => appendOptionCategory({
-              name: "",
-              description: "",
-              isRequired: false,
-              options: []
-            })}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Option Category
-          </Button>
-        </div>
-
-        {optionCategoryFields.map((category, categoryIndex) => (
-          <Card key={category.id} className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-medium">Option Category {categoryIndex + 1}</h4>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeOptionCategory(categoryIndex)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name={`optionCategories.${categoryIndex}.name`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Wood Type" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name={`optionCategories.${categoryIndex}.description`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Choose your preferred material" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name={`optionCategories.${categoryIndex}.isRequired`}
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Required Selection</FormLabel>
-                      <FormDescription>
-                        Customers must choose an option from this category
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {/* Option Management */}
-              <OptionFieldArray 
-                control={form.control} 
-                categoryIndex={categoryIndex} 
-              />
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="space-y-6">
       {/* Multi-Session Configuration */}
       {watchEventType !== "single" && (
         <div className="space-y-4">
@@ -1058,27 +930,319 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
         </div>
       )}
 
-      {/* Summary */}
-      <Card className="bg-gray-50">
-        <CardHeader>
-          <CardTitle className="text-lg">Event Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-sm">
-            <div><strong>Name:</strong> {form.watch("name") || "Not set"}</div>
-            <div><strong>Type:</strong> {eventTypeOptions.find(t => t.value === watchEventType)?.label}</div>
-            <div><strong>Base Price:</strong> ${form.watch("basePrice")?.toFixed(2) || "0.00"}</div>
-            {watchHasSiblingDiscount && (
-              <div><strong>Sibling Price:</strong> ${form.watch("siblingPrice")?.toFixed(2) || "0.00"}</div>
-            )}
-            {watchEventType !== "single" && (
-              <div><strong>Sessions:</strong> {sessionFields.length} configured</div>
-            )}
+      {/* Option Categories */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium">Workshop Options</h3>
+            <p className="text-sm text-gray-600">
+              Add customizable options like material choices, sizes, or add-ons with different prices
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => appendOptionCategory({
+              name: "",
+              description: "",
+              isRequired: false,
+              options: []
+            })}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Option Category
+          </Button>
+        </div>
+
+        {optionCategoryFields.map((category, categoryIndex) => (
+          <Card key={category.id} className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-medium">Option Category {categoryIndex + 1}</h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeOptionCategory(categoryIndex)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name={`optionCategories.${categoryIndex}.name`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Wood Type" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`optionCategories.${categoryIndex}.description`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Choose your preferred material" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name={`optionCategories.${categoryIndex}.isRequired`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Required Selection</FormLabel>
+                      <FormDescription>
+                        Customers must choose an option from this category
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* Option Management */}
+              <OptionFieldArray 
+                control={form.control} 
+                categoryIndex={categoryIndex} 
+              />
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
+
+  const renderStep2 = () => {
+    const sessions = form.watch("sessions") || [];
+    const optionCategories = form.watch("optionCategories") || [];
+    
+    return (
+      <div className="space-y-6">
+        {/* Comprehensive Summary */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">Review Your Event</h3>
+          <p className="text-sm text-gray-600">
+            Please review all the details before creating your event. You can go back to make changes if needed.
+          </p>
+
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Event Name</p>
+                  <p className="font-medium">{form.watch("name") || "Not set"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Category</p>
+                  <p className="font-medium">
+                    {eventCategories.find(c => c.value === form.watch("category"))?.label || "Not set"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-gray-600">Description</p>
+                  <p className="font-medium">{form.watch("description") || "Not set"}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Event Type</p>
+                  <p className="font-medium">
+                    {eventTypeOptions.find(t => t.value === watchEventType)?.label}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Location</p>
+                  <p className="font-medium">{form.watch("location")}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pricing */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Pricing</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Base Price</p>
+                  <p className="font-medium text-lg text-green-600">
+                    ${form.watch("basePrice")?.toFixed(2) || "0.00"}
+                  </p>
+                </div>
+                {watchHasSiblingDiscount && (
+                  <div>
+                    <p className="text-gray-600">Sibling Discount Price</p>
+                    <p className="font-medium text-lg text-green-600">
+                      ${form.watch("siblingPrice")?.toFixed(2) || "0.00"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Event Photo */}
+          {form.watch("imageUrl") && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Event Photo</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <img 
+                    src={form.watch("imageUrl")} 
+                    alt="Event preview" 
+                    className="w-full max-w-md rounded-lg object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 break-all">{form.watch("imageUrl")}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Single Event Details */}
+          {watchEventType === "single" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Event Schedule</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Date</p>
+                    <p className="font-medium">
+                      {form.watch("eventDate") || "Not set"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Time</p>
+                    <p className="font-medium">
+                      {form.watch("eventTime") || "Not set"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Max Tickets</p>
+                    <p className="font-medium">
+                      {form.watch("maxTickets")} tickets
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Multi-Session Details */}
+          {watchEventType !== "single" && sessions.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Sessions ({sessions.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {sessions.map((session, index) => (
+                    <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                      <p className="font-medium mb-2">{session.sessionName || `Session ${index + 1}`}</p>
+                      <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+                        <div>
+                          <span className="text-xs">Date:</span> {session.sessionDate || "Not set"}
+                        </div>
+                        <div>
+                          <span className="text-xs">Time:</span> {session.sessionTime || "Not set"}
+                        </div>
+                        <div>
+                          <span className="text-xs">Tickets:</span> {session.maxTickets}
+                        </div>
+                        {session.priceOverride && (
+                          <div className="col-span-3">
+                            <span className="text-xs">Price Override:</span> ${session.priceOverride.toFixed(2)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Workshop Options */}
+          {optionCategories.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Workshop Options ({optionCategories.length} categories)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {optionCategories.map((category, index) => (
+                    <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium">{category.name}</p>
+                        {category.isRequired && (
+                          <Badge variant="secondary" className="text-xs">Required</Badge>
+                        )}
+                      </div>
+                      {category.description && (
+                        <p className="text-sm text-gray-600 mb-2">{category.description}</p>
+                      )}
+                      <div className="space-y-1">
+                        {category.options?.map((option, optIndex) => (
+                          <div key={optIndex} className="flex items-center justify-between text-sm">
+                            <span className="flex items-center gap-2">
+                              {option.name}
+                              {option.isDefault && <Badge className="text-xs">Default</Badge>}
+                            </span>
+                            {option.priceModifier !== 0 && (
+                              <span className="text-gray-600">
+                                {option.priceModifier > 0 ? '+' : ''}${option.priceModifier.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Card className="w-full max-w-5xl mx-auto">
@@ -1108,7 +1272,6 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {currentStep === 1 && renderStep1()}
             {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
 
             {/* Navigation Buttons */}
             <div className="flex items-center justify-between pt-6 border-t">
@@ -1124,10 +1287,10 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
               </Button>
 
               <div className="text-sm text-gray-600">
-                Step {currentStep} of 3
+                Step {currentStep} of 2
               </div>
 
-              {currentStep < 3 ? (
+              {currentStep < 2 ? (
                 <Button
                   type="button"
                   onClick={nextStep}
@@ -1141,6 +1304,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
                   type="submit"
                   disabled={isSubmitting}
                   className="flex items-center gap-2"
+                  data-testid="button-create-event"
                 >
                   {isSubmitting ? (
                     <>
