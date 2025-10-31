@@ -440,11 +440,15 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
     });
   };
 
-  const nextStep = () => {
+  const nextStep = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setCurrentStep(prev => Math.min(prev + 1, 2));
   };
 
-  const prevStep = () => {
+  const prevStep = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
@@ -1035,12 +1039,69 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
     </div>
   );
 
+  // Fetch existing events for conflict detection
+  const { data: existingEvents = [] } = useQuery<any[]>({
+    queryKey: ["/api/events"],
+    enabled: currentStep === 2,
+  });
+
   const renderStep2 = () => {
     const sessions = form.watch("sessions") || [];
     const optionCategories = form.watch("optionCategories") || [];
     
+    // Check for time conflicts
+    const timeConflicts: string[] = [];
+    
+    if (watchEventType === "single") {
+      const eventDate = form.watch("eventDate");
+      const eventTime = form.watch("eventTime");
+      
+      if (eventDate && eventTime) {
+        const newEventDateTime = `${eventDate}T${eventTime}`;
+        existingEvents.forEach((event: any) => {
+          if (event.eventDate) {
+            const existingDateTime = event.eventDate.substring(0, 16); // Get YYYY-MM-DDTHH:mm
+            if (existingDateTime === newEventDateTime) {
+              timeConflicts.push(`${eventDate} at ${eventTime} - conflicts with "${event.notes || event.customerName || 'Existing Event'}"`);
+            }
+          }
+        });
+      }
+    } else {
+      // Check multi-session conflicts
+      sessions.forEach((session, index) => {
+        if (session.sessionDate && session.sessionTime) {
+          const sessionDateTime = `${session.sessionDate}T${session.sessionTime}`;
+          existingEvents.forEach((event: any) => {
+            if (event.eventDate) {
+              const existingDateTime = event.eventDate.substring(0, 16);
+              if (existingDateTime === sessionDateTime) {
+                timeConflicts.push(`Session ${index + 1} (${session.sessionDate} at ${session.sessionTime}) - conflicts with "${event.notes || event.customerName || 'Existing Event'}"`);
+              }
+            }
+          });
+        }
+      });
+    }
+    
     return (
       <div className="space-y-6">
+        {/* Time Conflict Warning */}
+        {timeConflicts.length > 0 && (
+          <Alert variant="destructive" className="border-orange-500 bg-orange-50">
+            <AlertCircle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              <p className="font-semibold mb-2">Time Conflict Warning</p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                {timeConflicts.map((conflict, index) => (
+                  <li key={index}>{conflict}</li>
+                ))}
+              </ul>
+              <p className="mt-2 text-sm">You can still create this event, but please be aware of these scheduling conflicts.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Comprehensive Summary */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">Review Your Event</h3>
@@ -1295,6 +1356,7 @@ export default function NewEventPanel({ onClose }: NewEventPanelProps) {
                   type="button"
                   onClick={nextStep}
                   className="flex items-center gap-2"
+                  data-testid="button-next-step"
                 >
                   Next
                   <ArrowRight className="w-4 h-4" />
