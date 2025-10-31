@@ -212,8 +212,12 @@ export default function AdminDashboard() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowNewEventPanel(true)}
+              onClick={() => {
+                setActiveTab("events");
+                setShowNewEventPanel(true);
+              }}
               className="flex-shrink-0"
+              data-testid="button-new-event-header"
             >
               <Plus className="w-4 h-4 md:mr-2" />
               <span className="hidden sm:inline">New Event</span>

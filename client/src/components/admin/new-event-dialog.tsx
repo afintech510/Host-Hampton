@@ -101,8 +101,8 @@ const newEventSchema = z.object({
   // Option Categories (for workshops with choices like wood types)
   optionCategories: z.array(optionCategorySchema).optional(),
   
-  // Associated Event Type for booking management
-  associatedEventType: z.string().min(1, "Event type is required"),
+  // Associated Event Type for booking management (optional)
+  associatedEventType: z.string().optional(),
 });
 
 type NewEventFormData = z.infer<typeof newEventSchema>;
