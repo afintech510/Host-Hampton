@@ -11,6 +11,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Truck, Calendar, Users, MapPin, Star, Clock, X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import longIslandHeroBg from "@assets/long-island-dusty-blue-mobile-hero-bg_1761886362376.webp";
 
 export default function TruckHatBar() {
   const { toast } = useToast();
@@ -121,18 +122,34 @@ export default function TruckHatBar() {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-6">🚛👒</div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      {/* Hero Section with Long Island Background */}
+      <div 
+        className="relative min-h-[500px] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${longIslandHeroBg})`,
+          backgroundColor: '#F5F1ED'
+        }}
+      >
+        <div className="relative z-10 text-center px-4 py-20">
+          <h1 className="text-5xl md:text-6xl font-bold text-black mb-6">
             Trucker Hat Bar
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Bring the ultimate trucker hat bar experience to your event! Our mobile trucker hat bar 
-            comes directly to you with a curated collection of trendy trucker hats and custom styling services.
+          <p className="text-lg md:text-xl text-gray-900 max-w-2xl mx-auto mb-8">
+            The ultimate mobile hat experience — handcraft style, anywhere from Manhattan to Montauk.
           </p>
+          <Link href="/book-event">
+            <Button 
+              size="lg" 
+              className="bg-[#5B9BD5] hover:bg-[#4A8AC4] text-white px-8 py-6 text-lg rounded-md shadow-lg"
+              data-testid="button-book-your-event"
+            >
+              Book Your Event
+            </Button>
+          </Link>
         </div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Services Section */}
         <div className="mb-16">
