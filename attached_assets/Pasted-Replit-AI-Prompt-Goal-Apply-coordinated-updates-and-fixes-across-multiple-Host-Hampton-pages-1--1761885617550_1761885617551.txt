@@ -1,0 +1,147 @@
+Replit AI Prompt
+
+Goal: Apply coordinated updates and fixes across multiple Host Hampton pages.
+
+1. Fix /events date display bug
+
+There’s an ongoing issue where event times display one day earlier than stored.
+
+The database values are correct (verified). The problem likely stems from UTC ↔ EST conversion during client rendering.
+
+Update the event rendering logic to:
+
+Convert stored UTC timestamps into America/New_York (EST/EDT) before display.
+
+Use the local timezone for both formatting and comparison.
+
+Ensure displayed date/time matches the entry in the database even across daylight savings transitions.
+
+Apply fix globally (theme parties, events, workshops).
+
+✅ Expected: Event date/time displayed exactly as stored in database, consistent across user devices and regions.
+
+2. Update /permanent-jewelry page
+
+Theme to match the Host Hampton yellow background aesthetic (same hue used on Hat Bar pages).
+
+Replace any “booking options” or pricing blocks with a custom contact form that allows visitors to inquire directly.
+
+Form fields:
+
+Name
+
+Email
+
+Phone (optional)
+
+Desired date
+
+Desired time
+
+Group size
+
+Location (dropdown: “Host Hampton / On-site Mobile / Private Home / Other”)
+
+Type of jewelry (dropdown: “Bracelet / Necklace / Anklet / Ring / Other”)
+
+Message box for notes
+
+Include submit button styled like Host Hampton’s existing brand buttons.
+
+Add trust messaging block styled like the Trucker Hat Bar page:
+
+“Trusted from Manhattan to Montauk — we bring timeless sparkle anywhere you are.”
+Add trust bullets: “Fully insured artists,” “Sterling, gold-filled, and solid gold options,” “Professional, sanitary equipment.”
+
+Add a matching hero gradient or section header in the dusty blue/mauve/light gray palette for visual continuity.
+
+✅ Expected: Page reads like an elegant, high-end contact/inquiry flow rather than an e-commerce checkout.
+
+3. Add contact module to /trucker-hat-bar
+
+Below the inspiration gallery, add a short inquiry form (similar to jewelry contact form) allowing users to request a date or event.
+
+Fields:
+
+Name
+
+Email
+
+Desired date
+
+Group size
+
+Location / venue name
+
+Message
+
+Keep form styling consistent with new yellow accent theme.
+
+Include line of reassurance:
+
+“From Manhattan to Montauk — our mobile Hat Bar brings the fun to you.”
+
+Ensure form posts correctly to existing backend email or database endpoint used for other inquiries.
+
+✅ Expected: Section feels trustworthy and visually aligned with other mobile event offerings.
+
+4. Update /party-room-rental page
+
+Remove all “package” or “book now” sections.
+
+Replace with a reservation module connected to the global availability calendar and pricing database.
+
+Inputs:
+
+Date picker (only show available dates per global calendar)
+
+Start time
+
+Duration (dropdown: 2, 3, 4 hours)
+
+System auto-detects weekday vs. weekend rates based on database pricing
+
+Display computed rental total before deposit
+
+Add $200 deposit checkout button (Stripe or current payment flow).
+
+On submission:
+
+Create booking in database with “pending confirmation” status
+
+Show confirmation message:
+
+“Thank you for your reservation request. Host Hampton will contact you within 24 hours to confirm availability.
+Host Hampton reserves the right to cancel any reservation within one week of booking.”
+
+Include matching brand theme (yellow or dusty blue gradient background, black text).
+
+✅ Expected: Booking flow with automatic date validation and pricing logic consistent with the global database, $200 deposit checkout, and pending confirmation messaging.
+
+5. Global styling
+
+Maintain Host Hampton’s typography and gradient palette:
+
+Dusty Blue #B9C9D4
+
+Mauve #F5F1ED
+
+Light Gray #F0F0F0
+
+White #FFFFFF
+
+Accent Yellow (existing background from Hat Bar pages)
+
+Use soft black (#111) or deep gray (#222) for text.
+
+Retain consistent spacing, rounded corners, and minimalist, airy layout.
+
+✅ Deliverables summary
+
+/events: Fix UTC vs EST date display
+
+/permanent-jewelry: Yellow-themed contact-form layout replacing booking options, add trust bar
+
+/trucker-hat-bar: Add contact inquiry module below gallery
+
+/party-room-rental: Replace packages with reservation form (date/time/duration, DB pricing, $200 deposit, confirmation text)

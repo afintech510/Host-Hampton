@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import type { Product, ProductSession } from "@shared/schema";
 import Navigation from "@/components/navigation";
+import { formatDate, formatTime } from "@/lib/date-utils";
 
 // Helper function to format prices
 const formatPrice = (priceInCents: number) => {
@@ -45,23 +46,6 @@ const formatPricing = (product: Product) => {
     secondary: null,
     label: null,
   };
-};
-
-const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(date));
-};
-
-const formatTime = (date: Date) => {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(date));
 };
 
 export default function UpcomingEvents() {
@@ -276,7 +260,7 @@ export default function UpcomingEvents() {
                                   <div className="flex items-center gap-1">
                                     <Calendar className="w-4 h-4" />
                                     <span>
-                                      {formatDate(new Date(event.eventDate))}
+                                      {formatDate(event.eventDate)}
                                     </span>
                                   </div>
                                 )}
@@ -417,10 +401,10 @@ export default function UpcomingEvents() {
                         <Calendar className="w-4 h-4 text-purple-500" />
                         <div className="text-sm">
                           <div className="font-medium">
-                            {formatDate(new Date(event.eventDate))}
+                            {formatDate(event.eventDate)}
                           </div>
                           <div className="text-gray-500">
-                            {formatTime(new Date(event.eventDate))}
+                            {formatTime(event.eventDate)}
                           </div>
                         </div>
                       </div>
@@ -513,7 +497,7 @@ export default function UpcomingEvents() {
                   <div className="font-medium">{session.sessionName}</div>
                   <div className="text-sm text-gray-600 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    {formatDate(new Date(session.sessionDate))}
+                    {formatDate(session.sessionDate)}
                   </div>
                   <div className="text-sm text-gray-600 flex items-center gap-2">
                     <Clock className="w-4 h-4" />
