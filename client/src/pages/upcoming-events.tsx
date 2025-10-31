@@ -186,7 +186,20 @@ export default function UpcomingEvents() {
       <Navigation />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <div 
+        style={{
+          background: `linear-gradient(
+            90deg,
+            #B9C9D4 0%,
+            #B9C9D4 20%,
+            #F5F1ED 40%,
+            #F0F0F0 60%,
+            #B9C9D4 80%,
+            #B9C9D4 100%
+          )`
+        }}
+        className="text-black"
+      >
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Upcoming Events
